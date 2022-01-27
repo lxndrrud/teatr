@@ -1,0 +1,52 @@
+version: '3'
+services:
+  fastapi:
+    build: 
+      context: ./fastapi
+      dockerfile: Dockerfile
+    container_name: fastapi
+    volumes:
+      - ./fastapi:/usr/src/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+    networks: 
+      - custom_network
+
+  nextjs:
+    build: 
+      context: ./nextjs
+      dockerfile: Dockerfile
+    container_name: nextjs
+    volumes:
+      - ./nextjs:/usr/src/app
+    ports:
+      - 3000:3000
+    networks: 
+      - custom_network
+
+  postgres:
+    container_name: postgres
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: teatr
+    networks: 
+      - custom_network
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks: 
+      - custom_network
+
+networks:
+  custom_network:
+    external: False
