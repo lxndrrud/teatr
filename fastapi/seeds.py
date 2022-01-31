@@ -13,9 +13,8 @@ def plays_seed(db: PostgresSession) -> None:
                 db.delete(i)
         print('Inserting test rows...')
         new_row = Play(
-            title = "Тестовый спектакль",
-            description = "Это самый интересный тестовый спектакль",
-            image = "/storage/no-photo.png"
+            title = "Test title",
+            description = "Test desc"
         )
         db.add(new_row)
         db.commit()

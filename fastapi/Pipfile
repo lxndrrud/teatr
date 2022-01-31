@@ -10,8 +10,11 @@ sqlalchemy = "*"
 alembic = "*"
 psycopg2-binary = "*"
 python-multipart = "*"
+pytest = "*"
+requests = "*"
 
 [dev-packages]
+
 
 [requires]
 python_version = "3.9"

@@ -12,6 +12,8 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
+ENV PYTHONPATH "${PYTHONPATH}:/usr/src/app"
+
 RUN python -m pip install pipenv
 
 RUN python -m pipenv lock --keep-outdated --requirements > requirements.txt

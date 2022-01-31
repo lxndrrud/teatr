@@ -1,6 +1,35 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
+import datetime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean
 from sqlalchemy.orm import relationship, backref
+
+class User(Base):
+    """
+    Класс пользователя
+    """
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, index=True)
+    login = Column(String(50), nullable=False, unique=True)
+    email = Column(String(80), nullable=True)
+    password = Column(String(100), nullable=False)
+
+class SiteSession(Base):
+    """
+    Класс сеанса на сайте
+    """
+    __tablename__ = 'site_sessions'
+
+    id = Column(Integer, primary_key=True, index=True)
+    id_user = Column(Integer, 
+        ForeignKey(User.id, onupdate='CASCADE', ondelete='CASCADE'),
+        nullable=False)
+    token = Column(String(255), nullable=False)
+    expiration_datetime = Column(DateTime(timezone=False), 
+        nullable=False, 
+        default=datetime.datetime.now() + datetime.timedelta(hours=2))
+
+    user = relationship(User, backref=backref("site_session", cascade="all,delete"))
 
 class Play(Base):
     """
@@ -11,7 +40,34 @@ class Play(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(100), nullable=False)
     description = Column(String(300), nullable=False)
-    image = Column(String(300), nullable=True)
+
+class Image(Base):
+    """
+    Класс изображения
+    """
+    __tablename__ = 'images'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    filepath = Column(String(100), nullable=False)
+
+class PlaysImages(Base):
+    """
+    Класс отношения М:М изображения - спектаклиs
+    """
+
+    __tablename__ = 'plays_to_images'
+
+    id = Column(Integer, primary_key=True, index=True)
+    id_play = Column(Integer, 
+        ForeignKey(Play.id, onupdate='CASCADE', ondelete='CASCADE'),
+        nullable=False)
+    id_image = Column(Integer, 
+        ForeignKey(Image.id, onupdate='CASCADE', ondelete='CASCADE'),
+        nullable=False)
+    is_poster = Column(Boolean, nullable=False, default=True)
+
+    play = relationship(Play, backref=backref("plays_images", cascade="all,delete"))
+    image = relationship(Image, backref=backref("plays_images", cascade="all,delete"))
 
 
 class Session(Base):
@@ -21,7 +77,9 @@ class Session(Base):
     __tablename__ = 'sessions'
 
     id = Column(Integer, primary_key=True, index=True)
-    id_play = Column(Integer, ForeignKey(Play.id))
+    id_play = Column(Integer, 
+        ForeignKey(Play.id, onupdate='CASCADE', ondelete='CASCADE'), 
+        nullable=False)
     datetime = Column(DateTime, nullable=False)
     price = Column(Float, nullable=False)
 
@@ -85,7 +143,7 @@ class ReservationsSeats(Base):
     """
     Вспомогательный класс отношения М:М брони и места в зале
     """
-    __tablename__ = 'reservations_seats'
+    __tablename__ = 'reservations_to_seats'
 
     id = Column(Integer, primary_key=True, index=True)
     id_reservation = Column(Integer, 

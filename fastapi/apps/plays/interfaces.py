@@ -1,10 +1,13 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 
 
 class PlayModel(BaseModel):
     title: str
     description: str
+
+class PlayModelList(BaseModel):
+    plays: List[PlayModel]
 
 class PlayWithImageModel(PlayModel):
     image: Optional[str]
