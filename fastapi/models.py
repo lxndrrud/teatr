@@ -137,7 +137,7 @@ class Reservation(Base):
     id_record = Column(Integer, ForeignKey(Record.id))
 
     session = relationship(Session, backref=backref("reservations", cascade="all,delete"))
-    record = relationship(Record, backref=backref("records", cascade="all,delete"))
+    record = relationship(Record, backref=backref("reservations", cascade="all,delete"))
 
 class ReservationsSeats(Base):
     """

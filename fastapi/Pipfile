@@ -10,6 +10,7 @@ sqlalchemy = "*"
 alembic = "*"
 psycopg2-binary = "*"
 python-multipart = "*"
+pydantic[email] = "*"
 pytest = "*"
 requests = "*"
 

@@ -15,5 +15,9 @@ class PlayWithImageModel(PlayModel):
 class PlayCreateModel(PlayModel):
     pass
 
+class PlayUpdateModel(PlayCreateModel):
+    title: Optional[str]
+    description: Optional[str]
+
 class PlayDatabaseModel(PlayWithImageModel):
     id: int

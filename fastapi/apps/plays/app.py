@@ -1,10 +1,11 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session as DBSession
 from database import get_db
 from models import Play
 from fastapi import APIRouter, Depends, Response, Path, UploadFile
 from starlette import status
 from typing import Optional
-from .interfaces import PlayModel, PlayCreateModel, PlayWithImageModel, PlayDatabaseModel, PlayModelList
+from .interfaces import PlayModel, PlayCreateModel, PlayWithImageModel, \
+    PlayDatabaseModel, PlayModelList, PlayUpdateModel
 from .utils import image_saving
 
 
@@ -14,7 +15,7 @@ router = APIRouter(
     )
 
 @router.get('/', status_code=status.HTTP_200_OK)
-def get_plays(db: Session = Depends(get_db)):
+def get_plays(db: DBSession = Depends(get_db)):
     query = db.query(Play).all()
     return query
 
@@ -22,7 +23,7 @@ def get_plays(db: Session = Depends(get_db)):
 def post_play(
         item: PlayCreateModel, 
         response: Response,
-        db: Session = Depends(get_db), ):
+        db: DBSession = Depends(get_db), ):
     try:
         new_row = Play(
             title=item.title,
@@ -41,7 +42,7 @@ def post_play(
 def get_single(
     response: Response,
     item_id: int = Path(...), 
-    db: Session = Depends(get_db),
+    db: DBSession = Depends(get_db),
 ):
     query = db.query(Play).filter(Play.id == item_id).first()
     if query:
@@ -57,7 +58,7 @@ def get_single(
 def delete_single(
     response: Response, 
     item_id: int = Path(...),
-    db: Session = Depends(get_db),
+    db: DBSession = Depends(get_db),
 ): 
     query = db.query(Play).filter(Play.id == item_id).first()
     if query:
@@ -65,6 +66,25 @@ def delete_single(
         db.commit()
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
+
+@router.put('/{item_id}')
+def update_play(
+    response: Response, 
+    item: PlayUpdateModel,
+    item_id: int = Path(...),
+    db: DBSession = Depends(get_db)):
+    query = db.query(Play).filter(Play.id == item_id).first()
+    if query:
+        if item.description:
+            query.description = item.description
+        if item.title:
+            query.title = item.title
+        db.add(query)
+        db.commit()
+        response.status_code = status.HTTP_200_OK
+    else:
+        response.status_code = status.HTTP_404_NOT_FOUND
+
 
 
 
