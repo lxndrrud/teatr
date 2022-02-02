@@ -4,23 +4,17 @@ from datetime import datetime
 from ..plays.interfaces import PlayModel
 
 
-class SessionDatabaseModel(BaseModel):
+class SessionBaseModel(BaseModel):
     id_play: int
     price: float
     datetime: datetime
 
-class SessionCreateModel(SessionDatabaseModel):
-    pass
+class SessionModel(SessionBaseModel):
+    id: int
+    class Config:
+        orm_mode = True
 
-class SessionUpdateModel(SessionCreateModel):
-    id_play: Optional[int]
-    price: Optional[float]
-    datetime: Optional[datetime]
 
-class SessionModel(BaseModel):
-    play: PlayModel
-    datetime: datetime
-    price: float
 
 
 

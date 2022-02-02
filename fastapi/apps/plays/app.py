@@ -4,8 +4,7 @@ from models import Play
 from fastapi import APIRouter, Depends, Response, Path, UploadFile
 from starlette import status
 from typing import Optional
-from .interfaces import PlayModel, PlayCreateModel, PlayWithImageModel, \
-    PlayDatabaseModel, PlayModelList, PlayUpdateModel
+from .interfaces import PlayModel, PlayBaseModel
 from .utils import image_saving
 
 
@@ -21,7 +20,7 @@ def get_plays(db: DBSession = Depends(get_db)):
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
 def post_play(
-        item: PlayCreateModel, 
+        item: PlayModel, 
         response: Response,
         db: DBSession = Depends(get_db), ):
     try:
@@ -32,7 +31,6 @@ def post_play(
         db.add(new_row)
         db.commit()
         response.status_code = status.HTTP_201_CREATED
-        #response.headers['Location'] = f"/plays/{new_row.id}"
         return {"id": new_row.id}
     except:
         db.rollback()
@@ -47,6 +45,7 @@ def get_single(
     query = db.query(Play).filter(Play.id == item_id).first()
     if query:
         result = PlayModel(
+            id=query.id,
             title=query.title, 
             description=query.description, 
         )
@@ -70,15 +69,13 @@ def delete_single(
 @router.put('/{item_id}')
 def update_play(
     response: Response, 
-    item: PlayUpdateModel,
+    item: PlayBaseModel,
     item_id: int = Path(...),
     db: DBSession = Depends(get_db)):
     query = db.query(Play).filter(Play.id == item_id).first()
     if query:
-        if item.description:
-            query.description = item.description
-        if item.title:
-            query.title = item.title
+        query.description = item.description
+        query.title = item.title
         db.add(query)
         db.commit()
         response.status_code = status.HTTP_200_OK

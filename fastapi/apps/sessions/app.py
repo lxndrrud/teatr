@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Response, Path
 from database import get_db
 from sqlalchemy.orm import Session as DBSession
 from starlette import status
-from .interfaces import SessionModel, SessionCreateModel, SessionUpdateModel
+from .interfaces import SessionModel, SessionBaseModel
 from ..plays.interfaces import PlayModel
 from models import Session
 
@@ -22,13 +22,9 @@ def get_single(response: Response,
     db: DBSession = Depends(get_db),):
     query = db.query(Session).filter(Session.id == item_id).first()
     if query:
-        play = query.play
-        play = PlayModel(
-            title=play.title,
-            description=play.description
-        )
         result = SessionModel(
-            play=play,
+            id=query.id,
+            id_play=query.id_play,
             price=query.price,
             datetime=query.datetime
         )
@@ -38,7 +34,7 @@ def get_single(response: Response,
 
 @router.post('/')
 def post_session(
-    item: SessionCreateModel,
+    item: SessionBaseModel,
     response: Response, 
     db: DBSession = Depends(get_db)):
     try:
@@ -70,17 +66,14 @@ def delete_session(
 @router.put('/{item_id}')
 def update_session(
     response: Response,
-    item: SessionUpdateModel,
+    item: SessionBaseModel,
     item_id: int = Path(...),
     db: DBSession = Depends(get_db)):
     query = db.query(Session).filter(Session.id == item_id).first()
     if query:
-        if item.datetime:
-            query.datetime = item.datetime
-        if item.id_play:
-            query.id_play = item.id_play
-        if item.price:
-            query.price = item.price
+        query.datetime = item.datetime
+        query.id_play = item.id_play
+        query.price = item.price
         db.add(query)
         db.commit()
         response.status_code = status.HTTP_200_OK

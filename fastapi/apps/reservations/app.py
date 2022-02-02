@@ -5,7 +5,7 @@ from starlette import status
 
 from ..sessions.interfaces import SessionModel, PlayModel
 #from .interfaces import SessionModel, SessionCreateModel
-from .interfaces import ReservationCreateModel, ReservationModel, ReservationUpdateModel
+from .interfaces import ReservationBaseModel, ReservationModel
 from models import Reservation, ReservationsSeats, Record
 
 router = APIRouter(
@@ -26,6 +26,7 @@ def get_single(
     query = db.query(Reservation).filter(Reservation.id == item_id).first()
     if query:
         play = PlayModel(
+            id=query.id,
             title=query.session.play.title,
             description=query.session.play.description
         )
@@ -45,7 +46,7 @@ def get_single(
 @router.post('/')
 def post_reservation(
     response: Response,
-    item: ReservationCreateModel,
+    item: ReservationBaseModel,
     db: DBSession = Depends(get_db)):
     try:
         new_row = Reservation(
@@ -75,16 +76,14 @@ def delete_reservation(
 @router.put('/{item_id}')
 def update_reservation(
     response: Response,
-    item: ReservationUpdateModel,
+    item: ReservationBaseModel,
     item_id: int = Path(...),
     db: DBSession = Depends(get_db)
 ):
     query = db.query(Reservation).filter(Reservation.id == item_id).first()
     if query:
-        if item.id_record:
-            query.id_record = item.id_record
-        if item.id_session:
-            query.id_session = item.id_session
+        query.id_record = item.id_record
+        query.id_session = item.id_session
         db.add(query)
         db.commit()
         response.status_code = status.HTTP_200_OK

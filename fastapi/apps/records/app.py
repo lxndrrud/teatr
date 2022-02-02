@@ -3,7 +3,7 @@ from database import get_db
 from sqlalchemy.orm import Session as DBSession
 from starlette import status
 from models import Record
-from .interfaces import RecordCreateModel, RecordModel, RecordDatabaseModel, RecordUpdateModel
+from .interfaces import RecordModel, RecordBaseModel
 
 
 router = APIRouter(
@@ -24,6 +24,7 @@ def get_single(
     query = db.query(Record).filter(Record.id == item_id).first()
     if query:
         result = RecordModel(
+            id=query.id,
             email=query.email,
             firstname=query.firstname,
             middlename=query.middlename, 
@@ -37,7 +38,7 @@ def get_single(
 
 @router.post('/')
 def post_record(
-    item: RecordCreateModel,
+    item: RecordBaseModel,
     response: Response,
     db: DBSession = Depends(get_db)):
     try:
@@ -72,22 +73,17 @@ def delete_record(
 @router.put('/{item_id}', )
 def update_record(
     response: Response,
-    item: RecordUpdateModel,
+    item: RecordBaseModel,
     item_id: int = Path(...),
     db: DBSession = Depends(get_db)
 ):
     query = db.query(Record).filter(Record.id == item_id).first()
     if query:
-        if item.email:
-            query.email = item.email
-        if item.firstname:
-            query.firstname = item.firstname
-        if item.middlename:
-            query.middlename = item.middlename
-        if item.lastname:
-            query.lastname = item.lastname
-        if item.reservation_counter:
-            query.reservation_counter = item.reservation_counter
+        query.email = item.email
+        query.firstname = item.firstname
+        query.middlename = item.middlename
+        query.lastname = item.lastname
+        query.reservation_counter = item.reservation_counter
         db.add(query)
         db.commit()
         response.status_code = status.HTTP_200_OK

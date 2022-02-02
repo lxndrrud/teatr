@@ -2,18 +2,14 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 
-class RecordModel(BaseModel):
+class RecordBaseModel(BaseModel):
     email: EmailStr
     firstname: Optional[str] 
     middlename: Optional[str] 
     lastname: Optional[str] 
     reservation_counter: int
 
-class RecordDatabaseModel(RecordModel):
+class RecordModel(RecordBaseModel):
     id: int
-
-class RecordCreateModel(RecordModel):
-    reservation_counter: Optional[int]
-
-class RecordUpdateModel(RecordCreateModel):
-    email: Optional[EmailStr]
+    class Config:
+        orm_mode = True
