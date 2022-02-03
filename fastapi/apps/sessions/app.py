@@ -80,6 +80,15 @@ def update_session(
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
 
-
+@router.get('/play/{item_id}', status_code=status.HTTP_200_OK)
+def get_sessions_by_play(
+    response: Response,
+    item_id: int = Path(...),
+    db: DBSession = Depends(get_db)):
+    query = db.query(Session).filter(Session.id_play == item_id).order_by(Session.datetime.desc()).all()
+    if query: 
+        return query
+    else:
+        response.status_code = status.HTTP_404_NOT_FOUND
 
 

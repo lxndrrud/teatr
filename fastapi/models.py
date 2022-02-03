@@ -81,7 +81,6 @@ class Session(Base):
         ForeignKey(Play.id, onupdate='CASCADE', ondelete='CASCADE'), 
         nullable=False)
     datetime = Column(DateTime, nullable=False)
-    price = Column(Float, nullable=False)
 
     play = relationship(Play, backref=backref("sessions", cascade="all,delete"))
 
@@ -125,7 +124,6 @@ class Seat(Base):
 
     auditorium = relationship(Auditorium, backref=backref("seats", cascade="all,delete"))
 
-
 class Reservation(Base):
     """
     Класс брони клиента на конкретный сеанс (Session) представления (Play)
@@ -133,16 +131,57 @@ class Reservation(Base):
     __tablename__ = 'reservations'
 
     id = Column(Integer, primary_key=True, index=True)
-    id_session = Column(Integer, ForeignKey(Session.id))
-    id_record = Column(Integer, ForeignKey(Record.id))
+    datetime = Column(DateTime, nullable=False, default=datetime.datetime.now())
+    is_paid = Column(Boolean, nullable=False, default=False)
+    code = Column(String(6), nullable=False)
+    id_session = Column(Integer, ForeignKey(Session.id, onupdate='CASCADE'), nullable=False)
+    id_record = Column(Integer, ForeignKey(Record.id, onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
 
     session = relationship(Session, backref=backref("reservations", cascade="all,delete"))
     record = relationship(Record, backref=backref("reservations", cascade="all,delete"))
 
+class SeatPrice(Base):
+    """
+    Класс цены билета на спектакль на конкретное место
+    """
+    __tablename__ = 'seats_prices'
+
+    id = Column(Integer, primary_key=True, index=True)
+    price = Column(Float, nullable=False)
+    is_current = Column(Boolean, nullable=False)
+    datetime = Column(DateTime, nullable=False, default=datetime.datetime.now())
+
+    id_session = Column(Integer, 
+        ForeignKey(Session.id, ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False)
+    id_seat = Column(Integer, 
+        ForeignKey(Seat.id, ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False)
+
+    session = relationship(Session, backref=backref("seats_prices", cascade="all,delete"))
+    seat = relationship(Seat, backref=backref("seats_prices", cascade="all,delete"))
+
+class ReservationsToSeatPrices(Base):
+    """
+    Вспомогательный класс отношения 1:М брони и цены места в зале
+    """
+    __tablename__ = 'reservations_to_seats'
+
+    id = Column(Integer, primary_key=True, index=True)
+    id_reservation = Column(Integer, 
+        ForeignKey(Reservation.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    id_seat_price = Column(Integer, 
+        ForeignKey(Seat.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+
+    reservation = relationship(Reservation, backref=backref('reservations_seats', cascade='all,delete'))
+    seat_price = relationship(Seat, backref=backref('reservations_seats', cascade='all,delete'))
+
+
+"""
 class ReservationsSeats(Base):
-    """
+    " ""
     Вспомогательный класс отношения М:М брони и места в зале
-    """
+    " ""
     __tablename__ = 'reservations_to_seats'
 
     id = Column(Integer, primary_key=True, index=True)
@@ -153,3 +192,5 @@ class ReservationsSeats(Base):
 
     reservation = relationship(Reservation, backref=backref('reservations_seats', cascade='all,delete'))
     seat = relationship(Seat, backref=backref('reservations_seats', cascade='all,delete'))
+
+"""

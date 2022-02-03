@@ -1,6 +1,6 @@
 from database import SessionLocal
 from sqlalchemy.orm import Session as PostgresSession
-from models import Auditorium, Play, Session, Seat, Reservation, Record, ReservationsSeats
+from models import Auditorium, Play, Session, Seat, Reservation, Record
 import datetime
 
 
@@ -36,7 +36,6 @@ def sessions_seed(db: PostgresSession) -> None:
         new_row = Session(
             id_play = 1,
             datetime = datetime.datetime(2022, 3, 15, hour=10, minute=30),
-            price = 200.0
         )
         db.add(new_row)
         db.commit()

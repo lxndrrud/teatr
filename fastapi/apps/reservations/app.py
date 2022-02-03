@@ -6,7 +6,8 @@ from starlette import status
 from ..sessions.interfaces import SessionModel, PlayModel
 #from .interfaces import SessionModel, SessionCreateModel
 from .interfaces import ReservationBaseModel, ReservationModel
-from models import Reservation, ReservationsSeats, Record
+from models import Reservation, Record
+from random import randint, seed as random_seed
 
 router = APIRouter(
     prefix='/reservations',
@@ -49,7 +50,10 @@ def post_reservation(
     item: ReservationBaseModel,
     db: DBSession = Depends(get_db)):
     try:
+        random_seed()
+        new_code = f"{randint(0,9)}{randint(0,9)}{randint(0,9)}{randint(0,9)}{randint(0,9)}{randint(0,9)}"
         new_row = Reservation(
+            code = new_code,
             id_session = item.id_record,
             id_record = item.id_session
         )
