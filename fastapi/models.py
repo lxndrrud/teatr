@@ -3,33 +3,15 @@ import datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean
 from sqlalchemy.orm import relationship, backref
 
-class User(Base):
-    """
-    Класс пользователя
-    """
-    __tablename__ = 'users'
 
+class Image(Base):
+    """
+    Класс изображения
+    """
+    __tablename__ = 'images'
+    
     id = Column(Integer, primary_key=True, index=True)
-    login = Column(String(50), nullable=False, unique=True)
-    email = Column(String(80), nullable=True)
-    password = Column(String(100), nullable=False)
-
-class SiteSession(Base):
-    """
-    Класс сеанса на сайте
-    """
-    __tablename__ = 'site_sessions'
-
-    id = Column(Integer, primary_key=True, index=True)
-    id_user = Column(Integer, 
-        ForeignKey(User.id, onupdate='CASCADE', ondelete='CASCADE'),
-        nullable=False)
-    token = Column(String(255), nullable=False)
-    expiration_datetime = Column(DateTime(timezone=False), 
-        nullable=False, 
-        default=datetime.datetime.now() + datetime.timedelta(hours=2))
-
-    user = relationship(User, backref=backref("site_session", cascade="all,delete"))
+    filepath = Column(String(100), nullable=False)
 
 class Play(Base):
     """
@@ -41,18 +23,79 @@ class Play(Base):
     title = Column(String(100), nullable=False)
     description = Column(String(300), nullable=False)
 
-class Image(Base):
+class Auditorium(Base):
     """
-    Класс изображения
+    Класс зала
     """
-    __tablename__ = 'images'
-    
+    __tablename__ = 'auditoriums'
+
     id = Column(Integer, primary_key=True, index=True)
-    filepath = Column(String(100), nullable=False)
+    title = Column(String(100), nullable=False)
+
+class Row(Base):
+    """
+    Класс ряда в зале
+    """
+    __tablename__ = 'auditorium_rows'
+
+    id = Column(Integer, primary_key=True, index=True)
+    number = Column(Integer, nullable=False)
+
+    id_auditorium = Column(Integer,
+        ForeignKey(Auditorium.id, ondelete='CASCADE', onupdate='CASCADE'),   
+        nullable=False)
+
+    auditorium = relationship(Auditorium, backref=backref('rows', lazy='subquery'))
+
+class Seat(Base):
+    """
+    Класс ряда в зале
+    """
+    __tablename__ = 'auditorium_seats'
+
+    id = Column(Integer, primary_key=True, index=True)
+    number = Column(Integer, nullable=False)
+
+    id_row = Column(Integer,
+        ForeignKey(Row.id, ondelete='CASCADE', onupdate='CASCADE'),   
+        nullable=False)
+
+    row = relationship(Row, backref=backref('seats', lazy='subquery'))
+
+
+class PricePolicy(Base):
+    """
+    Ценовая политика
+    """
+    __tablename__ = 'price_policy'
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(50), nullable=True)
+
+
+class Slot(Base):
+    """
+    Слот ценовой политики (место в зале с ценой)
+    """
+
+    __tablename__ = 'slots'
+
+    id = Column(Integer, primary_key=True, index=True)
+    price = Column(Float, nullable=False)
+
+    id_price_policy = Column(Integer, 
+        ForeignKey(PricePolicy.id, onupdate='CASCADE', ondelete='CASCADE'),
+        nullable=False)
+    id_seat = Column(Integer, 
+        ForeignKey(Seat.id, onupdate='CASCADE', ondelete='CASCADE'),
+        nullable=False)
+
+    price_policy = relationship(PricePolicy, backref=backref('slots', lazy='subquery'))
+    seat = relationship(Seat, backref=backref('slots', lazy='subquery'))
 
 class PlaysImages(Base):
     """
-    Класс отношения М:М изображения - спектаклиs
+    Класс отношения изображения М:М спектакли
     """
 
     __tablename__ = 'plays_to_images'
@@ -77,12 +120,17 @@ class Session(Base):
     __tablename__ = 'sessions'
 
     id = Column(Integer, primary_key=True, index=True)
+    datetime = Column(DateTime, nullable=False)
+
     id_play = Column(Integer, 
         ForeignKey(Play.id, onupdate='CASCADE', ondelete='CASCADE'), 
         nullable=False)
-    datetime = Column(DateTime, nullable=False)
+    id_price_policy = Column(Integer, 
+        ForeignKey(PricePolicy.id, onupdate='CASCADE', ondelete='CASCADE'),
+        nullable=False)
 
-    play = relationship(Play, backref=backref("sessions", cascade="all,delete"))
+    play = relationship(Play, backref=backref("sessions", lazy='subquery'))
+    price_policy = relationship(PricePolicy, backref=backref("sessions", lazy='subquery'))
 
 class Record(Base):
     """
@@ -97,32 +145,6 @@ class Record(Base):
     lastname = Column(String(70), nullable=True, default='Не указано')
     reservation_counter = Column(Integer, nullable=False, default=1)
 
-class Auditorium(Base):
-    """
-    Класс зала
-    """
-    __tablename__ = 'auditoriums'
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(50), nullable=False)
-
-
-class Seat(Base):
-    """
-    Класс места в зале
-    """
-    __tablename__ = 'seats'
-
-    id = Column(Integer, primary_key=True, index=True)
-    number_row = Column(Integer, nullable=False)
-    number_seat = Column(Integer, nullable=False)
-    id_auditorium = Column(Integer, 
-        ForeignKey(Auditorium.id, 
-        onupdate='CASCADE', 
-        ondelete='CASCADE'), 
-        nullable=False)
-
-    auditorium = relationship(Auditorium, backref=backref("seats", cascade="all,delete"))
 
 class Reservation(Base):
     """
@@ -134,47 +156,37 @@ class Reservation(Base):
     datetime = Column(DateTime, nullable=False, default=datetime.datetime.now())
     is_paid = Column(Boolean, nullable=False, default=False)
     code = Column(String(6), nullable=False)
-    id_session = Column(Integer, ForeignKey(Session.id, onupdate='CASCADE'), nullable=False)
-    id_record = Column(Integer, ForeignKey(Record.id, onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
+
+    id_session = Column(Integer, 
+        ForeignKey(Session.id, onupdate='CASCADE'), 
+        nullable=False)
+    id_record = Column(Integer, 
+        ForeignKey(Record.id, onupdate='CASCADE', ondelete='CASCADE'),      
+        nullable=False)
 
     session = relationship(Session, backref=backref("reservations", cascade="all,delete"))
     record = relationship(Record, backref=backref("reservations", cascade="all,delete"))
 
-class SeatPrice(Base):
+
+class ReservationsSlots(Base):
     """
-    Класс цены билета на спектакль на конкретное место
+    Вспомогательный класс отношения бронь 1:М слот 
     """
-    __tablename__ = 'seats_prices'
+    __tablename__ = 'reservations_to_slots'
 
     id = Column(Integer, primary_key=True, index=True)
-    price = Column(Float, nullable=False)
-    is_current = Column(Boolean, nullable=False)
-    datetime = Column(DateTime, nullable=False, default=datetime.datetime.now())
 
-    id_session = Column(Integer, 
-        ForeignKey(Session.id, ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False)
-    id_seat = Column(Integer, 
-        ForeignKey(Seat.id, ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False)
-
-    session = relationship(Session, backref=backref("seats_prices", cascade="all,delete"))
-    seat = relationship(Seat, backref=backref("seats_prices", cascade="all,delete"))
-
-class ReservationsToSeatPrices(Base):
-    """
-    Вспомогательный класс отношения 1:М брони и цены места в зале
-    """
-    __tablename__ = 'reservations_to_seats'
-
-    id = Column(Integer, primary_key=True, index=True)
     id_reservation = Column(Integer, 
-        ForeignKey(Reservation.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    id_seat_price = Column(Integer, 
-        ForeignKey(Seat.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+        ForeignKey(Reservation.id, onupdate='CASCADE', ondelete='CASCADE'),
+        nullable=False)
+    id_slot = Column(Integer, 
+        ForeignKey(Slot.id, onupdate='CASCADE', ondelete='CASCADE'), 
+        nullable=False)
 
-    reservation = relationship(Reservation, backref=backref('reservations_seats', cascade='all,delete'))
-    seat_price = relationship(Seat, backref=backref('reservations_seats', cascade='all,delete'))
+    reservation = relationship(Reservation, backref=backref('reservations_slots', lazy='subquery'))
+    Slot = relationship(Slot, backref=backref('reservations_slots', lazy='subquery'))
+
+
 
 
 """
