@@ -1,6 +1,6 @@
 from database import SessionLocal
 from sqlalchemy.orm import Session as PostgresSession
-from models import Auditorium, Play, Session, Seat, Reservation, Record
+from models import Auditorium, Play, PricePolicy, Row, Session, Seat, Reservation, Record, Slot
 import datetime
 
 
@@ -85,6 +85,26 @@ def auditoriums_seed(db: PostgresSession) -> None:
         db.rollback()
         print('Auditorium seed failed!')
 
+def rows_seed(db: PostgresSession) -> None:
+    try:
+        print('Running Row seeds...')
+        query = db.query(Row).all()
+        if query != []:
+            print('Deleting Row rows...')
+            for i in query:
+                db.delete(i)
+        print('Inserting test rows...')
+        new_row = Row(
+            number=1,
+            id_auditorium=1
+        )
+        db.add(new_row)
+        db.commit()
+        print('Committed Row seeds!')
+    except:
+        db.rollback()
+        print('Row seed failed!')
+
 def seats_seed(db: PostgresSession) -> None:
     try:
         print('Running Seat seeds...')
@@ -95,9 +115,8 @@ def seats_seed(db: PostgresSession) -> None:
                 db.delete(i)
         print('Inserting test rows...')
         new_row = Seat(
-            number_seat=1,
-            number_row=1,
-            id_auditorium=1
+            number=1,
+            id_row=1
         )
         db.add(new_row)
         db.commit()
@@ -106,11 +125,51 @@ def seats_seed(db: PostgresSession) -> None:
         db.rollback()
         print('Seat seed failed!')
 
+def price_policies_seed(db: PostgresSession) -> None:
+    try:
+        print('Running PricePolicy seeds...')
+        query = db.query(PricePolicy).all()
+        if query != []:
+            print('Deleting PricePolicy rows...')
+            for i in query:
+                db.delete(i)
+        print('Inserting test rows...')
+        new_row = PricePolicy(
+            title='Тестовая ценовая политика'
+        )
+        db.add(new_row)
+        db.commit()
+        print('Committed PricePolicy seeds!')
+    except:
+        db.rollback()
+        print('PricePolicy seed failed!')
+
+def slots_seed(db: PostgresSession) -> None:
+    try:
+        print('Running Slot seeds...')
+        query = db.query(Slot).all()
+        if query != []:
+            print('Deleting Slot rows...')
+            for i in query:
+                db.delete(i)
+        print('Inserting test rows...')
+        new_row = Slot(
+            id_price_policy=1,
+            id_seat=1,
+            price=200
+        )
+        db.add(new_row)
+        db.commit()
+        print('Committed Slot seeds!')
+    except:
+        db.rollback()
+        print('Slot seed failed!')
+
         
 
 
 def run_seeds() -> None:
-    list_ = [plays_seed, sessions_seed, records_seed, auditoriums_seed, seats_seed]
+    list_ = [auditoriums_seed, rows_seed, seats_seed, price_policies_seed, slots_seed]
     for f in list_:
         db = SessionLocal()
         f(db)

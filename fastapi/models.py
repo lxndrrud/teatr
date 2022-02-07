@@ -143,7 +143,6 @@ class Record(Base):
     firstname = Column(String(70), nullable=True, default='Не указано')
     middlename = Column(String(70), nullable=True, default='Не указано')
     lastname = Column(String(70), nullable=True, default='Не указано')
-    reservation_counter = Column(Integer, nullable=False, default=1)
 
 
 class Reservation(Base):
@@ -156,6 +155,8 @@ class Reservation(Base):
     datetime = Column(DateTime, nullable=False, default=datetime.datetime.now())
     is_paid = Column(Boolean, nullable=False, default=False)
     code = Column(String(6), nullable=False)
+    is_confirmed = Column(Boolean, nullable=False, default=False)
+    confirmation_code = Column(String(6), nullable=False)
 
     id_session = Column(Integer, 
         ForeignKey(Session.id, onupdate='CASCADE'), 
@@ -184,7 +185,7 @@ class ReservationsSlots(Base):
         nullable=False)
 
     reservation = relationship(Reservation, backref=backref('reservations_slots', lazy='subquery'))
-    Slot = relationship(Slot, backref=backref('reservations_slots', lazy='subquery'))
+    slot = relationship(Slot, backref=backref('reservations_slots', lazy='subquery'))
 
 
 

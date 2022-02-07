@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 42dcd8cf4fcc
+Revision ID: 607351c91b6f
 Revises: 
-Create Date: 2022-02-04 09:59:48.771199
+Create Date: 2022-02-07 09:57:24.311129
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '42dcd8cf4fcc'
+revision = '607351c91b6f'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -49,7 +49,6 @@ def upgrade():
     sa.Column('firstname', sa.String(length=70), nullable=True),
     sa.Column('middlename', sa.String(length=70), nullable=True),
     sa.Column('lastname', sa.String(length=70), nullable=True),
-    sa.Column('reservation_counter', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_records_id'), 'records', ['id'], unique=False)
@@ -94,6 +93,8 @@ def upgrade():
     sa.Column('datetime', sa.DateTime(), nullable=False),
     sa.Column('is_paid', sa.Boolean(), nullable=False),
     sa.Column('code', sa.String(length=6), nullable=False),
+    sa.Column('is_confirmed', sa.Boolean(), nullable=False),
+    sa.Column('confirmation_code', sa.String(length=6), nullable=False),
     sa.Column('id_session', sa.Integer(), nullable=False),
     sa.Column('id_record', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id_record'], ['records.id'], onupdate='CASCADE', ondelete='CASCADE'),

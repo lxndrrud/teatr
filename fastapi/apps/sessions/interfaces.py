@@ -6,7 +6,6 @@ from ..plays.interfaces import PlayModel
 
 class SessionBaseModel(BaseModel):
     id_play: int
-    price: float
     datetime: datetime
 
 class SessionModel(SessionBaseModel):

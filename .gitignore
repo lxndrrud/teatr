@@ -1,3 +1,4 @@
 .pytest_cache
 .next
 node_modules
+storage/
