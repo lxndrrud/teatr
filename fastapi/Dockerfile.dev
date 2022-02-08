@@ -24,4 +24,6 @@ COPY ./ /usr/src/app/
 
 RUN chown -R worker:worker /usr/src/app
 
-CMD ["uvicorn", "main:app", "--reload", "--proxy-headers", "--root-path", "/fastapi", "--host", "fastapi", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--reload", "--host", "fastapi", "--port", "8000"]
+
+# "--proxy-headers",  "--root-path", "/fastapi/", 

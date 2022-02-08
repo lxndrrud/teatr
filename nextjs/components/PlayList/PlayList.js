@@ -1,9 +1,9 @@
 import PlayItem from '../PlayItem/PlayItem'
+import styles from './PlayList.module.css'
 
 export default function PlayList({plays}) {
-    console.log(plays)
     return (
-    <div>
+    <div className={styles.posts}>
         {plays && plays.map(play => (
             <PlayItem play={play} key={play.id}></PlayItem>
         ))}
