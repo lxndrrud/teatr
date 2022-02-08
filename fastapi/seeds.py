@@ -36,6 +36,7 @@ def sessions_seed(db: PostgresSession) -> None:
         new_row = Session(
             id_play = 1,
             datetime = datetime.datetime(2022, 3, 15, hour=10, minute=30),
+            id_price_policy = 1
         )
         db.add(new_row)
         db.commit()
@@ -169,7 +170,7 @@ def slots_seed(db: PostgresSession) -> None:
 
 
 def run_seeds() -> None:
-    list_ = [auditoriums_seed, rows_seed, seats_seed, price_policies_seed, slots_seed]
+    list_ = [auditoriums_seed, rows_seed, seats_seed, price_policies_seed, slots_seed, plays_seed, sessions_seed]
     for f in list_:
         db = SessionLocal()
         f(db)

@@ -3,7 +3,7 @@ from database import get_db
 from sqlalchemy.orm import Session as DBSession
 from starlette import status
 
-from .interfaces import ReservationModel, ReservationEmailModel, ReservationUpdateModel
+from .interfaces import ReservationModel, ReservationEmailModel, ReservationUpdateModel, SlotInfoModel
 from models import Reservation, Record, ReservationsSlots, Slot
 from random import randint, seed as random_seed
 
@@ -27,12 +27,12 @@ def get_single(
         reservations_slots = db.query(ReservationsSlots).filter(ReservationsSlots.id_reservation == item_id).all()
         slots = []
         for slot in reservations_slots:
-            slot_info = {
-                "price": slot.slot.price,
-                "seat_number": slot.slot.seat.number,
-                "row_number": slot.slot.seat.row.number,
-                "auditorium": slot.slot.seat.row.auditorium.title
-            }
+            slot_info = SlotInfoModel(
+                price=slot.slot.price,
+                seat_number=slot.slot.seat.number,
+                row_number=slot.slot.seat.row.number,
+                auditorium=slot.slot.seat.row.auditorium.title
+            )
             slots.append(slot_info)
         
         result = ReservationModel(
@@ -122,8 +122,13 @@ def update_reservation(
         query.id_record = item.id_record
         query.id_session = item.id_session
         query.is_paid = item.is_paid
+        query.is_confirmed = item.is_confirmed
+        query.code = item.code
+        query.confirmation_code = item.confirmation_code
+        query.datetime = item.datetime
         db.add(query)
         db.commit()
         response.status_code = status.HTTP_200_OK
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
+

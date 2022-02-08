@@ -12,7 +12,7 @@ services:
     depends_on:
       - postgres
     networks: 
-      - custom_network
+      - customnetwork
 
   nextjs:
     build: 
@@ -24,7 +24,7 @@ services:
     ports:
       - 3000:3000
     networks: 
-      - custom_network
+      - customnetwork
 
   postgres:
     container_name: postgres
@@ -35,7 +35,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: teatr
     networks: 
-      - custom_network
+      - customnetwork
     ports:
       - 5432:5432
 
@@ -45,8 +45,32 @@ services:
     ports:
       - 8080:8080
     networks: 
-      - custom_network
+      - customnetwork
+
+  reverse-proxy:
+        image: nginx:1.20.0
+        container_name: nginx
+        restart: unless-stopped
+        depends_on:
+            - postgres
+            - fastapi
+            - adminer
+
+        ports:
+            - '80:80'
+        links:
+            - fastapi
+            - postgres
+            - adminer
+        networks:
+            - customnetwork
+        volumes:
+            - './fastapi/storage:/var/www/storage'
+            - './nginx:/var/log/nginx'
+            - './nginx/conf.d:/etc/nginx/conf.d'
+
+
 
 networks:
-  custom_network:
+  customnetwork:
     external: False

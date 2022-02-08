@@ -1,0 +1,17 @@
+.layout {
+    margin: 50px 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.navLinks {
+    font-size: large;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}

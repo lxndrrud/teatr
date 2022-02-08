@@ -1,0 +1,9 @@
+.customLink{
+    text-decoration: none;
+    color: #0070f3;
+    margin: 0 20px;
+}
+
+.customLink:hover {
+    text-decoration-line: underline;
+}
