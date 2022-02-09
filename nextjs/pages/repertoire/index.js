@@ -1,6 +1,6 @@
-import MainLayout from "../layouts/MainLayout/MainLayout"
-import PlayList from "../components/PlayList/PlayList"
-import { useState, useEffect } from "react/cjs/react.development"
+import MainLayout from "../../layouts/MainLayout/MainLayout"
+import PlayList from "../../components/PlayList/PlayList"
+import { useState, useEffect } from "react"
 
 export default function Repertoire() {
     let [plays, setPlays] = useState([])

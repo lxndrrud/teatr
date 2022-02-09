@@ -1,0 +1,4 @@
+.sessions {
+    display: flex;
+    flex-direction: row;
+}
