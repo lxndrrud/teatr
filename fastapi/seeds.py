@@ -14,8 +14,8 @@ def plays_seed(db: PostgresSession) -> None:
                 db.delete(i)
         print('Inserting test rows...')
         new_row = Play(
-            title = "Test title",
-            description = "Test desc"
+            title = "Название спектакля",
+            description = "Описание спектакля"
         )
         db.add(new_row)
         db.commit()
@@ -56,9 +56,9 @@ def records_seed(db: PostgresSession) -> None:
         print('Inserting test rows...')
         new_row = Record(
             email='test@mail.ru',
-            firstname='Test',
-            middlename='Test',
-            lastname='Test',
+            firstname='Тест',
+            middlename='Тестович',
+            lastname='Тестенко'
         )
         db.add(new_row)
         db.commit()
@@ -77,7 +77,7 @@ def auditoriums_seed(db: PostgresSession) -> None:
                 db.delete(i)
         print('Inserting test rows...')
         new_row = Auditorium(
-           title='Тестовый зал'
+           title='Название зала'
         )
         db.add(new_row)
         db.commit()

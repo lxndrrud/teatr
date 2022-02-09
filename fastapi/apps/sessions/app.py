@@ -21,7 +21,19 @@ router = APIRouter(
 @router.get('/', status_code=status.HTTP_200_OK)
 def get_sessions(db: DBSession = Depends(get_db)):
     query = db.query(Session).order_by(Session.datetime).all()
-    return query
+    list_ = []
+    for row in query:
+        auditorium_title = row.price_policy.slots[0].seat.row.auditorium.title
+        new_row = SessionModel(
+            id=row.id,
+            id_play=row.id_play,
+            id_price_policy=row.id_price_policy,
+            datetime=row.datetime,
+            auditorium_title=auditorium_title,
+            play_title=row.play.title
+        )
+        list_.append(new_row)
+    return list_
 
 @router.get('/{item_id}', response_model=SessionModel)
 def get_single(response: Response,
@@ -29,10 +41,14 @@ def get_single(response: Response,
     db: DBSession = Depends(get_db),):
     query = db.query(Session).filter(Session.id == item_id).first()
     if query:
+        auditorium_title = query.price_policy.slots[0].seat.row.auditorium.title
         result = SessionModel(
             id=query.id,
             id_play=query.id_play,
-            datetime=query.datetime
+            id_price_policy=query.id_price_policy,
+            datetime=query.datetime,
+            auditorium_title=auditorium_title,
+            play_title=query.play.title
         )
         return result
     else:
@@ -46,8 +62,8 @@ def post_session(
     try:
         new_row = Session(
             id_play = item.id_play,
+            id_price_policy = item.id_price_policy,
             datetime=item.datetime,
-            price=item.price
         )
         db.add(new_row)
         db.commit()
@@ -92,8 +108,22 @@ def get_sessions_by_play(
     item_id: int = Path(...),
     db: DBSession = Depends(get_db)):
     query = db.query(Session).filter(Session.id_play == item_id).order_by(Session.datetime.desc()).all()
+
+    
     if query: 
-        return query
+        list_ = []
+        for row in query:
+            auditorium_title = row.price_policy.slots[0].seat.row.auditorium.title
+            new_row = SessionModel(
+                id=row.id,
+                id_play=row.id_play,
+                id_price_policy=row.id_price_policy,
+                datetime=row.datetime,
+                auditorium_title=auditorium_title,
+                play_title=row.play.title
+            )
+            list_.append(new_row)
+        return list_
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
 

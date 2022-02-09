@@ -1,7 +1,7 @@
 .customLink{
     text-decoration: none;
     color: #0070f3;
-    margin: 0 20px;
+    font-size: 22px;
 }
 
 .customLink:hover {

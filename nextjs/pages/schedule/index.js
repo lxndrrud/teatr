@@ -1,5 +1,6 @@
-import MainLayout from "../layouts/MainLayout/MainLayout"
-import { useState, useEffect } from "react/cjs/react.development"
+import MainLayout from "../../layouts/MainLayout/MainLayout"
+import SessionList from "../../components/SessionList/SessionList"
+import { useEffect, useState } from "react"
 
 export default function Shedule() {
     let [sessions, setSessions] = useState([])
@@ -16,7 +17,7 @@ export default function Shedule() {
     return (
     <>
         <MainLayout title="Расписание">
-            
+            <SessionList sessions={sessions} />
         </MainLayout>
     </>
     )
