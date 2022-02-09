@@ -1,3 +1,10 @@
 .playItem {
-    
+    border-radius: 10px;
+    border: 1px solid black;
+    padding: 10px;
+    width: 400px;
+}
+
+.playItem:hover{
+    border: 1px solid #0070f3;
 }
