@@ -22,7 +22,7 @@ router = APIRouter(
 
 @router.get('/', status_code=status.HTTP_200_OK)
 def get_sessions(db: DBSession = Depends(get_db)):
-    query = db.query(Session).filter(Session.is_locked == False).order_by(Session.datetime).all()
+    query = db.query(Session).filter(Session.is_locked == False).order_by(Session.datetime.desc()).all()
     list_ = []
     for row in query:
         auditorium_title = row.price_policy.slots[0].seat.row.auditorium.title
