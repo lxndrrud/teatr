@@ -35,6 +35,7 @@ def sessions_seed(db: PostgresSession) -> None:
         print('Inserting test rows...')
         new_row = Session(
             id_play = 1,
+            is_locked=False,
             datetime = datetime.datetime(2022, 3, 15, hour=10, minute=30),
             id_price_policy = 1
         )

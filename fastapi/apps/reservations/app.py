@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, Response, Path
+from fastapi import APIRouter, Depends, Response, Path, BackgroundTasks
 from database import get_db
 from sqlalchemy.orm import Session as DBSession
 from starlette import status
 
 from .interfaces import ReservationModel, ReservationEmailModel, ReservationUpdateModel, SlotInfoModel
-from models import Reservation, Record, ReservationsSlots, Slot
-from random import randint, seed as random_seed
+from .utils import send_confirmation_email, generate_code
+from models import Reservation, Record, ReservationsSlots, Slot, Session
 
 router = APIRouter(
     prefix='/reservations',
@@ -56,11 +56,15 @@ def get_single(
 @router.post('/')
 def post_reservation(
     response: Response,
+    background_tasks: BackgroundTasks,
     item: ReservationEmailModel,
     db: DBSession = Depends(get_db)):
     try:
-        random_seed()
         query = db.query(Record).filter(Record.email == item.email).first()
+        session_query = db.query(Session).filter(Session.id == item.id_session).first()
+        if session_query.is_locked == True:
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return
         _record_id = 0
         if query:
             _record_id = query.id
@@ -71,8 +75,8 @@ def post_reservation(
             db.add(new_record)
             db.commit()
             _record_id = new_record.id
-        new_code = f"{randint(0,9)}{randint(0,9)}{randint(0,9)}{randint(0,9)}{randint(0,9)}{randint(0,9)}"
-        new_confirmation_code = f"{randint(0,9)}{randint(0,9)}{randint(0,9)}{randint(0,9)}{randint(0,9)}{randint(0,9)}"
+        new_code = generate_code()
+        new_confirmation_code = generate_code()
         new_reservation = Reservation(
             code = new_code,
             is_paid = False,
@@ -92,6 +96,8 @@ def post_reservation(
             db.add(new_reservation_slots)
         db.commit()
         
+        background_tasks.add_task(send_confirmation_email, item.email, new_confirmation_code)
+
         response.status_code = status.HTTP_201_CREATED
         return {"id": new_reservation.id}
     except:

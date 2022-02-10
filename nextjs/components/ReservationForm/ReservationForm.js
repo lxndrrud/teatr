@@ -9,15 +9,20 @@ const ReservationForm = ({ idSession }) => {
     }
     const postForm = (e) => {
         e.preventDefault()
-        console.log('kek')
+        
         // Отправить на backend запрос по почте
     }
 
     return (
-        <form className={styles.postForm}>
-            <input type="email" name="email" value={email} onChange={syncEmail} required />
-            <input type="submit" value="Подтвердить" onClick={postForm}/>
-        </form>
+        <>
+            <form className={styles.postForm}>
+                <input type="email" name="email" value={email} onChange={syncEmail} required />
+                <input type="submit" value="Подтвердить" onClick={postForm}/>
+            </form>
+            <div></div>
+
+        </>
+        
     )
 };
 

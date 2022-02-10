@@ -8,6 +8,7 @@ class SessionBaseModel(BaseModel):
     id_play: int
     id_price_policy: int
     datetime: datetime
+    is_locked: bool
 
 class SessionModel(SessionBaseModel):
     id: int

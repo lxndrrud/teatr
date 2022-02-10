@@ -2,8 +2,10 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Response, Path, UploadFile
 from database import get_db
 from sqlalchemy.orm import Session as DBSession
+from sqlalchemy import and_
 from starlette import status
 from .interfaces import SessionModel, SessionBaseModel
+from .utils import formatDatetime
 from models import Session
 import os, sys
 from pathlib import Path as sys_path
@@ -20,12 +22,13 @@ router = APIRouter(
 
 @router.get('/', status_code=status.HTTP_200_OK)
 def get_sessions(db: DBSession = Depends(get_db)):
-    query = db.query(Session).order_by(Session.datetime).all()
+    query = db.query(Session).filter(Session.is_locked == False).order_by(Session.datetime).all()
     list_ = []
     for row in query:
         auditorium_title = row.price_policy.slots[0].seat.row.auditorium.title
         new_row = SessionModel(
             id=row.id,
+            is_locked=row.is_locked,
             id_play=row.id_play,
             id_price_policy=row.id_price_policy,
             datetime=row.datetime,
@@ -44,6 +47,7 @@ def get_single(response: Response,
         auditorium_title = query.price_policy.slots[0].seat.row.auditorium.title
         result = SessionModel(
             id=query.id,
+            is_locked=query.is_locked,
             id_play=query.id_play,
             id_price_policy=query.id_price_policy,
             datetime=query.datetime,
@@ -93,6 +97,7 @@ def update_session(
     db: DBSession = Depends(get_db)):
     query = db.query(Session).filter(Session.id == item_id).first()
     if query:
+        query.is_locked = item.is_locked
         query.datetime = item.datetime
         query.id_play = item.id_play
         query.price = item.price
@@ -107,7 +112,8 @@ def get_sessions_by_play(
     response: Response,
     item_id: int = Path(...),
     db: DBSession = Depends(get_db)):
-    query = db.query(Session).filter(Session.id_play == item_id).order_by(Session.datetime.desc()).all()
+    query = db.query(Session).filter(and_(Session.is_locked == False, Session.id_play == item_id)) \
+        .order_by(Session.datetime.desc()).all()
 
     
     if query: 
@@ -116,6 +122,7 @@ def get_sessions_by_play(
             auditorium_title = row.price_policy.slots[0].seat.row.auditorium.title
             new_row = SessionModel(
                 id=row.id,
+                is_locked=row.is_locked,
                 id_play=row.id_play,
                 id_price_policy=row.id_price_policy,
                 datetime=row.datetime,
@@ -139,27 +146,27 @@ async def post_sessions_csv(
     plays_array = []
     with open(my_path, 'r') as f:
         content = f.read().split('\n')[:-1]
-        counter = 0
+        counter = 1
         for row in content:
-            if counter == 0:
+            if counter == 1:
                 counter += 1
                 continue
             try:
                 row_content = row.split('%')
-                #datetime csv format: "dd-mm-yyyy hh:mm"
-                _datetime_content = row_content[0].split(' ')
-                _date = _datetime_content[0].split("-")
-                _time = _datetime_content[1].split(":")
-                _datetime = datetime(year=int(_date[2]), month=int(_date[1]), day=int(_date[0]), hour=int(_time[0]), minute=int(_time[1]))
-                _id_play = row_content[1]
-                _id_price_policy = row_content[2] 
+                
+                _datetime = formatDatetime(row_content[0])
+                is_locked = True if row_content[1] == 'Д' else False 
+                id_play = row_content[2]
+                id_price_policy = row_content[3] 
                 new_row = Session(
                     datetime = _datetime,
-                    id_play = _id_play,
-                    id_price_policy = _id_price_policy)
+                    is_locked = is_locked,
+                    id_play = id_play,
+                    id_price_policy = id_price_policy)
                 plays_array.append(new_row)
             except:
-                print(f'CSV Session row failed: "{_datetime}", "{_id_play}", "{_id_price_policy}"')
+                print(f'CSV Session row failed: Номер строки = "{counter}"')
+            counter += 1
     for row in plays_array:
         db.add(row)
     db.commit()

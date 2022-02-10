@@ -121,6 +121,7 @@ class Session(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     datetime = Column(DateTime, nullable=False)
+    is_locked = Column(Boolean, nullable=False, default=False)
 
     id_play = Column(Integer, 
         ForeignKey(Play.id, onupdate='CASCADE', ondelete='CASCADE'), 

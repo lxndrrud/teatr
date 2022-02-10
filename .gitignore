@@ -1,5 +1,6 @@
 .pytest_cache
 .next
 node_modules
+/fastapi/storage/csv_files/
 **/nginx/access.log
 **/nginx/error.log
