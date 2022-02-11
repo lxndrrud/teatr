@@ -1,5 +1,6 @@
 import smtplib, ssl
 from random import seed, randint
+from datetime import datetime
 
 mail_config = {
     "server": "smtp.gmail.com",
@@ -8,7 +9,8 @@ mail_config = {
     "port": 465
 }
 
-def send_confirmation_email(email: str, code: str) -> None:
+def send_confirmation_email(email: str, confirmation_code: str, code: str, \
+    play_title: str, datetime: str, auditorium_title) -> None:
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(mail_config["server"], mail_config["port"], context=context) as server:
         server.login(mail_config["login"], mail_config["password"])
@@ -17,9 +19,19 @@ def send_confirmation_email(email: str, code: str) -> None:
             "To: %s" % email,
             "Subject: Бронь в театре на Оборонной",
             "",
-            "Код вашей брони в театре на Оборонной: %s" % code
+            "Код подтверждения вашей брони в театре на Оборонной: %s" % confirmation_code,
+            "Код идентификации вашей брони в театре на Оборонной (понадобится на кассе): %s" % code,
+            "Название представления: %s" % play_title,
+            "Дата и время представления: %s" % datetime,
+            "Название зала: %s" % auditorium_title
         )).encode()
         server.sendmail(mail_config["login"], email, BODY)
+
+def formatStrFromDatetime(datetime_: datetime):
+    """
+    datetime str format: "dd-mm-yyyy hh:mm"
+    """
+    return f"{datetime_.day}-{datetime_.month}-{datetime_.year} {datetime_.hour}:{datetime_.minute}"
 
 
 def generate_code() -> str:

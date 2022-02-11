@@ -45,7 +45,7 @@ class Row(Base):
         ForeignKey(Auditorium.id, ondelete='CASCADE', onupdate='CASCADE'),   
         nullable=False)
 
-    auditorium = relationship(Auditorium, backref=backref('rows', lazy='subquery'))
+    auditorium = relationship(Auditorium, backref=backref('rows', lazy='subquery', cascade='all,delete'))
 
 class Seat(Base):
     """
@@ -60,7 +60,7 @@ class Seat(Base):
         ForeignKey(Row.id, ondelete='CASCADE', onupdate='CASCADE'),   
         nullable=False)
 
-    row = relationship(Row, backref=backref('seats', lazy='subquery'))
+    row = relationship(Row, backref=backref('seats', lazy='subquery', cascade='all,delete'))
 
 
 class PricePolicy(Base):
@@ -130,8 +130,8 @@ class Session(Base):
         ForeignKey(PricePolicy.id, onupdate='CASCADE', ondelete='CASCADE'),
         nullable=False)
 
-    play = relationship(Play, backref=backref("sessions", lazy='subquery'))
-    price_policy = relationship(PricePolicy, backref=backref("sessions", lazy='subquery'))
+    play = relationship(Play, backref=backref("sessions", lazy='subquery', cascade='all,delete'))
+    price_policy = relationship(PricePolicy, backref=backref("sessions", lazy='subquery', cascade='all,delete'))
 
 class Record(Base):
     """
@@ -166,8 +166,8 @@ class Reservation(Base):
         ForeignKey(Record.id, onupdate='CASCADE', ondelete='CASCADE'),      
         nullable=False)
 
-    session = relationship(Session, backref=backref("reservations", cascade="all,delete"))
-    record = relationship(Record, backref=backref("reservations", cascade="all,delete"))
+    session = relationship(Session, backref=backref("reservations", lazy='subquery', cascade="all"))
+    record = relationship(Record, backref=backref("reservations", lazy='subquery', cascade="all,delete"))
 
 
 class ReservationsSlots(Base):
@@ -185,8 +185,8 @@ class ReservationsSlots(Base):
         ForeignKey(Slot.id, onupdate='CASCADE', ondelete='CASCADE'), 
         nullable=False)
 
-    reservation = relationship(Reservation, backref=backref('reservations_slots', lazy='subquery'))
-    slot = relationship(Slot, backref=backref('reservations_slots', lazy='subquery'))
+    reservation = relationship(Reservation, backref=backref('reservations_slots', lazy='subquery', cascade='all,delete'))
+    slot = relationship(Slot, backref=backref('reservations_slots', lazy='subquery', cascade='all,delete'))
 
 
 

@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, Response, Path, BackgroundTasks
+from fastapi import APIRouter, Body, Depends, Response, Path, BackgroundTasks
 from database import get_db
 from sqlalchemy.orm import Session as DBSession
+from sqlalchemy import and_
 from starlette import status
 
-from .interfaces import ReservationModel, ReservationEmailModel, ReservationUpdateModel, SlotInfoModel
-from .utils import send_confirmation_email, generate_code
-from models import Reservation, Record, ReservationsSlots, Slot, Session
+from .interfaces import ReservationConfirmationModel, ReservationModel, ReservationEmailModel, ReservationUpdateModel, SlotInfoModel
+from .utils import send_confirmation_email, generate_code, formatStrFromDatetime
+from models import Reservation, Record, ReservationsSlots, Session
 
 router = APIRouter(
     prefix='/reservations',
@@ -59,15 +60,15 @@ def post_reservation(
     background_tasks: BackgroundTasks,
     item: ReservationEmailModel,
     db: DBSession = Depends(get_db)):
-    try:
-        query = db.query(Record).filter(Record.email == item.email).first()
+    try: 
+        record_query = db.query(Record).filter(Record.email == item.email).first()
         session_query = db.query(Session).filter(Session.id == item.id_session).first()
         if session_query.is_locked == True:
             response.status_code = status.HTTP_403_FORBIDDEN
             return
         _record_id = 0
-        if query:
-            _record_id = query.id
+        if record_query:
+            _record_id = record_query.id
         else:
             new_record = Record(
                 email=item.email
@@ -96,10 +97,18 @@ def post_reservation(
             db.add(new_reservation_slots)
         db.commit()
         
-        background_tasks.add_task(send_confirmation_email, item.email, new_confirmation_code)
+        background_tasks \
+            .add_task(send_confirmation_email, item.email, new_confirmation_code, \
+                new_code, session_query.play.title, \
+                formatStrFromDatetime(session_query.datetime), \
+                session_query.price_policy.slots[0].seat.row.auditorium.title)
 
         response.status_code = status.HTTP_201_CREATED
-        return {"id": new_reservation.id}
+        return {"id": new_reservation.id, 
+            "id_session": new_reservation.id_session, 
+            "code": new_reservation.code,
+            "confirmation_code": new_reservation.confirmation_code
+        }
     except:
         response.status_code = status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
 
@@ -138,3 +147,23 @@ def update_reservation(
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
 
+@router.put('/confirm/{item_id}')
+def confirm_reservation(
+    response: Response,
+    item: ReservationConfirmationModel,
+    item_id: int = Path(...),
+    db: DBSession = Depends(get_db)):
+    print(item)
+    query = db.query(Reservation) \
+        .filter(and_(Reservation.id == item_id, Reservation.code == item.code, Reservation.id_session == item.id_session)) \
+        .first()
+    if query:
+        if query.confirmation_code == item.confirmation_code:
+            query.is_confirmed = True
+            db.add(query)
+            db.commit()
+            response.status_code = status.HTTP_200_OK
+        else:
+            response.status_code = status.HTTP_412_PRECONDITION_FAILED
+    else:
+        response.status_code = status.HTTP_404_NOT_FOUND
