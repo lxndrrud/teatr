@@ -78,7 +78,6 @@ const ReservationForm = ({ idSession }) => {
                 code: reservation.code,
                 id_session: parseInt(reservation.id_session)
             }
-            console.log(reservation.id)
             let url = '/fastapi/reservations/confirm/' + reservation.id.toString()
             let resp = await fetch(url, {
                 headers: {
@@ -88,7 +87,7 @@ const ReservationForm = ({ idSession }) => {
                 method: 'PUT', 
                 body: JSON.stringify(body)
             })
-            resp.status == 200 ? NextResponse.redirect('/') : errorConfirmation()
+            resp.status == 200 ? NextResponse.redirect('/') : errorConfirmation(resp.status)
         }
         postConfirmationRequest()
     }

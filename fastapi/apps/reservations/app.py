@@ -153,7 +153,6 @@ def confirm_reservation(
     item: ReservationConfirmationModel,
     item_id: int = Path(...),
     db: DBSession = Depends(get_db)):
-    print(item)
     query = db.query(Reservation) \
         .filter(and_(Reservation.id == item_id, Reservation.code == item.code, Reservation.id_session == item.id_session)) \
         .first()
