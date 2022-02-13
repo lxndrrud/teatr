@@ -1,0 +1,5 @@
+export const FETCH_PLAY = 'FETCH_PLAY'
+export const FETCH_PLAYS = 'FETCH_PLAYS'
+
+export const FETCH_SESSION = 'FETCH_SESSION'
+export const FETCH_SESSIONS = 'FETCH_SESSIONS'

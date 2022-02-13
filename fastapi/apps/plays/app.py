@@ -24,7 +24,10 @@ router = APIRouter(
 @router.get('/', status_code=status.HTTP_200_OK)
 def get_plays(db: DBSession = Depends(get_db)):
     query = db.query(Play).all()
-    return query
+    result = []
+    for row in query:
+        result.append(PlayModel.from_orm(row))
+    return result
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
 def post_play(

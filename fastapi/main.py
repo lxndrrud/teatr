@@ -55,7 +55,7 @@ scheduler = AsyncIOScheduler(jobstores=jobstores, executors=executors, job_defau
 
 @app.on_event('startup')
 def call_scheduled_jobs():
-    scheduler.add_job(process_time, 'interval', id='server_process_time', seconds=15, replace_existing=True)
+    scheduler.add_job(process_time, 'interval', id='server_process_time', minutes=1, replace_existing=True)
     scheduler.start()
 
 @app.on_event('shutdown')
