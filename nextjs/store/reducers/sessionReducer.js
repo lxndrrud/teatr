@@ -1,4 +1,4 @@
-import { FETCH_SESSION, FETCH_SESSIONS } from "../types"
+import { FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_BY_PLAY } from "../types"
 
 
 const defaultState = {
@@ -23,6 +23,8 @@ const sessionReducer = (state = defaultState, action) => {
         case FETCH_SESSION:
             return {...state, session: action.payload }
         case FETCH_SESSIONS:
+            return {...state, sessions: action.payload }
+        case FETCH_SESSIONS_BY_PLAY:
             return {...state, sessions: action.payload }
         default:
             return state

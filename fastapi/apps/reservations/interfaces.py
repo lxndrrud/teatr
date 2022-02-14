@@ -43,6 +43,11 @@ class ReservationModel(ReservationBaseModel):
     class Config:
             orm_mode = True
 
+class ReservationPostResponseModel(BaseModel):
+    id: int
+    id_session: int
+    code: str
+
 class ReservationConfirmationModel(BaseModel):
     id_session: int
     code: str

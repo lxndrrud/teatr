@@ -1,30 +1,24 @@
 import MainLayout from "../../layouts/MainLayout/MainLayout"
 import PlayDetail from "../../components/PlayDetail/PlayDetail"
 import SessionList from "../../components/SessionList/SessionList"
+import { fetchPlay } from "../../store/actions/playAction"
+import { fetchSessionsByPlay } from "../../store/actions/sessionAction"
+import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from "next/router"
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 
 export default function PlayPage() {
-    let [play, setPlay] = useState({})
-    let [sessions, setSessions] = useState([])
+    const dispatch = useDispatch()
     const router = useRouter()
     useEffect(() => {
-        const fetchPlay = async (playid_) => {
-            const resp = await fetch(`/fastapi/plays/${playid_}`)
-            const json_ = await resp.json()
-            setPlay(json_)
-        }
-        const fetchSessionsByPlay = async (playid_) => {
-            const resp = await fetch(`/fastapi/sessions/play/${playid_}`)
-            const json_ = await resp.json()
-            setSessions(json_)
-        }
-        
         if (router.isReady) {
-            fetchPlay(router.query.playid)
-            fetchSessionsByPlay(router.query.playid)
+            dispatch(fetchPlay(router.query.playid))
+            dispatch(fetchSessionsByPlay(router.query.playid))
         }
     }, [router.isReady])
+
+    const play = useSelector(state => state.play.play)
+    const sessions = useSelector(state => state.session.sessions)    
 
     return (
         <>

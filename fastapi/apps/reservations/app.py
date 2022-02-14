@@ -4,9 +4,10 @@ from sqlalchemy.orm import Session as DBSession
 from sqlalchemy import and_
 from starlette import status
 
-from .interfaces import ReservationConfirmationModel, ReservationModel, ReservationEmailModel, ReservationUpdateModel, SlotInfoModel
+from .interfaces import  ReservationModel, ReservationEmailModel, ReservationUpdateModel,\
+    SlotInfoModel, ReservationConfirmationModel, ReservationPostResponseModel
 from .utils import send_confirmation_email, generate_code, formatStrFromDatetime
-from models import Reservation, Record, ReservationsSlots, Session
+from models import Reservation, Record, ReservationsSlots, Session, Slot
 
 router = APIRouter(
     prefix='/reservations',
@@ -54,18 +55,32 @@ def get_single(
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
 
-@router.post('/')
+@router.post('/', response_model=ReservationPostResponseModel)
 def post_reservation(
     response: Response,
     background_tasks: BackgroundTasks,
     item: ReservationEmailModel,
     db: DBSession = Depends(get_db)):
     try: 
-        record_query = db.query(Record).filter(Record.email == item.email).first()
+        # Session lock check
         session_query = db.query(Session).filter(Session.id == item.id_session).first()
         if session_query.is_locked == True:
             response.status_code = status.HTTP_403_FORBIDDEN
-            return
+            return {"message": "Session is locked!"}
+        
+        # Existing slot reservation check
+        reservations_query = db.query(Reservation) \
+            .filter(Reservation.id_session == session_query.id) \
+            .all()
+        for row in reservations_query:
+            for reserved_slot in row.reservations_slots:
+                for incoming_slot in item.slots:
+                    if reserved_slot.id_slot == incoming_slot.id:
+                        response.status_code = status.HTTP_403_FORBIDDEN
+                        return {"message": "Slot has been already reserved!"}
+
+        # Existing record row check
+        record_query = db.query(Record).filter(Record.email == item.email).first()
         _record_id = 0
         if record_query:
             _record_id = record_query.id
@@ -83,18 +98,18 @@ def post_reservation(
             is_paid = False,
             confirmation_code = new_confirmation_code,
             is_confirmed = False,
-            id_session = _record_id,
-            id_record = item.id_session
+            id_session = session_query.id,
+            id_record = _record_id
         )
         db.add(new_reservation)
         db.commit()
 
         for slot in item.slots:
-            new_reservation_slots = ReservationsSlots(
+            new_reservations_slots = ReservationsSlots(
                 id_slot=slot,
                 id_reservation=new_reservation.id
             )
-            db.add(new_reservation_slots)
+            db.add(new_reservations_slots)
         db.commit()
         
         background_tasks \
@@ -104,11 +119,11 @@ def post_reservation(
                 session_query.price_policy.slots[0].seat.row.auditorium.title)
 
         response.status_code = status.HTTP_201_CREATED
-        return {"id": new_reservation.id, 
-            "id_session": new_reservation.id_session, 
-            "code": new_reservation.code,
-            "confirmation_code": new_reservation.confirmation_code
-        }
+        return ReservationPostResponseModel(
+            id=new_reservation.id,
+            id_session=new_reservation.id_session,
+            code=new_reservation.code
+        )
     except:
         response.status_code = status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
 
