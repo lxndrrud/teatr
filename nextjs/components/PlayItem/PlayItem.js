@@ -1,13 +1,13 @@
 import styles from './PlayItem.module.css'
-import { CustomLink } from '../CustomLink/CustomLink'
+import { ButtonLink } from '../ButtonLink/ButtonLink'
 
 
 export default function PlayItem({play}) {
     let destinationURL = `/repertoire/${play.id}`
     return (
     <div className={styles.playItem}>
-        <h2>{play.title}</h2>
-        <h3>{play.description}</h3>
-        <CustomLink destination={destinationURL} text="Посмотреть"/>
+        <p className={styles.playTitle}>{play.title}</p>
+        <p className={styles.playDescription.slice(0, 50)}>{play.description}</p>
+        <ButtonLink destination={destinationURL} text="Посмотреть"/>
     </div>)
 }

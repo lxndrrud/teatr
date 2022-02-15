@@ -1,5 +1,7 @@
-import { useDispatch, useSelector } from 'react-redux'
 import React from 'react'
+import CustomInput from '../CustomInput/CustomInput'
+import CustomButton from '../CustomButton/CustomButton'
+import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 
 const ReservationConfirmationForm = () => {
@@ -49,9 +51,9 @@ const ReservationConfirmationForm = () => {
     return (
         <>
             <h3>{confirmationErrorMessage}</h3>
-            <input type="text" name="confirmationCode" value={confirmationCode} placeholder="Код подтверждения"
-                onChange={syncConfirmationCode} required />
-            <input type="submit" value="Подтвердить" onClick={postConfirmation}/>
+            <CustomInput type="text" name="confirmationCode" value={confirmationCode} placeholder="Код подтверждения"
+                onChange={syncConfirmationCode} description="Введите код подтверждения, который вы получили по почте" />
+            <CustomButton type="submit" value="Подтвердить" onClickHook={postConfirmation} />
         </> 
     )   
 }

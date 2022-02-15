@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session as DBSession
 from sqlalchemy import and_
 from starlette import status
 from .interfaces import SessionModel, SessionBaseModel
-from .utils import formatDatetime
+from .utils import formatDate, formatTime
 from models import Session
 import os, sys
 from pathlib import Path as sys_path
@@ -22,7 +22,10 @@ router = APIRouter(
 
 @router.get('/', status_code=status.HTTP_200_OK)
 def get_sessions(db: DBSession = Depends(get_db)):
-    query = db.query(Session).filter(Session.is_locked == False).order_by(Session.datetime.desc()).all()
+    query = db.query(Session) \
+        .filter(Session.is_locked == False) \
+        .order_by(Session.date.desc(), Session.time.desc()) \
+        .all()
     list_ = []
     for row in query:
         auditorium_title = row.price_policy.slots[0].seat.row.auditorium.title
@@ -31,7 +34,8 @@ def get_sessions(db: DBSession = Depends(get_db)):
             is_locked=row.is_locked,
             id_play=row.id_play,
             id_price_policy=row.id_price_policy,
-            datetime=row.datetime,
+            date=row.date,
+            time=row.time,
             auditorium_title=auditorium_title,
             play_title=row.play.title
         )
@@ -50,7 +54,8 @@ def get_single(response: Response,
             is_locked=query.is_locked,
             id_play=query.id_play,
             id_price_policy=query.id_price_policy,
-            datetime=query.datetime,
+            date=query.date,
+            time=query.time,
             auditorium_title=auditorium_title,
             play_title=query.play.title
         )
@@ -67,7 +72,8 @@ def post_session(
         new_row = Session(
             id_play = item.id_play,
             id_price_policy = item.id_price_policy,
-            datetime=item.datetime,
+            date=item.date,
+            time=item.time
         )
         db.add(new_row)
         db.commit()
@@ -98,7 +104,8 @@ def update_session(
     query = db.query(Session).filter(Session.id == item_id).first()
     if query:
         query.is_locked = item.is_locked
-        query.datetime = item.datetime
+        query.dateitem.date
+        query.time = item.time
         query.id_play = item.id_play
         query.price = item.price
         db.add(query)
@@ -125,7 +132,8 @@ def get_sessions_by_play(
                 is_locked=row.is_locked,
                 id_play=row.id_play,
                 id_price_policy=row.id_price_policy,
-                datetime=row.datetime,
+                date=row.date,
+                time=row.time,
                 auditorium_title=auditorium_title,
                 play_title=row.play.title
             )
@@ -154,12 +162,14 @@ async def post_sessions_csv(
             try:
                 row_content = row.split('%')
                 
-                _datetime = formatDatetime(row_content[0])
-                is_locked = True if row_content[1] == 'Д' else False 
-                id_play = row_content[2]
-                id_price_policy = row_content[3] 
+                date = formatDate(row_content[0])
+                time = formatTime(row_content[1])
+                is_locked = True if row_content[2] == 'Д' else False 
+                id_play = row_content[3]
+                id_price_policy = row_content[4] 
                 new_row = Session(
-                    datetime = _datetime,
+                    date=date,
+                    time=time,
                     is_locked = is_locked,
                     id_play = id_play,
                     id_price_policy = id_price_policy)

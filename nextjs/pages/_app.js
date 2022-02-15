@@ -1,6 +1,6 @@
-import styles from '../styles/globals.css'
 import App from 'next/app'
 import React from 'react'
+import styles from '../styles/globals.css'
 import { Provider } from 'react-redux'
 import store from '../store/store'
 import { createWrapper} from 'next-redux-wrapper'

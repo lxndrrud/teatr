@@ -16,11 +16,14 @@ const SessionReservation = () => {
   }, [router.isReady])
 
   const session = useSelector(state => state.session.session)
+  const play = useSelector(state => state.play.play)
 
   
   return (
     <>
       <MainLayout title="Оформление брони">
+        <h3>Спектакль: {play.title}</h3>
+        <h3>Сеанс: {session.datetime } {session.auditorium_title}</h3>
         <ReservationForm session={ session }/>
       </MainLayout>
     </>

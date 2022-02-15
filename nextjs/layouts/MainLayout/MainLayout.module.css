@@ -9,7 +9,7 @@
     display: flex;
     flex-basis: auto;
     flex-shrink: 1;
-    width: 400px;
+    width: 500px;
     justify-content: space-between;
 }
 .mainContent {

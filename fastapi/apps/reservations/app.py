@@ -41,7 +41,8 @@ def get_single(
             id=query.id,
             id_session=query.id_session,
             id_record=query.id_record,
-            datetime=query.datetime,
+            date=query.date,
+            time=query.time,
             is_paid=query.is_paid, 
             code=query.code,
             is_confirmed=query.is_confirmed,
@@ -155,7 +156,8 @@ def update_reservation(
         query.is_confirmed = item.is_confirmed
         query.code = item.code
         query.confirmation_code = item.confirmation_code
-        query.datetime = item.datetime
+        query.date = item.date
+        query.time = item.time
         db.add(query)
         db.commit()
         response.status_code = status.HTTP_200_OK

@@ -1,0 +1,9 @@
+.customInput {
+    width: 500px;
+    height: 60px;
+    font-family: Ubuntu;
+    font-size: 28px;
+    border-radius: 5px;
+    border-color:  #E63946;
+    border: 2px solid #E63946;
+}

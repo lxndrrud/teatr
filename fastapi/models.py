@@ -1,6 +1,7 @@
 from database import Base
-import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean
+import datetime 
+
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Date, Time
 from sqlalchemy.orm import relationship, backref
 
 
@@ -120,7 +121,8 @@ class Session(Base):
     __tablename__ = 'sessions'
 
     id = Column(Integer, primary_key=True, index=True)
-    datetime = Column(DateTime, nullable=False)
+    date = Column(Date, nullable=False)
+    time = Column(Time, nullable=False)
     is_locked = Column(Boolean, nullable=False, default=False)
 
     id_play = Column(Integer, 
@@ -153,7 +155,8 @@ class Reservation(Base):
     __tablename__ = 'reservations'
 
     id = Column(Integer, primary_key=True, index=True)
-    datetime = Column(DateTime, nullable=False, default=datetime.datetime.now())
+    date = Column(Date, nullable=False, default=datetime.datetime.now().date())
+    time = Column(Time, nullable=False, default=datetime.datetime.now().time())
     is_paid = Column(Boolean, nullable=False, default=False)
     code = Column(String(6), nullable=False)
     is_confirmed = Column(Boolean, nullable=False, default=False)

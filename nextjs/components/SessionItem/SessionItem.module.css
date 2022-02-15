@@ -1,10 +1,15 @@
 .sessionItem {
     border-radius: 10px;
-    border: 1px solid black;
-    padding: 10px;
+    /*border: 3px solid black;*/
+    background-color: #A8DADC;
+    padding: 15px;
     width: 400px;
 }
 
+/*
 .sessionItem:hover{
-    border: 1px solid #0070f3;
+    background-color: #E63946;
+    /*border: 3px solid #457B9D; *-/
+    /*border: 1px solid #0070f3; *-/
 }
+*/

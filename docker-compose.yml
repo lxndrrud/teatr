@@ -55,7 +55,6 @@ services:
             - postgres
             - fastapi
             - adminer
-
         ports:
             - '80:80'
         links:
@@ -65,7 +64,8 @@ services:
         networks:
             - customnetwork
         volumes:
-            - './fastapi/storage:/var/www/storage'
+            - './fastapi/storage:/var/www/back-storage'
+            - './nextjs/storage:/var/www/front-storage'
             - './nginx:/var/log/nginx'
             - './nginx/conf.d:/etc/nginx/conf.d'
 

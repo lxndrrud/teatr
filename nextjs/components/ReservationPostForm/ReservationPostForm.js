@@ -1,5 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { showConfirmationField, setReservation } from '../../store/actions/reservationAction'
+import CustomInput from '../CustomInput/CustomInput'
+import CustomButton from '../CustomButton/CustomButton'
 import React from 'react'
 import { useState } from 'react'
 
@@ -18,9 +20,9 @@ const ReservationPostForm = ({ session }) => {
 
     const postEmailReservation = (e) => {
         e.preventDefault()
-        const emailErrorMessage = () => {
+        const emailErrorMessage = (text) => {
             setEmail('')
-            setEmailErrorMessage('Произошла ошибка! Попробуйте еще раз.')
+            setEmailErrorMessage(text)
         }
         const success = (responseBody) => {
             // Нужно связать все компоненты формы
@@ -34,6 +36,10 @@ const ReservationPostForm = ({ session }) => {
         }
         // Отправить на backend запрос по почте
         const postReservation = async () => {
+            if (email === '') {
+                emailErrorMessage('Пожалуйста, введите почту и попробуйте еще раз.')
+                return 
+            }
             let body = {
                 email: email, 
                 id_session: session.id,
@@ -48,7 +54,7 @@ const ReservationPostForm = ({ session }) => {
                 body: JSON.stringify(body)
             })
             body = await resp.json()
-            resp.status == 201 ?  success(body) : emailErrorMessage()
+            resp.status == 201 ?  success(body) : emailErrorMessage('Произошла ошибка! Попробуйте еще раз.')
         }
         postReservation()
     }
@@ -56,9 +62,9 @@ const ReservationPostForm = ({ session }) => {
     return (
         <>
             <h3>{emailErrorMessage}</h3>
-            <input type="email" name="email" value={email} placeholder="Ваша почта"
-                onChange={syncEmail} required />
-            <input type="submit" value="Подтвердить" onClick={postEmailReservation}/>
+            <CustomInput type="email" name="email" value={email} placeholder="Ваша почта"
+                onChange={syncEmail} required description="На вашу почту будет выслан код подтверждения"/>
+            <CustomButton type="submit" value="Подтвердить" onClickHook={postEmailReservation} />
         </>
     )
 }

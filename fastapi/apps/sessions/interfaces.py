@@ -1,13 +1,14 @@
 from typing import Optional, List
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import date, time
 from ..plays.interfaces import PlayModel
 
 
 class SessionBaseModel(BaseModel):
     id_play: int
     id_price_policy: int
-    datetime: datetime
+    date: date
+    time: time
     is_locked: bool
 
 class SessionModel(SessionBaseModel):

@@ -1,6 +1,6 @@
 from typing import Optional, List
 from pydantic import BaseModel, EmailStr
-from datetime import datetime
+from datetime import date, time
 
 
 class SlotInfoModel(BaseModel):
@@ -18,7 +18,8 @@ class ReservationUpdateModel(ReservationBaseModel):
     code: str
     is_confirmed: bool
     confirmation_code: str
-    datetime: datetime
+    time: date
+    time: time
 
 class ReservationEmailModel(BaseModel):
     email: EmailStr
@@ -31,13 +32,15 @@ class ReservationEmailModel(BaseModel):
 
 class ReservationModel(ReservationBaseModel):
     id: int
-    datetime: datetime
+    date: date
+    time: time
     is_paid: bool
     code: str
     is_confirmed: bool
     confirmation_code: str
     slots: List[SlotInfoModel]
-    session_datetime: datetime
+    session_date: date
+    session_time: time
     play_title: str 
 
     class Config:
