@@ -120,7 +120,7 @@ def get_sessions_by_play(
     item_id: int = Path(...),
     db: DBSession = Depends(get_db)):
     query = db.query(Session).filter(and_(Session.is_locked == False, Session.id_play == item_id)) \
-        .order_by(Session.datetime.desc()).all()
+        .order_by(Session.date.desc(), Session.time.desc()).all()
 
     
     if query: 
