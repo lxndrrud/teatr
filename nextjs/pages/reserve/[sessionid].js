@@ -1,5 +1,6 @@
 import MainLayout from '../../layouts/MainLayout/MainLayout'
 import ReservationForm from '../../components/ReservationForm/ReservationForm';
+import { fetchPlay } from "../../store/actions/playAction"
 import { fetchSession } from '../../store/actions/sessionAction'
 import { useRouter } from 'next/router';
 import { useDispatch, useSelector} from 'react-redux'
@@ -16,6 +17,10 @@ const SessionReservation = () => {
   }, [router.isReady])
 
   const session = useSelector(state => state.session.session)
+  useEffect(() => {
+    dispatch(fetchPlay(session.id_play))
+  }, [session])
+  
   const play = useSelector(state => state.play.play)
 
   

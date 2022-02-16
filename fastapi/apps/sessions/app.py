@@ -24,7 +24,7 @@ router = APIRouter(
 def get_sessions(db: DBSession = Depends(get_db)):
     query = db.query(Session) \
         .filter(Session.is_locked == False) \
-        .order_by(Session.date.desc(), Session.time.desc()) \
+        .order_by(Session.date.asc(), Session.time.asc()) \
         .all()
     list_ = []
     for row in query:

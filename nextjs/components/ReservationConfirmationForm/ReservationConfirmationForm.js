@@ -1,10 +1,12 @@
 import React from 'react'
+import { useRouter } from "next/router"
 import CustomInput from '../CustomInput/CustomInput'
 import CustomButton from '../CustomButton/CustomButton'
 import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 
 const ReservationConfirmationForm = () => {
+    const router = useRouter()
     const dispatch = useDispatch()
     let [confirmationCode, setConfirmationCode] = useState('')
     let [confirmationErrorMessage, setConfirmationErrorMessage] = useState('')
@@ -44,7 +46,7 @@ const ReservationConfirmationForm = () => {
                 method: 'PUT', 
                 body: JSON.stringify(body)
             })
-            resp.status == 200 ? NextResponse.redirect('/') : errorConfirmation(resp.status)
+            resp.status == 200 ? router.push('/') : errorConfirmation(resp.status)
         }
         postConfirmationRequest()
     }

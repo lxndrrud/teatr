@@ -1,62 +1,47 @@
 import { useDispatch, useSelector } from 'react-redux'
-import { showConfirmationField, setReservation } from '../../store/actions/reservationAction'
+import { showConfirmationField, postReservation } from '../../store/actions/reservationAction'
 import CustomInput from '../CustomInput/CustomInput'
 import CustomButton from '../CustomButton/CustomButton'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react'
 
 const ReservationPostForm = ({ session }) => {
     const dispatch = useDispatch()
-
-    
+    const errorReservation = useSelector(state => state.reservation.error)
 
     let [email, setEmail] = useState('')
     let [slotsList, setSlotsList] = useState([1])
-    let [emailErrorMessage, setEmailErrorMessage] = useState('')
+    let [emailErrorMessage, setEmailErrorMessage] = useState()
 
     const syncEmail = (e) => {
         setEmail(e.target.value)
     }
 
+    const emailError = (text) => {
+        setEmailErrorMessage(text)
+        setEmail('')
+    }
+
+    useEffect(() => {
+        emailError(errorReservation)
+    }, [errorReservation])
+
     const postEmailReservation = (e) => {
         e.preventDefault()
-        const emailErrorMessage = (text) => {
-            setEmail('')
-            setEmailErrorMessage(text)
+
+        if (email === '') {
+            emailError('Пожалуйста, введите почту и попробуйте еще раз.')
+            return 
         }
-        const success = (responseBody) => {
-            // Нужно связать все компоненты формы
-            // setShowConfirmationField(true)
-            dispatch(setReservation({
-                id: responseBody.id,
-                id_session: responseBody.id_session,
-                code: responseBody.code,
-            }))
-            dispatch(showConfirmationField())
-        }
+
         // Отправить на backend запрос по почте
-        const postReservation = async () => {
-            if (email === '') {
-                emailErrorMessage('Пожалуйста, введите почту и попробуйте еще раз.')
-                return 
-            }
-            let body = {
-                email: email, 
-                id_session: session.id,
-                slots: slotsList
-            }
-            let resp = await fetch('/fastapi/reservations', {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }, 
-                method: 'POST', 
-                body: JSON.stringify(body)
-            })
-            body = await resp.json()
-            resp.status == 201 ?  success(body) : emailErrorMessage('Произошла ошибка! Попробуйте еще раз.')
-        }
-        postReservation()
+        dispatch(postReservation({
+            email: email, 
+            id_session: session.id,
+            slots: slotsList
+        }))
+
+        if (errorReservation === null) dispatch(showConfirmationField())
     }
 
     return (

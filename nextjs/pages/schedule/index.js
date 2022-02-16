@@ -4,7 +4,7 @@ import { fetchSessions } from '../../store/actions/sessionAction'
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
-export default function Shedule() {
+export default function Schedule() {
     //let [sessions, setSessions] = useState([])
     const dispatch = useDispatch()
     
