@@ -6,6 +6,7 @@
     border-radius: 5px;
     border-color:  #E63946;
     border: 2px solid #E63946;
+    padding: 5px;
 }
 
 .errorMessage {

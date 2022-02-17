@@ -9,14 +9,13 @@
     display: flex;
     flex-basis: auto;
     flex-shrink: 1;
-    width: 500px;
+    max-width: 500px;
     justify-content: space-between;
 }
 .mainContent {
     display: flex;
     flex-direction: column;
     align-items: start;
-    text-align: center;
 }
 
 .title{

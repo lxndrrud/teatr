@@ -14,16 +14,18 @@ def send_confirmation_email(email: str, confirmation_code: str, code: str, \
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(mail_config["server"], mail_config["port"], context=context) as server:
         server.login(mail_config["login"], mail_config["password"])
+        mail_info = '\n'.join((
+            "Код подтверждения вашей брони в театре на Оборонной: %s" % confirmation_code,
+            "Код идентификации вашей брони в театре на Оборонной (понадобится на кассе): %s" % code,
+            "Название представления: %s" % play_title,
+            "Дата и время представления: %s" % datetime,
+            "Название зала: %s" % auditorium_title))
         BODY = "\r\n".join((
             "From: %s" % mail_config["login"],
             "To: %s" % email,
             "Subject: Бронь в театре на Оборонной",
             "",
-            "Код подтверждения вашей брони в театре на Оборонной: %s" % confirmation_code,
-            "Код идентификации вашей брони в театре на Оборонной (понадобится на кассе): %s" % code,
-            "Название представления: %s" % play_title,
-            "Дата и время представления: %s" % datetime,
-            "Название зала: %s" % auditorium_title
+            mail_info
         )).encode()
         server.sendmail(mail_config["login"], email, BODY)
 

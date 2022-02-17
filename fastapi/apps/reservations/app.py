@@ -56,20 +56,18 @@ def get_single(
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
 
-@router.post('/', response_model=ReservationPostResponseModel)
+@router.post('/')
 def post_reservation(
     response: Response,
     background_tasks: BackgroundTasks,
     item: ReservationEmailModel,
     db: DBSession = Depends(get_db)):
-    try: 
+    try:
         # Session lock check
         session_query = db.query(Session).filter(Session.id == item.id_session).first()
         if session_query.is_locked == True:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                detail="Бронирование на сеанс недоступно!")
-            #response.status_code = status.HTTP_403_FORBIDDEN
-            #return {"message": "Бронь на сеанс закрыты!"}
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return {"detail": "Бронь на сеанс закрыты!"}
         # Existing slot reservation check
         reservations_query = db.query(Reservation) \
             .filter(Reservation.id_session == session_query.id) \
@@ -79,12 +77,10 @@ def post_reservation(
                 for incoming_slot in item.slots:
                     print(incoming_slot, reserved_slot.id_slot)
                     if reserved_slot.id_slot == incoming_slot:
-                        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                            detail="Место на сеанс уже забронировано. Пожалуйста, обновите страницу")
-                        #response.status_code = status.HTTP_409_CONFLICT
-                        #return {"message": 
-                            #"Место на сеанс уже забронировано. Пожалуйста, обновите страницу"
-                        #}
+                        response.status_code = status.HTTP_409_CONFLICT
+                        return {"detail": 
+                            "Место на сеанс уже забронировано. Пожалуйста, обновите страницу"
+                        }
         # Existing record row check
         record_query = db.query(Record).filter(Record.email == item.email).first()
         _record_id = 0
@@ -132,6 +128,7 @@ def post_reservation(
         )
     except:
         response.status_code = status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
+    
 
 @router.delete('/{item_id}')
 def delete_reservation(

@@ -7,7 +7,7 @@ import { useState } from 'react'
 
 const ReservationPostForm = ({ session }) => {
     const dispatch = useDispatch()
-    const errorReservation = useSelector(state => state.reservation.error)
+    let errorReservation = useSelector(state => state.reservation.error)
 
     let [email, setEmail] = useState('')
     let [slotsList, setSlotsList] = useState([1])
