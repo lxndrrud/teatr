@@ -8,4 +8,5 @@
 
 .customLink:hover {
     text-decoration-line: underline;
+    color: #E63946;
 }

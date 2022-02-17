@@ -6,9 +6,9 @@ export default function SessionItem({ session }) {
     
     return (
         <div className={styles.sessionItem} >
-            <h2>{session.play_title}</h2>
-            <h3>{session.auditorium_title}</h3>
-            <h3>{session.date} {session.time}</h3>
+            <p className={styles.playTitle}>{session.play_title}</p>
+            <p className={styles.auditoriumTitle}>{session.auditorium_title}</p>
+            <p className={styles.sessionDate}>{session.date} {session.time}</p>
             <ButtonLink destination={destinationURL} text="Оформить бронь"/> 
         </div>
     )

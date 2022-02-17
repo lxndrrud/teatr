@@ -15,5 +15,12 @@
 .mainContent {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    align-items: start;
+    text-align: center;
+}
+
+.title{
+    margin: 10px 0px;
+    font-size: 32px;
+    font-weight: bold;
 }

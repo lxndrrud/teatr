@@ -9,7 +9,7 @@ export default function MainLayout({ children, title }) {
             <CustomLink destination="/repertoire" text="Репертуар" />
             <CustomLink destination="/schedule" text="Расписание" />
         </nav>
-        <h1>{title}</h1>
+        <h1 className={styles.title}>{title}</h1>
         <main className={styles.mainContent}>
             { children }
         </main>

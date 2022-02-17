@@ -46,9 +46,10 @@ const ReservationPostForm = ({ session }) => {
 
     return (
         <>
-            <h3>{emailErrorMessage}</h3>
             <CustomInput type="email" name="email" value={email} placeholder="Ваша почта"
-                onChange={syncEmail} required description="На вашу почту будет выслан код подтверждения"/>
+                onChange={syncEmail} required 
+                description="На вашу почту будет выслан код подтверждения" 
+                errorMessage={emailErrorMessage}/>
             <CustomButton type="submit" value="Подтвердить" onClickHook={postEmailReservation} />
         </>
     )

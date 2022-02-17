@@ -6,6 +6,19 @@
     width: 400px;
 }
 
+.playTitle {
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.auditoriumTitle {
+    font-size: 22px;
+}
+
+.sessionDate {
+    font-size: 22px;
+}
+
 /*
 .sessionItem:hover{
     background-color: #E63946;

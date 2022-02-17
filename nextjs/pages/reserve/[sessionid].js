@@ -27,9 +27,7 @@ const SessionReservation = () => {
   return (
     <>
       <MainLayout title="Оформление брони">
-        <h3>Спектакль: {play.title}</h3>
-        <h3>Сеанс: {session.date} {session.time} {session.auditorium_title}</h3>
-        <ReservationForm session={ session }/>
+        <ReservationForm session={ session } play={ play }/>
       </MainLayout>
     </>
   );

@@ -1,5 +1,6 @@
 from database import Base
 import datetime 
+from pytz import timezone
 
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean, Date, Time
 from sqlalchemy.orm import relationship, backref
@@ -155,8 +156,10 @@ class Reservation(Base):
     __tablename__ = 'reservations'
 
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(Date, nullable=False, default=datetime.datetime.now().date())
-    time = Column(Time, nullable=False, default=datetime.datetime.now().time())
+    date = Column(Date, nullable=False, \
+        default=datetime.datetime.now(timezone('Europe/Moscow')).date())
+    time = Column(Time, nullable=False, \
+        default=datetime.datetime.now(timezone('Europe/Moscow')).time())
     is_paid = Column(Boolean, nullable=False, default=False)
     code = Column(String(6), nullable=False)
     is_confirmed = Column(Boolean, nullable=False, default=False)

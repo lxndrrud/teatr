@@ -4,6 +4,7 @@ from datetime import date, time
 
 
 class SlotInfoModel(BaseModel):
+    id: int
     price: float
     seat_number: int
     row_number: int

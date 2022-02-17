@@ -1,15 +1,17 @@
 .customButton{
     text-decoration: none;
     color: #F1FAEE;
-    /*color: #0070f3; */
-    font-size: 24px;
+    font-size: 22px;
     font-weight: bold;
     border: 3px solid #1D3557;
     background-color: #1D3557;
-    /* border: 3px solid #E63946; */
     padding: 10px;
     margin: 5px 5px;
-    margin-bottom: 15px;
+    /* margin-bottom: 15px; */
     border-radius: 10px;
-    
+}
+
+.customButton:hover {
+    border: 3px solid #457B9D;
+    background-color: #457B9D;
 }

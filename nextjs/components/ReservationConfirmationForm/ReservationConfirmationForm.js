@@ -52,9 +52,10 @@ const ReservationConfirmationForm = () => {
     }
     return (
         <>
-            <h3>{confirmationErrorMessage}</h3>
             <CustomInput type="text" name="confirmationCode" value={confirmationCode} placeholder="Код подтверждения"
-                onChange={syncConfirmationCode} description="Введите код подтверждения, который вы получили по почте" />
+                onChange={syncConfirmationCode} 
+                description="Введите код подтверждения, который вы получили по почте" 
+                errorMessage={confirmationErrorMessage} />
             <CustomButton type="submit" value="Подтвердить" onClickHook={postConfirmation} />
         </> 
     )   

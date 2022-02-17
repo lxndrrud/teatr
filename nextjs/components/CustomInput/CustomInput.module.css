@@ -7,3 +7,7 @@
     border-color:  #E63946;
     border: 2px solid #E63946;
 }
+
+.errorMessage {
+    color: #E63946;
+}

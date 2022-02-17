@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session as DBSession
 from database import SessionLocal
 from models import Session, Reservation
 from datetime import datetime
+from pytz import timezone
 
 def is_fifteen_minutes_interval(datetime1, datetime2) -> bool:
     """
@@ -40,8 +41,8 @@ def process_sessions(db: DBSession) -> None:
     query = db.query(Session).filter(Session.is_locked == False)\
         .order_by(Session.date.asc(), Session.date.asc()).all()
     now_ = {
-        "date": datetime.now().date(),
-        "time": datetime.now().time()
+        "date": datetime.now(timezone('Europe/Moscow')).date(),
+        "time": datetime.now(timezone('Europe/Moscow')).time()
     }
     for row in query:
         row_ = {
@@ -62,8 +63,8 @@ def process_reservations(db: DBSession) -> None:
     query = db.query(Reservation).filter(Reservation.is_confirmed == False)\
         .order_by(Reservation.date.asc(), Reservation.time.asc()).all()
     now_ = now_ = {
-        "date": datetime.now().date(),
-        "time": datetime.now().time()
+        "date": datetime.now(timezone('Europe/Moscow')).date(),
+        "time": datetime.now(timezone('Europe/Moscow')).time()
     }
     for row in query:
         row_ = {
@@ -78,7 +79,8 @@ def process_reservations(db: DBSession) -> None:
 
 
 def process_time() -> None:
-    print(f'process time cron {datetime.now()}')
+    timezone_ = timezone('Europe/Moscow')
+    print(f'process time cron {datetime.now(timezone_)}')
     funcs_ = [process_sessions, process_reservations]
     for f in funcs_:
         db = SessionLocal()

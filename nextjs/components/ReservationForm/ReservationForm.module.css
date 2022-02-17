@@ -1,0 +1,16 @@
+.postForm {
+    margin-top: 40px;
+}
+
+.playInfo {
+    margin: 5px 0px;
+    font-size: 26px;
+    /* font-weight: bold; */
+}
+
+.infoCard {
+    background-color: #ffb703;
+    width: 600px;
+    padding: 20px;
+    border-radius: 10px;
+}

@@ -1,6 +1,5 @@
 import MainLayout from "../../layouts/MainLayout/MainLayout"
 import PlayDetail from "../../components/PlayDetail/PlayDetail"
-import SessionList from "../../components/SessionList/SessionList"
 import { fetchPlay } from "../../store/actions/playAction"
 import { fetchSessionsByPlay } from "../../store/actions/sessionAction"
 import { useDispatch, useSelector } from 'react-redux'
@@ -23,8 +22,7 @@ export default function PlayPage() {
     return (
         <>
             <MainLayout title={play.title}>
-                <PlayDetail play={play} />
-                <SessionList sessions={sessions} />
+                <PlayDetail play={play} sessions={sessions}/>
             </MainLayout>
         </>
     )

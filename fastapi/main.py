@@ -49,13 +49,15 @@ job_defaults = {
     'coalesce': False,
     'max_instances': 3
 }
-scheduler = AsyncIOScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, \
-     timezone=timezone('Europe/Moscow'))
+scheduler = AsyncIOScheduler(jobstores=jobstores, executors=executors, \
+    job_defaults=job_defaults, \
+    timezone=timezone('Europe/Moscow'))
 
 
 @app.on_event('startup')
 def call_scheduled_jobs():
-    scheduler.add_job(process_time, 'interval', id='server_process_time', minutes=1, replace_existing=True)
+    scheduler.add_job(process_time, 'interval', \
+        id='server_process_time', minutes=1, replace_existing=True)
     scheduler.start()
 
 @app.on_event('shutdown')

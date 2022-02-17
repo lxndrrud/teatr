@@ -63,7 +63,6 @@ def post_reservation(
     item: ReservationEmailModel,
     db: DBSession = Depends(get_db)):
     try: 
-        print(item, item.id_session, item.email, item.slots)
         # Session lock check
         session_query = db.query(Session).filter(Session.id == item.id_session).first()
         if session_query.is_locked == True:
@@ -71,12 +70,10 @@ def post_reservation(
                 detail="Бронирование на сеанс недоступно!")
             #response.status_code = status.HTTP_403_FORBIDDEN
             #return {"message": "Бронь на сеанс закрыты!"}
-        print(session_query)
         # Existing slot reservation check
         reservations_query = db.query(Reservation) \
             .filter(Reservation.id_session == session_query.id) \
             .all()
-        print(reservations_query)
         for row in reservations_query:
             for reserved_slot in row.reservations_slots:
                 for incoming_slot in item.slots:
@@ -88,7 +85,6 @@ def post_reservation(
                         #return {"message": 
                             #"Место на сеанс уже забронировано. Пожалуйста, обновите страницу"
                         #}
-        print(reservations_query)
         # Existing record row check
         record_query = db.query(Record).filter(Record.email == item.email).first()
         _record_id = 0
@@ -103,7 +99,6 @@ def post_reservation(
             _record_id = new_record.id
         new_code = generate_code()
         new_confirmation_code = generate_code()
-        print(_record_id, new_code, new_confirmation_code)
         new_reservation = Reservation(
             code = new_code,
             is_paid = False,
@@ -112,7 +107,6 @@ def post_reservation(
             id_session = session_query.id,
             id_record = _record_id
         )
-        print(new_reservation)
         db.add(new_reservation)
         db.commit()
 
