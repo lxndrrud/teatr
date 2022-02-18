@@ -1,0 +1,22 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.scene {
+    display: flex;
+    max-width: fit-content;
+    text-align: center;
+    padding: 5px 1rem;
+    border: 2px solid black;
+    margin-bottom: 40px;
+}
+
+.tableContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* border: 1px solid #457B9D;*/ 
+}

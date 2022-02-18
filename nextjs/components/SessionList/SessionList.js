@@ -5,7 +5,7 @@ export default function SessionList({ sessions, parentStyles }) {
     return (
         <div className={styles.sessions, parentStyles}>
             {sessions && sessions.map(session => (
-                <SessionItem session={session} key={session.id}></SessionItem>
+                <SessionItem session={session} key={session.id} />
             ))}
         </div>
     )

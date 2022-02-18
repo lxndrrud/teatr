@@ -1,4 +1,6 @@
 import smtplib, ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from random import seed, randint
 from datetime import date, time
 
@@ -12,22 +14,22 @@ mail_config = {
 def send_confirmation_email(email: str, confirmation_code: str, code: str, \
     play_title: str, datetime: str, auditorium_title) -> None:
     context = ssl.create_default_context()
+    message = MIMEMultipart('alternative')
+    message["Subject"] = "Бронь в театре на Оборонной"
+    message["From"] = mail_config["login"]
+    message["To"] =  email
+    custom_text = f"""
+    Код подтверждения вашей брони: {confirmation_code}
+    Код идентификации вашей брони (понадобится на кассе и при управлении бронью): {code}
+    Название представления: {play_title}
+    Дата и время представления: {datetime}
+    Название зала: {auditorium_title}
+    """
+    text_part = MIMEText(custom_text, 'plain')
+    message.attach(text_part)
     with smtplib.SMTP_SSL(mail_config["server"], mail_config["port"], context=context) as server:
         server.login(mail_config["login"], mail_config["password"])
-        mail_info = '\n'.join((
-            "Код подтверждения вашей брони в театре на Оборонной: %s" % confirmation_code,
-            "Код идентификации вашей брони в театре на Оборонной (понадобится на кассе): %s" % code,
-            "Название представления: %s" % play_title,
-            "Дата и время представления: %s" % datetime,
-            "Название зала: %s" % auditorium_title))
-        BODY = "\r\n".join((
-            "From: %s" % mail_config["login"],
-            "To: %s" % email,
-            "Subject: Бронь в театре на Оборонной",
-            "",
-            mail_info
-        )).encode()
-        server.sendmail(mail_config["login"], email, BODY)
+        server.sendmail(mail_config["login"], email, message.as_string())
 
 def formatStrFromDatetime(date_: date, time_: time):
     """

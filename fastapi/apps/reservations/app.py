@@ -76,7 +76,7 @@ def post_reservation(
             for reserved_slot in row.reservations_slots:
                 for incoming_slot in item.slots:
                     print(incoming_slot, reserved_slot.id_slot)
-                    if reserved_slot.id_slot == incoming_slot:
+                    if reserved_slot.id_slot == incoming_slot.id:
                         response.status_code = status.HTTP_409_CONFLICT
                         return {"detail": 
                             "Место на сеанс уже забронировано. Пожалуйста, обновите страницу"

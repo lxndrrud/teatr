@@ -5,7 +5,7 @@ export default function PlayList({plays}) {
     return (
     <div className={styles.posts}>
         {plays && plays.map(play => (
-            <PlayItem play={play} key={play.id}></PlayItem>
+            <PlayItem play={play} key={play.id} />
         ))}
     </div>
     )

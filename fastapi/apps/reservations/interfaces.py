@@ -3,11 +3,13 @@ from pydantic import BaseModel, EmailStr
 from datetime import date, time
 
 
-class SlotInfoModel(BaseModel):
+class SlotPostModel(BaseModel):
     id: int
     price: float
     seat_number: int
     row_number: int
+
+class SlotInfoModel(SlotPostModel):
     auditorium: str
 
 class ReservationBaseModel(BaseModel):
@@ -25,7 +27,7 @@ class ReservationUpdateModel(ReservationBaseModel):
 class ReservationEmailModel(BaseModel):
     email: EmailStr
     id_session: int
-    slots: List[int]
+    slots: List[SlotPostModel]
 
     class Config:
             orm_mode = True

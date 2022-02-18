@@ -3,7 +3,9 @@ import {
     POST_RESERVATION,
     SET_RESERVATION, 
     SHOW_CONFIRMATION_FIELD, 
-    HIDE_CONFIRMATION_FIELD 
+    HIDE_CONFIRMATION_FIELD,
+    ADD_SLOT,
+    DELETE_SLOT
 } from "../types"
 
 export const postReservation = ({ email, id_session, slots }) => async dispatch => {
@@ -24,7 +26,11 @@ export const postReservation = ({ email, id_session, slots }) => async dispatch 
         ? 
             dispatch({
                 type: POST_RESERVATION,
-                payload: body
+                payload: {
+                    id: payload.id,
+                    code: payload.code,
+                    id_session: payload.id_session
+                }
             })
         :
             dispatch({
@@ -38,7 +44,12 @@ export const postReservation = ({ email, id_session, slots }) => async dispatch 
 export const setReservation = (payload) => async dispatch => {
     dispatch({
         type: SET_RESERVATION,
-        payload: payload
+        payload: {
+            id: payload.id,
+            code: payload.code,
+            confirmation_code: payload.confirmation_code,
+            id_session: payload.id_session
+        }
     })
 }
 
@@ -53,5 +64,30 @@ export const hideConfirmationField = () => async dispatch => {
     dispatch({
         type: HIDE_CONFIRMATION_FIELD,
         payload: false
+    })
+}
+
+export const addSlot = (payload) => async dispatch => {
+    dispatch({
+        type: ADD_SLOT,
+        payload: {
+            seat_number: payload.seat_number,
+            row_number: payload.row_number,
+            price: payload.price,
+            id: payload.id
+        }
+    })
+}
+
+
+export const deleteSlot = (payload) => async dispatch => {
+    dispatch({
+        type: DELETE_SLOT,
+        payload: {
+            seat_number: payload.seat_number,
+            row_number: payload.row_number,
+            price: payload.price,
+            id: payload.id
+        }
     })
 }
