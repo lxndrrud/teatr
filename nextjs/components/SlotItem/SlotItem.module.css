@@ -21,3 +21,17 @@
 .freeContainer:hover {
     background-color: #99d98c;
 }
+
+.clickedContainer {
+    user-select: none;
+    font-size: 20px;
+    font-weight: normal;
+    background-color: #99d98c;
+    padding: 10px;
+    text-align: center;
+    margin: 3px 3px;
+}
+
+.clickedContainer:hover {
+    background-color: #E63946;
+}

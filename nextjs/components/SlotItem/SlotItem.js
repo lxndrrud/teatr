@@ -23,7 +23,8 @@ const SlotItem = ({ slotObject }) => {
     const dispatch = useDispatch()
 
     const slotClick = () => { 
-        if (slotObject.is_reserved) {
+        if (!slotObject.is_reserved) {
+            console.log('kek ')
             if (isClicked) dispatch(deleteSlot({
                 id: slotObject.id,
                 seat_number: slotObject.seat_number,
