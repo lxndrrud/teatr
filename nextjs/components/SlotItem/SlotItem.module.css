@@ -1,15 +1,13 @@
 .reservedContainer {
-    user-select: none;
     font-size: 20px;
     font-weight: normal;
-    background-color: #ffb703;
+    background-color: #E63946;
     padding: 10px;
     text-align: center;
     margin: 3px 3px;
 }
 
 .freeContainer {
-    user-select: none;
     font-size: 20px;
     font-weight: normal;
     background-color: #A8DADC;
@@ -19,19 +17,16 @@
 }
 
 .freeContainer:hover {
-    background-color: #99d98c;
+    background-color: #1D3557;
+    color: #F1FAEE;
 }
 
+
 .clickedContainer {
-    user-select: none;
     font-size: 20px;
     font-weight: normal;
     background-color: #99d98c;
     padding: 10px;
     text-align: center;
     margin: 3px 3px;
-}
-
-.clickedContainer:hover {
-    background-color: #E63946;
 }

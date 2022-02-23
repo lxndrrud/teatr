@@ -32,6 +32,7 @@ class Auditorium(Base):
     __tablename__ = 'auditoriums'
 
     id = Column(Integer, primary_key=True, index=True)
+    max_user_reservations = Column(Integer, nullable=False)
     title = Column(String(100), nullable=False)
 
 class Row(Base):

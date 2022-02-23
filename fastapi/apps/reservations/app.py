@@ -63,18 +63,15 @@ def post_reservation(
     item: ReservationEmailModel,
     db: DBSession = Depends(get_db)):
     try:
-        print(item)
         # Session lock check
         session_query = db.query(Session).filter(Session.id == item.id_session).first()
-        print('1')
         if session_query.is_locked == True:
             response.status_code = status.HTTP_403_FORBIDDEN
-            return {"detail": "Бронь на сеанс закрыты!"}
+            return {"detail": "Бронь на сеанс закрытаs!"}
         # Existing slot reservation check
         reservations_query = db.query(Reservation) \
             .filter(Reservation.id_session == session_query.id) \
             .all()
-        print('2')
         for row in reservations_query:
             for reserved_slot in row.reservations_slots:
                 for incoming_slot in item.slots:
@@ -84,9 +81,12 @@ def post_reservation(
                         return {"detail": 
                             "Место на сеанс уже забронировано. Пожалуйста, обновите страницу"
                         }
+        # Max reservations slots check
+        if len(item.slots) > session_query.price_policy.slots[0].row.auditorium.max_user_reservations:
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return {"detail": "Превышено максимальное количество мест для брони для выбранного зала!"}
         # Existing record row check
         record_query = db.query(Record).filter(Record.email == item.email).first()
-        print('3')
         _record_id = 0
         if record_query:
             _record_id = record_query.id

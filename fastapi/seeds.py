@@ -80,7 +80,8 @@ def auditoriums_seed(db: PostgresSession) -> None:
                 db.delete(i)
         print('Inserting test rows...')
         new_row = Auditorium(
-           title='Название зала'
+           title='Название зала',
+           max_user_reservations=5
         )
         db.add(new_row)
         db.commit()

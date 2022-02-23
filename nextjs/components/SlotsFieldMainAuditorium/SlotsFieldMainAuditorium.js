@@ -4,7 +4,8 @@ import styles from "./SlotsFieldMainAuditorium.module.css"
 
 const SlotsFieldMainAuditorium = ({ rows }) => {
     return (
-        <div className={styles.container}>  
+        <div className={styles.container}> 
+            <p className="font-bold text-lg mb-5">Главный зал</p> 
             <span className={styles.scene}>Сцена</span>
             <table className={styles.tableContainer} rules="rows">
                 <tbody>
