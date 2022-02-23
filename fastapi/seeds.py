@@ -118,11 +118,12 @@ def seats_seed(db: PostgresSession) -> None:
             for i in query:
                 db.delete(i)
         print('Inserting test rows...')
-        new_row = Seat(
-            number=1,
-            id_row=1
-        )
-        db.add(new_row)
+        for i in range(1, 17):    
+            new_row = Seat(
+                number=i,
+                id_row=1
+            )
+            db.add(new_row)
         db.commit()
         print('Committed Seat seeds!')
     except:
@@ -157,12 +158,13 @@ def slots_seed(db: PostgresSession) -> None:
             for i in query:
                 db.delete(i)
         print('Inserting test rows...')
-        new_row = Slot(
-            id_price_policy=1,
-            id_seat=1,
-            price=200
-        )
-        db.add(new_row)
+        for i in range(1, 17):
+            new_row = Slot(
+                id_price_policy=1,
+                id_seat=i,
+                price=200
+            )
+            db.add(new_row)
         db.commit()
         print('Committed Slot seeds!')
     except:

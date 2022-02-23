@@ -5,15 +5,23 @@ import CustomButton from '../CustomButton/CustomButton'
 import SlotsFieldMainAuditorium from "../SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
 import React, { useEffect } from 'react'
 import { useState } from 'react'
+import store  from "../../store/store"
+
+const getSlots = () => {
+    return store.getState().reservation.slots
+}
 
 const ReservationPostForm = ({ session }) => {
     const dispatch = useDispatch()
     let errorReservation = useSelector(state => state.reservation.error)
 
     let [email, setEmail] = useState('')
+    /*
     let [slotsList, setSlotsList] = useState([
         {row_number: 1, seat_number: 1, price: 200, id: 1}
     ])
+    */
+
     let [emailErrorMessage, setEmailErrorMessage] = useState()
 
     const syncEmail = (e) => {
@@ -30,6 +38,7 @@ const ReservationPostForm = ({ session }) => {
     }, [errorReservation])
 
     const postEmailReservation = (e) => {
+        console.log(getSlots())
         e.preventDefault()
 
         if (email === '') {
@@ -41,7 +50,7 @@ const ReservationPostForm = ({ session }) => {
         dispatch(postReservation({
             email: email, 
             id_session: session.id,
-            slots: slotsList
+            slots: getSlots()
         }))
 
         if (errorReservation === null) dispatch(showConfirmationField())

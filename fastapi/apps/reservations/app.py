@@ -63,8 +63,10 @@ def post_reservation(
     item: ReservationEmailModel,
     db: DBSession = Depends(get_db)):
     try:
+        print(item)
         # Session lock check
         session_query = db.query(Session).filter(Session.id == item.id_session).first()
+        print('1')
         if session_query.is_locked == True:
             response.status_code = status.HTTP_403_FORBIDDEN
             return {"detail": "Бронь на сеанс закрыты!"}
@@ -72,6 +74,7 @@ def post_reservation(
         reservations_query = db.query(Reservation) \
             .filter(Reservation.id_session == session_query.id) \
             .all()
+        print('2')
         for row in reservations_query:
             for reserved_slot in row.reservations_slots:
                 for incoming_slot in item.slots:
@@ -83,6 +86,7 @@ def post_reservation(
                         }
         # Existing record row check
         record_query = db.query(Record).filter(Record.email == item.email).first()
+        print('3')
         _record_id = 0
         if record_query:
             _record_id = record_query.id
@@ -108,7 +112,7 @@ def post_reservation(
 
         for slot in item.slots:
             new_reservations_slots = ReservationsSlots(
-                id_slot=slot,
+                id_slot=slot.id,
                 id_reservation=new_reservation.id
             )
             db.add(new_reservations_slots)
@@ -127,7 +131,7 @@ def post_reservation(
             code=new_reservation.code
         )
     except:
-        response.status_code = status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     
 
 @router.delete('/{item_id}')

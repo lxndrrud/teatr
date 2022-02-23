@@ -42,8 +42,10 @@ const reservationReducer = (state = defaultState, action) => {
         case ERROR_RESERVATION:
             return {...state, error: action.payload }
         case ADD_SLOT:
+            console.log(state, action.payload)
             return {...state, slots: [...state.slots, action.payload ]}
         case DELETE_SLOT:
+            console.log(state, action.payload)
             return {...state, slots: state.slots.filter(slot => slot.id != action.payload.id)}
         default:
             return state

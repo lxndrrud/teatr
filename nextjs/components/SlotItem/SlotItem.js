@@ -6,18 +6,17 @@ import styles from './SlotItem.module.css'
 
 const SlotItem = ({ slotObject }) => { 
     let [isClicked, setIsClicked] = useState(false)
-    let [styleClass, setStyleClass] = useState(slotObject.is_reserved 
-        ? `rounded-full ${styles.reservedContainer}`
+    const slotStyle = () => {
+        return slotObject.is_reserved 
+        ? `rounded ${styles.reservedContainer}`
         : (isClicked 
-            ? `rounded-full ${styles.clickedContainer}` 
-            : `rounded-full ${styles.freeContainer}`))
+            ? `rounded ${styles.clickedContainer}` 
+            : `rounded ${styles.freeContainer}`)
+    }
+    let [styleClass, setStyleClass] = useState(slotStyle())
 
     useEffect(() => {
-        setStyleClass(slotObject.is_reserved 
-            ? `rounded-full ${styles.reservedContainer}`
-            : (isClicked 
-                ? `rounded-full ${styles.clickedContainer}` 
-                : `rounded-full ${styles.freeContainer}`))
+        setStyleClass(slotStyle())
     }, [isClicked, slotObject.is_reserved])
 
     const dispatch = useDispatch()
