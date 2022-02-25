@@ -1,5 +1,4 @@
 from datetime import datetime
-from ntpath import join
 from fastapi import APIRouter, Depends, Response, Path, UploadFile
 from database import get_db
 from sqlalchemy.orm import Session as DBSession
@@ -10,7 +9,6 @@ from .utils import formatDate, formatTime
 from models import PricePolicy, ReservationsSlots, Row, Seat, Session, Slot
 import os, sys
 from pathlib import Path as sys_path
-from datetime import datetime
 
 
 sys.path.append(
@@ -200,6 +198,7 @@ def get_slots_for_sessions(
             .filter(Slot.id_price_policy == session_query.price_policy.id) \
             .join(Seat, Seat.id_row == Row.id) \
             .join(Slot, Slot.id_seat == Seat.id) \
+            .distinct() \
             .all()
         slots_query = db \
             .query(Slot.id, Row.id.label('id_row'), Seat.number.label('seat_number'), 
@@ -218,10 +217,31 @@ def get_slots_for_sessions(
             .all()
         result = []
         for row in rows_query:
-            row_reserved_slots = reserved_slots_query.filter(lambda x: x.id_row == row.id)
-            row_slots = slots_query.filter(lambda x: x.id_row == row.id)
+            row_slots = list(filter(lambda x: x.id_row == row.id, slots_query))
+            slots = []
+            for slot in row_slots:
+                if slot.id in list(map(lambda x: x.id, reserved_slots_query)):
+                    slots.append({
+                        'id': slot.id,
+                        'seat_number': slot.seat_number,
+                        'row_number': slot.row_number,
+                        'price': slot.price,
+                        'is_reserved': True
+                    })
+                else:
+                    slots.append({
+                        'id': slot.id,
+                        'seat_number': slot.seat_number,
+                        'row_number': slot.row_number,
+                        'price': slot.price,
+                        'is_reserved': False
+                    })
+            result.append({
+                'number': row.number,
+                'slots': slots
+            })
         response.status_code = status.HTTP_200_OK
-        return slots_query
+        return result
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
     

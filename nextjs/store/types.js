@@ -6,6 +6,7 @@ export const FETCH_PLAYS = 'FETCH_PLAYS'
 export const FETCH_SESSION = 'FETCH_SESSION'
 export const FETCH_SESSIONS = 'FETCH_SESSIONS'
 export const FETCH_SESSIONS_BY_PLAY = 'FETCH_SESSIONS_BY_PLAY'
+export const FETCH_SLOTS = 'FETCH_SLOTS'
 
 // Reservation Reducer
 export const POST_RESERVATION = 'POST_RESERVATION'

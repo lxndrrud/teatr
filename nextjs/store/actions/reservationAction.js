@@ -21,21 +21,20 @@ export const postReservation = ({ email, id_session, slots }) => async dispatch 
         body: JSON.stringify(body)
     })
     body = await resp.json()
-    console.log(resp.status, resp.statusText, body)
     resp.status == 201 
         ? 
             dispatch({
                 type: POST_RESERVATION,
                 payload: {
-                    id: payload.id,
-                    code: payload.code,
-                    id_session: payload.id_session
+                    id: body.id,
+                    code: body.code,
+                    id_session: body.id_session
                 }
             })
         :
             dispatch({
                 type: ERROR_RESERVATION,
-                payload: body.detail
+                payload: body.message
             })
 
 }

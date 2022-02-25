@@ -16,11 +16,6 @@ const ReservationPostForm = ({ session }) => {
     let errorReservation = useSelector(state => state.reservation.error)
 
     let [email, setEmail] = useState('')
-    /*
-    let [slotsList, setSlotsList] = useState([
-        {row_number: 1, seat_number: 1, price: 200, id: 1}
-    ])
-    */
 
     let [emailErrorMessage, setEmailErrorMessage] = useState()
 
@@ -38,7 +33,6 @@ const ReservationPostForm = ({ session }) => {
     }, [errorReservation])
 
     const postEmailReservation = (e) => {
-        console.log(getSlots())
         e.preventDefault()
 
         if (email === '') {
