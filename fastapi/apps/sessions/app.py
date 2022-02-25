@@ -1,4 +1,5 @@
 from datetime import datetime
+from ntpath import join
 from fastapi import APIRouter, Depends, Response, Path, UploadFile
 from database import get_db
 from sqlalchemy.orm import Session as DBSession
@@ -6,7 +7,7 @@ from sqlalchemy import and_
 from starlette import status
 from .interfaces import SessionModel, SessionBaseModel
 from .utils import formatDate, formatTime
-from models import Session
+from models import PricePolicy, ReservationsSlots, Row, Seat, Session, Slot
 import os, sys
 from pathlib import Path as sys_path
 from datetime import datetime
@@ -184,6 +185,48 @@ async def post_sessions_csv(
     for row in plays_array:
         ids_array.append(row.id)
     return ids_array
+
+
+
+@router.get('/{item_id}/slots')
+def get_slots_for_sessions(
+    response: Response, 
+    item_id: int =  Path(...), 
+    db: DBSession = Depends(get_db)):
+    session_query = db.query(Session).filter(Session.id == item_id).first()
+    if session_query:
+        rows_query = db \
+            .query(Row.id, Row.number) \
+            .filter(Slot.id_price_policy == session_query.price_policy.id) \
+            .join(Seat, Seat.id_row == Row.id) \
+            .join(Slot, Slot.id_seat == Seat.id) \
+            .all()
+        slots_query = db \
+            .query(Slot.id, Row.id.label('id_row'), Seat.number.label('seat_number'), 
+                Row.number.label('row_number'), Slot.price) \
+            .filter(Slot.id_price_policy == session_query.price_policy.id) \
+            .join(Seat, Seat.id == Slot.id_seat) \
+            .join(Row,  Row.id == Seat.id_row) \
+            .all()
+        reserved_slots_query = db \
+            .query(Slot.id, Row.id.label('id_row'), Seat.number.label('seat_number'), 
+                Row.number.label('row_number'), Slot.price) \
+            .filter(Slot.id_price_policy == session_query.price_policy.id) \
+            .join(Seat, Seat.id == Slot.id_seat) \
+            .join(Row,  Row.id == Seat.id_row) \
+            .join(ReservationsSlots, ReservationsSlots.id_slot == Slot.id) \
+            .all()
+        result = []
+        for row in rows_query:
+            row_reserved_slots = reserved_slots_query.filter(lambda x: x.id_row == row.id)
+            row_slots = slots_query.filter(lambda x: x.id_row == row.id)
+        response.status_code = status.HTTP_200_OK
+        return slots_query
+    else:
+        response.status_code = status.HTTP_404_NOT_FOUND
+    
+
+    
 
 
 
