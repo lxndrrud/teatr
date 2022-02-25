@@ -63,6 +63,7 @@ def post_reservation(
     item: ReservationEmailModel,
     db: DBSession = Depends(get_db)):
     try:
+        print(item)
         # Session lock check
         session_query = db.query(Session).filter(Session.id == item.id_session).first()
         if session_query.is_locked == True:

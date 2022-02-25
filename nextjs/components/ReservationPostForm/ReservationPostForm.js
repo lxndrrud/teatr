@@ -60,22 +60,22 @@ const ReservationPostForm = ({ session }) => {
         <>
             <SlotsFieldMainAuditorium rows={[ 
                 { number: 1, seats: [
-                    {is_reserved: false, row_number: 1, seat_number: 1, price: 200, id: 1}, 
-                    {is_reserved: false, row_number: 1, seat_number: 2, price: 200, id: 2}, 
-                    {is_reserved: false, row_number: 1, seat_number: 3, price: 200, id: 3}, 
-                    {is_reserved: false, row_number: 1, seat_number: 4, price: 200, id: 4}, 
-                    {is_reserved: false, row_number: 1, seat_number: 5, price: 200, id: 5}, 
-                    {is_reserved: false, row_number: 1, seat_number: 6, price: 200, id: 6}, 
-                    {is_reserved: false, row_number: 1, seat_number: 7, price: 200, id: 7}, 
-                    {is_reserved: false, row_number: 1, seat_number: 8, price: 200, id: 8}, 
-                    {is_reserved: true, row_number: 1, seat_number: 9, price: 200, id: 9}, 
-                    {is_reserved: false, row_number: 1, seat_number: 10, price: 200, id: 10}, 
-                    {is_reserved: false, row_number: 1, seat_number: 11, price: 200, id: 11}, 
-                    {is_reserved: false, row_number: 1, seat_number: 12, price: 200, id: 12}, 
-                    {is_reserved: true, row_number: 1, seat_number: 13, price: 200, id: 13}, 
-                    {is_reserved: false, row_number: 1, seat_number: 14, price: 200, id: 14}, 
-                    {is_reserved: false, row_number: 1, seat_number: 15, price: 200, id: 15}, 
-                    {is_reserved: false, row_number: 1, seat_number: 16, price: 200, id: 16}, 
+                    {is_reserved: false, row_number: 1, seat_number: 1, price: 200.0, id: 1}, 
+                    {is_reserved: false, row_number: 1, seat_number: 2, price: 200.0, id: 2}, 
+                    {is_reserved: false, row_number: 1, seat_number: 3, price: 200.0, id: 3}, 
+                    {is_reserved: false, row_number: 1, seat_number: 4, price: 200.0, id: 4}, 
+                    {is_reserved: false, row_number: 1, seat_number: 5, price: 200.0, id: 5}, 
+                    {is_reserved: false, row_number: 1, seat_number: 6, price: 200.0, id: 6}, 
+                    {is_reserved: false, row_number: 1, seat_number: 7, price: 200.0, id: 7}, 
+                    {is_reserved: false, row_number: 1, seat_number: 8, price: 200.0, id: 8}, 
+                    {is_reserved: true, row_number: 1, seat_number: 9, price: 200.0, id: 9}, 
+                    {is_reserved: false, row_number: 1, seat_number: 10, price: 200.0, id: 10}, 
+                    {is_reserved: false, row_number: 1, seat_number: 11, price: 200.0, id: 11}, 
+                    {is_reserved: false, row_number: 1, seat_number: 12, price: 200.0, id: 12}, 
+                    {is_reserved: true, row_number: 1, seat_number: 13, price: 200.0, id: 13}, 
+                    {is_reserved: false, row_number: 1, seat_number: 14, price: 200.0, id: 14}, 
+                    {is_reserved: false, row_number: 1, seat_number: 15, price: 200.0, id: 15}, 
+                    {is_reserved: false, row_number: 1, seat_number: 16, price: 200.0, id: 16}, 
                     ] 
                 }
             ]} />
