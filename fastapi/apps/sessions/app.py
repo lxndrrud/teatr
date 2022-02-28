@@ -238,7 +238,7 @@ def get_slots_for_sessions(
                     })
             result.append({
                 'number': row.number,
-                'slots': slots
+                'seats': slots
             })
         response.status_code = status.HTTP_200_OK
         return result

@@ -14,8 +14,13 @@ def plays_seed(db: PostgresSession) -> None:
                 db.delete(i)
         print('Inserting test rows...')
         new_row = Play(
-            title = "Название спектакля",
-            description = "Описание спектакля"
+            title = "Спектакль 1",
+            description = "Тестовый спектакль 1"
+        )
+        db.add(new_row)
+        new_row = Play(
+            title = "Спектакль 2",
+            description = "Тестовый спектакль 2"
         )
         db.add(new_row)
         db.commit()
@@ -36,6 +41,33 @@ def sessions_seed(db: PostgresSession) -> None:
         _datetime  = datetime.datetime(2022, 3, 15, hour=10, minute=30)
         new_row = Session(
             id_play = 1,
+            is_locked = False,
+            date = _datetime.date(),
+            time = _datetime.time(),
+            id_price_policy = 1
+        )
+        db.add(new_row)
+        _datetime  = datetime.datetime(2022, 3, 17, hour=10, minute=30)
+        new_row = Session(
+            id_play = 1,
+            is_locked = False,
+            date = _datetime.date(),
+            time = _datetime.time(),
+            id_price_policy = 1
+        )
+        db.add(new_row)
+        _datetime  = datetime.datetime(2022, 3, 15, hour=10, minute=30)
+        new_row = Session(
+            id_play = 2,
+            is_locked = False,
+            date = _datetime.date(),
+            time = _datetime.time(),
+            id_price_policy = 1
+        )
+        db.add(new_row)
+        _datetime  = datetime.datetime(2022, 3, 17, hour=10, minute=30)
+        new_row = Session(
+            id_play = 2,
             is_locked = False,
             date = _datetime.date(),
             time = _datetime.time(),
@@ -80,7 +112,7 @@ def auditoriums_seed(db: PostgresSession) -> None:
                 db.delete(i)
         print('Inserting test rows...')
         new_row = Auditorium(
-           title='Название зала',
+           title='Главный зал',
            max_user_reservations=5
         )
         db.add(new_row)
@@ -176,7 +208,11 @@ def slots_seed(db: PostgresSession) -> None:
 
 
 def run_seeds() -> None:
-    list_ = [auditoriums_seed, rows_seed, seats_seed, price_policies_seed, slots_seed, plays_seed, sessions_seed]
+    list_ = [
+        auditoriums_seed, rows_seed, seats_seed, 
+        price_policies_seed, slots_seed, plays_seed, 
+        sessions_seed
+    ]
     for f in list_:
         db = SessionLocal()
         f(db)

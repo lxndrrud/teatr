@@ -16,12 +16,7 @@ const defaultState = {
         time: '10:30:00',
         auditorium_title: ''
     }],
-    slots: [{
-        id: 0,
-        seat_number: 0,
-        row_number: 0,
-        price: 0.0
-    }],
+    slots: [],
     loading: false,
     error: null
 }

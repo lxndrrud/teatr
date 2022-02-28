@@ -1,4 +1,6 @@
 .buttonLink {
+    display: flex;
+    flex-wrap: nowrap;
     text-decoration: none;
     color: #F1FAEE;
     font-size: 22px;
@@ -7,6 +9,7 @@
     /* border: 3px solid #E63946; */
     padding: 7px;
     border-radius: 10px;
+    justify-content: center;
 }
 
 .buttonLink:hover {

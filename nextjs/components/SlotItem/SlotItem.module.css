@@ -1,19 +1,20 @@
-.reservedContainer {
+.slot {
     font-size: 20px;
     font-weight: normal;
-    background-color: #E63946;
-    padding: 10px;
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
     margin: 3px 3px;
+    text-align: center;
+    padding: 10px;
+}
+
+.reservedContainer {
+    background-color: #E63946;
 }
 
 .freeContainer {
-    font-size: 20px;
-    font-weight: normal;
     background-color: #A8DADC;
-    padding: 10px;
-    text-align: center;
-    margin: 3px 3px;
 }
 
 .freeContainer:hover {
@@ -21,12 +22,14 @@
     color: #F1FAEE;
 }
 
-
 .clickedContainer {
-    font-size: 20px;
-    font-weight: normal;
     background-color: #99d98c;
-    padding: 10px;
-    text-align: center;
-    margin: 3px 3px;
+}
+
+@media (max-width: 550px) {
+    .slot {
+        font-size: 20px;
+        padding: 5px;
+        margin: 1px 1px;
+    }
 }

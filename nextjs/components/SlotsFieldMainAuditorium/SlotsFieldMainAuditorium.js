@@ -9,8 +9,8 @@ const SlotsFieldMainAuditorium = ({ rows }) => {
             <span className={styles.scene}>Сцена</span>
             <table className={styles.tableContainer} rules="rows">
                 <tbody>
-                    {rows.map(row => (
-                        <tr key={row.number} >
+                    {rows && rows.map(row => (
+                        <tr key={row.number} className={styles.tableRow}>
                             <td className="text-base">Ряд #{row.number}</td>
                             {row.seats.map(slot => (
                                 <td key={slot.id}>

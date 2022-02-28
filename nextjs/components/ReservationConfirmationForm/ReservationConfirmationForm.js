@@ -2,6 +2,7 @@ import React from 'react'
 import { useRouter } from "next/router"
 import CustomInput from '../CustomInput/CustomInput'
 import CustomButton from '../CustomButton/CustomButton'
+import { hideConfirmationField } from "../../store/actions/reservationAction"
 import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 
@@ -30,15 +31,20 @@ const ReservationConfirmationForm = () => {
             }
         }
 
+        const success = () => {
+            dispatch(hideConfirmationField())
+            router.push('/')
+        }
+
         const postConfirmationRequest = async () => {
             // send request and redirect 
-            let body = {
+            const body = {
                 confirmation_code: confirmationCode,
                 code: reservation.code,
                 id_session: parseInt(reservation.id_session)
             }
-            let url = '/fastapi/reservations/confirm/' + reservation.id.toString()
-            let resp = await fetch(url, {
+            const url = '/fastapi/reservations/confirm/' + reservation.id.toString()
+            const resp = await fetch(url, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
@@ -46,7 +52,7 @@ const ReservationConfirmationForm = () => {
                 method: 'PUT', 
                 body: JSON.stringify(body)
             })
-            resp.status == 200 ? router.push('/') : errorConfirmation(resp.status)
+            resp.status == 200 ? success() : errorConfirmation(resp.status)
         }
         postConfirmationRequest()
     }
