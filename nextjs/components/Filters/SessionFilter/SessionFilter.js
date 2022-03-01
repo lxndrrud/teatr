@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useRouter } from "next/router"
 import { useDispatch, useSelector } from 'react-redux'
 import CustomButton from "../../CustomButton/CustomButton"
 import DateString from "../../DateString/DateString"
@@ -7,13 +6,12 @@ import { fetchFilteredSessions, fetchSessionFilterOptions } from "../../../store
 
 const SessionFilter = () => {
     const dispatch = useDispatch()
-    const router = useRouter()
     let [date, setDate] = useState('')
     let [auditoriumTitle, setAuditoriumTitle] = useState('')
     let [playTitle, setPlayTitle] = useState('')
     useEffect(() => {
-        dispatch(fetchSessionFilterOptions)
-    }, [router.isReady])
+        dispatch(fetchSessionFilterOptions())
+    }, [])
     const getFilteredSessions = (e) => {
         e.preventDefault()
 
@@ -41,7 +39,7 @@ const SessionFilter = () => {
                 <option>Дата</option>
                 {filterOptions.dates && filterOptions.dates.map(item => (
                   <option value={item.date}>
-                      <DateString date={item.date}/>
+                    {item.date}
                   </option>  
                 ))}
             </select>

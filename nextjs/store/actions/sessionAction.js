@@ -13,6 +13,7 @@ export const fetchSession = (sessionid) => async dispatch =>  {
 
 
 export const fetchSessions = () => async dispatch =>  {
+    console.log('kek')
     const response = await fetch('/fastapi/sessions')
     const json_ = await response.json()
     dispatch({

@@ -11,7 +11,7 @@ const defaultState = {
     },
     sessions: [{
         id: 0,
-        play_title: '',
+        play_title: 'Test',
         date: '2022-02-13',
         time: '10:30:00',
         auditorium_title: ''

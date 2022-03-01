@@ -40,7 +40,7 @@ def get_session_filter_options(db: DBSession = Depends(get_db)):
     return {
         "dates": dates_query, 
         "auditoriums": auditoriums_query, 
-        "play_titles": plays_query
+        "plays": plays_query
     }
 
 
