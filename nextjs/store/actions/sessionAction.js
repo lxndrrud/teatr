@@ -1,4 +1,4 @@
-import { FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_BY_PLAY, FETCH_SLOTS } from '../types'
+import { FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_BY_PLAY, FETCH_SESSION_FILTER_OPTIONS, FETCH_SLOTS } from '../types'
 
 
 
@@ -35,6 +35,38 @@ export const fetchSlotsBySession = (sessionid) => async dispatch => {
     const json_ = await resp.json()
     dispatch({
         type: FETCH_SLOTS,
+        payload: json_
+    })
+}
+
+export const fetchSessionFilterOptions = () => async dispatch => {
+    const resp = await fetch('/fastapi/sessions/filterSetup')
+    const json_ = await resp.json()
+
+    dispatch({
+        type: FETCH_SESSION_FILTER_OPTIONS,
+        payload: json_
+    })
+}
+
+
+export const fetchFilteredSessions = (date, auditoriumTitle, playTitle) => async dispatch => {
+    const resp = await fetch('/fastapi/sessions/filter?' + new URLSearchParams({
+            'date': date,
+            'auditorium_title': auditoriumTitle,
+            'play_title': playTitle
+        }), 
+        {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: 'GET',
+    })
+    const json_ = await resp.json()
+
+    dispatch({
+        type: FETCH_FILTERED_SESSIONS,
         payload: json_
     })
 }

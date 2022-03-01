@@ -1,12 +1,14 @@
-from datetime import datetime
+from datetime import datetime, date
 from fastapi import APIRouter, Depends, Response, Path, UploadFile
 from database import get_db
 from sqlalchemy.orm import Session as DBSession
 from sqlalchemy import and_
 from starlette import status
-from .interfaces import SessionModel, SessionBaseModel
+from typing import Optional
+from .interfaces import SessionModel, SessionBaseModel, SessionFilterQuery
 from .utils import formatDate, formatTime
-from models import PricePolicy, ReservationsSlots, Row, Seat, Session, Slot
+from .db_queries import get_sessions_query
+from models import Auditorium, PricePolicy, ReservationsSlots, Row, Seat, Session, Slot, Play
 import os, sys
 from pathlib import Path as sys_path
 
@@ -21,25 +23,45 @@ router = APIRouter(
 
 @router.get('/', status_code=status.HTTP_200_OK)
 def get_sessions(db: DBSession = Depends(get_db)):
-    query = db.query(Session) \
+    query = get_sessions_query(db)
+    return query
+
+@router.get('/filterSetup', status_code=status.HTTP_200_OK)
+def get_session_filter_options(db: DBSession = Depends(get_db)):
+    dates_query = db.query(Session.date).filter(Session.is_locked == False) \
+        .order_by(Session.date.asc()) \
+        .distinct().all()
+    auditoriums_query = db.query(Auditorium.title).all()
+    plays_query = db.query(Play.title) \
         .filter(Session.is_locked == False) \
-        .order_by(Session.date.asc(), Session.time.asc()) \
+        .join(Session, Session.id_play == Play.id) \
+        .distinct() \
         .all()
-    list_ = []
-    for row in query:
-        auditorium_title = row.price_policy.slots[0].seat.row.auditorium.title
-        new_row = SessionModel(
-            id=row.id,
-            is_locked=row.is_locked,
-            id_play=row.id_play,
-            id_price_policy=row.id_price_policy,
-            date=row.date,
-            time=row.time,
-            auditorium_title=auditorium_title,
-            play_title=row.play.title
-        )
-        list_.append(new_row)
-    return list_
+    return {
+        "dates": dates_query, 
+        "auditoriums": auditoriums_query, 
+        "play_titles": plays_query
+    }
+
+
+@router.get('/filter', status_code=status.HTTP_200_OK)
+def get_filtered_sessions(
+    query_date: Optional[date], 
+    query_auditorium_title: Optional[str],
+    query_play_title: Optional[str],
+    db: DBSession = Depends(get_db)):
+    FILTER = [Session.is_locked == False]
+    if query_date:
+        FILTER.append(Session.date == query_date)
+    if query_play_title:
+        FILTER.append(Play.title == query_play_title)
+    if query_auditorium_title: 
+        FILTER.append(Auditorium.title == query_auditorium_title)
+
+    sessions_query = get_sessions_query(db, FILTER)
+
+    return sessions_query  
+    
 
 @router.get('/{item_id}', response_model=SessionModel)
 def get_single(response: Response,
@@ -118,26 +140,11 @@ def get_sessions_by_play(
     response: Response,
     item_id: int = Path(...),
     db: DBSession = Depends(get_db)):
-    query = db.query(Session).filter(and_(Session.is_locked == False, Session.id_play == item_id)) \
-        .order_by(Session.date.desc(), Session.time.desc()).all()
-
+    FILTER = [Session.is_locked == False, Session.id_play == item_id]
+    query = get_sessions_query(db, FILTER)
     
     if query: 
-        list_ = []
-        for row in query:
-            auditorium_title = row.price_policy.slots[0].seat.row.auditorium.title
-            new_row = SessionModel(
-                id=row.id,
-                is_locked=row.is_locked,
-                id_play=row.id_play,
-                id_price_policy=row.id_price_policy,
-                date=row.date,
-                time=row.time,
-                auditorium_title=auditorium_title,
-                play_title=row.play.title
-            )
-            list_.append(new_row)
-        return list_
+        return query
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
 
@@ -246,7 +253,8 @@ def get_slots_for_sessions(
         response.status_code = status.HTTP_404_NOT_FOUND
     
 
-    
+
+
 
 
 

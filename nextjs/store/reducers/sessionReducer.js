@@ -1,4 +1,4 @@
-import { FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_BY_PLAY, FETCH_SLOTS } from "../types"
+import { FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_BY_PLAY, FETCH_SESSION_FILTER_OPTIONS, FETCH_SLOTS } from "../types"
 
 
 const defaultState = {
@@ -17,6 +17,7 @@ const defaultState = {
         auditorium_title: ''
     }],
     slots: [],
+    filterOptions: {},
     loading: false,
     error: null
 }
@@ -31,6 +32,10 @@ const sessionReducer = (state = defaultState, action) => {
             return {...state, sessions: action.payload }
         case FETCH_SLOTS:
             return {...state, slots: action.payload }
+        case FETCH_SESSION_FILTER_OPTIONS:
+            return {...state, filterOptions: action.payload }
+        case FETCH_FILTERED_SESSIONS:
+            return {...state, sessions: action.payload }
         default:
             return state
     }

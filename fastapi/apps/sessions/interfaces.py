@@ -19,6 +19,10 @@ class SessionModel(SessionBaseModel):
         orm_mode = True
 
 
+class SessionFilterQuery(BaseModel):
+    date: Optional[date]
+    auditorium_title: Optional[str]
+    play_title: Optional[str]
 
 
 
