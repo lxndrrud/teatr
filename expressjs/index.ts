@@ -1,5 +1,7 @@
 import express from 'express';
 import { Router } from 'express';
+import "reflect-metadata";
+
 // rest of the code remains same
 const app = express();
 const PORT = 8081;

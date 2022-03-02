@@ -1,0 +1,24 @@
+{
+   "type": "postgres",
+   "host": "postgres",
+   "port": 5432,
+   "username": "user",
+   "password": "password",
+   "database": "teatr",
+   "synchronize": true,
+   "logging": false,
+   "entities": [
+      "database/entity/**/*.ts"
+   ],
+   "migrations": [
+      "database/migration/**/*.ts"
+   ],
+   "subscribers": [
+      "database/subscriber/**/*.ts"
+   ],
+   "cli": {
+      "entitiesDir": "database/entity",
+      "migrationsDir": "database/migration",
+      "subscribersDir": "database/subscriber"
+   }
+}

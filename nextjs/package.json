@@ -8,12 +8,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@mui/icons-material": "^5.4.1",
-    "axios": "^0.25.0",
-    "next": "12.0.8",
+    "@mui/icons-material": "^5.4.4",
+    "axios": "^0.26.0",
+    "next": "^12.1.0",
     "next-redux-wrapper": "^7.0.5",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-redux": "^7.2.6",
     "redux": "^4.1.2",
     "redux-devtools-extension": "^2.13.9",
@@ -21,9 +21,9 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.2",
-    "eslint": "8.7.0",
-    "eslint-config-next": "12.0.8",
-    "postcss": "^8.4.6",
+    "eslint": "^8.10.0",
+    "eslint-config-next": "^12.1.0",
+    "postcss": "^8.4.7",
     "tailwindcss": "^3.0.23"
   }
 }
