@@ -19,24 +19,26 @@ const SessionFilter = () => {
     } 
 
     const syncDate = (e) => {
+        if (e.target.value === 'None') setDate(null)
         setDate(e.target.value)
     }
 
     const syncAuditoriumTitle = (e) => {
+        if (e.target.value === 'None') setAuditoriumTitle(null)
         setAuditoriumTitle(e.target.value)
     }
 
     const syncPlayTitle = (e) => {
+        if (e.target.value === 'None') setPlayTitle(null)
         setPlayTitle(e.target.value)
     }
 
     const filterOptions = useSelector(state => state.session.filterOptions)
-    console.log(filterOptions)
 
     return (
         <div>
             <select onChange={syncDate}>
-                <option>Дата</option>
+                <option value="None">Дата</option>
                 {filterOptions.dates && filterOptions.dates.map(item => (
                   <option value={item.date}>
                     {item.date}
@@ -44,7 +46,7 @@ const SessionFilter = () => {
                 ))}
             </select>
             <select onChange={syncAuditoriumTitle}>
-                <option>Название зала</option>
+                <option value="None">Название зала</option>
                 {filterOptions.auditoriums && filterOptions.auditoriums.map(item => (
                     <option value={item.title}>
                         {item.title}
@@ -52,7 +54,7 @@ const SessionFilter = () => {
                 ))}
             </select>
             <select onChange={syncPlayTitle}>
-                <option>Название спектакля</option>
+                <option value="None">Название спектакля</option>
 
                 {filterOptions.plays && filterOptions.plays.map(item => (
                     <option value={item.title}>
