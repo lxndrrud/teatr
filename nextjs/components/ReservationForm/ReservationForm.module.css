@@ -1,0 +1,32 @@
+.postForm {
+    margin-top: 2%;
+}
+
+.playInfo {
+    margin: 1% 0px;
+    font-size: 26px;
+    /* font-weight: bold; */
+}
+
+.infoCard {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffb703;
+    max-width: 600px;
+    min-width: 100%;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.infoCardTitle {
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+}
+
+@media (max-width: 550px) {
+    .infoCard {
+        justify-content: center;
+        align-items: center;
+    }
+}

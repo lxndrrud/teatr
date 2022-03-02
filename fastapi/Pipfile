@@ -13,9 +13,9 @@ python-multipart = "*"
 email-validator = "*"
 pytest = "*"
 requests = "*"
+apscheduler = "*"
 
 [dev-packages]
-
 
 [requires]
 python_version = "3.9"

@@ -1,0 +1,35 @@
+.slot {
+    font-size: 20px;
+    font-weight: normal;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    margin: 3px 3px;
+    text-align: center;
+    padding: 10px;
+}
+
+.reservedContainer {
+    background-color: #E63946;
+}
+
+.freeContainer {
+    background-color: #A8DADC;
+}
+
+.freeContainer:hover {
+    background-color: #1D3557;
+    color: #F1FAEE;
+}
+
+.clickedContainer {
+    background-color: #99d98c;
+}
+
+@media (max-width: 550px) {
+    .slot {
+        font-size: 20px;
+        padding: 5px;
+        margin: 1px 1px;
+    }
+}

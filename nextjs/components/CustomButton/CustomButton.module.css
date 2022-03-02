@@ -1,0 +1,19 @@
+.customButton{
+    display: flex;
+    flex-wrap: nowrap;
+    text-decoration: none;
+    color: #F1FAEE;
+    font-size: 22px;
+    font-weight: bold;
+    border: 3px solid #1D3557;
+    background-color: #1D3557;
+    padding: 10px;
+    margin: 5px 5px;
+    /* margin-bottom: 15px; */
+    border-radius: 10px;
+}
+
+.customButton:hover {
+    border: 3px solid #457B9D;
+    background-color: #457B9D;
+}

@@ -25,3 +25,11 @@ COPY ./ /usr/src/app/
 RUN chown -R worker:worker /usr/src/app
 
 CMD ["uvicorn", "main:app", "--reload", "--host", "fastapi", "--port", "8000"]
+
+#RUN ["alembic", "downgrade", "-1"]
+
+#RUN ["alembic", "upgrade", "head"]
+
+#RUN ["python", "seeds.py"]
+
+# "--proxy-headers",  "--root-path", "/fastapi/", 

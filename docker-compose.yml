@@ -1,41 +1,17 @@
 version: '3'
 services:
-  fastapi:
-    build: 
-      context: ./fastapi
-      dockerfile: Dockerfile.dev
-    container_name: fastapi
-    volumes:
-      - ./fastapi:/usr/src/app
-    ports:
-      - 8000:8000
-    depends_on:
-      - postgres
-    networks: 
-      - custom_network
-
-  nextjs:
-    build: 
-      context: ./nextjs
-      dockerfile: Dockerfile
-    container_name: nextjs
-    volumes:
-      - ./nextjs:/usr/src/app
-    ports:
-      - 3000:3000
-    networks: 
-      - custom_network
-
   postgres:
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
     container_name: postgres
-    image: postgres:14.1-alpine
     restart: always
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: teatr
     networks: 
-      - custom_network
+      - customnetwork
     ports:
       - 5432:5432
 
@@ -44,9 +20,61 @@ services:
     restart: always
     ports:
       - 8080:8080
+    depends_on:
+      - postgres
     networks: 
-      - custom_network
+      - customnetwork
+
+
+  fastapi:
+    build: 
+      context: ./fastapi
+      dockerfile: Dockerfile.dev
+    container_name: fastapi
+    depends_on:
+      - postgres
+    volumes:
+      - ./fastapi:/usr/src/app
+    ports:
+      - 8000:8000
+    
+    networks: 
+      - customnetwork
+
+  nextjs:
+      build: 
+        context: ./nextjs
+        dockerfile: Dockerfile
+      container_name: nextjs
+      volumes:
+        - ./nextjs:/usr/src/app
+      ports:
+        - 3000:3000
+      networks: 
+        - customnetwork
+
+  reverse-proxy:
+    image: nginx:1.20.0
+    container_name: nginx
+    restart: unless-stopped
+    depends_on:
+      - fastapi
+    ports:
+        - '80:80'
+    links:
+        - fastapi
+        - postgres
+        - adminer
+    networks:
+        - customnetwork
+    volumes:
+        - './fastapi/storage:/var/www/back-storage'
+        - './nextjs/storage:/var/www/front-storage'
+        - './nginx:/var/log/nginx'
+        - './nginx/conf.d:/etc/nginx/conf.d'
+
+
 
 networks:
-  custom_network:
+  customnetwork:
     external: False

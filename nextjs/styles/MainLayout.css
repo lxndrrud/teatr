@@ -1,0 +1,9 @@
+export default function Repertoire() {
+    return (
+    <>
+        <MainLayout>
+            <h1>Репертуар</h1>
+        </MainLayout>
+    </>
+    )
+}

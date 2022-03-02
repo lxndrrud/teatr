@@ -1,6 +1,6 @@
 from database import SessionLocal
 from sqlalchemy.orm import Session as PostgresSession
-from models import Auditorium, Play, Session, Seat, Reservation, Record
+from models import Auditorium, Play, PricePolicy, Row, Session, Seat, Reservation, Record, Slot
 import datetime
 
 
@@ -14,8 +14,13 @@ def plays_seed(db: PostgresSession) -> None:
                 db.delete(i)
         print('Inserting test rows...')
         new_row = Play(
-            title = "Test title",
-            description = "Test desc"
+            title = "Спектакль 1",
+            description = "Тестовый спектакль 1"
+        )
+        db.add(new_row)
+        new_row = Play(
+            title = "Спектакль 2",
+            description = "Тестовый спектакль 2"
         )
         db.add(new_row)
         db.commit()
@@ -33,9 +38,40 @@ def sessions_seed(db: PostgresSession) -> None:
             for i in query:
                 db.delete(i)
         print('Inserting test rows...')
+        _datetime  = datetime.datetime(2022, 3, 15, hour=10, minute=30)
         new_row = Session(
             id_play = 1,
-            datetime = datetime.datetime(2022, 3, 15, hour=10, minute=30),
+            is_locked = False,
+            date = _datetime.date(),
+            time = _datetime.time(),
+            id_price_policy = 1
+        )
+        db.add(new_row)
+        _datetime  = datetime.datetime(2022, 3, 17, hour=10, minute=30)
+        new_row = Session(
+            id_play = 1,
+            is_locked = False,
+            date = _datetime.date(),
+            time = _datetime.time(),
+            id_price_policy = 1
+        )
+        db.add(new_row)
+        _datetime  = datetime.datetime(2022, 3, 15, hour=10, minute=30)
+        new_row = Session(
+            id_play = 2,
+            is_locked = False,
+            date = _datetime.date(),
+            time = _datetime.time(),
+            id_price_policy = 1
+        )
+        db.add(new_row)
+        _datetime  = datetime.datetime(2022, 3, 17, hour=10, minute=30)
+        new_row = Session(
+            id_play = 2,
+            is_locked = False,
+            date = _datetime.date(),
+            time = _datetime.time(),
+            id_price_policy = 1
         )
         db.add(new_row)
         db.commit()
@@ -55,9 +91,9 @@ def records_seed(db: PostgresSession) -> None:
         print('Inserting test rows...')
         new_row = Record(
             email='test@mail.ru',
-            firstname='Test',
-            middlename='Test',
-            lastname='Test',
+            firstname='Тест',
+            middlename='Тестович',
+            lastname='Тестенко'
         )
         db.add(new_row)
         db.commit()
@@ -76,7 +112,8 @@ def auditoriums_seed(db: PostgresSession) -> None:
                 db.delete(i)
         print('Inserting test rows...')
         new_row = Auditorium(
-           title='Тестовый зал'
+           title='Главный зал',
+           max_user_reservations=5
         )
         db.add(new_row)
         db.commit()
@@ -84,6 +121,26 @@ def auditoriums_seed(db: PostgresSession) -> None:
     except:
         db.rollback()
         print('Auditorium seed failed!')
+
+def rows_seed(db: PostgresSession) -> None:
+    try:
+        print('Running Row seeds...')
+        query = db.query(Row).all()
+        if query != []:
+            print('Deleting Row rows...')
+            for i in query:
+                db.delete(i)
+        print('Inserting test rows...')
+        new_row = Row(
+            number=1,
+            id_auditorium=1
+        )
+        db.add(new_row)
+        db.commit()
+        print('Committed Row seeds!')
+    except:
+        db.rollback()
+        print('Row seed failed!')
 
 def seats_seed(db: PostgresSession) -> None:
     try:
@@ -94,23 +151,68 @@ def seats_seed(db: PostgresSession) -> None:
             for i in query:
                 db.delete(i)
         print('Inserting test rows...')
-        new_row = Seat(
-            number_seat=1,
-            number_row=1,
-            id_auditorium=1
-        )
-        db.add(new_row)
+        for i in range(1, 17):    
+            new_row = Seat(
+                number=i,
+                id_row=1
+            )
+            db.add(new_row)
         db.commit()
         print('Committed Seat seeds!')
     except:
         db.rollback()
         print('Seat seed failed!')
 
+def price_policies_seed(db: PostgresSession) -> None:
+    try:
+        print('Running PricePolicy seeds...')
+        query = db.query(PricePolicy).all()
+        if query != []:
+            print('Deleting PricePolicy rows...')
+            for i in query:
+                db.delete(i)
+        print('Inserting test rows...')
+        new_row = PricePolicy(
+            title='Тестовая ценовая политика'
+        )
+        db.add(new_row)
+        db.commit()
+        print('Committed PricePolicy seeds!')
+    except:
+        db.rollback()
+        print('PricePolicy seed failed!')
+
+def slots_seed(db: PostgresSession) -> None:
+    try:
+        print('Running Slot seeds...')
+        query = db.query(Slot).all()
+        if query != []:
+            print('Deleting Slot rows...')
+            for i in query:
+                db.delete(i)
+        print('Inserting test rows...')
+        for i in range(1, 17):
+            new_row = Slot(
+                id_price_policy=1,
+                id_seat=i,
+                price=200
+            )
+            db.add(new_row)
+        db.commit()
+        print('Committed Slot seeds!')
+    except:
+        db.rollback()
+        print('Slot seed failed!')
+
         
 
 
 def run_seeds() -> None:
-    list_ = [plays_seed, sessions_seed, records_seed, auditoriums_seed, seats_seed]
+    list_ = [
+        auditoriums_seed, rows_seed, seats_seed, 
+        price_policies_seed, slots_seed, plays_seed, 
+        sessions_seed
+    ]
     for f in list_:
         db = SessionLocal()
         f(db)
