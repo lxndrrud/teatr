@@ -25,21 +25,33 @@ services:
     networks: 
       - customnetwork
 
-
-  fastapi:
+  expressjs:
     build: 
-      context: ./fastapi
+      context: ./expressjs
       dockerfile: Dockerfile.dev
-    container_name: fastapi
+    container_name: expressjs
     depends_on:
       - postgres
     volumes:
-      - ./fastapi:/usr/src/app
+      - ./expressjs:/usr/src/app
     ports:
-      - 8000:8000
-    
+      - 8001:8001
     networks: 
       - customnetwork
+
+  #fastapi:
+    #build: 
+      #context: ./fastapi
+      #dockerfile: Dockerfile.dev
+    #container_name: fastapi
+    #depends_on:
+      #- postgres
+    #volumes:
+      #- ./fastapi:/usr/src/app
+    #ports:
+      #- 8000:8000
+    #networks: 
+      #- customnetwork
 
   nextjs:
       build: 
@@ -58,17 +70,20 @@ services:
     container_name: nginx
     restart: unless-stopped
     depends_on:
-      - fastapi
+      - expressjs
+      #- fastapi
     ports:
         - '80:80'
     links:
-        - fastapi
+        - expressjs
+        #- fastapi
         - postgres
         - adminer
     networks:
         - customnetwork
     volumes:
-        - './fastapi/storage:/var/www/back-storage'
+        - './expressjs/storage:/var/www/back-storage'
+        #- './fastapi/storage:/var/www/back-storage'
         - './nextjs/storage:/var/www/front-storage'
         - './nginx:/var/log/nginx'
         - './nginx/conf.d:/etc/nginx/conf.d'
