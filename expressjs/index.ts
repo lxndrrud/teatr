@@ -1,17 +1,18 @@
 import express from 'express';
+import { CronJob } from 'cron';
+import { processTime } from './cron/cron';
 import { Router, Request, Response } from 'express';
 import { playsRouter } from './routes/plays';
-/*
-import "reflect-metadata";
-import { createConnection } from 'typeorm';
-import  { Record } from "./database/entity/Record"
-*/
+import { sessionsRouter } from './routes/sessions';
 
-// rest of the code remains same
 const app = express();
 const PORT = 8081;
 
 const prefixRouter = Router();
+
+prefixRouter.use('/plays', playsRouter)
+prefixRouter.use('/sessions', sessionsRouter)
+
 
 app.use('/expressjs', prefixRouter);
 
@@ -19,19 +20,9 @@ prefixRouter.get('/', (req: Request, res: Response) => res.send({
     "message": 'Express + TypeScript Server'
 }));
 
-prefixRouter.use('/plays', playsRouter)
+const cronProcess = new CronJob('* * * * *', processTime)
 
-/*prefixRouter.get('/testOrm', async  (req: Request, res: Response) => {
-    const conn = await createConnection()
-    const newRecord = new Record()
-    newRecord.email = "Timber";
-    newRecord.firstname = "Saw";
-    await conn.manager.save(newRecord)
-    res.send({
-      message: 'created'
-    })
-})
-*/
 app.listen(PORT, () => {
     console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
+    cronProcess.start()
 });
