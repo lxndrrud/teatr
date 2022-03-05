@@ -1,14 +1,24 @@
 import { Router } from "express";
 import { getSessions, getSessionsByPlay, getSingleSession, 
-    postSession, updateSession, deleteSession } from "../controllers/sessions";
+    postSession, updateSession, deleteSession, getSlotsForSessions, getFilteredSessions, getSessionFilterOptions } from "../controllers/sessions";
  
 export const sessionsRouter = Router();
 
-sessionsRouter.get('/', getSessions)
-sessionsRouter.get('/:idSession', getSingleSession)
+
 sessionsRouter.get('/play/:idPlay', getSessionsByPlay)
-sessionsRouter.post('/', postSession)
-sessionsRouter.put('/:idSession', updateSession)
-sessionsRouter.delete('/:idSession', deleteSession)
+sessionsRouter.get('/:idSession/slots', getSlotsForSessions)
+
+sessionsRouter.get('/filter', getFilteredSessions)
+sessionsRouter.get('/filterSetup', getSessionFilterOptions)
+
+sessionsRouter.route('/:idSession')
+    .get(getSingleSession)
+    .put(updateSession)
+    .delete(deleteSession)
+
+sessionsRouter.route('/')
+    .get(getSessions)
+    .post(postSession)
+
 
 

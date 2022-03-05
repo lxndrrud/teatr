@@ -16,7 +16,7 @@ const processSessions = async () => {
     
     const idsArr = []
     for (let session of query) {
-        if (moment().isAfter(moment(session.timestamp)) 
+        if (moment().isSameOrAfter(moment(session.timestamp)) 
             || moment().add(15, 'minutes').isSameOrAfter(moment(session.timestamp))) {
                 idsArr.push(session.id)
         }
