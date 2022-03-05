@@ -7,8 +7,7 @@ const moment = require('moment')
 exports.up = function(knex) {
     return knex.schema.withSchema('public').createTable('reservations', tbl => {
         tbl.increments('id').primary()
-        tbl.string('date').notNullable().defaultTo(moment().format('DD.MM.YYYY').toString())
-        tbl.string('time').notNullable().defaultTo(moment().format('hh:mm').toString())
+        tbl.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
         tbl.boolean('is_paid').notNullable().defaultTo(false)
         tbl.boolean('is_confirmed').notNullable().defaultTo(false)
         tbl.string('code', 6).notNullable()

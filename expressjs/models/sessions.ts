@@ -8,11 +8,12 @@ export const getUnlockedSessions = () => {
     return KnexConnection('sessions as s')
         .select(
             's.id', 
-            's.is_locked', 's.date', 's.time',
+            's.is_locked', 's.timestamp',
             's.id_play', 's.id_price_policy', 
-            'a.title as auditorium_title', 'p.title as play_title'
+            'a.title as auditorium_title', 
+            'p.title as play_title'
         )
-        .join('plays as p', 'p.id', 's.id')
+        .join('plays as p', 'p.id', 's.id_play')
         .join('price_policies as pp', 'pp.id', 's.id_price_policy')
         .join('slots', 'slots.id_price_policy', 'pp.id')
         .join('seats', 'seats.id', 'slots.id_seat')
@@ -20,6 +21,7 @@ export const getUnlockedSessions = () => {
         .join('auditoriums as a', 'a.id', 'rows.id_auditorium')
         .where('s.is_locked', false)
         .distinct()
+        .orderBy('s.timestamp')
 }
 
 export const getSingleSession = (id: number) => {

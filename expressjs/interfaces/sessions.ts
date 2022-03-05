@@ -1,8 +1,7 @@
 export interface SessionBaseInterface {
     id_play: number
     id_price_policy: number
-    date: string
-    time: string
+    timestamp: string
     is_locked: boolean
 }
 
@@ -13,7 +12,7 @@ export interface SessionInterface extends SessionBaseInterface {
 }
 
 export interface SessionFilterQueryInterface {
-    date?: string
+    timestamp?: string
     auditorium_title?: string
     play_title?: string
 }

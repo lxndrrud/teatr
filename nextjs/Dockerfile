@@ -1,5 +1,8 @@
 FROM node:16.13.2-alpine
 
+RUN apk update && apk add tzdata
+ENV TZ=Europe/Moscow
+
 WORKDIR /usr/src/app
 
 COPY . ./
