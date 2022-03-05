@@ -4,6 +4,7 @@ import { processTime } from './cron/cron';
 import { Router, Request, Response } from 'express';
 import { playsRouter } from './routes/plays';
 import { sessionsRouter } from './routes/sessions';
+import { reservationsRouter } from './routes/reservations';
 
 const app = express();
 const PORT = 8081;
@@ -12,6 +13,7 @@ const prefixRouter = Router();
 
 prefixRouter.use('/plays', playsRouter)
 prefixRouter.use('/sessions', sessionsRouter)
+prefixRouter.use('/reservations', reservationsRouter)
 
 
 app.use('/expressjs', prefixRouter);
@@ -26,3 +28,7 @@ app.listen(PORT, () => {
     console.log(`⚡️[server]: Server is running at https://localhost:${PORT}`);
     cronProcess.start()
 });
+
+app.on('shutdown', () => {
+    cronProcess.stop()
+})
