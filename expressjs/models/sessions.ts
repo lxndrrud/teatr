@@ -73,6 +73,10 @@ export const getSlotsByPricePolicy = (idPricePolicy: number) => {
 }
 
 export const getReservedSlots = (idSession: number, idPricePolicy: number) => {
+    /**
+     * Скорее всего, это излишний запрос
+     * reservations model -> get reservations slots
+     */
     return KnexConnection('slots')
         .select('slots.id', 'rows.id as id_row', 'seats.number as seat_number',
             'rows.number as row_number', 'slots.price'

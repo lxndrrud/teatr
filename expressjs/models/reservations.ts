@@ -14,7 +14,7 @@ export const getSingleReservation = (idReservation: number) => {
         .first()
 }
 
-export const getReservationSlots = (idReservation: number) => {
+export const getReservedSlots = (idReservation: number) => {
     return KnexConnection('reservations_slots as rs')
         .select(
             'slots.id', 'slots.price', 
