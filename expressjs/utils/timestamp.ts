@@ -27,3 +27,7 @@ export const extendedDateFromTimestamp = (timestamp_: string) => {
     return moment(timestamp_).locale('ru').format('LLLL').toString()
         .split(',').slice(0, -1).join(',')
 }
+
+export const extendedTimestamp = (timestamp_: string) => {
+    return moment(timestamp_).locale('ru').format('LLLL').toString()
+}

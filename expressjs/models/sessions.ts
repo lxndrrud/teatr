@@ -1,15 +1,17 @@
 import { Knex } from "knex";
 import { KnexConnection } from "../knex/connections";
+import { SlotInterface } from "../interfaces/slots";
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface } 
     from "../interfaces/sessions"; 
 
 
 export const getUnlockedSessions = () => {
-    return KnexConnection('sessions as s')
+    return KnexConnection<SessionInterface>('sessions as s')
         .select(
             's.id', 
             's.is_locked', 's.timestamp',
-            's.id_play', 's.id_price_policy', 
+            's.max_slots', 
+            's.id_play', 's.id_price_policy',
             'a.title as auditorium_title', 
             'p.title as play_title'
         )
@@ -28,7 +30,7 @@ export const getSingleSession = (id: number) => {
     return getUnlockedSessions().where('s.id', id).first()
 }
 
-export const postSession = (trx: Knex.Transaction, payload: SessionBaseInterface) => {
+export const createSession = (trx: Knex.Transaction, payload: SessionBaseInterface) => {
     return trx('sessions')
         .insert(payload)
         .returning('id')
@@ -63,7 +65,7 @@ export const getRowsByPricePolicy = (idPricePolicy: number) => {
 }
 
 export const getSlotsByPricePolicy = (idPricePolicy: number) => {
-    return KnexConnection('slots')
+    return KnexConnection<SlotInterface>('slots')
         .select('slots.id', 'rows.id as id_row', 'seats.number as seat_number', 
             'rows.number as row_number', 'slots.price'
         )
@@ -73,18 +75,16 @@ export const getSlotsByPricePolicy = (idPricePolicy: number) => {
 }
 
 export const getReservedSlots = (idSession: number, idPricePolicy: number) => {
-    /**
-     * Скорее всего, это излишний запрос
-     * reservations model -> get reservations slots
-     */
-    return KnexConnection('slots')
-        .select('slots.id', 'rows.id as id_row', 'seats.number as seat_number',
-            'rows.number as row_number', 'slots.price'
+    return KnexConnection<SlotInterface>('slots')
+        .select('slots.id', 'seats.number as seat_number',
+            'rows.number as row_number', 'slots.price',
+            'a.title as auditorium_title'
         )
         .where('slots.id_price_policy', idPricePolicy)
         .andWhere('r.id_session', idSession)
         .join('seats', 'seats.id', 'slots.id_seat')
         .join('rows as rows', 'rows.id', 'seats.id_row')
+        .join('auditoriums as a', 'a.id', 'rows.id_auditorium')
         .join('reservations_slots as rr', 'rr.id_slot', 'slots.id')
         .join('reservations as r', 'r.id', 'rr.id_reservation')
 }

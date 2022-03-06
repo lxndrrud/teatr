@@ -8,7 +8,6 @@ exports.seed = async function(knex) {
   await knex('auditoriums').insert([
     { 
       title: 'Главный зал', 
-      max_user_reservations: 5
     }
   ]);
 };

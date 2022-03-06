@@ -1,4 +1,5 @@
 import express from 'express';
+import bodyParser from 'body-parser';
 import { CronJob } from 'cron';
 import { processTime } from './cron/cron';
 import { Router, Request, Response } from 'express';
@@ -8,6 +9,8 @@ import { reservationsRouter } from './routes/reservations';
 
 const app = express();
 const PORT = 8081;
+
+app.use(bodyParser.json())
 
 const prefixRouter = Router();
 

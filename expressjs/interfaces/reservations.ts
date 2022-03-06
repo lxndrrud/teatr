@@ -1,20 +1,26 @@
-export interface SlotInterface {
-    id: number
-    price: number
-    seat_number: number
-    row_number: number
-    auditorium_title: string
+import { SlotInterface } from "./slots"
+
+export interface ReservationPostEmailInterface {
+    email: string
+    id_session: number
+    slots: SlotInterface[]
 }
 
-export interface ReservationInterface {
-    id: number
+export interface ReservationBaseInterface {
     id_session: number
     id_record: number
-    created_at: string
-    is_paid: boolean
-    is_confirmed: boolean
     code: string
     confirmation_code: string
+}
+
+export interface ReservationDatabaseInterface extends ReservationBaseInterface {
+    id: number
+    is_paid: boolean
+    is_confirmed: boolean
+    created_at: string
+}
+
+export interface ReservationInterface extends ReservationDatabaseInterface {
     session_timestamp: string
     play_title: string
     slots: SlotInterface[]

@@ -3,6 +3,7 @@ export interface SessionBaseInterface {
     id_price_policy: number
     timestamp: string
     is_locked: boolean
+    max_slots: number
 }
 
 export interface SessionInterface extends SessionBaseInterface {

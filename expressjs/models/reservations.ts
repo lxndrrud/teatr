@@ -1,3 +1,6 @@
+import { Knex } from "knex";
+import { ReservationBaseInterface, ReservationDatabaseInterface } from "../interfaces/reservations";
+import { ReservationsSlotsBaseInterface, ReservationsSlotsInterface, SlotInterface } from "../interfaces/slots";
 import { KnexConnection } from "../knex/connections";
 
 export const getSingleReservation = (idReservation: number) => {
@@ -15,7 +18,7 @@ export const getSingleReservation = (idReservation: number) => {
 }
 
 export const getReservedSlots = (idReservation: number) => {
-    return KnexConnection('reservations_slots as rs')
+    return KnexConnection<SlotInterface>('reservations_slots as rs')
         .select(
             'slots.id', 'slots.price', 
             'seats.number as seat_number', 'rows.number as row_number',
@@ -26,4 +29,17 @@ export const getReservedSlots = (idReservation: number) => {
         .join('seats', 'seats.id', 'slots.id_seat')
         .join('rows', 'rows.id', 'seats.id_row')
         .join('auditoriums as a', 'a.id', 'rows.id_auditorium')
+}
+
+export const createReservation = (trx: Knex.Transaction, payload: ReservationBaseInterface) => {
+    return trx<ReservationDatabaseInterface>('reservations')
+        .insert(payload)
+        .returning('*')
+}
+
+
+export const createReservationsSlotsList = (trx: Knex.Transaction, payloadList: ReservationsSlotsBaseInterface[]) => {
+    return trx<ReservationsSlotsInterface>('reservations_slots')
+        .insert(payloadList)
+        .returning('*')
 }

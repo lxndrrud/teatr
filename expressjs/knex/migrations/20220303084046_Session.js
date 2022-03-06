@@ -7,6 +7,7 @@ exports.up = function(knex) {
         tbl.increments('id').primary()
         tbl.timestamp('timestamp').notNullable()
         tbl.boolean('is_locked').notNullable().defaultTo(false)
+        tbl.integer('max_slots').notNullable().defaultTo(5)
         tbl.integer('id_play').notNullable()
             .references('id').inTable('plays')
         tbl.integer('id_price_policy').notNullable()

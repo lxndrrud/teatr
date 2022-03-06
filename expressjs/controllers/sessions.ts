@@ -32,7 +32,7 @@ export const postSession = async (req: Request, res: Response) => {
         const payload: SessionBaseInterface = {...req.body}
         const trx = await KnexConnection.transaction()
         try {
-            const newSession = await SessionModel.postSession(trx, payload)
+            const newSession = await SessionModel.createSession(trx, payload)
             await trx.commit()
             res.status(201).send({
                 id: newSession.at(0).id

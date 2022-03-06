@@ -5,7 +5,6 @@
 exports.up = function(knex) {
     return knex.schema.withSchema('public').createTable('auditoriums', tbl => {
         tbl.increments('id').primary()
-        tbl.integer('max_user_reservations').notNullable()
         tbl.string('title', 100).notNullable()
     })
 };
