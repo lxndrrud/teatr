@@ -5,7 +5,7 @@ import { RecordBaseInterface, RecordInterface } from "../interfaces/records"
 import { SlotInterface, ReservationsSlotsBaseInterface } from "../interfaces/slots"
 import { ErrorInterface } from "../interfaces/errors"
 import { ReservationBaseInterface, ReservationInterface, 
-    ReservationPostEmailInterface, ReservationDatabaseInterface} from "../interfaces/reservations"
+    ReservationPostEmailInterface, ReservationDatabaseInterface, ReservationConfirmationInterface} from "../interfaces/reservations"
 import { SessionInterface } from "../interfaces/sessions"
 //* Models
 import * as RecordModel from '../models/records'
@@ -138,4 +138,25 @@ export const postReservation = async (req: Request, res: Response) => {
         }
         res.status(400).send(error)
     }
+}
+
+
+export const confirmReservation = async (req: Request, res: Response) => {
+    const idReservation: number = parseInt(req.params.idReservation)
+    const requestBody: ReservationConfirmationInterface = {...req.body}
+    const reservationQuery = await ReservationModel.getSingleReservation(idReservation)
+    if (!reservationQuery) {
+        res.status(404).end()
+        return
+    }
+    const reservation: ReservationInterface = {...reservationQuery}
+    if (reservation.confirmation_code !== requestBody.confirmation_code) {
+        res.status(412).end()
+        return
+    }
+    reservation.is_confirmed = true
+    const trx = await KnexConnection.transaction()
+    await ReservationModel.updateReservation(trx, reservation)
+    await trx.commit()
+    res.status(200).end()
 }

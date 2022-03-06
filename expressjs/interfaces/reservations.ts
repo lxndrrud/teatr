@@ -6,6 +6,12 @@ export interface ReservationPostEmailInterface {
     slots: SlotInterface[]
 }
 
+export interface ReservationConfirmationInterface {
+    id_session: number
+    code: string
+    confirmation_code: string
+}
+
 export interface ReservationBaseInterface {
     id_session: number
     id_record: number

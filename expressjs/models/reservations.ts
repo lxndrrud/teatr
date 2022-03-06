@@ -1,10 +1,10 @@
 import { Knex } from "knex";
-import { ReservationBaseInterface, ReservationDatabaseInterface } from "../interfaces/reservations";
+import { ReservationBaseInterface, ReservationDatabaseInterface, ReservationInterface } from "../interfaces/reservations";
 import { ReservationsSlotsBaseInterface, ReservationsSlotsInterface, SlotInterface } from "../interfaces/slots";
 import { KnexConnection } from "../knex/connections";
 
 export const getSingleReservation = (idReservation: number) => {
-    return KnexConnection('reservations as r')
+    return KnexConnection<ReservationInterface>('reservations as r')
         .select(
             'r.*', 's.id as id_session', 'rec.id as id_record',
             's.timestamp as session_timestamp',
@@ -15,6 +15,11 @@ export const getSingleReservation = (idReservation: number) => {
         .join('sessions as s', 's.id', 'r.id_session')
         .join('plays as p', 'p.id', 's.id_play')
         .first()
+}
+
+export const getReservationForUpdate = (idReservation: number) => {
+    return KnexConnection<ReservationDatabaseInterface>('reservations as r')
+        .where('r.id', idReservation)
 }
 
 export const getReservedSlots = (idReservation: number) => {
@@ -35,6 +40,12 @@ export const createReservation = (trx: Knex.Transaction, payload: ReservationBas
     return trx<ReservationDatabaseInterface>('reservations')
         .insert(payload)
         .returning('*')
+}
+
+export const updateReservation = (trx: Knex.Transaction, payload: ReservationDatabaseInterface) => {
+    return trx('reservations')
+        .where('reservations.id', payload.id)
+        .update(payload)
 }
 
 
