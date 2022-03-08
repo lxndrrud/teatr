@@ -4,9 +4,8 @@ import { SlotInterface } from "../interfaces/slots";
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface } 
     from "../interfaces/sessions"; 
 
-
-export const getUnlockedSessions = () => {
-    return KnexConnection
+const unlockedSessions = () => {
+    return KnexConnection<SessionInterface>('sessions as s')
         .select(
             KnexConnection.ref('id').withSchema('s'),
             KnexConnection.ref('is_locked').withSchema('s'), 
@@ -17,7 +16,6 @@ export const getUnlockedSessions = () => {
             KnexConnection.ref('title').withSchema('a').as('auditorium_title'), 
             KnexConnection.ref('title').withSchema('p').as('play_title')
         )
-        .from<SessionInterface>('sessions as s')
         .join('plays as p', 'p.id', 's.id_play')
         .join('price_policies as pp', 'pp.id', 's.id_price_policy')
         .join('slots', 'slots.id_price_policy', 'pp.id')
@@ -29,8 +27,12 @@ export const getUnlockedSessions = () => {
         .orderBy('s.timestamp', 'asc')
 }
 
-export const getSingleSession = (id: number) => {
-    return getUnlockedSessions().where('s.id', id).first()
+export const getUnlockedSessions = (): Promise<SessionInterface[]> => {
+    return unlockedSessions()
+}
+
+export const getSingleSession = (id: number): Promise<SessionInterface | undefined> => {
+   return unlockedSessions().where('s.id', id).first()
 }
 
 export const createSession = (trx: Knex.Transaction, payload: SessionBaseInterface) => {
@@ -53,8 +55,8 @@ export const deleteSession = (trx: Knex.Transaction, id: number) => {
     .del()
 }
 
-export const getSessionsByPlay = (idPlay: number) => {
-    return getUnlockedSessions()
+export const getSessionsByPlay = (idPlay: number): Promise<SessionInterface[]> => {
+    return unlockedSessions()
         .andWhere('s.id_play', idPlay)
 }
 
@@ -77,7 +79,7 @@ export const getSlotsByPricePolicy = (idPricePolicy: number) => {
         .join('rows', 'rows.id', 'seats.id_row')
 }
 
-export const getReservedSlots = (idSession: number, idPricePolicy: number) => {
+export const getReservedSlots = (idSession: number, idPricePolicy: number): Promise<SlotInterface[]> => {
     return KnexConnection<SlotInterface>('slots')
         .select('slots.id', 'seats.number as seat_number',
             'rows.number as row_number', 'slots.price',
@@ -121,8 +123,8 @@ export const getSessionFilterPlays = () => {
         .distinct()
 }
 
-export const getFilteredSessions = (date: string, auditoriumTitle: string, playTitle: string) => {
-    return getUnlockedSessions()
+export const getFilteredSessions = (date: string, auditoriumTitle: string, playTitle: string): Promise<SessionInterface[]> => {
+    return unlockedSessions()
         .andWhere(builder => {
             if (date !== '')
                 builder.andWhere('s.timestamp', 'like', `%${date}%`)

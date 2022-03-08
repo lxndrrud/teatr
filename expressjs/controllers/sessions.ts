@@ -7,7 +7,7 @@ import { dateFromTimestamp, extendedDateFromTimestamp } from "../utils/timestamp
 
 
 export const getSessions = async (req: Request, res: Response) => {
-    const query: SessionInterface[] = [...(await SessionModel.getUnlockedSessions())]
+    const query = await SessionModel.getUnlockedSessions()
     res.status(200).send(query)
 }
 
@@ -19,8 +19,7 @@ export const getSingleSession = async (req: Request, res: Response) => {
     }
     const query = await SessionModel.getSingleSession(idSession)
     if (query) {
-        const result: SessionInterface = {...query}
-        res.status(200).send(result)
+        res.status(200).send(query)
     }
     else {
         res.status(404).end()
