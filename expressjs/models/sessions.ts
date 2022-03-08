@@ -6,15 +6,18 @@ import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface }
 
 
 export const getUnlockedSessions = () => {
-    return KnexConnection<SessionInterface>('sessions as s')
+    return KnexConnection
         .select(
-            's.id', 
-            's.is_locked', 's.timestamp',
-            's.max_slots', 
-            's.id_play', 's.id_price_policy',
-            'a.title as auditorium_title', 
-            'p.title as play_title'
+            KnexConnection.ref('id').withSchema('s'),
+            KnexConnection.ref('is_locked').withSchema('s'), 
+            KnexConnection.ref('timestamp').withSchema('s'),
+            KnexConnection.ref('max_slots').withSchema('s'), 
+            KnexConnection.ref('id_play').withSchema('s'), 
+            KnexConnection.ref('id_price_policy').withSchema('s'),
+            KnexConnection.ref('title').withSchema('a').as('auditorium_title'), 
+            KnexConnection.ref('title').withSchema('p').as('play_title')
         )
+        .from<SessionInterface>('sessions as s')
         .join('plays as p', 'p.id', 's.id_play')
         .join('price_policies as pp', 'pp.id', 's.id_price_policy')
         .join('slots', 'slots.id_price_policy', 'pp.id')

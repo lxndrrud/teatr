@@ -1,12 +1,11 @@
 import { KnexConnection }from "../knex/connections"
 import { Request, Response } from "express"
 import * as PlayModel from "../models/plays"
-import { PlayBaseInterface, PlayInterface } from "../interfaces/plays"
+import { PlayBaseInterface } from "../interfaces/plays"
 
 export const getPlays = async (req: Request, res: Response) => {
     const query = await PlayModel.getPlays()
-    res.statusCode = 200
-    res.send(query)
+    res.status(200).send(query)
 }
 
 export const createPlay = async (req: Request, res: Response) => {
@@ -14,38 +13,35 @@ export const createPlay = async (req: Request, res: Response) => {
         const payload: PlayBaseInterface = {...req.body}
         const trx = await KnexConnection.transaction()
         try {
-            const newPlay = await PlayModel.postPlay(trx, payload)
+            const newPlay = (await PlayModel.postPlay(trx, payload))[0]
             await trx.commit()
-            res.statusCode = 201
-            res.send({
-                id: newPlay.at(0).id
+            res.status(201).send({
+                id: newPlay.id
             })
         }
         catch (e) {
             await trx.rollback()
             console.log(e)
-            res.statusCode = 500
+            res.status(500).end()
         }
     } catch (e) {
         console.log(e)
-        res.statusCode = 400
+        res.status(400).end()
     }
 }
 
 export const getSinglePlay = async (req: Request, res: Response) => {
     const idPlay = parseInt(req.params.idPlay)
     if (!idPlay) {
-        res.statusCode = 400
+        res.status(400).end()
         return 
     }
     const query = await PlayModel.getSinglePlay(idPlay)
     if (query) {
-        const result: PlayInterface = {...query}
-        res.statusCode = 200
-        res.send(result)
+        res.status(200).send(query)
     }
     else {
-        res.statusCode = 404
+        res.status(404).end()
     }
 }
     
@@ -54,19 +50,19 @@ export const deletePlay = async (req: Request, res: Response) => {
     const idPlay = parseInt(req.params.idPlay)
     const query = await PlayModel.getSinglePlay(idPlay)
     if (!query) {
-        res.statusCode = 404
+        res.status(404).end()
         return
     }
     const trx = await KnexConnection.transaction()
     try {
         await PlayModel.deletePlay(trx, idPlay)
         await trx.commit()
-        res.statusCode = 200
+        res.status(200).end()
     }
     catch (e) {
         await trx.rollback()
         console.log(e)
-        res.statusCode = 500
+        res.status(500).end()
     }
 }
 
@@ -77,7 +73,7 @@ export const updatePlay = async (req: Request, res: Response) => {
         const payload: PlayBaseInterface = {...req.body}
         const query = await PlayModel.getSinglePlay(idPlay)
         if (!query) { 
-            res.statusCode = 404
+            res.status(404).end()
             return 
         }
         const trx = await KnexConnection.transaction()
@@ -88,11 +84,11 @@ export const updatePlay = async (req: Request, res: Response) => {
         catch (e) {
             await trx.rollback()
             console.log(e)
-            res.statusCode = 500
+            res.status(500).end()
         }
     }
     catch (e) {
         console.log(e)
-        res.statusCode = 400
+        res.status(400).end()
     }
 }

@@ -26,8 +26,11 @@ export interface ReservationDatabaseInterface extends ReservationBaseInterface {
     created_at: string
 }
 
-export interface ReservationInterface extends ReservationDatabaseInterface {
+export interface ReservationWithoutSlotsInterface extends ReservationDatabaseInterface{
     session_timestamp: string
     play_title: string
+}
+
+export interface ReservationInterface extends ReservationWithoutSlotsInterface {
     slots: SlotInterface[]
 }

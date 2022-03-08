@@ -1,14 +1,18 @@
 import { Knex } from "knex";
-import { ReservationBaseInterface, ReservationDatabaseInterface, ReservationInterface } from "../interfaces/reservations";
-import { ReservationsSlotsBaseInterface, ReservationsSlotsInterface, SlotInterface } from "../interfaces/slots";
+import { ReservationBaseInterface, 
+    ReservationDatabaseInterface, 
+    ReservationInterface, 
+    ReservationWithoutSlotsInterface } from "../interfaces/reservations";
+import { ReservationsSlotsBaseInterface, ReservationsSlotsInterface, 
+    SlotInterface } from "../interfaces/slots";
 import { KnexConnection } from "../knex/connections";
 
 export const getSingleReservation = (idReservation: number) => {
-    return KnexConnection<ReservationInterface>('reservations as r')
+    return KnexConnection<ReservationWithoutSlotsInterface>('reservations as r')
         .select(
             'r.*', 's.id as id_session', 'rec.id as id_record',
             's.timestamp as session_timestamp',
-            'p.title as play_title'
+            'p.title as play_title',
         )
         .where('r.id', idReservation)
         .join('records as rec', 'rec.id', 'r.id_record')

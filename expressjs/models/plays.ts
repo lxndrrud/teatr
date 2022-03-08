@@ -16,7 +16,7 @@ export const getSinglePlay = (id: number) => {
 }
 
 export const postPlay = (trx: Knex.Transaction, payload: PlayBaseInterface) => {
-    return trx('plays').insert(payload).returning('id')
+    return trx<PlayInterface>('plays').insert(payload).returning('*')
 }
 
 export const updatePlay = (trx: Knex.Transaction, id: number, payload: PlayBaseInterface) => {
