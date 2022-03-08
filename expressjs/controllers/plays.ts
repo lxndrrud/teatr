@@ -9,7 +9,7 @@ export const getPlays = async (req: Request, res: Response) => {
     res.send(query)
 }
 
-export const postPlay = async (req: Request, res: Response) => {
+export const createPlay = async (req: Request, res: Response) => {
     try {
         const payload: PlayBaseInterface = {...req.body}
         const trx = await KnexConnection.transaction()
