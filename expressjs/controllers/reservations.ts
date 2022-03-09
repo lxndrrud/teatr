@@ -26,8 +26,7 @@ export const getSingleReservation = async (req: Request, res: Response) => {
         return
     }
     try {
-        const slotsQuery = await ReservationModel.getReservedSlots(idReservation)
-        const slots: SlotInterface[] = [...slotsQuery]
+        const slots = await ReservationModel.getReservedSlots(idReservation)
         const reservation: ReservationInterface = {...reservationQuery, slots}
         res.status(200).send(reservation)
     } catch (e) {
@@ -37,16 +36,15 @@ export const getSingleReservation = async (req: Request, res: Response) => {
 }
 
 export const postReservation = async (req: Request, res: Response) => {
-    try{
+    try {
         const requestBody: ReservationPostEmailInterface = {...req.body}
         const sessionQuery = await SessionModel.getSingleSession(requestBody.id_session)
         if (!sessionQuery) {
             res.status(404).end()
             return
         }
-        const session: SessionInterface = {...sessionQuery}
         // Проверка на доступность сеанcf
-        if (session.is_locked === true) {
+        if (sessionQuery.is_locked === true) {
             const error: ErrorInterface = {
                 message:'Бронь на сеанс закрыта!'
             }
@@ -55,7 +53,7 @@ export const postReservation = async (req: Request, res: Response) => {
         }
 
         // Проверка на максимум слотов
-        if (requestBody.slots.length > session.max_slots) {
+        if (requestBody.slots.length > sessionQuery.max_slots) {
             const error: ErrorInterface = {
                 message:'Превышено максимальное количество мест для брони!'
             }
@@ -64,8 +62,8 @@ export const postReservation = async (req: Request, res: Response) => {
         }
 
         // Проверка на коллизию выбранных слотов и уже забронированных
-        const reservedSlotsQuery = await SessionModel.getReservedSlots(session.id, 
-            session.id_price_policy)
+        const reservedSlotsQuery = await SessionModel.getReservedSlots(sessionQuery.id, 
+            sessionQuery.id_price_policy)
 
         const reservedSlots: SlotInterface[] = [...reservedSlotsQuery]
         
@@ -89,21 +87,18 @@ export const postReservation = async (req: Request, res: Response) => {
         } 
 
         // Проверка наличия почтовой записи
-        const recordQuery = await RecordModel.getRecordByEmail(requestBody.email)
+        let recordQuery = await RecordModel.getRecordByEmail(requestBody.email)
         const trx = await KnexConnection.transaction()
-        let record: RecordInterface
         if (!recordQuery) {
             const payload: RecordBaseInterface = {
                 email: requestBody.email
             }
-            record = (await RecordModel.createRecord(trx, payload))[0]
+            recordQuery = (await RecordModel.createRecord(trx, payload))[0]
         }
-        else {
-            record = {...recordQuery}
-        }
+
         const reservationPayload: ReservationBaseInterface = {
-            id_record: record.id,
-            id_session: session.id,
+            id_record: recordQuery.id,
+            id_session: sessionQuery.id,
             code: generateCode(),
             confirmation_code: generateCode()
         }
@@ -122,13 +117,13 @@ export const postReservation = async (req: Request, res: Response) => {
         await ReservationModel.createReservationsSlotsList(trx, slots)
         await trx.commit()
 
-        sendMail(record.email, reservation.confirmation_code,
-            reservation.code, session.play_title, session.timestamp,
-            session.auditorium_title)
+        sendMail(recordQuery.email, reservation.confirmation_code,
+            reservation.code, sessionQuery.play_title, sessionQuery.timestamp,
+            sessionQuery.auditorium_title)
 
         res.status(201).send({
             id_reservation: reservation.id,
-            id_session: session.id,
+            id_session: sessionQuery.id,
             code: reservation.code
         })
     } catch(e) {
@@ -149,14 +144,13 @@ export const confirmReservation = async (req: Request, res: Response) => {
         res.status(404).end()
         return
     }
-    const reservation: ReservationInterface = {...reservationQuery}
-    if (reservation.confirmation_code !== requestBody.confirmation_code) {
+    if (reservationQuery.confirmation_code !== requestBody.confirmation_code) {
         res.status(412).end()
         return
     }
-    reservation.is_confirmed = true
+    reservationQuery.is_confirmed = true
     const trx = await KnexConnection.transaction()
-    await ReservationModel.updateReservation(trx, reservation)
+    await ReservationModel.updateReservation(trx, reservationQuery)
     await trx.commit()
     res.status(200).end()
 }

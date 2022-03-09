@@ -3,7 +3,7 @@ import { FETCH_PLAY, FETCH_PLAYS } from '../types'
 
 
 export const fetchPlay = (playid) => async dispatch =>  {
-    const response = await fetch(`/fastapi/plays/${playid}`)
+    const response = await fetch(`/expressjs/plays/${playid}`)
     const json_ = await response.json()
     dispatch({
         type: FETCH_PLAY,
@@ -13,7 +13,7 @@ export const fetchPlay = (playid) => async dispatch =>  {
 
 
 export const fetchPlays = () => async dispatch =>  {
-    const response = await fetch('/fastapi/plays')
+    const response = await fetch('/expressjs/plays')
     const json_ = await response.json()
     dispatch({
         type: FETCH_PLAYS,

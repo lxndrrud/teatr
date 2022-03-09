@@ -4,25 +4,35 @@ import { fetchPlay } from "../../store/actions/playAction"
 import { fetchSession } from '../../store/actions/sessionAction'
 import { useRouter } from 'next/router';
 import { useDispatch, useSelector} from 'react-redux'
-import { useEffect } from 'react'
+import store from "../../store/store"
+import { useEffect, useState } from 'react'
+
+const getSession = () => { 
+  return store.getState().session.session
+}
+
+const getPlay = () => {
+  return store.getState().play.play
+}
 
 const SessionReservation = () => {
   const router = useRouter()
   const dispatch = useDispatch()
+  let [session, setSession] = useState({})
+  let [play, setPlay] = useState({})
 
   useEffect( () => {
     if (router.isReady) {
       dispatch(fetchSession(router.query.sessionid))
+      setSession(getSession())
     }
   }, [router.isReady])
 
-  const session = useSelector(state => state.session.session)
   useEffect(() => {
     dispatch(fetchPlay(session.id_play))
+    setPlay(getPlay())
   }, [session])
   
-  const play = useSelector(state => state.play.play)
-
   
   return (
     <>

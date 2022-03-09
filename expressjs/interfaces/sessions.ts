@@ -6,14 +6,17 @@ export interface SessionBaseInterface {
     max_slots: number
 }
 
-export interface SessionInterface extends SessionBaseInterface {
+export interface SessionDatabaseInterface extends SessionBaseInterface {
     id: number
+}
+
+export interface SessionInterface extends SessionDatabaseInterface {
     play_title: string
     auditorium_title: string
 }
 
 export interface SessionFilterQueryInterface {
-    timestamp?: string
+    date?: string
     auditorium_title?: string
     play_title?: string
 }

@@ -31,3 +31,8 @@ export const extendedDateFromTimestamp = (timestamp_: string) => {
 export const extendedTimestamp = (timestamp_: string) => {
     return moment(timestamp_).locale('ru').format('LLLL').toString()
 }
+
+export const getNextDayOfTimestamp = (timestamp_: string) => {
+    const nextDayDate = moment(timestamp_).add(1, 'day').format('YYYY-MM-DD').toString()
+    return nextDayDate + 'T00:00:00' 
+}

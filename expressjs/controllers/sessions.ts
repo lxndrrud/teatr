@@ -1,13 +1,17 @@
 import { KnexConnection }from "../knex/connections"
 import { Request, Response } from "express"
 import * as SessionModel from "../models/sessions"
+import { TimestampSessionFilterOptionInterface } from "../interfaces/timestamps"
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface } 
     from "../interfaces/sessions"
-import { dateFromTimestamp, extendedDateFromTimestamp } from "../utils/timestamp"
+import { dateFromTimestamp, extendedDateFromTimestamp, extendedTimestamp } from "../utils/timestamp"
 
 
 export const getSessions = async (req: Request, res: Response) => {
     const query = await SessionModel.getUnlockedSessions()
+    for (let session of query) {
+        session.timestamp = extendedTimestamp(session.timestamp)
+    }
     res.status(200).send(query)
 }
 
@@ -19,6 +23,7 @@ export const getSingleSession = async (req: Request, res: Response) => {
     }
     const query = await SessionModel.getSingleSession(idSession)
     if (query) {
+        query.timestamp = extendedTimestamp(query.timestamp)
         res.status(200).send(query)
     }
     else {
@@ -34,7 +39,7 @@ export const postSession = async (req: Request, res: Response) => {
             const newSession = await SessionModel.createSession(trx, payload)
             await trx.commit()
             res.status(201).send({
-                id: newSession.at(0).id
+                id: newSession[0].id
             })
         }
         catch (e) {
@@ -62,6 +67,7 @@ export const updateSession = async (req: Request, res: Response) => {
         try {
             await SessionModel.updateSession(trx, idSession, payload)
             await trx.commit()
+            res.status(200).end()
         }
         catch (e) {
             await trx.rollback()
@@ -101,7 +107,13 @@ export const getSessionsByPlay = async (req: Request, res: Response) => {
         res.status(400).end()
         return 
     }
+    
     const query = await SessionModel.getSessionsByPlay(idPlay)
+
+    for (let session of query) {
+        session.timestamp = extendedTimestamp(session.timestamp)
+    }
+
     res.status(200).send(query)
 }
 
@@ -111,17 +123,16 @@ export const getSlotsForSessions = async (req: Request, res: Response) => {
         res.status(400).end()
         return
     }
-    let session = await SessionModel.getSingleSession(idSession)
+    const session = await SessionModel.getSingleSession(idSession)
     if (!session) {
         res.status(404).end()
         return
     }
-    let sessionQuery: SessionInterface = {...session}
     
     const [rowsQuery, slotsQuery, reservedSlotsQuery] = await Promise.all([
-        SessionModel.getRowsByPricePolicy(sessionQuery.id_price_policy),
-        SessionModel.getSlotsByPricePolicy(sessionQuery.id_price_policy),
-        SessionModel.getReservedSlots(idSession, sessionQuery.id_price_policy)
+        SessionModel.getRowsByPricePolicy(session.id_price_policy),
+        SessionModel.getSlotsByPricePolicy(session.id_price_policy),
+        SessionModel.getReservedSlots(idSession, session.id_price_policy)
     ])
 
     let result = []
@@ -158,15 +169,13 @@ export const getSlotsForSessions = async (req: Request, res: Response) => {
 }
 
 export const getFilteredSessions = async (req: Request, res: Response) => {
-    const queryDate = `${req.query.queryDate}`
-    const queryAuditoriumTitle = `${req.query.queryAuditoriumTitle}`
-    const queryPlayTitle = `${req.query.queryPlayTitle}`
+    const userQuery: SessionFilterQueryInterface = {...req.query}
 
-    const query = await SessionModel.getFilteredSessions(
-        queryDate,
-        queryAuditoriumTitle,
-        queryPlayTitle
-    )
+    const query = await SessionModel.getFilteredSessions(userQuery)
+
+    for (let session of query) {
+        session.timestamp = extendedTimestamp(session.timestamp)
+    }
 
     res.status(200).send(query)
 }
@@ -178,12 +187,16 @@ export const getSessionFilterOptions = async (req: Request, res: Response) => {
         SessionModel.getSessionFilterPlays()
     ])
 
-    let dates = []
+    let dates: TimestampSessionFilterOptionInterface[] = []
+    let distinctCheck: string [] = []
     for (let row of timestamps) {
-        dates.push({
-            date: dateFromTimestamp(row.timestamp),
-            extendedDate: extendedDateFromTimestamp(row.timestamp)
-        })
+        if (!distinctCheck.includes(dateFromTimestamp(row.timestamp))) {
+            dates.push({
+                date: dateFromTimestamp(row.timestamp),
+                extended_date: extendedDateFromTimestamp(row.timestamp)
+            })
+            distinctCheck.push(dateFromTimestamp(row.timestamp))
+        }
     }
 
     res.status(200).send({

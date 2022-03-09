@@ -43,7 +43,7 @@ const ReservationConfirmationForm = () => {
                 code: reservation.code,
                 id_session: parseInt(reservation.id_session)
             }
-            const url = '/fastapi/reservations/confirm/' + reservation.id.toString()
+            const url = `/expressjs/reservations/${reservation.id.toString()}/confirm/` 
             const resp = await fetch(url, {
                 headers: {
                     'Accept': 'application/json',

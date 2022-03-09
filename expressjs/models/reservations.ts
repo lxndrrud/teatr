@@ -7,12 +7,14 @@ import { ReservationsSlotsBaseInterface, ReservationsSlotsInterface,
     SlotInterface } from "../interfaces/slots";
 import { KnexConnection } from "../knex/connections";
 
-export const getSingleReservation = (idReservation: number) => {
+export const getSingleReservation = (idReservation: number): Promise<ReservationWithoutSlotsInterface | undefined> => {
     return KnexConnection<ReservationWithoutSlotsInterface>('reservations as r')
         .select(
-            'r.*', 's.id as id_session', 'rec.id as id_record',
-            's.timestamp as session_timestamp',
-            'p.title as play_title',
+            KnexConnection.ref('*').withSchema('r'), 
+            KnexConnection.ref('id').withSchema('s').as('id_session'), 
+            KnexConnection.ref('id').withSchema('rec').as('id_record'),
+            KnexConnection.ref('timestamp').withSchema('s').as('session_timestamp'),
+            KnexConnection.ref('title').withSchema('p').as('play_title')
         )
         .where('r.id', idReservation)
         .join('records as rec', 'rec.id', 'r.id_record')
@@ -22,11 +24,11 @@ export const getSingleReservation = (idReservation: number) => {
 }
 
 export const getReservationForUpdate = (idReservation: number) => {
-    return KnexConnection<ReservationDatabaseInterface>('reservations as r')
-        .where('r.id', idReservation)
+    return KnexConnection<ReservationDatabaseInterface>('reservations')
+        .where('id', idReservation)
 }
 
-export const getReservedSlots = (idReservation: number) => {
+export const getReservedSlots = (idReservation: number): Promise<SlotInterface[]> => {
     return KnexConnection<SlotInterface>('reservations_slots as rs')
         .select(
             'slots.id', 'slots.price', 

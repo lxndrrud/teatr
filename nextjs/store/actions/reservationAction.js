@@ -12,7 +12,7 @@ export const postReservation = ({ email, id_session, slots }) => async dispatch 
     let body = {
         email, id_session, slots
     }
-    let resp = await fetch('/fastapi/reservations', {
+    let resp = await fetch('/expressjs/reservations', {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'

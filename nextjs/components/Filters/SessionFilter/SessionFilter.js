@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import CustomButton from "../../CustomButton/CustomButton"
-import DateString from "../../DateString/DateString"
 import { fetchFilteredSessions, fetchSessionFilterOptions } from "../../../store/actions/sessionAction"
 
 const SessionFilter = () => {
@@ -19,18 +18,18 @@ const SessionFilter = () => {
     } 
 
     const syncDate = (e) => {
-        if (e.target.value === 'None') setDate(null)
-        setDate(e.target.value)
+        if (e.target.value === 'None') setDate('')
+        else setDate(e.target.value)
     }
 
     const syncAuditoriumTitle = (e) => {
-        if (e.target.value === 'None') setAuditoriumTitle(null)
-        setAuditoriumTitle(e.target.value)
+        if (e.target.value === 'None') setAuditoriumTitle('')
+        else setAuditoriumTitle(e.target.value)
     }
 
     const syncPlayTitle = (e) => {
-        if (e.target.value === 'None') setPlayTitle(null)
-        setPlayTitle(e.target.value)
+        if (e.target.value === 'None') setPlayTitle('')
+        else setPlayTitle(e.target.value)
     }
 
     const filterOptions = useSelector(state => state.session.filterOptions)
@@ -41,7 +40,7 @@ const SessionFilter = () => {
                 <option value="None">Дата</option>
                 {filterOptions.dates && filterOptions.dates.map(item => (
                   <option value={item.date}>
-                    {item.date}
+                    {item.extended_date}
                   </option>  
                 ))}
             </select>

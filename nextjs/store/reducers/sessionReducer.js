@@ -5,15 +5,15 @@ const defaultState = {
     session: {
         id: 0,
         play_title: '',
-        date: '2022-02-13',
-        time: '10:30:00',
+        timestamp: '2022-03-09T00:00:00',
+        max_slots: 0,
         auditorium_title: ''
     },
     sessions: [{
         id: 0,
         play_title: 'Test',
-        date: '2022-02-13',
-        time: '10:30:00',
+        timestamp: '2022-03-09T00:00:00',
+        max_slots: 0,
         auditorium_title: ''
     }],
     slots: [],

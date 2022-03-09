@@ -6,3 +6,7 @@ export interface PlayBaseInterface {
 export interface PlayInterface extends PlayBaseInterface {
     id: number
 }
+
+export interface PlaySessionFilterOptionInterface {
+    title: string
+}

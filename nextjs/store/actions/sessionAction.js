@@ -3,7 +3,7 @@ import { FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_
 
 
 export const fetchSession = (sessionid) => async dispatch =>  {
-    const response = await fetch(`/fastapi/sessions/${sessionid}`)
+    const response = await fetch(`/expressjs/sessions/${sessionid}`)
     const json_ = await response.json()
     dispatch({
         type: FETCH_SESSION,
@@ -13,7 +13,7 @@ export const fetchSession = (sessionid) => async dispatch =>  {
 
 
 export const fetchSessions = () => async dispatch =>  {
-    const response = await fetch('/fastapi/sessions')
+    const response = await fetch('/expressjs/sessions')
     const json_ = await response.json()
     dispatch({
         type: FETCH_SESSIONS,
@@ -22,7 +22,7 @@ export const fetchSessions = () => async dispatch =>  {
 }
 
 export const fetchSessionsByPlay = (playid) => async dispatch => {
-    const resp = await fetch(`/fastapi/sessions/play/${playid}`)
+    const resp = await fetch(`/expressjs/sessions/play/${playid}`)
     const json_ = await resp.json()
     dispatch({
         type: FETCH_SESSIONS_BY_PLAY,
@@ -31,7 +31,7 @@ export const fetchSessionsByPlay = (playid) => async dispatch => {
 }
 
 export const fetchSlotsBySession = (sessionid) => async dispatch => {
-    const resp = await fetch(`/fastapi/sessions/${sessionid}/slots`)
+    const resp = await fetch(`/expressjs/sessions/${sessionid}/slots`)
     const json_ = await resp.json()
     dispatch({
         type: FETCH_SLOTS,
@@ -40,7 +40,7 @@ export const fetchSlotsBySession = (sessionid) => async dispatch => {
 }
 
 export const fetchSessionFilterOptions = () => async dispatch => {
-    const resp = await fetch('/fastapi/sessions/filterSetup')
+    const resp = await fetch('/expressjs/sessions/filterSetup')
     const json_ = await resp.json()
 
     dispatch({
@@ -51,7 +51,7 @@ export const fetchSessionFilterOptions = () => async dispatch => {
 
 
 export const fetchFilteredSessions = (date, auditoriumTitle, playTitle) => async dispatch => {
-    const resp = await fetch('/fastapi/sessions/filter?' + new URLSearchParams({
+    const resp = await fetch('/expressjs/sessions/filter?' + new URLSearchParams({
             'date': date,
             'auditorium_title': auditoriumTitle,
             'play_title': playTitle
