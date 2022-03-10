@@ -17,21 +17,20 @@ const getPlay = () => {
 
 const SessionReservation = () => {
   const router = useRouter()
+  const { sessionid } = router.query
   const dispatch = useDispatch()
   let [session, setSession] = useState({})
   let [play, setPlay] = useState({})
 
   useEffect( () => {
-    if (router.isReady) {
-      dispatch(fetchSession(router.query.sessionid))
+      dispatch(fetchSession(sessionid))
+      console.log(sessionid)
       setSession(getSession())
-    }
-  }, [router.isReady])
-
-  useEffect(() => {
-    dispatch(fetchPlay(session.id_play))
-    setPlay(getPlay())
-  }, [session])
+      console.log(session)
+      dispatch(fetchPlay(session.id_play))
+      setPlay(getPlay())
+      console.log(play)
+  })
   
   
   return (

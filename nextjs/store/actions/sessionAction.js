@@ -5,6 +5,7 @@ import { FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_
 export const fetchSession = (sessionid) => async dispatch =>  {
     const response = await fetch(`/expressjs/sessions/${sessionid}`)
     const json_ = await response.json()
+    console.log(json_)
     dispatch({
         type: FETCH_SESSION,
         payload: json_
