@@ -103,7 +103,7 @@ export const postReservation = async (req: Request, res: Response) => {
             confirmation_code: generateCode()
         }
 
-        const reservation: ReservationDatabaseInterface= (await ReservationModel.createReservation(trx, 
+        const reservation: ReservationDatabaseInterface = (await ReservationModel.createReservation(trx, 
             reservationPayload))[0]
 
         let slots: ReservationsSlotsBaseInterface[] = []
@@ -150,7 +150,43 @@ export const confirmReservation = async (req: Request, res: Response) => {
     }
     reservationQuery.is_confirmed = true
     const trx = await KnexConnection.transaction()
-    await ReservationModel.updateReservation(trx, reservationQuery)
-    await trx.commit()
-    res.status(200).end()
+    try {
+        await ReservationModel.updateReservation(trx, reservationQuery)
+        await trx.commit()
+        res.status(200).end()
+    } catch (e) {
+        const error: ErrorInterface = {
+            message: 'Ошибка в изменении записи!'
+        } 
+        await trx.rollback()
+        console.log(e)
+        res.status(500).send(error)
+    }
+}
+
+export const deleteReservation = async (req: Request, res: Response) => {
+    const idReservation = parseInt(req.params.idReservation)
+    if (!idReservation) {
+        res.status(400).end()
+        return
+    }
+    const reservation = await ReservationModel.getSingleReservation(idReservation)
+    if (!reservation) {
+        res.status(404).end()
+        return
+    }
+    const trx = await KnexConnection.transaction()
+    try {
+        await ReservationModel.deleteReservationsSlots(trx, idReservation)
+        await ReservationModel.deleteReservation(trx, idReservation)
+        await trx.commit()
+        res.status(200).end()
+    } catch (e) {
+        const error: ErrorInterface = {
+            message: 'Ошибка в удалении записи!'
+        } 
+        await trx.rollback()
+        console.log(e)
+        res.status(500).send(error)
+    }
 }

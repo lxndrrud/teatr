@@ -23,8 +23,25 @@ export const getSingleReservation = (idReservation: number): Promise<Reservation
         .first()
 }
 
+export const getReservationForDelete = (code: string, idSession: number): Promise<ReservationWithoutSlotsInterface | undefined> => {
+    return KnexConnection('reservations')
+        .select(
+            KnexConnection.ref('*').withSchema('r'), 
+            KnexConnection.ref('id').withSchema('s').as('id_session'), 
+            KnexConnection.ref('id').withSchema('rec').as('id_record'),
+            KnexConnection.ref('timestamp').withSchema('s').as('session_timestamp'),
+            KnexConnection.ref('title').withSchema('p').as('play_title')
+        )
+        .where('s.id', idSession)
+        .andWhere('r.code', code)
+        .join('records as rec', 'rec.id', 'r.id_record')
+        .join('sessions as s', 's.id', 'r.id_session')
+        .join('plays as p', 'p.id', 's.id_play')
+        .first()
+}
+
 export const getReservationForUpdate = (idReservation: number) => {
-    return KnexConnection<ReservationDatabaseInterface>('reservations')
+    return KnexConnection<ReservationDatabaseInterface>('reservations as r')
         .where('id', idReservation)
 }
 
@@ -59,4 +76,19 @@ export const createReservationsSlotsList = (trx: Knex.Transaction, payloadList: 
     return trx<ReservationsSlotsInterface>('reservations_slots')
         .insert(payloadList)
         .returning('*')
+}
+
+export const deleteReservation = (trx: Knex.Transaction, idReservation: number) => {
+    return trx('reservations')
+        .where({
+            id: idReservation
+        })
+        .del()
+}
+
+
+export const deleteReservationsSlots = (trx: Knex.Transaction, idReservation: number) => {
+    return trx('reservations_slots')
+        .where('id_reservation', idReservation)
+        .del()
 }

@@ -5,7 +5,7 @@
 exports.seed = async function(knex) {
   // Deletes ALL existing entries
   let slots = []
-  for (let i = 1; i < 17; i++) {
+  for (let i = 1; i < 25; i++) {
     slots.push({
       price: 200.0,
       id_seat: i,

@@ -6,6 +6,10 @@ export interface SlotInterface {
     auditorium_title: string
 }
 
+export interface SlotIsReservedInterface extends SlotInterface {
+    is_reserved: boolean
+}
+
 export interface SlotWithRowIdInterface extends SlotInterface {
     id_row: number
 }

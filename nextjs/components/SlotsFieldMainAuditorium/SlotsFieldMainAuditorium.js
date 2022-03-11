@@ -11,7 +11,7 @@ const SlotsFieldMainAuditorium = ({ rows }) => {
                 <tbody>
                     {rows && rows.map(row => (
                         <tr key={row.number} className={styles.tableRow}>
-                            <td className="text-base">Ряд #{row.number}</td>
+                            <td className={styles.rowLabel}>Ряд #{row.number}</td>
                             {row.seats.map(slot => (
                                 <td key={slot.id}>
                                     <SlotItem key={slot.id} slotObject={slot} />

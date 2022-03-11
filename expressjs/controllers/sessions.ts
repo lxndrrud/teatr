@@ -5,6 +5,7 @@ import { TimestampSessionFilterOptionInterface } from "../interfaces/timestamps"
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface } 
     from "../interfaces/sessions"
 import { dateFromTimestamp, extendedDateFromTimestamp, extendedTimestamp } from "../utils/timestamp"
+import { SlotIsReservedInterface } from "../interfaces/slots"
 
 
 export const getSessions = async (req: Request, res: Response) => {
@@ -139,30 +140,35 @@ export const getSlotsForSessions = async (req: Request, res: Response) => {
 
     for (let row of rowsQuery) {
         const rowSlots = slotsQuery.filter((slot) => slot.id_row == row.id)
-        let slots = []
+        const reservedSlotsMap = reservedSlotsQuery.map(reservedSlot => reservedSlot.id)
+        let slots: SlotIsReservedInterface[] = []
         for (let slot of rowSlots) {
-            if (reservedSlotsQuery.includes(slot)) {
-                slots.push({
+            if (reservedSlotsMap.includes(slot.id)) {
+                const item: SlotIsReservedInterface = {
                     id: slot.id,
                     seat_number: slot.seat_number,
                     row_number: slot.row_number,
                     price: slot.price,
+                    auditorium_title: slot.auditorium_title,
                     is_reserved: true
-                })
+                }
+                slots.push(item)
             }
             else {
-                slots.push({
+                const item: SlotIsReservedInterface = {
                     id: slot.id,
                     seat_number: slot.seat_number,
                     row_number: slot.row_number,
                     price: slot.price,
+                    auditorium_title: slot.auditorium_title,
                     is_reserved: false
-                })
+                }
+                slots.push(item)
             }
         }
         result.push({
-            'number': row.number,
-            'seats': slots
+            number: row.number,
+            seats: slots
         })
     }
     res.status(200).send(result)
@@ -188,14 +194,14 @@ export const getSessionFilterOptions = async (req: Request, res: Response) => {
     ])
 
     let dates: TimestampSessionFilterOptionInterface[] = []
-    let distinctCheck: string [] = []
+    let distinctCheck: Map<string, string> = new Map()
     for (let row of timestamps) {
-        if (!distinctCheck.includes(dateFromTimestamp(row.timestamp))) {
+        if (!distinctCheck.has(dateFromTimestamp(row.timestamp))) {
             dates.push({
                 date: dateFromTimestamp(row.timestamp),
                 extended_date: extendedDateFromTimestamp(row.timestamp)
             })
-            distinctCheck.push(dateFromTimestamp(row.timestamp))
+            distinctCheck.set(dateFromTimestamp(row.timestamp), dateFromTimestamp(row.timestamp))
         }
     }
 

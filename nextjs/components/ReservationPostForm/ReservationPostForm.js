@@ -30,8 +30,9 @@ const ReservationPostForm = ({ session }) => {
     }
 
     useEffect(() => {
-        dispatch(fetchSlotsBySession(session.id))
-    })
+        if (session.id)
+            dispatch(fetchSlotsBySession(session.id))
+    }, [session])
 
     let slots = useSelector(state => state.session.slots)
 

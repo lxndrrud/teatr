@@ -35,3 +35,11 @@
     /* border: 3px solid #0070f3; *-/
 }
 */
+
+@media (max-width: 800px) {
+    .playItem {
+        max-width: 100%;
+        width: 100%;
+        display: flexbox;
+    }
+}

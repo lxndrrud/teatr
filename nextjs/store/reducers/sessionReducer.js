@@ -2,20 +2,17 @@ import { FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_
 
 
 const defaultState = {
-    session: {
-        id: 0,
-        play_title: '',
-        timestamp: '2022-03-09T00:00:00',
-        max_slots: 0,
-        auditorium_title: ''
-    },
-    sessions: [{
+    /*
+    {
         id: 0,
         play_title: 'Test',
         timestamp: '2022-03-09T00:00:00',
         max_slots: 0,
         auditorium_title: ''
-    }],
+    }
+    */
+    session: {},
+    sessions: [],
     slots: [],
     filterOptions: {},
     loading: false,
