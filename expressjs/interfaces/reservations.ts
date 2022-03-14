@@ -1,20 +1,19 @@
 import { SlotInterface } from "./slots"
 
 export interface ReservationPostEmailInterface {
-    email: string
+    id_user: number
     id_session: number
     slots: SlotInterface[]
 }
 
 export interface ReservationConfirmationInterface {
     id_session: number
-    code: string
     confirmation_code: string
 }
 
 export interface ReservationBaseInterface {
     id_session: number
-    id_record: number
+    id_user: number
     code: string
     confirmation_code: string
 }

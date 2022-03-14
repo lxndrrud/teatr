@@ -14,8 +14,8 @@ exports.up = function(knex) {
         tbl.string('confirmation_code', 6).notNullable()
         tbl.integer('id_session').notNullable()
             .references('id').inTable('sessions')
-        tbl.integer('id_record').notNullable()
-            .references('id').inTable('records')
+        tbl.integer('id_user').notNullable()
+            .references('id').inTable('users')
     })
 };
 

@@ -1,16 +1,17 @@
 import { KnexConnection } from "../knex/connections"
 import { Request, Response } from "express"
 //* Interfaces
-import { RecordBaseInterface, RecordInterface } from "../interfaces/records"
+import { UserBaseInterface, UserInterface } from "../interfaces/users"
 import { SlotInterface, ReservationsSlotsBaseInterface } from "../interfaces/slots"
 import { ErrorInterface } from "../interfaces/errors"
 import { ReservationBaseInterface, ReservationInterface, 
     ReservationPostEmailInterface, ReservationDatabaseInterface, ReservationConfirmationInterface} from "../interfaces/reservations"
 import { SessionInterface } from "../interfaces/sessions"
 //* Models
-import * as RecordModel from '../models/records'
+import * as UserModel from '../models/users'
 import * as ReservationModel from "../models/reservations"
 import * as SessionModel from "../models/sessions"
+import * as RoleModel from "../models/roles"
 import { generateCode } from "../utils/code"
 import { sendMail } from "../utils/email"
 
@@ -87,17 +88,39 @@ export const postReservation = async (req: Request, res: Response) => {
         } 
 
         // Проверка наличия почтовой записи
-        let recordQuery = await RecordModel.getRecordByEmail(requestBody.email)
+        let userQuery = await UserModel.getUser(requestBody.id_user)
         const trx = await KnexConnection.transaction()
-        if (!recordQuery) {
+        if (!userQuery) {
+            const error: ErrorInterface = {
+                message: 'Пользователь не найден'
+            }
+            res.status(404).send(error)
+            return
+
+            //* Было до реворка Record в User
+            /*
             const payload: RecordBaseInterface = {
                 email: requestBody.email
             }
             recordQuery = (await RecordModel.createRecord(trx, payload))[0]
+            */
+
+            /*
+            const visitorRoleQuery = await RoleModel.getVisitorRole()
+            if (!visitorRoleQuery) res.status(500).end()
+            else {
+                const userPayload: UserBaseInterface = {
+                    password: `${generateCode()}${generateCode()}`,
+                    id_record: recordQuery.id,
+                    id_role: visitorRoleQuery.id
+                }
+                const user = (await UserModel.createUser(trx, userPayload))[0]
+            }
+            */
         }
 
         const reservationPayload: ReservationBaseInterface = {
-            id_record: recordQuery.id,
+            id_user: userQuery.id,
             id_session: sessionQuery.id,
             code: generateCode(),
             confirmation_code: generateCode()
@@ -117,7 +140,7 @@ export const postReservation = async (req: Request, res: Response) => {
         await ReservationModel.createReservationsSlotsList(trx, slots)
         await trx.commit()
 
-        sendMail(recordQuery.email, reservation.confirmation_code,
+        sendMail(userQuery.email, reservation.confirmation_code,
             reservation.code, sessionQuery.play_title, sessionQuery.timestamp,
             sessionQuery.auditorium_title)
 

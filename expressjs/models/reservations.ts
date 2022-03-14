@@ -48,9 +48,11 @@ export const getReservationForUpdate = (idReservation: number) => {
 export const getReservedSlots = (idReservation: number): Promise<SlotInterface[]> => {
     return KnexConnection<SlotInterface>('reservations_slots as rs')
         .select(
-            'slots.id', 'slots.price', 
-            'seats.number as seat_number', 'rows.number as row_number',
-            'a.title as auditorium_title'
+            KnexConnection.ref('id').withSchema('slots'),
+            KnexConnection.ref('price').withSchema('slots'),
+            KnexConnection.ref('number').withSchema('seats').as('seat_number'),
+            KnexConnection('number').withSchema('rows').as('row_number'),
+            KnexConnection('title').withSchema('a').as('auditorium_title')
         )
         .where('rs.id_reservation', idReservation)
         .join('slots', 'slots.id', 'rs.id_slot')

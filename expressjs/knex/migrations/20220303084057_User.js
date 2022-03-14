@@ -3,12 +3,16 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-    return knex.schema.withSchema('public').createTable('records', tbl => {
+    return knex.schema.withSchema('public').createTable('users', tbl => {
         tbl.increments('id').primary()
         tbl.string('email', 70).notNullable()
+        tbl.string('password').notNullable()
+        tbl.string('token').notNullable()
         tbl.string('firstname', 70).nullable().defaultTo('Не указано')
         tbl.string('middlename', 70).nullable().defaultTo('Не указано')
         tbl.string('lastname', 70).nullable().defaultTo('Не указано')
+        tbl.integer('id_role').notNullable()
+            .references('id').inTable('roles')
     })
 };
 
@@ -17,5 +21,5 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-    return knex.schema.withSchema('public').dropTableIfExists('records')
+    return knex.schema.withSchema('public').dropTableIfExists('users')
 };
