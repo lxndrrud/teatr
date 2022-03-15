@@ -1,21 +1,27 @@
 import { Request, Response, NextFunction } from "express"
 import { ErrorInterface } from "../interfaces/errors"
-import { KnexConnection } from "../knex/connections"
+import { verify } from "jsonwebtoken"
 
-
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.token
+export const basicAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    const token = req.headers['auth-token']
     if (!token) {
         const error: ErrorInterface = {
             message: 'Вы не авторизованы!'
         }
         res.status(403).send(error)
     }
-    else {
-        if (checkToken()) next()
+    try {
+        const decoded = verify(`${token}`, `${process.env.SECRET_KEY}`);
+        req.user = {...JSON.parse(JSON.stringify(decoded))}
+        next()
+    } catch (e) {
+        const error: ErrorInterface = {
+            message: 'Неверный токен!'
+        }
+        res.status(401).send(error)
     }
 }
 
-const checkToken = (): boolean => {
-    return true
+export const adminAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    
 }

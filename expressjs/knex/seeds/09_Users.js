@@ -7,9 +7,11 @@
     await knex('users').del();
     await knex('users').insert([
         {
-            password: 'hashed_pass',
-            id_record: 1,
-            id_role: 1
+            // '123456'
+            password: '$2a$10$.7sVPajSPR/JTa4g8tWToe7O31A0Gz4EnL6TA8BzMaD8IAxXbFqwS',
+            firstname: 'Тест',
+            email: 'lxndrrud@yandex.ru',
+            id_role: 3
         }
     ]);
 };

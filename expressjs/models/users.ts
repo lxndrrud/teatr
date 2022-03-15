@@ -1,11 +1,15 @@
 import { Knex } from "knex"
 import { KnexConnection } from "../knex/connections"
-import { UserBaseInterface, UserInterface, UserLoginInterface } from "../interfaces/users"
-import { hash, compareSync } from 'bcryptjs';
+import { UserBaseInterface, UserInterface, UserRequestOption } from "../interfaces/users"
+import { hash } from 'bcryptjs';
+import { sign } from 'jsonwebtoken'
 
+export const getUsers = () => {
+    return KnexConnection<UserInterface>('users')
+}
 
 export const getUser = (idUser: number) => {
-    return KnexConnection<UserInterface>('users')
+    return getUsers()
         .where({
             id: idUser
         })
@@ -13,23 +17,39 @@ export const getUser = (idUser: number) => {
 }
 
 export const getUserByEmail = (email: string) => {
-    return KnexConnection<UserInterface>('users')
+    return getUsers()
         .where({
             email
         })
         .first()
 }
 
-export const createUser = (trx: Knex.Transaction, payload: UserBaseInterface) => {
+export const createUser = async (trx: Knex.Transaction, payload: UserBaseInterface) => {
+    payload.password = await hash(payload.password, 10)
     return trx<UserInterface>('users')
         .insert(payload)
         .returning('*')
 }
 
-export const loginUser = async (payload: UserLoginInterface): Promise<string | null> => {
-    const user = await getUserByEmail(payload.email)
-    if (user && compareSync(user.password, payload.password)) {
-        return user.token
+export const generateToken = (trx: Knex.Transaction, user: UserInterface) => {
+    const userRequestOption: UserRequestOption = {
+        id: user.id,
+        email: user.email,
+        id_role: user.id_role
     }
-    return null
+    const token = sign(
+        userRequestOption, 
+        `${process.env.SECRET_KEY}`,
+        {
+            expiresIn: "2h",
+        }
+    )
+    return trx<UserInterface>('users')
+        .where({
+            id: user.id
+        })
+        .update({
+            token
+        })
+        .returning('*')
 }

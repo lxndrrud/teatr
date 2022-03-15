@@ -7,7 +7,7 @@ exports.up = function(knex) {
         tbl.increments('id').primary()
         tbl.string('email', 70).notNullable()
         tbl.string('password').notNullable()
-        tbl.string('token').notNullable()
+        tbl.string('token').nullable()
         tbl.string('firstname', 70).nullable().defaultTo('Не указано')
         tbl.string('middlename', 70).nullable().defaultTo('Не указано')
         tbl.string('lastname', 70).nullable().defaultTo('Не указано')

@@ -5,6 +5,7 @@ import { CronJob } from 'cron';
 import { processTime } from './cron/cron';
 import { prefixRouter } from './routes/prefixRouter';
 import { logger } from './middlewares/logs';
+import { UserRequestOption } from './interfaces/users';
 
 const app = express();
 const PORT = 8081;
@@ -14,7 +15,13 @@ app.use(logger)
 
 app.use('/expressjs', prefixRouter);
 
-
+declare global {
+    namespace Express {
+        export interface Request {
+            user?: UserRequestOption
+        }
+    }
+}
 
 const cronProcess = new CronJob('* * * * *', processTime)
 

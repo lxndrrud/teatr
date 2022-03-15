@@ -12,7 +12,7 @@
             code: '123456',
             confirmation_code: '123456',
             id_session: 2,
-            id_record: 1
+            id_user: 1
         }
     ]);
 };

@@ -38,13 +38,17 @@ export const getSingleReservation = async (req: Request, res: Response) => {
 
 export const postReservation = async (req: Request, res: Response) => {
     try {
+        if (!req.user) {
+            res.status(401).end()
+            return
+        }
         const requestBody: ReservationPostEmailInterface = {...req.body}
         const sessionQuery = await SessionModel.getSingleSession(requestBody.id_session)
         if (!sessionQuery) {
             res.status(404).end()
             return
         }
-        // Проверка на доступность сеанcf
+        // * Проверка на доступность сеанcа
         if (sessionQuery.is_locked === true) {
             const error: ErrorInterface = {
                 message:'Бронь на сеанс закрыта!'
@@ -53,7 +57,7 @@ export const postReservation = async (req: Request, res: Response) => {
             return
         }
 
-        // Проверка на максимум слотов
+        // * Проверка на максимум слотов
         if (requestBody.slots.length > sessionQuery.max_slots) {
             const error: ErrorInterface = {
                 message:'Превышено максимальное количество мест для брони!'
@@ -62,7 +66,7 @@ export const postReservation = async (req: Request, res: Response) => {
             return
         }
 
-        // Проверка на коллизию выбранных слотов и уже забронированных
+        // * Проверка на коллизию выбранных слотов и уже забронированных
         const reservedSlotsQuery = await SessionModel.getReservedSlots(sessionQuery.id, 
             sessionQuery.id_price_policy)
 
@@ -76,19 +80,17 @@ export const postReservation = async (req: Request, res: Response) => {
                     break
                 }
             }
-            if(slotCheck.length > 0) break
-        }
-        
-        if (slotCheck.length > 0) {
-            const error: ErrorInterface = {
-                message: 'Одно из мест на сеанс уже забронировано. Пожалуйста, обновите страницу.'
+            if(slotCheck.length > 0) {
+                const error: ErrorInterface = {
+                    message: 'Одно из мест на сеанс уже забронировано. Пожалуйста, обновите страницу.'
+                }
+                res.status(409).send(error)
+                return
             }
-            res.status(409).send(error)
-            return
-        } 
+        }
 
-        // Проверка наличия почтовой записи
-        let userQuery = await UserModel.getUser(requestBody.id_user)
+        // * Проверка наличия почтовой записи
+        let userQuery = await UserModel.getUser(req.user?.id)
         const trx = await KnexConnection.transaction()
         if (!userQuery) {
             const error: ErrorInterface = {
@@ -96,27 +98,6 @@ export const postReservation = async (req: Request, res: Response) => {
             }
             res.status(404).send(error)
             return
-
-            //* Было до реворка Record в User
-            /*
-            const payload: RecordBaseInterface = {
-                email: requestBody.email
-            }
-            recordQuery = (await RecordModel.createRecord(trx, payload))[0]
-            */
-
-            /*
-            const visitorRoleQuery = await RoleModel.getVisitorRole()
-            if (!visitorRoleQuery) res.status(500).end()
-            else {
-                const userPayload: UserBaseInterface = {
-                    password: `${generateCode()}${generateCode()}`,
-                    id_record: recordQuery.id,
-                    id_role: visitorRoleQuery.id
-                }
-                const user = (await UserModel.createUser(trx, userPayload))[0]
-            }
-            */
         }
 
         const reservationPayload: ReservationBaseInterface = {
@@ -193,11 +174,18 @@ export const deleteReservation = async (req: Request, res: Response) => {
         res.status(400).end()
         return
     }
+    // * Get reservation from database
     const reservation = await ReservationModel.getSingleReservation(idReservation)
     if (!reservation) {
         res.status(404).end()
         return
     }
+    // * Check if user deletes his own reservation
+    if (reservation.id_user !== req.user?.id) {
+        res.status(403).end()
+        return
+    }
+    // * Transaction: delete reservation slots, then delete reservation
     const trx = await KnexConnection.transaction()
     try {
         await ReservationModel.deleteReservationsSlots(trx, idReservation)
