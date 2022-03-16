@@ -2,10 +2,11 @@ import { Request, Response } from "express";
 import { KnexConnection } from "../knex/connections";
 import * as UserModel from "../models/users"
 import * as RoleModel from "../models/roles"
-import { UserBaseInterface, UserLoginInterface, UserRegisterInterface } 
+import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface } 
     from "../interfaces/users";
 import { ErrorInterface } from "../interfaces/errors";
-import { hash, compareSync } from "bcryptjs";
+import { compareSync } from "bcryptjs";
+import { ExecException } from "child_process";
 
 export const registerUser = async (req: Request, res: Response) => {
     // * Parse request body
@@ -58,31 +59,35 @@ export const registerUser = async (req: Request, res: Response) => {
 }
 
 export const loginUser = async (req: Request, res: Response) => {
+    // * Request body check
     let requestBody: UserLoginInterface
     try {
+        if (!isUserLoginInterface(req.body)) throw 'Неверное тело запроса!'
         requestBody = {...req.body}
-    } catch (e) {
+    } catch (e: any) {
         const error: ErrorInterface = {
-            message: 'Неверное тело запроса!'
+            message: e
         }
         res.status(400).send(error)
         return
     }
+    // * Get user and compare password input with hash in database
     const user = await UserModel.getUserByEmail(requestBody.email)
     if (!(user && compareSync(requestBody.password, user.password))) {
-        const myHash = await hash(requestBody.password, 10)
-        console.log(user, myHash)
         const error: ErrorInterface = {
             message: 'Пользователь с такими входными данными не найден!'
         }
         res.status(401).send(error)
         return
     }
+    // * Transaction: generate new token for user and send it
     const trx = await KnexConnection.transaction()
     try {
         const fetchedUser = (await UserModel.generateToken(trx, user))[0]
         await trx.commit()
-        res.status(200).send(fetchedUser)
+        res.status(200).send({
+            token: fetchedUser.token
+        })
     } catch (e) {
         await trx.rollback()
         console.log(e)

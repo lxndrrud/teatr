@@ -27,6 +27,8 @@
    "main": "index.ts",
    "scripts": {
       "build": "tsc --project ./",
+      "db-up": "npx knex migrate:latest --env main && npx knex seed:run --env main",
+      "db-down": "npx knex migrate:rollback --env main",
       "dev": "nodemon index.ts",
       "test": "test",
       "start": "ts-node database/index.ts",

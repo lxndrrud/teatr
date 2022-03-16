@@ -1,5 +1,5 @@
 import MainLayout from '../../layouts/MainLayout/MainLayout'
-import ReservationForm from '../../components/ReservationForm/ReservationForm';
+import ReservationForm from '../../components/Forms/ReservationForm/ReservationForm';
 import { fetchPlay } from "../../store/actions/playAction"
 import { fetchSession } from '../../store/actions/sessionAction'
 import { useRouter } from 'next/router';
@@ -29,6 +29,8 @@ const SessionReservation = () => {
 
   useEffect(() => {
     if(router.isReady) {
+      if (!(store.getState().user.token && store.getState().user.token.length > 0))
+        router.push('/login')
       const { sessionid } = router.query
       if (sessionid)
         dispatch(fetchSession(sessionid))

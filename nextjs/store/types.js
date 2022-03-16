@@ -19,3 +19,8 @@ export const SHOW_CONFIRMATION_FIELD = 'SHOW_CONFIRMATION_FIELD'
 export const HIDE_CONFIRMATION_FIELD = 'HIDE_CONFIRMATION_FIELD'
 export const ADD_SLOT = 'ADD_SLOT'
 export const DELETE_SLOT = 'DELETE_SLOT'
+
+// User Reducer
+export const REGISTER = 'REGISTER'
+export const LOG_IN = 'LOG_IN'
+export const LOG_OUT = 'LOG_OUT'
