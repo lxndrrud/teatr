@@ -9,6 +9,7 @@ export const basicAuthMiddleware = (req: Request, res: Response, next: NextFunct
             message: 'Вы не авторизованы!'
         }
         res.status(403).send(error)
+        return
     }
     try {
         const decoded = verify(`${token}`, `${process.env.SECRET_KEY}`);
@@ -19,6 +20,7 @@ export const basicAuthMiddleware = (req: Request, res: Response, next: NextFunct
             message: 'Неверный токен!'
         }
         res.status(401).send(error)
+        return
     }
 }
 
