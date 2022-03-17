@@ -1,9 +1,12 @@
 
+--- Backend logs
+sudo docker logs -f expressjs
+
  --- Change directory 
 cd Desktop/repos/teatr
 
 --- Up containers with seeds
-cd Desktop/repos/teatr || sudo docker-compose up -d && sudo docker exec -it expressjs npm run db-down && sudo docker exec -it expressjs npm run db-up
+(cd Desktop/repos/teatr && sudo docker-compose up -d && sudo docker exec -it expressjs npm run db-down && sudo docker exec -it expressjs npm run db-up) || (cd Desktop/repos/teatr || sudo docker-compose up -d && sudo docker exec -it expressjs npm run db-down && sudo docker exec -it expressjs npm run db-up)
 
 --- Down containers
-cd Desktop/repos/teatr || sudo docker-compose down
+(cd Desktop/repos/teatr && sudo docker-compose down) || (cd Desktop/repos/teatr || sudo docker-compose down)
