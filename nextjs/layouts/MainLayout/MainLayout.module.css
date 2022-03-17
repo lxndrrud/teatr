@@ -29,6 +29,10 @@
     font-weight: bold;
 }
 
+.logOutButton {
+    margin: 0;
+}
+
 @media (max-width: 550px) {
     .layout {
         margin: 0px 0px;

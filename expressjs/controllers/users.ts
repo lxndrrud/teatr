@@ -6,7 +6,6 @@ import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLog
     from "../interfaces/users";
 import { ErrorInterface } from "../interfaces/errors";
 import { compareSync } from "bcryptjs";
-import { ExecException } from "child_process";
 
 export const registerUser = async (req: Request, res: Response) => {
     // * Parse request body

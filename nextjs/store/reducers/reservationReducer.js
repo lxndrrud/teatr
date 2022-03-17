@@ -6,7 +6,8 @@ import {
     POST_RESERVATION,
     ERROR_RESERVATION,
     ADD_SLOT,
-    DELETE_SLOT
+    DELETE_SLOT,
+    ERROR_CONFIRMATION
 } from "../types"
 
 
@@ -40,6 +41,8 @@ const reservationReducer = (state = defaultState, action) => {
         case HIDE_CONFIRMATION_FIELD:
             return {...state, showConfirmationField: action.payload }
         case ERROR_RESERVATION:
+            return {...state, error: action.payload }
+        case ERROR_CONFIRMATION:
             return {...state, error: action.payload }
         case ADD_SLOT:
             return {...state, slots: [...state.slots, action.payload ]}

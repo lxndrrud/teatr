@@ -1,5 +1,6 @@
 import { 
     ERROR_RESERVATION,
+    ERROR_CONFIRMATION,
     POST_RESERVATION,
     SET_RESERVATION, 
     SHOW_CONFIRMATION_FIELD, 
@@ -8,14 +9,15 @@ import {
     DELETE_SLOT
 } from "../types"
 
-export const postReservation = ({ email, id_session, slots }) => async dispatch => {
+export const postReservation = ({ token, id_session, slots }) => async dispatch => {
     let body = {
-        email, id_session, slots
+        id_session, slots
     }
     let resp = await fetch('/expressjs/reservations', {
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'auth-token': token
         }, 
         method: 'POST', 
         body: JSON.stringify(body)
@@ -37,6 +39,32 @@ export const postReservation = ({ email, id_session, slots }) => async dispatch 
                 payload: body.message
             })
 
+}
+
+export const confirmReservation = ({ token, id_reservation, code, id_session, confirmation_code }) => async dispatch => {
+    // send request and redirect 
+    console.log(token, id_reservation, code, id_session, confirmation_code)
+    const body = {
+        confirmation_code: confirmation_code,
+        code: code,
+        id_session: id_session
+    }
+    const url = `/expressjs/reservations/${id_reservation.toString()}/confirm/` 
+    const resp = await fetch(url, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'auth-token': token
+        }, 
+        method: 'PUT', 
+        body: JSON.stringify(body)
+    })
+    resp.status == 200 
+        ? dispatch(hideConfirmationField())
+        : dispatch({
+            type: ERROR_CONFIRMATION,
+            payload: body.message
+        })
 }
 
 

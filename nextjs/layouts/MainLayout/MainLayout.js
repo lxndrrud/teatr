@@ -29,7 +29,6 @@ export default function MainLayout({ children, title }) {
     return (
     <div className={styles.layout}>
         { 
-            //* !tokenCheck()
             !isLoggedIn
             ? (
                 <nav className={styles.navLinks}>
@@ -46,7 +45,8 @@ export default function MainLayout({ children, title }) {
                     <CustomLink destination="/repertoire" text="Репертуар" />
                     <CustomLink destination="/schedule" text="Расписание" />
                     <CustomButton type="submit" value="Выйти" 
-                        onClickHook={logOutOnClick}/>
+                        onClickHook={logOutOnClick}
+                        styleClass={styles.logOutButton}/>
                 </nav>
             )
         }

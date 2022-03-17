@@ -6,7 +6,7 @@ export const reservationsRouter = Router()
 
 
 reservationsRouter.route('/')
-    .post(postReservation)
+    .post(basicAuthMiddleware, postReservation)
 reservationsRouter.route('/:idReservation')
     .get(basicAuthMiddleware, getSingleReservation)
     .delete(basicAuthMiddleware, deleteReservation)

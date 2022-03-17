@@ -37,7 +37,7 @@ const SessionFilter = () => {
     return (
         <div>
             <select onChange={syncDate}>
-                <option value="None">Дата</option>
+                <option value="None">Все даты</option>
                 {filterOptions.dates && filterOptions.dates.map(item => (
                   <option value={item.date}>
                     {item.extended_date}
@@ -45,7 +45,7 @@ const SessionFilter = () => {
                 ))}
             </select>
             <select onChange={syncAuditoriumTitle}>
-                <option value="None">Название зала</option>
+                <option value="None">Все залы</option>
                 {filterOptions.auditoriums && filterOptions.auditoriums.map(item => (
                     <option value={item.title}>
                         {item.title}
@@ -53,7 +53,7 @@ const SessionFilter = () => {
                 ))}
             </select>
             <select onChange={syncPlayTitle}>
-                <option value="None">Название спектакля</option>
+                <option value="None">Все спектакли</option>
 
                 {filterOptions.plays && filterOptions.plays.map(item => (
                     <option value={item.title}>

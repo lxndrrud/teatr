@@ -1,9 +1,12 @@
 import React from 'react'
 import styles from "./BaseForm.module.css"
 
-const BaseForm = ({ children }) => {
+const BaseForm = ({ children, styleClass }) => {
+  let customStyleClass = `${styles.formContainer}`
+  if (styleClass)
+    customStyleClass = `${customStyleClass} ${styleClass}`
   return (
-    <form className={styles.formContainer}>
+    <form className={customStyleClass}>
         { children }
     </form>
   )

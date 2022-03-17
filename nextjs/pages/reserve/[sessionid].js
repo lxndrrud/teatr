@@ -21,10 +21,7 @@ const SessionReservation = () => {
   const router = useRouter()
   const dispatch = useDispatch()
   const store = useStore()
-  /*
-  let [session, setSession] = useState({})
-  let [play, setPlay] = useState({})
-  */
+  
   
 
   useEffect(() => {
@@ -34,11 +31,7 @@ const SessionReservation = () => {
       const { sessionid } = router.query
       if (sessionid)
         dispatch(fetchSession(sessionid))
-    }
-    
-    //setSession(store.getState().session.session)
-    //console.log(session)
-      
+    }  
   }, [router.isReady])
 
   const sessionFromStore = useSelector(state => state.session.session)
@@ -46,8 +39,6 @@ const SessionReservation = () => {
   useEffect( () => {
     if (sessionFromStore.id_play)
       dispatch(fetchPlay(sessionFromStore.id_play))
-    //setPlay(store.getState().play.play)
-    //console.log(play)
   }, [sessionFromStore])
 
   const playFromStore = useSelector(state => state.play.play)
