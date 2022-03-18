@@ -12,15 +12,15 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendMail = (email: string, confirmation_code: string,
-    code: string, play_title: string, timestamp: string, 
+    id_reservation: number, play_title: string, timestamp: string, 
     auditorium_title: string) => {
     return transporter.sendMail({
         from: '"Театр на Оборонной" <for.mailing.shop@gmail.com>',
         to: email,
         subject: "Бронь в театре на Оборонной",
         text: 
+        `Номер вашей брони (понадобится на кассе): ${id_reservation.toString()}\n` +
         `Код подтверждения вашей брони: ${confirmation_code}\n` +
-        `Код идентификации вашей брони (понадобится на кассе и при управлении бронью): ${code}\n` +
         `Название представления: ${play_title}\n` +
         `Дата и время представления: ${extendedTimestamp(timestamp)}\n` +
         `Название зала: ${auditorium_title}\n`,

@@ -7,7 +7,8 @@ import {
     HIDE_CONFIRMATION_FIELD,
     ADD_SLOT,
     DELETE_SLOT,
-    ERROR_SET_DEFAULT
+    ERROR_SET_DEFAULT,
+    FETCH_RESERVATIONS
 } from "../types"
 
 export const postReservation = ({ token, id_session, slots }) => async dispatch => {
@@ -129,5 +130,18 @@ export const deleteSlot = (payload) => async dispatch => {
 export const errorSetDefault = () => async dispatch => {
     dispatch({
         type: ERROR_SET_DEFAULT
+    })
+}
+
+export const fetchUserReservations = (token) => async dispatch => {
+    const resp = await fetch('/expressjs/reservations/user', {
+        headers: {
+            'auth-token': token
+        }
+    })
+    const body = await resp.json()
+    dispatch({
+        type: FETCH_RESERVATIONS,
+        payload: body
     })
 }

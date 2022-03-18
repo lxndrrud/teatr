@@ -1,5 +1,5 @@
-import { CustomLink } from '../../components/CustomLink/CustomLink'
-import CustomButton from '../../components/CustomButton/CustomButton'
+import { CustomLink } from '../../components/UI/CustomLink/CustomLink'
+import CustomButton from '../../components/UI/CustomButton/CustomButton'
 import { useDispatch, useSelector } from 'react-redux'
 import styles from './MainLayout.module.css'
 import { logOut } from '../../store/actions/userAction'
@@ -44,6 +44,7 @@ export default function MainLayout({ children, title }) {
                     <CustomLink destination="/" text="Главная" />
                     <CustomLink destination="/repertoire" text="Репертуар" />
                     <CustomLink destination="/schedule" text="Расписание" />
+                    <CustomLink destination="/control" text="Управление бронями" />
                     <CustomButton type="submit" value="Выйти" 
                         onClickHook={logOutOnClick}
                         styleClass={styles.logOutButton}/>

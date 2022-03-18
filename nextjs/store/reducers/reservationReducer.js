@@ -8,23 +8,21 @@ import {
     ADD_SLOT,
     DELETE_SLOT,
     ERROR_CONFIRMATION,
-    ERROR_SET_DEFAULT
+    ERROR_SET_DEFAULT,
+    FETCH_RESERVATIONS
 } from "../types"
 
 
 const defaultState = {
-    reservation: {
+    /*
+    {
         id: 0,
-        code: '',
         confirmation_code: '',
         id_session: 0
-    },
-    reservations: [{
-        id: 0,
-        code: '',
-        confirmation_code: '',
-        id_session: 0
-    }],
+    }
+    */
+    reservation: undefined,
+    reservations: [],
     slots: [],
     loading: false,
     error: null,
@@ -33,8 +31,10 @@ const defaultState = {
 
 const reservationReducer = (state = defaultState, action) => {
     switch (action.type) {
+        case FETCH_RESERVATIONS:
+            return {...state, reservations: action.payload }
         case POST_RESERVATION:
-            return {...state, reservation: action.payload}
+            return {...state, reservation: action.payload }
         case SET_RESERVATION:
             return {...state, reservation: action.payload }
         case SHOW_CONFIRMATION_FIELD:
@@ -48,9 +48,9 @@ const reservationReducer = (state = defaultState, action) => {
         case ERROR_SET_DEFAULT:
             return {...state, error: defaultState.error }
         case ADD_SLOT:
-            return {...state, slots: [...state.slots, action.payload ]}
+            return {...state, slots: [...state.slots, action.payload ] }
         case DELETE_SLOT:
-            return {...state, slots: state.slots.filter(slot => slot.id != action.payload.id)}
+            return {...state, slots: state.slots.filter(slot => slot.id != action.payload.id) }
         default:
             return state
     }

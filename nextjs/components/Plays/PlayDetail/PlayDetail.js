@@ -1,5 +1,5 @@
 import styles from "./PlayDetail.module.css"
-import SessionList from "../../components/SessionList/SessionList"
+import SessionList from "../../Sessions/SessionList/SessionList"
 
 
 

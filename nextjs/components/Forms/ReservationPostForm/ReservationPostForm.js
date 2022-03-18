@@ -1,8 +1,8 @@
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { showConfirmationField, postReservation, errorSetDefault } from '../../../store/actions/reservationAction'
 import { fetchSlotsBySession } from "../../../store/actions/sessionAction"
-import CustomButton from '../../CustomButton/CustomButton'
-import SlotsFieldMainAuditorium from "../../SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
+import CustomButton from '../../UI/CustomButton/CustomButton'
+import SlotsFieldMainAuditorium from "../../Slots/SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
 import React, { useEffect, useState } from 'react'
 import styles from "./ReservationPostForm.module.css"
 

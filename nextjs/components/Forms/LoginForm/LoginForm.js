@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import BaseForm from '../BaseForm/BaseForm'
-import CustomInput from "../../CustomInput/CustomInput"
-import CustomButton from "../../CustomButton/CustomButton"
+import CustomInput from "../../UI/CustomInput/CustomInput"
+import CustomButton from "../../UI/CustomButton/CustomButton"
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
 import { logIn } from "../../../store/actions/userAction"

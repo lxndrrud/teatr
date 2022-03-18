@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/router'
 import BaseForm from '../BaseForm/BaseForm'
-import CustomInput from '../../CustomInput/CustomInput'
-import CustomButton from '../../CustomButton/CustomButton'
+import CustomInput from '../../UI/CustomInput/CustomInput'
+import CustomButton from '../../UI/CustomButton/CustomButton'
 import { register } from '../../../store/actions/userAction'
 import styles from "./RegisterForm.module.css"
 

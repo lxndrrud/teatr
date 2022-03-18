@@ -23,6 +23,21 @@ export const getSingleReservation = (idReservation: number): Promise<Reservation
         .first()
 }
 
+export const getUserReservations = (idUser: number): Promise<ReservationWithoutSlotsInterface[]> => {
+    return KnexConnection<ReservationWithoutSlotsInterface>('reservations as r')
+        .select(
+            KnexConnection.ref('*').withSchema('r'), 
+            KnexConnection.ref('id').withSchema('s').as('id_session'), 
+            KnexConnection.ref('id').withSchema('u').as('id_user'),
+            KnexConnection.ref('timestamp').withSchema('s').as('session_timestamp'),
+            KnexConnection.ref('title').withSchema('p').as('play_title')
+        )
+        .where('u.id', idUser)
+        .join('users as u', 'u.id', 'r.id_user')
+        .join('sessions as s', 's.id', 'r.id_session')
+        .join('plays as p', 'p.id', 's.id_play')
+}
+
 export const getReservationForDelete = (code: string, idSession: number): Promise<ReservationWithoutSlotsInterface | undefined> => {
     return KnexConnection('reservations')
         .select(

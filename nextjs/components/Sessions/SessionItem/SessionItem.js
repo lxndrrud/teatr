@@ -1,4 +1,4 @@
-import { ButtonLink } from "../ButtonLink/ButtonLink"
+import { ButtonLink } from "../../UI/ButtonLink/ButtonLink"
 import styles from './SessionItem.module.css'
 
 export default function SessionItem({ session }) {

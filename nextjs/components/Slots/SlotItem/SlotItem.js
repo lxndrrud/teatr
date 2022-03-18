@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useState } from 'react'
-import { addSlot, deleteSlot } from '../../store/actions/reservationAction'
+import { addSlot, deleteSlot } from '../../../store/actions/reservationAction'
 import styles from './SlotItem.module.css'
 
 const SlotItem = ({ slotObject }) => { 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import CustomButton from "../../CustomButton/CustomButton"
+import CustomButton from "../../UI/CustomButton/CustomButton"
 import { fetchFilteredSessions, fetchSessionFilterOptions } from "../../../store/actions/sessionAction"
 
 const SessionFilter = () => {

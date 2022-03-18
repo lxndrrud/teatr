@@ -127,22 +127,9 @@ export const postReservation = async (req: Request, res: Response) => {
     // * Транзакция: создание брони и забронированных мест
     const trx = await KnexConnection.transaction()
 
-    /*
-    // * Проверка наличия почтовой записи
-    let userQuery = await UserModel.getUser(req.user.id)
-    if (!userQuery) {
-        const error: ErrorInterface = {
-            message: 'Пользователь не найден'
-        }
-        res.status(404).send(error)
-        return
-    }
-    */
-
     const reservationPayload: ReservationBaseInterface = {
         id_user: req.user.id,
         id_session: sessionQuery.id,
-        code: generateCode(),
         confirmation_code: generateCode()
     }
 
@@ -162,13 +149,12 @@ export const postReservation = async (req: Request, res: Response) => {
 
     // * Отправка письма на почту с инофрмацией о сеансе и кодом подтверждения
     sendMail(req.user.email, reservation.confirmation_code,
-        reservation.code, sessionQuery.play_title, sessionQuery.timestamp,
+        reservation.id, sessionQuery.play_title, sessionQuery.timestamp,
         sessionQuery.auditorium_title)
 
     res.status(201).send({
         id: reservation.id,
         id_session: sessionQuery.id,
-        //code: reservation.code
     })
 }
 
@@ -253,6 +239,9 @@ export const confirmReservation = async (req: Request, res: Response) => {
     }
 }
 
+/**
+ * * Удаление брони (уровень 'Посетитель')
+ */
 export const deleteReservation = async (req: Request, res: Response) => {
     // * Проверка на авторизованность
     if (!req.user) {
@@ -300,5 +289,26 @@ export const deleteReservation = async (req: Request, res: Response) => {
         await trx.rollback()
         console.log(e)
         res.status(500).send(error)
+    }
+}
+
+export const getUserReservations = async (req: Request, res: Response) => {
+    // * Проверка на авторизованность
+    if (!req.user) {
+        res.status(401).send(<ErrorInterface>{
+            message: 'Ошибка авторизации!'
+        })
+        return
+    }
+
+    try {
+        const reservationsQuery = await ReservationModel.getUserReservations(req.user.id) 
+        res.status(200).send(reservationsQuery)
+    } catch (e) {
+        console.log(e)
+        res.status(500).send(<ErrorInterface>{
+            message: 'Внутренняя ошибка сервера!'
+        })
+        return
     }
 }

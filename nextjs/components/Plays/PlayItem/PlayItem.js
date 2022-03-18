@@ -1,5 +1,5 @@
 import styles from './PlayItem.module.css'
-import { ButtonLink } from '../ButtonLink/ButtonLink'
+import { ButtonLink } from '../../UI/ButtonLink/ButtonLink'
 
 
 export default function PlayItem({play}) {

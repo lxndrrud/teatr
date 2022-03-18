@@ -1,7 +1,7 @@
 import React from 'react'
 import { useRouter } from "next/router"
-import CustomInput from '../../CustomInput/CustomInput'
-import CustomButton from '../../CustomButton/CustomButton'
+import CustomInput from '../../UI/CustomInput/CustomInput'
+import CustomButton from '../../UI/CustomButton/CustomButton'
 import { confirmReservation, errorSetDefault, hideConfirmationField } from "../../../store/actions/reservationAction"
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { useState } from 'react'

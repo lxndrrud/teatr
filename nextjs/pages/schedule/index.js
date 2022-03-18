@@ -1,5 +1,5 @@
 import MainLayout from "../../layouts/MainLayout/MainLayout"
-import SessionList from "../../components/SessionList/SessionList"
+import SessionList from "../../components/Sessions/SessionList/SessionList"
 import SessionFilter from "../../components/Filters/SessionFilter/SessionFilter"
 import { fetchSessions } from '../../store/actions/sessionAction'
 import { useEffect } from "react"

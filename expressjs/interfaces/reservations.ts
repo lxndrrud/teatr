@@ -41,7 +41,7 @@ export function isReservationConfirmationInterface (obj: any): obj is Reservatio
 export interface ReservationBaseInterface {
     id_session: number
     id_user: number
-    code: string
+    //code: string
     confirmation_code: string
 }
 

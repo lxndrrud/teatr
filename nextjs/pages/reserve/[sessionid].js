@@ -16,8 +16,10 @@ const SessionReservation = () => {
 
   useEffect(() => {
     if(router.isReady) {
-      if (!(store.getState().user.token && store.getState().user.token.length > 0))
+      if (!(store.getState().user.token && store.getState().user.token.length > 0)) {
         router.push('/login')
+        return
+      }
       const { sessionid } = router.query
       if (sessionid)
         dispatch(fetchSession(sessionid))
