@@ -6,7 +6,8 @@ import {
     SHOW_CONFIRMATION_FIELD, 
     HIDE_CONFIRMATION_FIELD,
     ADD_SLOT,
-    DELETE_SLOT
+    DELETE_SLOT,
+    ERROR_SET_DEFAULT
 } from "../types"
 
 export const postReservation = ({ token, id_session, slots }) => async dispatch => {
@@ -29,7 +30,6 @@ export const postReservation = ({ token, id_session, slots }) => async dispatch 
                 type: POST_RESERVATION,
                 payload: {
                     id: body.id,
-                    code: body.code,
                     id_session: body.id_session
                 }
             })
@@ -41,12 +41,15 @@ export const postReservation = ({ token, id_session, slots }) => async dispatch 
 
 }
 
-export const confirmReservation = ({ token, id_reservation, code, id_session, confirmation_code }) => async dispatch => {
+export const confirmReservation = ({ 
+    token, 
+    id_reservation, 
+    id_session, 
+    confirmation_code 
+}) => async dispatch => {
     // send request and redirect 
-    console.log(token, id_reservation, code, id_session, confirmation_code)
     const body = {
         confirmation_code: confirmation_code,
-        code: code,
         id_session: id_session
     }
     const url = `/expressjs/reservations/${id_reservation.toString()}/confirm/` 
@@ -59,12 +62,17 @@ export const confirmReservation = ({ token, id_reservation, code, id_session, co
         method: 'PUT', 
         body: JSON.stringify(body)
     })
-    resp.status == 200 
-        ? dispatch(hideConfirmationField())
-        : dispatch({
+    
+    if (resp.status == 200)
+        dispatch(hideConfirmationField())
+    else {
+        const responseBody = await resp.json()
+        console.log(responseBody, resp.status)
+        dispatch({
             type: ERROR_CONFIRMATION,
             payload: body.message
         })
+    }
 }
 
 
@@ -73,7 +81,6 @@ export const setReservation = (payload) => async dispatch => {
         type: SET_RESERVATION,
         payload: {
             id: payload.id,
-            code: payload.code,
             confirmation_code: payload.confirmation_code,
             id_session: payload.id_session
         }
@@ -116,5 +123,11 @@ export const deleteSlot = (payload) => async dispatch => {
             price: payload.price,
             id: payload.id
         }
+    })
+}
+
+export const errorSetDefault = () => async dispatch => {
+    dispatch({
+        type: ERROR_SET_DEFAULT
     })
 }

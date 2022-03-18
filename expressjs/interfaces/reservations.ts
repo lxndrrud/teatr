@@ -22,7 +22,7 @@ export function isReservationCreateInterface (obj: any): obj is ReservationCreat
  */
 export interface ReservationConfirmationInterface {
     id_session: number
-    code: string
+    // code: string
     confirmation_code: string
 }
 

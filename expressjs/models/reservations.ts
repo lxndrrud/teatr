@@ -12,12 +12,12 @@ export const getSingleReservation = (idReservation: number): Promise<Reservation
         .select(
             KnexConnection.ref('*').withSchema('r'), 
             KnexConnection.ref('id').withSchema('s').as('id_session'), 
-            KnexConnection.ref('id').withSchema('rec').as('id_record'),
+            KnexConnection.ref('id').withSchema('u').as('id_user'),
             KnexConnection.ref('timestamp').withSchema('s').as('session_timestamp'),
             KnexConnection.ref('title').withSchema('p').as('play_title')
         )
         .where('r.id', idReservation)
-        .join('records as rec', 'rec.id', 'r.id_record')
+        .join('users as u', 'u.id', 'r.id_user')
         .join('sessions as s', 's.id', 'r.id_session')
         .join('plays as p', 'p.id', 's.id_play')
         .first()
@@ -28,13 +28,13 @@ export const getReservationForDelete = (code: string, idSession: number): Promis
         .select(
             KnexConnection.ref('*').withSchema('r'), 
             KnexConnection.ref('id').withSchema('s').as('id_session'), 
-            KnexConnection.ref('id').withSchema('rec').as('id_record'),
+            KnexConnection.ref('id').withSchema('u').as('id_user'),
             KnexConnection.ref('timestamp').withSchema('s').as('session_timestamp'),
             KnexConnection.ref('title').withSchema('p').as('play_title')
         )
         .where('s.id', idSession)
         .andWhere('r.code', code)
-        .join('records as rec', 'rec.id', 'r.id_record')
+        .join('users as u', 'u.id', 'u.id_user')
         .join('sessions as s', 's.id', 'r.id_session')
         .join('plays as p', 'p.id', 's.id_play')
         .first()
@@ -68,9 +68,17 @@ export const createReservation = (trx: Knex.Transaction, payload: ReservationBas
 }
 
 export const updateReservation = (trx: Knex.Transaction, payload: ReservationDatabaseInterface) => {
-    return trx('reservations')
-        .where('reservations.id', payload.id)
-        .update(payload)
+    return trx<ReservationDatabaseInterface>('reservations')
+        .where('id', payload.id)
+        .update({
+            //'code': payload.code,
+            'is_paid': payload.is_paid,
+            'is_confirmed': payload.is_confirmed,
+            'confirmation_code': payload.confirmation_code,
+            'created_at': payload.created_at,
+            'id_session': payload.id_session,
+            'id_user': payload.id_user,
+        })
 }
 
 

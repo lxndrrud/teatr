@@ -1,16 +1,16 @@
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { showConfirmationField, postReservation } from '../../../store/actions/reservationAction'
+import { showConfirmationField, postReservation, errorSetDefault } from '../../../store/actions/reservationAction'
 import { fetchSlotsBySession } from "../../../store/actions/sessionAction"
 import CustomButton from '../../CustomButton/CustomButton'
 import SlotsFieldMainAuditorium from "../../SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import styles from "./ReservationPostForm.module.css"
 
 
 const ReservationPostForm = ({ session }) => {
     const dispatch = useDispatch()
     const store = useStore()
-
-    let errorReservation = useSelector(state => state.reservation.error)
+    let [error, setError] = useState()
 
     useEffect(() => {
         if (session.id)
@@ -28,8 +28,17 @@ const ReservationPostForm = ({ session }) => {
             id_session: session.id,
             slots: store.getState().reservation.slots
         }))
+        .then(() => {
+            const errorObj  = store.getState().reservation.error
+            if (errorObj === null) 
+                dispatch(showConfirmationField())
+            else {
+                setError(errorObj)
+                dispatch(errorSetDefault())
+            }
+        })
 
-        if (errorReservation === null) dispatch(showConfirmationField())
+        //if (errorReservation === null) dispatch(showConfirmationField())
     }
 
     return (
@@ -40,7 +49,7 @@ const ReservationPostForm = ({ session }) => {
                 : 
                     <div></div>
             }
-
+            <div className={styles.errorMessage}>{error}</div>
             <CustomButton type="submit" value="Подтвердить" onClickHook={postEmailReservation} />
         </>
     )

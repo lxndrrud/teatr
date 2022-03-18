@@ -7,16 +7,6 @@ import { useDispatch, useSelector, useStore} from 'react-redux'
 //import store from "../../store/store"
 import { useEffect, useState } from 'react'
 
-/*
-const getSession = () => { 
-  return store.getState().session.session
-}
-
-const getPlay = () => {
-  return store.getState().play.play
-}
-*/
-
 const SessionReservation = () => {
   const router = useRouter()
   const dispatch = useDispatch()

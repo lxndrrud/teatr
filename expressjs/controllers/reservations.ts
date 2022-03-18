@@ -168,7 +168,7 @@ export const postReservation = async (req: Request, res: Response) => {
     res.status(201).send({
         id: reservation.id,
         id_session: sessionQuery.id,
-        code: reservation.code
+        //code: reservation.code
     })
 }
 
@@ -195,7 +195,7 @@ export const confirmReservation = async (req: Request, res: Response) => {
 
     // * Проверка тела запроса
     let requestBody: ReservationConfirmationInterface
-    if (isReservationConfirmationInterface(req.body)) {
+    if (!isReservationConfirmationInterface(req.body)) {
         res.status(400).send(<ErrorInterface>{
             message: 'Ошибка в теле запроса!'
         })

@@ -2,7 +2,7 @@ import React from 'react'
 import { useRouter } from "next/router"
 import CustomInput from '../../CustomInput/CustomInput'
 import CustomButton from '../../CustomButton/CustomButton'
-import { confirmReservation } from "../../../store/actions/reservationAction"
+import { confirmReservation, errorSetDefault, hideConfirmationField } from "../../../store/actions/reservationAction"
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { useState } from 'react'
 
@@ -15,7 +15,6 @@ const ReservationConfirmationForm = () => {
     let [confirmationErrorMessage, setConfirmationErrorMessage] = useState('')
 
     let reservation = useSelector(state => state.reservation.reservation)
-    console.log(reservation)
 
     const syncConfirmationCode = (e) => {
         setConfirmationCode(e.target.value)
@@ -25,24 +24,28 @@ const ReservationConfirmationForm = () => {
         const body = {
             token, 
             id_reservation: reservation.id,
-            code: reservation.code,
+            // code: reservation.code,
             id_session: parseInt(reservation.id_session),
             confirmation_code: confirmationCode
         }
 
-        await dispatch(confirmReservation(body))
-
-        if (store.getState().reservation.error) {
-            setConfirmationErrorMessage(store.getState().reservation.error)
-            setConfirmationCode('')
-        } 
-        else {
-            router.push('/')
-        }
+        dispatch(confirmReservation(body))
+        .then(() => {
+            const errorObj = store.getState().reservation.error
+            if (errorObj !== null) {
+                setConfirmationErrorMessage(errorObj)
+                setConfirmationCode('')
+                dispatch(errorSetDefault())
+            } 
+            else {
+                router.push('/')
+            }
+        })
     }
     return (
         <>
-            <CustomInput type="text" name="confirmationCode" value={confirmationCode} placeholder="Код подтверждения"
+            <CustomInput type="text" name="confirmationCode" value={confirmationCode} 
+                placeholder="Код подтверждения"
                 onChange={syncConfirmationCode} 
                 description="Введите код подтверждения, который вы получили по почте" 
                 errorMessage={confirmationErrorMessage} />
