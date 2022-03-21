@@ -302,8 +302,16 @@ export const getUserReservations = async (req: Request, res: Response) => {
     }
 
     try {
-        const reservationsQuery = await ReservationModel.getUserReservations(req.user.id) 
-        res.status(200).send(reservationsQuery)
+        const reservationsQuery = await ReservationModel.getUserReservations(req.user.id)
+        let result: ReservationInterface[] = []  
+        for (let reservation of reservationsQuery) {
+            const slots = await ReservationModel.getReservedSlots(reservation.id)
+            result.push(<ReservationInterface>{
+                ...reservation,
+                slots: slots
+            })
+        }
+        res.status(200).send(result)
     } catch (e) {
         console.log(e)
         res.status(500).send(<ErrorInterface>{

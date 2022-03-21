@@ -11,7 +11,7 @@ const ReservationsItem = ({ reservation }) => {
             <p className={styles.playTitle}>{reservation.play_title}</p>
             <p className={styles.auditoriumTitle}>{reservation.auditorium_title}</p>
             <p className={styles.sessionTimestamp}>{reservation.session_timestamp}</p>
-            <ButtonLink destination={destinationURL} text="Оформить бронь"/> 
+            <ButtonLink destination={destinationURL} text="Удалить бронь"/> 
         </div>
     )
 }

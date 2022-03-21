@@ -66,8 +66,8 @@ export const getReservedSlots = (idReservation: number): Promise<SlotInterface[]
             KnexConnection.ref('id').withSchema('slots'),
             KnexConnection.ref('price').withSchema('slots'),
             KnexConnection.ref('number').withSchema('seats').as('seat_number'),
-            KnexConnection('number').withSchema('rows').as('row_number'),
-            KnexConnection('title').withSchema('a').as('auditorium_title')
+            KnexConnection.ref('number').withSchema('rows').as('row_number'),
+            KnexConnection.ref('title').withSchema('a').as('auditorium_title')
         )
         .where('rs.id_reservation', idReservation)
         .join('slots', 'slots.id', 'rs.id_slot')
