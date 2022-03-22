@@ -8,7 +8,8 @@ import {
     ADD_SLOT,
     DELETE_SLOT,
     ERROR_SET_DEFAULT,
-    FETCH_RESERVATIONS
+    FETCH_RESERVATIONS,
+    DELETE_RESERVATION
 } from "../types"
 
 export const postReservation = ({ token, id_session, slots }) => async dispatch => {
@@ -143,5 +144,24 @@ export const fetchUserReservations = (token) => async dispatch => {
     dispatch({
         type: FETCH_RESERVATIONS,
         payload: body
+    })
+}
+
+export const deleteReservation = ({
+    token, 
+    id_reservation
+}) => async dispatch => {
+    const body = { token, id_reservation }
+    const resp = await fetch("/expressjs/reservations/"+id_reservation.toString(), {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'auth-token': token
+        }
+    })
+    dispatch({
+        type: DELETE_RESERVATION,
+        payload: { id: id_reservation }
     })
 }

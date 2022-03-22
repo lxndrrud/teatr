@@ -3,6 +3,7 @@ export interface SlotInterface {
     price: number
     seat_number: number
     row_number: number
+    row_title: string
     auditorium_title: string
 }
 

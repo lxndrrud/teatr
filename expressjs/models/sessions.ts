@@ -86,7 +86,8 @@ export const getSlotsByPricePolicy = (idPricePolicy: number): Promise<SlotWithRo
             KnexConnection.ref('number').withSchema('seats').as('seat_number'), 
             KnexConnection.ref('number').withSchema('rows').as('row_number'), 
             KnexConnection.ref('price').withSchema('slots'),
-            KnexConnection.ref('title').withSchema('a').as('auditorium_title')
+            KnexConnection.ref('title').withSchema('a').as('auditorium_title'),
+            KnexConnection.ref('title').withSchema('rows').as('row_title')
         )
         .where('slots.id_price_policy', idPricePolicy)
         .join('seats', 'seats.id', 'slots.id_seat')
@@ -101,7 +102,8 @@ export const getReservedSlots = (idSession: number, idPricePolicy: number): Prom
             KnexConnection.ref('number').withSchema('seats').as('seat_number'), 
             KnexConnection.ref('number').withSchema('rows').as('row_number'), 
             KnexConnection.ref('price').withSchema('slots'),
-            KnexConnection.ref('title').withSchema('a').as('auditorium_title')
+            KnexConnection.ref('title').withSchema('a').as('auditorium_title'),
+            KnexConnection.ref('title').withSchema('rows').as('row_title')
         )
         .where('slots.id_price_policy', idPricePolicy)
         .andWhere('r.id_session', idSession)

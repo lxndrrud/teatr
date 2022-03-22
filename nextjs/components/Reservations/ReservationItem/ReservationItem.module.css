@@ -1,0 +1,28 @@
+.reservationItem {
+    display: flex;
+    flex-direction: column;
+    max-width: 30%;
+    background-color: #ffb703;
+    margin: 1.5% 1.5%;
+    border-radius: 10px;
+    padding: 1%;
+}
+
+.textLabel {
+    font-size: 24px;
+    margin-bottom: 0.5%;
+}
+
+
+.deleteReservationButton {
+    max-width: 100%;
+    min-width: fit-content;
+    background-color: #c1121f;
+    border-color: #c1121f;
+    color: #F1FAEE;
+}
+
+.deleteReservationButton:hover {
+    background-color: #780000;
+    border-color: #780000;
+}

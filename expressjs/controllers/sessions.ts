@@ -150,6 +150,7 @@ export const getSlotsForSessions = async (req: Request, res: Response) => {
                     row_number: slot.row_number,
                     price: slot.price,
                     auditorium_title: slot.auditorium_title,
+                    row_title: slot.row_title,
                     is_reserved: true
                 }
                 slots.push(item)
@@ -161,6 +162,7 @@ export const getSlotsForSessions = async (req: Request, res: Response) => {
                     row_number: slot.row_number,
                     price: slot.price,
                     auditorium_title: slot.auditorium_title,
+                    row_title: slot.row_title,
                     is_reserved: false
                 }
                 slots.push(item)

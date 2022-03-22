@@ -60,7 +60,9 @@ export interface ReservationDatabaseInterface extends ReservationBaseInterface {
  */
 export interface ReservationWithoutSlotsInterface extends ReservationDatabaseInterface{
     session_timestamp: string
+    auditorium_title: string
     play_title: string
+    total_cost: number
 }
 
 /**

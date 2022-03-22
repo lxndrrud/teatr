@@ -9,7 +9,8 @@ import {
     DELETE_SLOT,
     ERROR_CONFIRMATION,
     ERROR_SET_DEFAULT,
-    FETCH_RESERVATIONS
+    FETCH_RESERVATIONS,
+    DELETE_RESERVATION
 } from "../types"
 
 
@@ -51,6 +52,10 @@ const reservationReducer = (state = defaultState, action) => {
             return {...state, slots: [...state.slots, action.payload ] }
         case DELETE_SLOT:
             return {...state, slots: state.slots.filter(slot => slot.id != action.payload.id) }
+        case DELETE_RESERVATION:
+            return {...state, reservations: state.reservations
+                .filter(reservation => reservation.id != action.payload.id) 
+            }
         default:
             return state
     }

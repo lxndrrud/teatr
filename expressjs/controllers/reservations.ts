@@ -12,6 +12,7 @@ import * as SessionModel from "../models/sessions"
 // * Утилиты
 import { generateCode } from "../utils/code"
 import { sendMail } from "../utils/email"
+import { extendedTimestamp } from '../utils/timestamp'
 
 /**
  * * Получение записи брони (уровень 'Посетитель')
@@ -44,8 +45,14 @@ export const getSingleReservation = async (req: Request, res: Response) => {
             res.status(403).end()
             return
         }
+
+        // * Редактирование формата timestamp`ов
+        reservationQuery.session_timestamp = extendedTimestamp(reservationQuery.session_timestamp)
+        reservationQuery.created_at = extendedTimestamp(reservationQuery.created_at)
         
         const slots = await ReservationModel.getReservedSlots(idReservation)
+
+        reservationQuery.total_cost = ReservationModel.calculateReservationTotalCost(slots)
 
         const reservation: ReservationInterface = {...reservationQuery, slots}
         res.status(200).send(reservation)
@@ -292,6 +299,9 @@ export const deleteReservation = async (req: Request, res: Response) => {
     }
 }
 
+/**
+ * * Получение броней пользователя
+ */
 export const getUserReservations = async (req: Request, res: Response) => {
     // * Проверка на авторизованность
     if (!req.user) {
@@ -305,7 +315,17 @@ export const getUserReservations = async (req: Request, res: Response) => {
         const reservationsQuery = await ReservationModel.getUserReservations(req.user.id)
         let result: ReservationInterface[] = []  
         for (let reservation of reservationsQuery) {
+            // * Редактирование формата timestamp`ов
+            reservation.session_timestamp = extendedTimestamp(reservation.session_timestamp)
+            reservation.created_at = extendedTimestamp(reservation.created_at)
+
+            // * Поиск разервированных мест
             const slots = await ReservationModel.getReservedSlots(reservation.id)
+
+            // * Расчет стоимости брони
+            reservation.total_cost = ReservationModel.calculateReservationTotalCost(slots)
+
+            
             result.push(<ReservationInterface>{
                 ...reservation,
                 slots: slots

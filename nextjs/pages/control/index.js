@@ -12,7 +12,6 @@ export default function ControlIndex() {
     useEffect(() => {
         if (router.isReady) {
             const token = store.getState().user.token
-            console.log(token)
             if(!(token && token.length > 0)) {
                 router.push('/login')
                 return
