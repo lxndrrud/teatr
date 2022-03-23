@@ -10,7 +10,9 @@
 }
 
 .reservedContainer {
-    background-color: #E63946;
+    background-color: #E63946; 
+    /* background-color: red; */
+    color: #F1FAEE;
 }
 
 .freeContainer {

@@ -1,5 +1,5 @@
 import MainLayout from "../../layouts/MainLayout/MainLayout"
-import PlayDetail from "../../components/PlayDetail/PlayDetail"
+import PlayDetail from "../../components/Plays/PlayDetail/PlayDetail"
 import { fetchPlay } from "../../store/actions/playAction"
 import { fetchSessionsByPlay } from "../../store/actions/sessionAction"
 import { useDispatch, useSelector } from 'react-redux'

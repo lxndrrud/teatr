@@ -12,7 +12,8 @@
 .infoCard {
     display: flex;
     flex-direction: column;
-    background-color: #ffb703;
+    /* background-color: #ffb703; */
+    background-color: #ffbf69;
     max-width: 600px;
     min-width: 100%;
     padding: 1rem;
