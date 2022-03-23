@@ -5,6 +5,9 @@ sudo docker logs -f expressjs
  --- Change directory 
 cd Desktop/repos/teatr
 
+--- Up container without seeds
+(cd Desktop/repos/teatr && sudo docker-compose up -d) || (cd Desktop/repos/teatr || sudo docker-compose up -d)
+
 --- Up containers with seeds
 (cd Desktop/repos/teatr && sudo docker-compose up -d && sudo docker exec -it expressjs npm run db-down && sudo docker exec -it expressjs npm run db-up) || (cd Desktop/repos/teatr || sudo docker-compose up -d && sudo docker exec -it expressjs npm run db-down && sudo docker exec -it expressjs npm run db-up)
 
