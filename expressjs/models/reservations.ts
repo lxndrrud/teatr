@@ -41,6 +41,7 @@ export const getUserReservations = (idUser: number): Promise<ReservationWithoutS
             KnexConnection.ref('title').withSchema('a').as('auditorium_title')
         )
         .where('u.id', idUser)
+        .andWhere('s.is_locked', false)
         .join('users as u', 'u.id', 'r.id_user')
         .join('sessions as s', 's.id', 'r.id_session')
         .join('plays as p', 'p.id', 's.id_play')
