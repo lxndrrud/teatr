@@ -45,6 +45,10 @@ export interface ReservationBaseInterface {
     confirmation_code: string
 }
 
+export interface ReservationBaseWithoutConfirmationInterface extends ReservationBaseInterface {
+    is_confirmed: true
+}
+
 /**
  * * Интерфейс записи брони с таблицы брони из базы данных 
  */

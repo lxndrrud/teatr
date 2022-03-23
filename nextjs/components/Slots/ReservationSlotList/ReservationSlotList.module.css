@@ -1,0 +1,28 @@
+.slotsList {
+    display: flexbox;
+    flex-direction: column;
+    width: 100%;
+}
+
+.slotsListLabel {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 0.5%;
+    margin-bottom: 0.25%;
+}
+
+@media (max-width: 1550px) {
+    .slotsList {
+        display: flex;
+        flex-direction: row;
+    }
+    .slotsListLabel {
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 1250px) {
+    .slotsListLabel {
+        margin-top: 0.5%;
+    }
+}

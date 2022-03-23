@@ -36,21 +36,19 @@ const LoginForm = () => {
     }
     return (
         <BaseForm styleClass={styles.loginForm}>
-            <div className={styles.itemsContainer}>
-                <CustomInput type="email" name="email" value={email} 
-                    onChange={syncEmail} 
-                    description="Почта" 
-                    required />
+            <CustomInput type="email" name="email" value={email} 
+                onChange={syncEmail} 
+                description="Почта" 
+                required />
 
-                <CustomInput type="password" name="password" value={password} 
-                    onChange={syncPassword} 
-                    description="Пароль" 
-                    required />
+            <CustomInput type="password" name="password" value={password} 
+                onChange={syncPassword} 
+                description="Пароль" 
+                required />
 
-                <CustomButton type="submit" value="Подтвердить" 
-                    onClickHook={sendPostRequest}
-                    styleClass={styles.fullWidthButton} />
-            </div>
+            <CustomButton type="submit" value="Подтвердить" 
+                onClickHook={sendPostRequest}
+                styleClass={styles.fullWidthButton} />
         </BaseForm>
     )
 }

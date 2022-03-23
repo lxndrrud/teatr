@@ -47,36 +47,34 @@ const RegisterForm = () => {
     }
     return (
         <BaseForm styleClass={styles.registerForm}>
-            <div className={styles.itemsContainer}>
-                <CustomInput type="email" name="email" value={email} 
-                    onChange={syncEmail} 
-                    description="Почта" 
-                    required />
+            <CustomInput type="email" name="email" value={email} 
+                onChange={syncEmail} 
+                description="Почта" 
+                required />
 
-                <CustomInput type="password" name="password" value={password} 
-                    onChange={syncPassword} 
-                    description="Пароль" 
-                    required />
+            <CustomInput type="password" name="password" value={password} 
+                onChange={syncPassword} 
+                description="Пароль" 
+                required />
 
-                <CustomInput type="text" name="firstname" value={firstname} 
-                    onChange={syncFirstname} 
-                    description="Имя (необязательно)"
-                    inputStyleClass={styles.notRequiredInputBorderColor} />
+            <CustomInput type="text" name="firstname" value={firstname} 
+                onChange={syncFirstname} 
+                description="Имя (необязательно)"
+                inputStyleClass={styles.notRequiredInputBorderColor} />
 
-                <CustomInput type="text" name="middlename" value={middlename} 
-                    onChange={syncMiddlename} 
-                    description="Отчество (необязательно)"
-                    inputStyleClass={styles.notRequiredInputBorderColor}  />
+            <CustomInput type="text" name="middlename" value={middlename} 
+                onChange={syncMiddlename} 
+                description="Отчество (необязательно)"
+                inputStyleClass={styles.notRequiredInputBorderColor}  />
 
-                <CustomInput type="text" name="lastname" value={lastname} 
-                    onChange={syncLastname} 
-                    description="Фамилия (необязательно)" 
-                    inputStyleClass={styles.notRequiredInputBorderColor}  />
+            <CustomInput type="text" name="lastname" value={lastname} 
+                onChange={syncLastname} 
+                description="Фамилия (необязательно)" 
+                inputStyleClass={styles.notRequiredInputBorderColor}  />
 
-                <CustomButton type="submit" value="Подтвердить" 
-                    onClickHook={sendPostRequest}
-                    styleClass={styles.fullWidthButton} />
-            </div>
+            <CustomButton type="submit" value="Подтвердить" 
+                onClickHook={sendPostRequest}
+                styleClass={styles.fullWidthButton} />
         </BaseForm>
     )
 }

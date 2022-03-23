@@ -7,8 +7,11 @@ import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLog
 import { ErrorInterface } from "../interfaces/errors";
 import { compareSync } from "bcryptjs";
 
+/**
+ * * Контроллер регистрации пользователя
+ */
 export const registerUser = async (req: Request, res: Response) => {
-    // * Parse request body
+    // * Парсинг тела запроса
     let requestBody: UserRegisterInterface
     try {
         requestBody = {...req.body}
@@ -19,7 +22,7 @@ export const registerUser = async (req: Request, res: Response) => {
         res.status(400).send(error)
         return
     }
-    // * Existing user check
+    // * Проверка на существующего пользователя
     const existingUserCheck = await UserModel.getUserByEmail(requestBody.email)
     if (existingUserCheck) {
         const error: ErrorInterface = {
@@ -28,7 +31,7 @@ export const registerUser = async (req: Request, res: Response) => {
         res.status(409).send(error)
         return
     }
-    // * Get visitor role from database
+    // * Получаем роль "Посетитель" из базы данных
     const visitorRole = await RoleModel.getVisitorRole()
     if (!visitorRole) {
         console.log('register user -> Не найдена роль посетителя!')
@@ -39,7 +42,7 @@ export const registerUser = async (req: Request, res: Response) => {
         return
     }
     const fetchedRequestBody: UserBaseInterface = {...requestBody, id_role: visitorRole.id}
-    // * Transaction: create user, then give him a token
+    // * Транзакция: создать пользователя, затем дать ему токен
     const trx = await KnexConnection.transaction()
     try {
         let user = (await UserModel.createUser(trx, fetchedRequestBody))[0]
@@ -57,8 +60,11 @@ export const registerUser = async (req: Request, res: Response) => {
     }
 }
 
+/**
+ * * Контроллер логина пользователя
+ */
 export const loginUser = async (req: Request, res: Response) => {
-    // * Request body check
+    // * Проверка тела запроса
     let requestBody: UserLoginInterface
     try {
         if (!isUserLoginInterface(req.body)) throw 'Неверное тело запроса!'
@@ -70,7 +76,7 @@ export const loginUser = async (req: Request, res: Response) => {
         res.status(400).send(error)
         return
     }
-    // * Get user and compare password input with hash in database
+    // * Получение пользователя и сравнение введенного пароля с хэшем в базе
     const user = await UserModel.getUserByEmail(requestBody.email)
     if (!(user && compareSync(requestBody.password, user.password))) {
         const error: ErrorInterface = {
@@ -79,7 +85,7 @@ export const loginUser = async (req: Request, res: Response) => {
         res.status(401).send(error)
         return
     }
-    // * Transaction: generate new token for user and send it
+    // * Транзакция: сгенерировать токен для пользователя, сохранить в БД и отправить его 
     const trx = await KnexConnection.transaction()
     try {
         const fetchedUser = (await UserModel.generateToken(trx, user))[0]
@@ -98,6 +104,9 @@ export const loginUser = async (req: Request, res: Response) => {
     }  
 }
 
+/**
+ * * Получить всех пользователей с БД
+ */
 export const getAllUsers = async (req: Request, res: Response) => {
     const query = await UserModel.getUsers()
     res.status(200).send(query)

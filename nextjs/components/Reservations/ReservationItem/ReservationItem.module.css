@@ -8,6 +8,12 @@
     padding: 1%;
 }
 
+.flexWidthContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;      
+}
+
 .textLabel {
     font-size: 24px;
     margin-bottom: 0.5%;
@@ -25,4 +31,35 @@
 .deleteReservationButton:hover {
     background-color: #780000;
     border-color: #780000;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.rowContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.columnContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 1550px) {
+    .reservationItem {
+        max-width: 100%;
+        width: 100%;
+        display: flex;
+    }
+    .flexWidthContainer {
+        flex-direction: row;
+    }
+}
+
+@media (max-width: 1250px) {
+    .flexWidthContainer {
+        flex-direction: column;
+    }
 }

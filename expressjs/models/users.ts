@@ -53,3 +53,25 @@ export const generateToken = (trx: Knex.Transaction, user: UserInterface) => {
         })
         .returning('*')
 }
+
+export const isUserAdmin = async (idUser: number): Promise<boolean> => {
+    const query = await KnexConnection<UserInterface>('users')
+        .where('users.id', idUser)
+        .andWhere('r.title', 'Администратор')
+        .join('roles as r', 'r.id', 'users.id_role')
+        .first()
+    
+    if (!query) return false 
+    return true
+}
+
+export const isUserVisitor = async (idUser: number): Promise<boolean> => {
+    const query = await KnexConnection<UserInterface>('users')
+        .where('users.id', idUser)
+        .andWhere('r.title', 'Посетитель')
+        .join('roles as r', 'r.id', 'users.id_role')
+        .first()
+    
+    if (!query) return false 
+    return true
+}

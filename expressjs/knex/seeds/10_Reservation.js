@@ -9,7 +9,7 @@
         {
             is_paid: false,
             is_confirmed: true,
-            code: '123456',
+            //code: '123456',
             confirmation_code: '123456',
             id_session: 2,
             id_user: 1

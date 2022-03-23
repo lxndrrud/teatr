@@ -1,21 +1,17 @@
 .slotItem {
     display: flex;
     flex-direction: column;
-    padding: 0.5rem;
+    padding: 0.3rem;
+    border: 1px solid black;
+    border-radius: 10px;
+    margin: 1%;
+    width: 100%;
 }
 
-.rowTitle {
+.textLabel {
     font-size: 16px;
 }
 
-.rowNumber {
-    font-size: 16px;
-}
-
-.seatNumber {
-    font-size: 16px;
-}
-
-.price {
-    font-size: 16px;
+.bold {
+    font-weight: bold;
 }

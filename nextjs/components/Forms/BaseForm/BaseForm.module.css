@@ -1,0 +1,21 @@
+.formContainer {
+    width: 100%;
+    justify-content: start;
+    margin: 0;
+}
+
+.itemsContainer {
+    width: 30%;
+    margin: 0 35%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+
+@media (max-width: 800px) {
+    .itemsContainer {
+        margin: 0;
+        width: 100%;
+    }
+}

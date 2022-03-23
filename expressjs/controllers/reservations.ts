@@ -5,10 +5,11 @@ import { Request, Response } from "express"
 import { SlotInterface, ReservationsSlotsBaseInterface } from "../interfaces/slots"
 import { ErrorInterface } from "../interfaces/errors"
 import { ReservationBaseInterface, ReservationInterface, 
-    ReservationCreateInterface, ReservationDatabaseInterface, ReservationConfirmationInterface, isReservationCreateInterface, isReservationConfirmationInterface, ReservationWithoutSlotsInterface} from "../interfaces/reservations"
+    ReservationCreateInterface, ReservationDatabaseInterface, ReservationConfirmationInterface, isReservationCreateInterface, isReservationConfirmationInterface, ReservationWithoutSlotsInterface, ReservationBaseWithoutConfirmationInterface} from "../interfaces/reservations"
 // * Модели
 import * as ReservationModel from "../models/reservations"
 import * as SessionModel from "../models/sessions"
+import * as UserModel from "../models/users"
 // * Утилиты
 import { generateCode } from "../utils/code"
 import { sendMail } from "../utils/email"
@@ -63,12 +64,23 @@ export const getSingleReservation = async (req: Request, res: Response) => {
 }
 
 /**
- * * Создание брони (уровень 'Посетитель') 
+ * * Создание брони (уровень 'Посетитель', 'Кассир', 'Администратор') 
  */
 export const postReservation = async (req: Request, res: Response) => {
     // * Проверка авторизации
     if (!req.user) {
         res.status(401).end()
+        return
+    }
+
+    // * Проверка "является ли пользователь посетителем?"
+    let isUserVisitor: boolean
+    try {
+        isUserVisitor = !(await UserModel.isUserVisitor(req.user.id))
+    } catch (e) {
+        res.status(500).send(<ErrorInterface>{
+            message: "Внутренняя ошибка сервера!"
+        })
         return
     }
 
@@ -81,7 +93,7 @@ export const postReservation = async (req: Request, res: Response) => {
         res.status(400).send(error)
         return
     }
-    requestBody = {...req.body}
+    requestBody = { ...req.body }
 
     // * Проверка наличия сеанса
     const sessionQuery = await SessionModel.getSingleSession(requestBody.id_session)
@@ -102,7 +114,18 @@ export const postReservation = async (req: Request, res: Response) => {
     // * Проверка на максимум слотов
     if (requestBody.slots.length > sessionQuery.max_slots) {
         const error: ErrorInterface = {
-            message:'Превышено максимальное количество мест для брони!'
+            message: 'Превышено максимальное количество мест для брони!'
+        }
+        res.status(403).send(error)
+        return
+    }
+
+    // * Проверка на наличие брони на сеанс у пользователя с ролью 'Посетитель'
+    const checkVisitorReservation = await ReservationModel
+        .checkVisitorHasReservedSession(req.user.id, requestBody.id_session)
+    if (isUserVisitor && checkVisitorReservation) {
+        const error: ErrorInterface = {
+            message: "Пользователь уже имеет брони на данный сеанс!"
         }
         res.status(403).send(error)
         return
@@ -134,14 +157,28 @@ export const postReservation = async (req: Request, res: Response) => {
     // * Транзакция: создание брони и забронированных мест
     const trx = await KnexConnection.transaction()
 
-    const reservationPayload: ReservationBaseInterface = {
-        id_user: req.user.id,
-        id_session: sessionQuery.id,
-        confirmation_code: generateCode()
+    let reservation: ReservationDatabaseInterface
+    if (isUserVisitor) {
+        const reservationPayload: ReservationBaseInterface = {
+            id_user: req.user.id,
+            id_session: sessionQuery.id,
+            confirmation_code: generateCode()
+        }
+    
+        reservation = (await ReservationModel.createReservation(trx, 
+            reservationPayload))[0]
     }
-
-    const reservation = (await ReservationModel.createReservation(trx, 
-        reservationPayload))[0]
+    else {
+        const reservationPayload: ReservationBaseWithoutConfirmationInterface = {
+            id_user: req.user.id,
+            id_session: sessionQuery.id,
+            confirmation_code: generateCode(),
+            is_confirmed: true
+        }
+        reservation = (await ReservationModel.createReservation(trx, 
+            reservationPayload))[0]
+    }
+    
 
     let slots: ReservationsSlotsBaseInterface[] = []
     for (let slot of requestBody.slots) {
@@ -154,10 +191,11 @@ export const postReservation = async (req: Request, res: Response) => {
     await ReservationModel.createReservationsSlotsList(trx, slots)
     await trx.commit()
 
-    // * Отправка письма на почту с инофрмацией о сеансе и кодом подтверждения
-    sendMail(req.user.email, reservation.confirmation_code,
-        reservation.id, sessionQuery.play_title, sessionQuery.timestamp,
-        sessionQuery.auditorium_title)
+    // * Отправка письма на почту с информацией о сеансе и кодом подтверждения
+    if (isUserVisitor)
+        sendMail(req.user.email, reservation.confirmation_code,
+            reservation.id, sessionQuery.play_title, sessionQuery.timestamp,
+            sessionQuery.auditorium_title)
 
     res.status(201).send({
         id: reservation.id,

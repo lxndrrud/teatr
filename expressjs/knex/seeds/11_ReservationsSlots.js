@@ -9,7 +9,11 @@
         {
             id_slot: 1,
             id_reservation: 1
-        }
+        },
+        {
+            id_slot: 2,
+            id_reservation: 1
+        },
     ]);
 };
   
