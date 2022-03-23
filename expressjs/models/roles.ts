@@ -18,3 +18,4 @@ export const getRole = (idRole: number) => {
         .where('id', idRole)
         .first()
 }
+

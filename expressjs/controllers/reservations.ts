@@ -76,7 +76,7 @@ export const postReservation = async (req: Request, res: Response) => {
     // * Проверка "является ли пользователь посетителем?"
     let isUserVisitor: boolean
     try {
-        isUserVisitor = !(await UserModel.isUserVisitor(req.user.id))
+        isUserVisitor = await UserModel.isUserVisitor(req.user.id)
     } catch (e) {
         res.status(500).send(<ErrorInterface>{
             message: "Внутренняя ошибка сервера!"
