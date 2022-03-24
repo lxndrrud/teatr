@@ -13,7 +13,15 @@
             confirmation_code: '123456',
             id_session: 2,
             id_user: 1
-        }
+        },
+        {
+            is_paid: false,
+            is_confirmed: true,
+            //code: '123456',
+            confirmation_code: '123456',
+            id_session: 3,
+            id_user: 2
+        },
     ]);
 };
   

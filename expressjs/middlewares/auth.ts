@@ -24,6 +24,6 @@ export const basicAuthMiddleware = (req: Request, res: Response, next: NextFunct
     }
 }
 
-export const adminAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const staffAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
     
 }

@@ -14,6 +14,10 @@
             id_slot: 2,
             id_reservation: 1
         },
+        {
+            id_slot: 3,
+            id_reservation: 2
+        },
     ]);
 };
   

@@ -4,11 +4,13 @@ import { fetchSlotsBySession } from "../../../store/actions/sessionAction"
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import SlotsFieldMainAuditorium from "../../Slots/SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
 import React, { useEffect, useState } from 'react'
+import { useRouter } from "next/router"
 import styles from "./ReservationPostForm.module.css"
 
 
 const ReservationPostForm = ({ session }) => {
     const dispatch = useDispatch()
+    const router = useRouter()
     const store = useStore()
     let [error, setError] = useState()
 
@@ -29,12 +31,18 @@ const ReservationPostForm = ({ session }) => {
             slots: store.getState().reservation.slots
         }))
         .then(() => {
-            const errorObj  = store.getState().reservation.error
-            if (errorObj === null) 
-                dispatch(showConfirmationField())
-            else {
+            const errorObj = store.getState().reservation.error
+            const needConfirmation = store.getState().reservation.need_confirmation
+            if (errorObj !== null) {
                 setError(errorObj)
                 dispatch(errorSetDefault())
+            } else if (needConfirmation) {
+                dispatch(showConfirmationField())
+            }
+            else {
+                if (router.isReady) {
+                    router.push('/control')
+                }
             }
         })
 

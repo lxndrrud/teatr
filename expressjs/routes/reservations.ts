@@ -1,5 +1,5 @@
 import { getSingleReservation, postReservation, confirmReservation, deleteReservation,
-    getUserReservations } from "../controllers/reservations";
+    getReservations } from "../controllers/reservations";
 import { Router } from "express";
 import { basicAuthMiddleware } from "../middlewares/auth";
 
@@ -7,8 +7,12 @@ export const reservationsRouter = Router()
 
 
 reservationsRouter.route('/')
+    .get(basicAuthMiddleware, getReservations)
     .post(basicAuthMiddleware, postReservation)
-reservationsRouter.get('/user', basicAuthMiddleware, getUserReservations)
+/**
+ * * Использовал ранее, так как не было проверки роли
+ * reservationsRouter.get('/user', basicAuthMiddleware, getUserReservations)
+ */
 reservationsRouter.route('/:idReservation')
     .get(basicAuthMiddleware, getSingleReservation)
     .delete(basicAuthMiddleware, deleteReservation)

@@ -1,7 +1,7 @@
 import MainLayout from "../../layouts/MainLayout/MainLayout"
 import ReservationList from "../../components/Reservations/ReservationList/ReservationList"
 import { useDispatch, useSelector, useStore } from "react-redux"
-import { fetchUserReservations } from "../../store/actions/reservationAction"
+import { fetchReservations } from "../../store/actions/reservationAction"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
 
@@ -16,7 +16,7 @@ export default function ControlIndex() {
                 router.push('/login')
                 return
             }
-            dispatch(fetchUserReservations(token))
+            dispatch(fetchReservations(token))
         }
     })
 

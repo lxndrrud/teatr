@@ -9,54 +9,61 @@ import { ReservationBaseInterface, ReservationInterface,
 // * Модели
 import * as ReservationModel from "../models/reservations"
 import * as SessionModel from "../models/sessions"
-import * as UserModel from "../models/users"
+import * as RoleModel from "../models/roles"
 // * Утилиты
 import { generateCode } from "../utils/code"
 import { sendMail } from "../utils/email"
-import { extendedTimestamp } from '../utils/timestamp'
+import { RoleDatabaseInterface } from "../interfaces/roles"
 
 /**
  * * Получение записи брони (уровень 'Посетитель')
  */
 export const getSingleReservation = async (req: Request, res: Response) => {
-    // * Проверка авторизации
+    // Проверка авторизации
     if (!req.user) {
         res.status(401).end()
         return
     }
 
-    // * Проверка строки запроса
+    // Проверка строки запро
     const idReservation = parseInt(req.params.idReservation)
     if (!idReservation) {
         res.status(400).end()
         return
     }
 
+    // Проверка-получение роли
+    let userRole: RoleDatabaseInterface | undefined
+    try {
+        userRole = await RoleModel.getUserRole(req.user.id, req.user.id_role)
+    } catch (e) {
+        console.error(e)
+        res.status(500).send(<ErrorInterface>{
+            message: "Внутренняя ошибка сервера!"
+        })
+        return
+    }
+    if (!userRole) {
+        res.status(500).send(<ErrorInterface>{
+            message: "Не удалось определить роль!"
+        })
+        return
+    }
+
     
     try {
-        // * Проверка наличия записи в базе данных
+        // Проверка наличия записи в базе данных
         const reservationQuery = await ReservationModel.getSingleReservation(idReservation)
         if (!reservationQuery) {
             res.status(404).end()
             return
         }
 
-        // * Проверка на владельца брони
-        if (reservationQuery.id_user !== req.user.id) {
-            res.status(403).end()
-            return
-        }
+        const result = (await ReservationModel.getReservationsListFullInfo(req.user.id,
+            userRole,
+            [reservationQuery]))[0]
 
-        // * Редактирование формата timestamp`ов
-        reservationQuery.session_timestamp = extendedTimestamp(reservationQuery.session_timestamp)
-        reservationQuery.created_at = extendedTimestamp(reservationQuery.created_at)
-        
-        const slots = await ReservationModel.getReservedSlots(idReservation)
-
-        reservationQuery.total_cost = ReservationModel.calculateReservationTotalCost(slots)
-
-        const reservation: ReservationInterface = {...reservationQuery, slots}
-        res.status(200).send(reservation)
+        res.status(200).send(result)
     } catch (e) {
         console.log(e)
         res.status(500).end()
@@ -67,24 +74,30 @@ export const getSingleReservation = async (req: Request, res: Response) => {
  * * Создание брони (уровень 'Посетитель', 'Кассир', 'Администратор') 
  */
 export const postReservation = async (req: Request, res: Response) => {
-    // * Проверка авторизации
+    // Проверка авторизации
     if (!req.user) {
         res.status(401).end()
         return
     }
 
-    // * Проверка "является ли пользователь посетителем?"
-    let isUserVisitor: boolean
+    // Получение роли из БД
+    let userRole: RoleDatabaseInterface | undefined
     try {
-        isUserVisitor = await UserModel.isUserVisitor(req.user.id)
+        userRole = await RoleModel.getUserRole(req.user.id, req.user.id_role)
     } catch (e) {
         res.status(500).send(<ErrorInterface>{
             message: "Внутренняя ошибка сервера!"
         })
         return
     }
+    if (!userRole) {
+        res.status(500).send(<ErrorInterface>{
+            message: "Не удалось определить роль!"
+        })
+        return
+    }
 
-    // * Проверка тела запроса на соответствие интерфейсу
+    //  Проверка тела запроса на соответствие интерфейсу
     let requestBody: ReservationCreateInterface
     if (!isReservationCreateInterface(req.body)) {
         const error: ErrorInterface = {
@@ -95,14 +108,14 @@ export const postReservation = async (req: Request, res: Response) => {
     }
     requestBody = { ...req.body }
 
-    // * Проверка наличия сеанса
+    // Проверка наличия сеанса
     const sessionQuery = await SessionModel.getSingleSession(requestBody.id_session)
     if (!sessionQuery) {
         res.status(404).end()
         return
     }
 
-    // * Проверка на доступность сеанcа
+    // Проверка на доступность сеанcа
     if (sessionQuery.is_locked === true) {
         const error: ErrorInterface = {
             message:'Бронь на сеанс закрыта!'
@@ -111,7 +124,7 @@ export const postReservation = async (req: Request, res: Response) => {
         return
     }
 
-    // * Проверка на максимум слотов
+    // Проверка на максимум слотов
     if (requestBody.slots.length > sessionQuery.max_slots) {
         const error: ErrorInterface = {
             message: 'Превышено максимальное количество мест для брони!'
@@ -120,10 +133,10 @@ export const postReservation = async (req: Request, res: Response) => {
         return
     }
 
-    // * Проверка на наличие брони на сеанс у пользователя с ролью 'Посетитель'
+    // Проверка на наличие брони на сеанс у пользователя
     const checkVisitorReservation = await ReservationModel
-        .checkVisitorHasReservedSession(req.user.id, requestBody.id_session)
-    if (isUserVisitor && checkVisitorReservation) {
+        .checkUserHasReservedSession(req.user.id, requestBody.id_session)
+    if (!userRole.can_have_more_than_one_reservation_on_session && checkVisitorReservation) {
         const error: ErrorInterface = {
             message: "Пользователь уже имеет брони на данный сеанс!"
         }
@@ -131,7 +144,7 @@ export const postReservation = async (req: Request, res: Response) => {
         return
     }
 
-    // * Проверка на коллизию выбранных слотов и уже забронированных мест
+    // Проверка на коллизию выбранных слотов и уже забронированных мест
     const reservedSlotsQuery = await SessionModel.getReservedSlots(sessionQuery.id, 
         sessionQuery.id_price_policy)
 
@@ -154,11 +167,11 @@ export const postReservation = async (req: Request, res: Response) => {
         }
     }
 
-    // * Транзакция: создание брони и забронированных мест
+    // Транзакция: создание брони и забронированных мест
     const trx = await KnexConnection.transaction()
 
     let reservation: ReservationDatabaseInterface
-    if (isUserVisitor) {
+    if (!userRole.can_make_reservation_without_email) {
         const reservationPayload: ReservationBaseInterface = {
             id_user: req.user.id,
             id_session: sessionQuery.id,
@@ -192,7 +205,7 @@ export const postReservation = async (req: Request, res: Response) => {
     await trx.commit()
 
     // * Отправка письма на почту с информацией о сеансе и кодом подтверждения
-    if (isUserVisitor)
+    if (!userRole.can_make_reservation_without_email)
         sendMail(req.user.email, reservation.confirmation_code,
             reservation.id, sessionQuery.play_title, sessionQuery.timestamp,
             sessionQuery.auditorium_title)
@@ -200,6 +213,7 @@ export const postReservation = async (req: Request, res: Response) => {
     res.status(201).send({
         id: reservation.id,
         id_session: sessionQuery.id,
+        need_confirmation: !userRole.can_make_reservation_without_email
     })
 }
 
@@ -207,7 +221,7 @@ export const postReservation = async (req: Request, res: Response) => {
  * * Подтверждение брони (уровень 'Посетитель')
  */
 export const confirmReservation = async (req: Request, res: Response) => {
-    // * Проверка на авторизованность
+    // Проверка на авторизованность
     if (!req.user) {
         res.status(401).send(<ErrorInterface>{
             message: 'Ошибка авторизации!'
@@ -215,7 +229,7 @@ export const confirmReservation = async (req: Request, res: Response) => {
         return
     }
 
-    // * Проверка строки запроса
+    // Проверка строки запроса
     const idReservation = parseInt(req.params.idReservation)
     if (!idReservation) {
         res.status(400).send(<ErrorInterface>{
@@ -224,7 +238,7 @@ export const confirmReservation = async (req: Request, res: Response) => {
         return
     }
 
-    // * Проверка тела запроса
+    // Проверка тела запроса
     let requestBody: ReservationConfirmationInterface
     if (!isReservationConfirmationInterface(req.body)) {
         res.status(400).send(<ErrorInterface>{
@@ -234,14 +248,14 @@ export const confirmReservation = async (req: Request, res: Response) => {
     }
     requestBody = {...req.body}
 
-    // * Проверка записи брони
+    // Проверка записи брони
     let reservationQuery: ReservationWithoutSlotsInterface | undefined
     try {
         reservationQuery = await ReservationModel.getSingleReservation(idReservation)
     } catch(e) {
         console.log(e)
         res.status(500).send(<ErrorInterface>{
-            message: 'Внутрення ошибка сервера!'
+            message: 'Внутренняя ошибка сервера!'
         })
         return
     }
@@ -252,7 +266,7 @@ export const confirmReservation = async (req: Request, res: Response) => {
         return
     }
 
-    // * Проверка на владельца брони
+    // Проверка на владельца брони
     if (reservationQuery.id_user !== req.user.id) {
         res.status(403).send(<ErrorInterface>{
             message: 'Ошибка определения владельца брони!' 
@@ -260,7 +274,7 @@ export const confirmReservation = async (req: Request, res: Response) => {
         return
     }
 
-    // * Проверка на валидность кода подтверждения
+    // Проверка на валидность кода подтверждения
     if (reservationQuery.confirmation_code !== requestBody.confirmation_code) {
         res.status(412).send(<ErrorInterface>{
             message: 'Неправильный код подтверждения!'
@@ -268,7 +282,7 @@ export const confirmReservation = async (req: Request, res: Response) => {
         return
     }
 
-    // * Транзакция: изменение флага подтверждения
+    // Транзакция: изменение флага подтверждения
     reservationQuery.is_confirmed = true
     const trx = await KnexConnection.transaction()
     try {
@@ -288,19 +302,38 @@ export const confirmReservation = async (req: Request, res: Response) => {
  * * Удаление брони (уровень 'Посетитель')
  */
 export const deleteReservation = async (req: Request, res: Response) => {
-    // * Проверка на авторизованность
+    // Проверка на авторизованность
     if (!req.user) {
         res.status(401).end()
         return
     }
 
-    // * Проверка строки запроса
+    // Проверка строки запроса
     const idReservation = parseInt(req.params.idReservation)
     if (!idReservation) {
         res.status(400).end()
         return
     }
-    // * Проверка на наличие записи в базе данных 
+
+    // Проверка-получение роли
+    let userRole: RoleDatabaseInterface | undefined
+    try {
+        userRole = await RoleModel.getUserRole(req.user.id, req.user.id_role)
+    } catch (e) {
+        console.error(e)
+        res.status(500).send(<ErrorInterface>{
+            message: "Внутренняя ошибка сервера!"
+        })
+        return
+    }
+    if (!userRole) {
+        res.status(500).send(<ErrorInterface>{
+            message: "Не удалось определить роль!"
+        })
+        return
+    }
+
+    // Проверка на наличие записи в базе данных 
     let reservation: ReservationWithoutSlotsInterface | undefined
     try {
         reservation = await ReservationModel.getSingleReservation(idReservation)
@@ -314,13 +347,13 @@ export const deleteReservation = async (req: Request, res: Response) => {
         return
     }
 
-    // * Проверка на владельца брони
-    if (reservation.id_user !== req.user.id) {
+    // Проверка на владельца брони
+    if (reservation.id_user !== req.user.id || (userRole.can_access_private && userRole.can_see_all_reservations)) {
         res.status(403).end()
         return
     }
 
-    // * Транзакция: удаление забронированных мест, затем удаление брони
+    // Транзакция: удаление забронированных мест, затем удаление брони
     const trx = await KnexConnection.transaction()
     try {
         await ReservationModel.deleteReservationsSlots(trx, idReservation)
@@ -338,10 +371,10 @@ export const deleteReservation = async (req: Request, res: Response) => {
 }
 
 /**
- * * Получение броней пользователя
+ * * Получение броней (уровень "Посетитель", "Кассир", "Администратор")
  */
-export const getUserReservations = async (req: Request, res: Response) => {
-    // * Проверка на авторизованность
+export const getReservations = async (req: Request, res: Response) => {
+    // Проверка на авторизованность
     if (!req.user) {
         res.status(401).send(<ErrorInterface>{
             message: 'Ошибка авторизации!'
@@ -349,29 +382,41 @@ export const getUserReservations = async (req: Request, res: Response) => {
         return
     }
 
+    // Проверка-получение роли
+    let userRole: RoleDatabaseInterface | undefined
     try {
-        const reservationsQuery = await ReservationModel.getUserReservations(req.user.id)
-        let result: ReservationInterface[] = []  
-        for (let reservation of reservationsQuery) {
-            // * Редактирование формата timestamp`ов
-            reservation.session_timestamp = extendedTimestamp(reservation.session_timestamp)
-            reservation.created_at = extendedTimestamp(reservation.created_at)
+        userRole = await RoleModel.getUserRole(req.user.id, req.user.id_role)
+    } catch (e) {
+        console.error(e)
+        res.status(500).send(<ErrorInterface>{
+            message: "Внутренняя ошибка сервера!"
+        })
+        return
+    }
+    if (!userRole) {
+        res.status(500).send(<ErrorInterface>{
+            message: "Не удалось определить роль!"
+        })
+        return
+    }
 
-            // * Поиск разервированных мест
-            const slots = await ReservationModel.getReservedSlots(reservation.id)
-
-            // * Расчет стоимости брони
-            reservation.total_cost = ReservationModel.calculateReservationTotalCost(slots)
-
-            
-            result.push(<ReservationInterface>{
-                ...reservation,
-                slots: slots
-            })
-        }
+    try {
+        // В зависимости от роли выдать либо все брони, либо только на пользователяs
+        let reservationsQuery: ReservationWithoutSlotsInterface[]
+        if (!userRole.can_see_all_reservations)
+            reservationsQuery = await ReservationModel.getUserReservations(req.user.id)
+        else
+            reservationsQuery = await ReservationModel.getAllReservations()
+        
+        // Отредактировать результирующий список
+        const result = await ReservationModel.getReservationsListFullInfo(
+            req.user.id, 
+            userRole,
+            reservationsQuery)
+        
         res.status(200).send(result)
     } catch (e) {
-        console.log(e)
+        console.error(e)
         res.status(500).send(<ErrorInterface>{
             message: 'Внутренняя ошибка сервера!'
         })

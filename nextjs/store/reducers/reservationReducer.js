@@ -24,6 +24,7 @@ const defaultState = {
     */
     reservation: undefined,
     reservations: [],
+    need_confirmation: true,
     slots: [],
     loading: false,
     error: null,
@@ -35,7 +36,14 @@ const reservationReducer = (state = defaultState, action) => {
         case FETCH_RESERVATIONS:
             return {...state, reservations: action.payload }
         case POST_RESERVATION:
-            return {...state, reservation: action.payload }
+            return {
+                ...state, 
+                reservation: {
+                    id: action.payload.id,
+                    id_session: action.payload.id_session
+                }, 
+                need_confirmation: action.payload.need_confirmation 
+            }
         case SET_RESERVATION:
             return {...state, reservation: action.payload }
         case SHOW_CONFIRMATION_FIELD:

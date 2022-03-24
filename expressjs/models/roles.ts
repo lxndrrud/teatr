@@ -13,9 +13,11 @@ export const getVisitorRole = () => getRoleByTitle('Посетитель')
 export const getCashierRole = () => getRoleByTitle('Кассир')
 
 
-export const getRole = (idRole: number) => {
+export const getUserRole = (idUser: number, idRole: number): Promise<RoleDatabaseInterface | undefined> => {
     return KnexConnection<RoleDatabaseInterface>('roles')
-        .where('id', idRole)
+        .where('users.id_role', idRole)
+        .andWhere('users.id', idUser)
+        .join('users', 'users.id_role', 'roles.id')
         .first()
 }
 

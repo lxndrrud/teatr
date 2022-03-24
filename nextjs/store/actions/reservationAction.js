@@ -32,7 +32,8 @@ export const postReservation = ({ token, id_session, slots }) => async dispatch 
                 type: POST_RESERVATION,
                 payload: {
                     id: body.id,
-                    id_session: body.id_session
+                    id_session: body.id_session,
+                    need_confirmation: body.need_confirmation
                 }
             })
         :
@@ -134,8 +135,8 @@ export const errorSetDefault = () => async dispatch => {
     })
 }
 
-export const fetchUserReservations = (token) => async dispatch => {
-    const resp = await fetch('/expressjs/reservations/user', {
+export const fetchReservations = (token) => async dispatch => {
+    const resp = await fetch('/expressjs/reservations/', {
         headers: {
             'auth-token': token
         }

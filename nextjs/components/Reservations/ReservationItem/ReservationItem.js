@@ -41,9 +41,14 @@ const ReservationItem = ({ reservation }) => {
                     <ReservationSlotList slots={reservation.slots} />
                 </div>
             </div>
-            <CustomButton type="submit" value="Удалить бронь" 
-                onClickHook={deleteReservationClick}
-                styleClass={styles.deleteReservationButton} />
+            {
+                reservation.can_user_delete 
+                ? <CustomButton type="submit" value="Удалить бронь" 
+                    onClickHook={deleteReservationClick}
+                    styleClass={styles.deleteReservationButton} />
+                : <></>
+            }
+            
         </div>
     )
 }

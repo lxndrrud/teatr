@@ -12,6 +12,13 @@
             firstname: 'Тест',
             email: 'lxndrrud@yandex.ru',
             id_role: 3
+        }, 
+        {
+            // '123456'
+            password: '$2a$10$.7sVPajSPR/JTa4g8tWToe7O31A0Gz4EnL6TA8BzMaD8IAxXbFqwS',
+            firstname: 'Тест',
+            email: 'kassir@mail.ru',
+            id_role: 9342
         }
     ]);
 };
