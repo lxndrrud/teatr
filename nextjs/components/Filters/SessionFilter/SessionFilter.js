@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import CustomButton from "../../UI/CustomButton/CustomButton"
 import Select from '../../UI/Select/Select'
+import styles from './SessionFilter.module.css'
 import { fetchFilteredSessions, fetchSessionFilterOptions } from "../../../store/actions/sessionAction"
 
 const SessionFilter = () => {
@@ -36,7 +37,7 @@ const SessionFilter = () => {
     const filterOptions = useSelector(state => state.session.filterOptions)
 
     return (
-        <div>
+        <div className={styles.container}>
             <Select onChange={syncDate}>
                 <option value="None">Все даты</option>
                 {filterOptions.dates && filterOptions.dates.map(item => (
@@ -62,7 +63,8 @@ const SessionFilter = () => {
                     </option>
                 ))}   
             </Select>
-            <CustomButton type="submit" value="Подтвердить" onClickHook={getFilteredSessions} />
+            <CustomButton type="submit" value="Фильтр" 
+                onClickHook={getFilteredSessions}  styleClass={styles.filterButton}/>
         </div>
     )
 }
