@@ -171,7 +171,7 @@ export const postReservation = async (req: Request, res: Response) => {
     const trx = await KnexConnection.transaction()
 
     let reservation: ReservationDatabaseInterface
-    if (!userRole.can_make_reservation_without_email) {
+    if (!userRole.can_make_reservation_without_confirmation) {
         const reservationPayload: ReservationBaseInterface = {
             id_user: req.user.id,
             id_session: sessionQuery.id,
@@ -205,7 +205,7 @@ export const postReservation = async (req: Request, res: Response) => {
     await trx.commit()
 
     // Отправка письма на почту с информацией о сеансе и кодом подтверждения
-    if (!userRole.can_make_reservation_without_email)
+    if (!userRole.can_make_reservation_without_confirmation)
         sendMail(req.user.email, reservation.confirmation_code,
             reservation.id, sessionQuery.play_title, sessionQuery.timestamp,
             sessionQuery.auditorium_title)
@@ -213,7 +213,7 @@ export const postReservation = async (req: Request, res: Response) => {
     res.status(201).send({
         id: reservation.id,
         id_session: sessionQuery.id,
-        need_confirmation: !userRole.can_make_reservation_without_email
+        need_confirmation: !userRole.can_make_reservation_without_confirmation
     })
 }
 
