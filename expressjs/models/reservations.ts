@@ -8,8 +8,9 @@ import { ReservationsSlotsBaseInterface, ReservationsSlotsInterface,
     SlotInterface } from "../interfaces/slots";
 import { KnexConnection } from "../knex/connections";
 import { extendedTimestamp } from "../utils/timestamp";
+import * as SessionModel from "./sessions"
 
-export const getAllReservations = (): Promise<ReservationWithoutSlotsInterface[]> => {
+const getAllReservationsBuilder = () => {
     return KnexConnection<ReservationWithoutSlotsInterface>('reservations as r')
         .select(
             KnexConnection.ref('*').withSchema('r'), 
@@ -17,7 +18,8 @@ export const getAllReservations = (): Promise<ReservationWithoutSlotsInterface[]
             KnexConnection.ref('id').withSchema('u').as('id_user'),
             KnexConnection.ref('timestamp').withSchema('s').as('session_timestamp'),
             KnexConnection.ref('title').withSchema('p').as('play_title'),
-            KnexConnection.ref('title').withSchema('a').as('auditorium_title')
+            KnexConnection.ref('title').withSchema('a').as('auditorium_title'),
+            KnexConnection.ref('is_locked').withSchema('s').as('session_is_locked')
         )
         .join('users as u', 'u.id', 'r.id_user')
         .join('sessions as s', 's.id', 'r.id_session')
@@ -31,50 +33,21 @@ export const getAllReservations = (): Promise<ReservationWithoutSlotsInterface[]
         .orderBy("r.created_at", "desc")
 }
 
+export const getAllReservations = (): Promise<ReservationWithoutSlotsInterface[]> => {
+    return getAllReservationsBuilder()
+}
+
 export const getSingleReservation = (idReservation: number): Promise<ReservationWithoutSlotsInterface | undefined> => {
-    return KnexConnection<ReservationWithoutSlotsInterface>('reservations as r')
-        .select(
-            KnexConnection.ref('*').withSchema('r'), 
-            KnexConnection.ref('id').withSchema('s').as('id_session'), 
-            KnexConnection.ref('id').withSchema('u').as('id_user'),
-            KnexConnection.ref('timestamp').withSchema('s').as('session_timestamp'),
-            KnexConnection.ref('title').withSchema('p').as('play_title'),
-            KnexConnection.ref('title').withSchema('a').as('auditorium_title')
-        )
+    return getAllReservationsBuilder()
         .where('r.id', idReservation)
-        .join('users as u', 'u.id', 'r.id_user')
-        .join('sessions as s', 's.id', 'r.id_session')
-        .join('plays as p', 'p.id', 's.id_play')
-        .join('price_policies as pp', 'pp.id', 's.id_price_policy')
-        .join('slots', 'slots.id_price_policy', 'pp.id')
-        .join('seats', 'seats.id', 'slots.id_seat')
-        .join('rows', 'rows.id', 'seats.id_row')
-        .join('auditoriums as a', 'a.id', 'rows.id_auditorium')
-        .distinct()
         .first()
 }
 
 export const getUserReservations = (idUser: number): Promise<ReservationWithoutSlotsInterface[]> => {
-    return KnexConnection<ReservationWithoutSlotsInterface>('reservations as r')
-        .select(
-            KnexConnection.ref('*').withSchema('r'), 
-            KnexConnection.ref('id').withSchema('s').as('id_session'), 
-            KnexConnection.ref('id').withSchema('u').as('id_user'),
-            KnexConnection.ref('timestamp').withSchema('s').as('session_timestamp'),
-            KnexConnection.ref('title').withSchema('p').as('play_title'),
-            KnexConnection.ref('title').withSchema('a').as('auditorium_title')
-        )
+    return getAllReservationsBuilder()
         .where('u.id', idUser)
         .andWhere('s.is_locked', false)
-        .join('users as u', 'u.id', 'r.id_user')
-        .join('sessions as s', 's.id', 'r.id_session')
-        .join('plays as p', 'p.id', 's.id_play')
-        .join('price_policies as pp', 'pp.id', 's.id_price_policy')
-        .join('slots', 'slots.id_price_policy', 'pp.id')
-        .join('seats', 'seats.id', 'slots.id_seat')
-        .join('rows', 'rows.id', 'seats.id_row')
-        .join('auditoriums as a', 'a.id', 'rows.id_auditorium')
-        .distinct()
+
 }
 
 export const getReservationForUpdate = (idReservation: number) => {
@@ -165,6 +138,7 @@ export const checkUserHasReservedSession = async (idUser: number, idSession: num
 
 /**
  * * Вывести полную информацию о бронях с необходимым редактированием
+ * ! Может кинуть исключение при поиске слотов
  */
 export const getReservationsListFullInfo = async (idUser: number, userRole: RoleDatabaseInterface, reservations: ReservationWithoutSlotsInterface[]): Promise<ReservationInterface[]> => {
     let result: ReservationInterface[] = []  
@@ -174,17 +148,12 @@ export const getReservationsListFullInfo = async (idUser: number, userRole: Role
         reservation.created_at = extendedTimestamp(reservation.created_at)
 
         // Поиск зарезервированных мест
-        let slots: SlotInterface[]
-        try {
-            slots = await getReservedSlots(reservation.id)
-        } catch (e) {
-            throw e
-        }
+        let slots = await getReservedSlots(reservation.id)        
 
         // Расчет стоимости брони
         reservation.total_cost = calculateReservationTotalCost(slots)
 
-        const canUserDelete = reservation.id_user === idUser 
+        const canUserDelete = (reservation.id_user === idUser && !reservation.session_is_locked)
             || (userRole.can_see_all_reservations && userRole.can_access_private)
         
         result.push(<ReservationInterface>{
@@ -195,3 +164,4 @@ export const getReservationsListFullInfo = async (idUser: number, userRole: Role
     }
     return result
 }
+

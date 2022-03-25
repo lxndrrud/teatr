@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import CustomButton from "../../UI/CustomButton/CustomButton"
+import Select from '../../UI/Select/Select'
 import { fetchFilteredSessions, fetchSessionFilterOptions } from "../../../store/actions/sessionAction"
 
 const SessionFilter = () => {
@@ -36,23 +37,23 @@ const SessionFilter = () => {
 
     return (
         <div>
-            <select onChange={syncDate}>
+            <Select onChange={syncDate}>
                 <option value="None">Все даты</option>
                 {filterOptions.dates && filterOptions.dates.map(item => (
                   <option value={item.date}>
                     {item.extended_date}
                   </option>  
                 ))}
-            </select>
-            <select onChange={syncAuditoriumTitle}>
+            </Select>
+            <Select onChange={syncAuditoriumTitle}>
                 <option value="None">Все залы</option>
                 {filterOptions.auditoriums && filterOptions.auditoriums.map(item => (
                     <option value={item.title}>
                         {item.title}
                     </option>
                 ))}
-            </select>
-            <select onChange={syncPlayTitle}>
+            </Select>
+            <Select onChange={syncPlayTitle}>
                 <option value="None">Все спектакли</option>
 
                 {filterOptions.plays && filterOptions.plays.map(item => (
@@ -60,7 +61,7 @@ const SessionFilter = () => {
                         {item.title}
                     </option>
                 ))}   
-            </select>
+            </Select>
             <CustomButton type="submit" value="Подтвердить" onClickHook={getFilteredSessions} />
         </div>
     )

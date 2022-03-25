@@ -204,7 +204,7 @@ export const postReservation = async (req: Request, res: Response) => {
     await ReservationModel.createReservationsSlotsList(trx, slots)
     await trx.commit()
 
-    // * Отправка письма на почту с информацией о сеансе и кодом подтверждения
+    // Отправка письма на почту с информацией о сеансе и кодом подтверждения
     if (!userRole.can_make_reservation_without_email)
         sendMail(req.user.email, reservation.confirmation_code,
             reservation.id, sessionQuery.play_title, sessionQuery.timestamp,
@@ -299,7 +299,7 @@ export const confirmReservation = async (req: Request, res: Response) => {
 }
 
 /**
- * * Удаление брони (уровень 'Посетитель')
+ * * Удаление брони (уровень 'Посетитель', 'Кассир', 'Администратор')
  */
 export const deleteReservation = async (req: Request, res: Response) => {
     // Проверка на авторизованность
@@ -401,7 +401,7 @@ export const getReservations = async (req: Request, res: Response) => {
     }
 
     try {
-        // В зависимости от роли выдать либо все брони, либо только на пользователяs
+        // В зависимости от роли выдать либо все брони, либо только на пользователя
         let reservationsQuery: ReservationWithoutSlotsInterface[]
         if (!userRole.can_see_all_reservations)
             reservationsQuery = await ReservationModel.getUserReservations(req.user.id)

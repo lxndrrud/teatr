@@ -27,6 +27,7 @@ const defaultState = {
     need_confirmation: true,
     slots: [],
     loading: false,
+    filterOptions: {},
     error: null,
     showConfirmationField: false
 }

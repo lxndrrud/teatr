@@ -64,6 +64,7 @@ export interface ReservationDatabaseInterface extends ReservationBaseInterface {
  */
 export interface ReservationWithoutSlotsInterface extends ReservationDatabaseInterface{
     session_timestamp: string
+    session_is_locked: boolean
     auditorium_title: string
     play_title: string
     total_cost: number

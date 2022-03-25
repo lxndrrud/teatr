@@ -1,18 +1,20 @@
 import { CustomLink } from '../../components/UI/CustomLink/CustomLink'
 import CustomButton from '../../components/UI/CustomButton/CustomButton'
 import { useDispatch, useSelector } from 'react-redux'
+import { useRouter } from "next/router"
 import styles from './MainLayout.module.css'
 import { logOut } from '../../store/actions/userAction'
 import { useEffect, useState } from 'react'
 
 export default function MainLayout({ children, title }) {
     const dispatch = useDispatch()
+    const router = useRouter()
     let [token, setToken] = useState(useSelector(state => state.user.token))
     const tokenCheck = () => {
         if (token && token.length > 0) return true
         return false
     }
-    let [isLoggedIn, setIsLoggedIn] = useState(tokenCheck() ? true: false)
+    let [isLoggedIn, setIsLoggedIn] = useState(tokenCheck())
     useEffect(() => {
         if (tokenCheck())
             setIsLoggedIn(true)
@@ -23,7 +25,12 @@ export default function MainLayout({ children, title }) {
     const logOutOnClick = (e) => {
         e.preventDefault()
         dispatch(logOut())
-        setToken('')
+        .then(() => {
+            setToken('')
+            if (router.isReady) {
+                router.push('/')
+            }
+        })
     }
 
     return (
