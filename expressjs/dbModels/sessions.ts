@@ -1,8 +1,11 @@
 import { Knex } from "knex";
 import { DatabaseModel } from "./baseModel";
 import { KnexConnection } from "../knex/connections";
-import { sessions } from "./tables";
-import { SessionBaseInterface } from "../interfaces/sessions";
+import { sessions, plays, pricePolicies, slots, seats, rows, auditoriums, reservationsSlots, reservations } from "./tables";
+import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, SessionDatabaseInterface } 
+    from "../interfaces/sessions";
+import { getNextDayOfTimestamp } from "../utils/timestamp";
+
 
 
 /**
@@ -76,5 +79,134 @@ export class SessionDatabaseModel extends DatabaseModel {
         return this.connection(sessions)
             .where(`${sessions}.id`, id)
             .del()
+    }
+
+    unlockedSessions() {
+        return KnexConnection(`${sessions} as s`)
+            .select(
+                KnexConnection.ref('id').withSchema('s'),
+                KnexConnection.ref('is_locked').withSchema('s'), 
+                KnexConnection.ref('timestamp').withSchema('s'),
+                KnexConnection.ref('max_slots').withSchema('s'), 
+                KnexConnection.ref('id_play').withSchema('s'), 
+                KnexConnection.ref('id_price_policy').withSchema('s'),
+                KnexConnection.ref('title').withSchema('a').as('auditorium_title'), 
+                KnexConnection.ref('title').withSchema('p').as('play_title')
+            )
+            .join(`${plays} as p`, 'p.id', 's.id_play')
+            .join(`${pricePolicies} as pp`, 'pp.id', 's.id_price_policy')
+            .join(slots, `${slots}.id_price_policy`, 'pp.id')
+            .join(seats, `${seats}.id`, `${slots}.id_seat`)
+            .join(rows, `${rows}.id`, `${seats}.id`)
+            .join(`${auditoriums} as a`, 'a.id', `${rows}.id_auditorium`)
+            .where('s.is_locked', false)
+            .distinct()
+            .orderBy('s.timestamp', 'asc')
+    }
+
+    getSessionsByPlay(idPlay: number)  {
+        return this.unlockedSessions()
+            .andWhere('s.id_play', idPlay)
+    }
+
+    getRowsByPricePolicy(idPricePolicy: number) {
+        return KnexConnection(`${rows} as r`)
+            .select(
+                KnexConnection.ref('id').withSchema('r'), 
+                KnexConnection.ref('number').withSchema('r'), 
+                KnexConnection.ref('title').withSchema('r')
+            )
+            .where(`${slots}.id_price_policy`, idPricePolicy)
+            .join(seats, `${seats}.id_row`, 'r.id')
+            .join(slots, `${slots}.id_seat`, `${seats}.id`)
+            .distinct()
+    }
+    
+    getSlotsByPricePolicy(idPricePolicy: number) {
+        return KnexConnection(slots)
+            .select(
+                KnexConnection.ref('id').withSchema(slots), 
+                KnexConnection.ref('id').withSchema(rows).as('id_row'),
+                KnexConnection.ref('number').withSchema(seats).as('seat_number'), 
+                KnexConnection.ref('number').withSchema(rows).as('row_number'), 
+                KnexConnection.ref('price').withSchema(slots),
+                KnexConnection.ref('title').withSchema('a').as('auditorium_title'),
+                KnexConnection.ref('title').withSchema(rows).as('row_title')
+            )
+            .where(`${slots}.id_price_policy`, idPricePolicy)
+            .join(seats, `${seats}.id`, `${slots}.id_seat`)
+            .join(rows, `${rows}.id`, `${seats}.id_row`)
+            .join(`${auditoriums} as a`, 'a.id', `${rows}.id_auditorium`)
+    }
+    
+    getReservedSlots(idSession: number, idPricePolicy: number){
+        return KnexConnection(slots)
+            .select(
+                KnexConnection.ref('id').withSchema(slots), 
+                KnexConnection.ref('number').withSchema(seats).as('seat_number'), 
+                KnexConnection.ref('number').withSchema(rows).as('row_number'), 
+                KnexConnection.ref('price').withSchema(slots),
+                KnexConnection.ref('title').withSchema('a').as('auditorium_title'),
+                KnexConnection.ref('title').withSchema(rows).as('row_title')
+            )
+            .where(`${slots}.id_price_policy`, idPricePolicy)
+            .andWhere('r.id_session', idSession)
+            .join(seats, `${seats}.id`, `${slots}.id_seat`)
+            .join(rows, `${rows}.id`, `${seats}.id_row`)
+            .join(`${auditoriums} as a`, 'a.id', `${rows}.id_auditorium`)
+            .join(`${reservationsSlots} as rs`, 'rs.id_slot', `${slots}.id`)
+            .join(`${reservations} as r`, 'r.id', 'rs.id_reservation')
+    }
+    
+    
+    getSessionFilterTimestamps() {
+        return KnexConnection(`${sessions} as s`)
+            .select(
+                KnexConnection.ref('timestamp').withSchema('s')
+            )
+            .where('s.is_locked', false)
+            .orderBy('s.timestamp', 'asc')
+            .distinct()
+    }
+    
+    getSessionFilterAuditoriums() {
+        return KnexConnection(`${sessions} as s`)
+            .select(
+                KnexConnection.ref('title').withSchema('a')
+            )
+            .where('s.is_locked', false)
+            .join(`${pricePolicies} as pp`, 'pp.id', 's.id_price_policy')
+            .join(slots, `${slots}.id_price_policy`, 'pp.id')
+            .join(seats, `${seats}.id`, `${slots}.id_seat`)
+            .join(`${rows} as r`, 'r.id', `${seats}.id_row`)
+            .join(`${auditoriums} as a`, 'a.id', 'r.id_auditorium')
+            .distinct()
+    }
+    
+    getSessionFilterPlays() {
+        return KnexConnection(`${plays} as p`)
+            .select(
+                KnexConnection.ref('title').withSchema('p')
+            )
+            .where('s.is_locked', false)
+            .join(`${sessions} as s`, 's.id_play', 'p.id')
+            .distinct()
+    }
+    
+
+    getFilteredSessions(userQueryPayload: SessionFilterQueryInterface) {
+        return this.unlockedSessions()
+            .andWhere(builder => {
+                if (userQueryPayload.date !== '') {
+                    builder.andWhere(innerBuilder => {
+                        innerBuilder.andWhere('s.timestamp', '>=', `${userQueryPayload.date}T00:00:00`)
+                        innerBuilder.andWhere('s.timestamp', '<', getNextDayOfTimestamp(`${userQueryPayload.date}`))
+                    })
+                }
+                if (userQueryPayload.auditorium_title !== '')
+                    builder.andWhere('a.title', userQueryPayload.auditorium_title)
+                if (userQueryPayload.play_title !== '')
+                    builder.andWhere('p.title', userQueryPayload.play_title)
+            })
     }
 }
