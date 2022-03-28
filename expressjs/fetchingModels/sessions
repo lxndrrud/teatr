@@ -1,0 +1,8 @@
+import { Knex } from "knex";
+import { SessionDatabaseModel } from "../dbModels/sessions";
+import { RoleDatabaseInterface } from "../interfaces/roles";
+import { sessions } from "../dbModels/tables";
+
+export class SessionFetchingModel {
+    
+}

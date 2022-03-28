@@ -3,6 +3,15 @@ import { DatabaseModel } from "./baseModel";
 import { KnexConnection } from "../knex/connections";
 import { roles } from "./tables";
 
+/**
+ * Role
+ * id: number 
+ * title: string,
+ * can_see_all_reservations: boolean,
+ * can_have_more_than_one_reservation_on_session: boolean,
+ * can_access_private: boolean,
+ * can_make_reservation_without_confirmation: boolean
+ */
 export class RoleDatabaseModel extends DatabaseModel {
     constructor(connection: Knex<any, unknown[]> = KnexConnection) {
         super(connection, roles)
@@ -53,6 +62,7 @@ export class RoleDatabaseModel extends DatabaseModel {
     }) {
         return this.connection(roles)
             .insert(payload)
+            .returning('*')
     }
 
     update(id: number, payload: {
