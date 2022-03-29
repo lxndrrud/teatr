@@ -36,8 +36,9 @@ export interface UserRegisterInterface extends UserLoginInterface {
 }
 
 export const isUserRegisterInterface = (obj: any): obj is UserRegisterInterface => {
-    if (obj.email && obj.password | obj.firstname | obj.middlename | obj.lastname)
+    if (obj.email && obj.password) {
         return true
+    }
     return false
 }
 

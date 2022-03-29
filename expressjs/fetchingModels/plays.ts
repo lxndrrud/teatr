@@ -1,39 +1,73 @@
 import { Knex } from "knex";
-import { PlayDatabaseModel } from "../dbModels/plays";
-import { PlayInterface } from "../interfaces/plays";
+import { KnexConnection } from "../knex/connections";
+import { PlayDatabaseInstance } from "../dbModels/plays";
+import { PlayBaseInterface, PlayInterface } from "../interfaces/plays";
 
-export class PlayFetchingModel {
-    static getAll(payload: {
+class PlayFetchingModel {
+    protected playDatabaseInstance
+
+    constructor() {
+        this.playDatabaseInstance = PlayDatabaseInstance
+    }
+
+    getAll(payload: {
         id?: number,
         title?: string,
         description?: string
     }): Promise<PlayInterface[]> {
-        return new PlayDatabaseModel().getAll(payload)
+        return this.playDatabaseInstance.getAll(payload)
     }
 
-    static get(payload: {
+    async getSinglePlay(payload: {
         id?: number,
-        title?: string,
-        description?: string
-    }): Promise<PlayInterface> {
-        return new PlayDatabaseModel().get(payload)
-    }
-
-    static insert(trx: Knex.Transaction, payload: {
-        title: string,
-        description: string
-    }): Promise<PlayInterface[]> {
-        return new PlayDatabaseModel(trx).insert(payload)
-    }
-
-    static update(trx: Knex.Transaction, id: number, payload: {
         title?: string,
         description?: string
     }) {
-        return new PlayDatabaseModel(trx).update(id, payload)
+        const query: PlayInterface | undefined = await this.playDatabaseInstance.get(payload)
+        if (!query) return 404
+        return query
     }
 
-    static delete(trx: Knex.Transaction, id: number) {
-        return new PlayDatabaseModel(trx).delete(id)
+    async createPlay(payload: PlayBaseInterface) {
+        const trx = await KnexConnection.transaction()
+        try {
+            const newPlay: PlayInterface = (await this.playDatabaseInstance.insert(trx, payload))[0]
+            await trx.commit()
+            return newPlay
+        } catch (e) {
+            await trx.rollback()
+            return 500
+        }
+    }
+
+    async updatePlay(idPlay: number, payload: PlayBaseInterface) {
+        const trx = await KnexConnection.transaction()
+        try {
+            const query = await this.playDatabaseInstance.get({ id: idPlay})
+            if (!query) {
+                return 404
+            }
+            await trx.commit()
+            return 200
+        } catch (e) {
+            await trx.rollback()
+            return 500
+        }
+    }
+
+    async deletePlay(idPlay: number) {
+        const query = await this.playDatabaseInstance.get({ id: idPlay })
+        if (!query) {
+            return 404
+        }
+        const trx = await KnexConnection.transaction()
+        try {
+            await this.playDatabaseInstance.delete(trx, idPlay)
+            return 200
+        } catch (e) {
+            return 500
+        }
     }
 }
+
+export const PlayFetchingInstance = new PlayFetchingModel()

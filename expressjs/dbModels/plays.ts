@@ -9,9 +9,9 @@ import { plays } from "./tables";
  * title: string
  * description: string
  */
-export class PlayDatabaseModel extends DatabaseModel {
-    constructor(connection: Knex<any, unknown[]> = KnexConnection) {
-        super(connection, plays)
+class PlayDatabaseModel extends DatabaseModel {
+    constructor() {
+        super(plays)
     }
 
 
@@ -20,7 +20,7 @@ export class PlayDatabaseModel extends DatabaseModel {
         title?: string,
         description?: string
     }) {
-        return this.connection(plays)
+        return KnexConnection(plays)
             .where(builder => {
                 if(payload.id) 
                     builder.andWhere(`${plays}.id`, payload.id)
@@ -39,27 +39,29 @@ export class PlayDatabaseModel extends DatabaseModel {
         return this.getAll(payload).first()
     }
 
-    insert(payload: {
+    insert(trx: Knex.Transaction, payload: {
         title: string,
         description: string
     }) {
-        return this.connection(plays)
+        return trx(plays)
             .insert(payload)
             .returning('*')
     }
 
-    update(id: number, payload: {
+    update(trx: Knex.Transaction, id: number, payload: {
         title?: string,
         description?: string
     }) {
-        return this.connection(plays)
+        return trx(plays)
             .update(payload)
             .where(`${plays}.id`, id)
     }
 
-    delete(id: number) {
-        return this.connection(plays)
+    delete(trx: Knex.Transaction, id: number) {
+        return trx(plays)
             .where(`${plays}.id`, id)
             .del()
     }
 }
+
+export const PlayDatabaseInstance = new PlayDatabaseModel()

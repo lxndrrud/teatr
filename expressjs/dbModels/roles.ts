@@ -1,7 +1,7 @@
 import { Knex } from "knex";
 import { DatabaseModel } from "./baseModel";
 import { KnexConnection } from "../knex/connections";
-import { roles } from "./tables";
+import { roles, users } from "./tables";
 
 /**
  * Role
@@ -12,9 +12,9 @@ import { roles } from "./tables";
  * can_access_private: boolean,
  * can_make_reservation_without_confirmation: boolean
  */
-export class RoleDatabaseModel extends DatabaseModel {
-    constructor(connection: Knex<any, unknown[]> = KnexConnection) {
-        super(connection, roles)
+class RoleDatabaseModel extends DatabaseModel {
+    constructor() {
+        super(roles)
     }
 
     getAll(payload: {
@@ -53,33 +53,43 @@ export class RoleDatabaseModel extends DatabaseModel {
         return this.getAll(payload).first()
     }
 
-    insert(payload: {
+    insert(trx: Knex.Transaction, payload: {
         title: string,
         can_see_all_reservations: boolean,
         can_have_more_than_one_reservation_on_session: boolean,
         can_access_private: boolean,
         can_make_reservation_without_confirmation: boolean
     }) {
-        return this.connection(roles)
+        return trx(roles)
             .insert(payload)
             .returning('*')
     }
 
-    update(id: number, payload: {
+    update(trx: Knex.Transaction, id: number, payload: {
         title?: string,
         can_see_all_reservations?: boolean,
         can_have_more_than_one_reservation_on_session?: boolean,
         can_access_private?: boolean,
         can_make_reservation_without_confirmation?: boolean
     }) {
-        return this.connection(roles)
+        return trx(roles)
             .update(payload)
             .where(`${roles}.id`, id)
     }
 
-    delete(id: number) {
-        return this.connection(roles)
+    delete(trx: Knex.Transaction, id: number) {
+        return trx(roles)
             .where(`${roles}.id`, id)
             .del()
     }
+
+    getUserRole (idUser: number, idRole: number) {
+        return this.get({})
+            .where(`${users}.id_role`, idRole)
+            .andWhere(`${users}.id`, idUser)
+            .join(`${users}`, `${users}.id_role`, `${roles}.id`)
+            .first()
+    }
 }
+
+export const RoleDatabaseInstance = new RoleDatabaseModel()

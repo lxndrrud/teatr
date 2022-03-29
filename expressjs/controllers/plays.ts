@@ -1,13 +1,13 @@
 import { KnexConnection }from "../knex/connections"
 import { Request, Response } from "express"
 import * as PlayModel from "../models/plays"
-import { PlayFetchingModel } from "../fetchingModels/plays"
-import { PlayBaseInterface, PlayInterface } from "../interfaces/plays"
+import { PlayFetchingInstance } from "../fetchingModels/plays"
+import { isPlayBaseInterface, PlayBaseInterface, PlayInterface } from "../interfaces/plays"
 import { ErrorInterface } from "../interfaces/errors"
 
 export const getPlays = async (req: Request, res: Response) => {
     try {
-        const query = await PlayFetchingModel.getAll({})
+        const query = await PlayFetchingInstance.getAll({})
         res.status(200).send(query)
     } catch (e) {
         res.status(500).send(<ErrorInterface>{
@@ -17,25 +17,23 @@ export const getPlays = async (req: Request, res: Response) => {
 }
 
 export const createPlay = async (req: Request, res: Response) => {
-    try {
-        const payload: PlayBaseInterface = {...req.body}
-        const trx = await KnexConnection.transaction()
-        try {
-            const newPlay = (await PlayFetchingModel.insert(trx, payload))[0]
-            await trx.commit()
-            res.status(201).send({
-                id: newPlay.id
-            })
-        }
-        catch (e) {
-            await trx.rollback()
-            console.log(e)
-            res.status(500).end()
-        }
-    } catch (e) {
-        console.log(e)
-        res.status(400).end()
+    if(!isPlayBaseInterface(req.body)) {
+        res.status(400).send(<ErrorInterface>{
+            message: 'Неверное тело запроса!'
+        })
+        return
     }
+    const payload: PlayBaseInterface = {...req.body}
+    const newPlay = await PlayFetchingInstance.createPlay(payload)
+    if (newPlay === 500) {
+        res.status(500).send(<ErrorInterface>{
+            message: 'Внутренняя ошибка сервера!'
+        })
+        return
+    }
+    res.status(201).send({
+        id: newPlay.id
+    })
 }
 
 export const getSinglePlay = async (req: Request, res: Response) => {
@@ -44,8 +42,8 @@ export const getSinglePlay = async (req: Request, res: Response) => {
         res.status(400).end()
         return 
     }
-    const query = await PlayFetchingModel.get({id: idPlay})
-    if (!query) {
+    const query = await PlayFetchingInstance.getSinglePlay({ id: idPlay })
+    if (query === 404) {
         res.status(404).end()
         return
     }
@@ -56,21 +54,25 @@ export const getSinglePlay = async (req: Request, res: Response) => {
 
 export const deletePlay = async (req: Request, res: Response) => {
     const idPlay = parseInt(req.params.idPlay)
-    const query = await PlayFetchingModel.get({id: idPlay})
-    if (!query) {
-        res.status(404).end()
+    if (!idPlay) {
+        res.status(400).send(<ErrorInterface>{
+            message: 'Неверное тело запроса!'
+        })
         return
     }
-    const trx = await KnexConnection.transaction()
-    try {
-        await PlayFetchingModel.delete(trx, idPlay)
-        await trx.commit()
+    const responseCode = await PlayFetchingInstance.deletePlay(idPlay)
+    if (responseCode === 200) {
         res.status(200).end()
     }
-    catch (e) {
-        await trx.rollback()
-        console.log(e)
-        res.status(500).end()
+    else if (responseCode === 404) {
+        res.status(404).send(<ErrorInterface>{
+            message: 'Запись не найдена!'
+        })
+    }
+    else if (responseCode === 500) {
+        res.status(500).send(<ErrorInterface>{
+            message: 'Внутрення ошибка сервера!'
+        })
     }
 }
 
@@ -80,20 +82,25 @@ export const updatePlay = async (req: Request, res: Response) => {
         res.send(400).end()
         return
     }
+    if (!isPlayBaseInterface(req.body)) {
+        res.status(400).send({
+            message: 'Неверное тело запроса!'
+        })
+        return
+    }
     const payload: PlayBaseInterface = {...req.body}
-    const query = await PlayFetchingModel.get({id: idPlay})
-    if (!query) { 
-        res.status(404).end()
-        return 
+    const responseCode = await PlayFetchingInstance.updatePlay(idPlay, payload)
+    if (responseCode === 200) {
+        res.status(200).end()
     }
-    const trx = await KnexConnection.transaction()
-    try {
-        await PlayFetchingModel.update(trx, idPlay, payload)
-        await trx.commit()
+    else if (responseCode === 404) {
+        res.status(404).send(<ErrorInterface>{
+            message: 'Запись не найдена!'
+        })
     }
-    catch (e) {
-        await trx.rollback()
-        console.log(e)
-        res.status(500).end()
+    else if (responseCode === 500) {
+        res.status(500).send(<ErrorInterface>{
+            message: 'Внутренняя ошибка сервера!'
+        })
     }
 }

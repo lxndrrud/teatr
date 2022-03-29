@@ -16,9 +16,9 @@ import { getNextDayOfTimestamp } from "../utils/timestamp";
  * id_price_policy: number
  * timestamp: timestamp(string)
  */
-export class SessionDatabaseModel extends DatabaseModel {
-    constructor(connection: Knex<any, unknown[]> = KnexConnection) {
-        super(connection, sessions)
+class SessionDatabaseModel extends DatabaseModel {
+    constructor() {
+        super(sessions)
     }
 
     getAll(payload: {
@@ -29,7 +29,7 @@ export class SessionDatabaseModel extends DatabaseModel {
         id_price_policy?: number,
         timestamp?: string,
     }) {
-        return this.connection(sessions)
+        return KnexConnection(sessions)
             .where(builder => {
                 if (payload.id)
                     builder.andWhere(`${sessions}.id`, payload.id)
@@ -57,26 +57,26 @@ export class SessionDatabaseModel extends DatabaseModel {
         return this.getAll(payload).first()
     }
 
-    insert(payload: SessionBaseInterface) {
-        return this.connection(sessions)
+    insert(trx: Knex.Transaction, payload: SessionBaseInterface) {
+        return trx(sessions)
             .insert(payload)
             .returning('*')
     }
 
-    update(id: number, payload: {
+    update(trx: Knex.Transaction, id: number, payload: {
         is_locked?: boolean,
         max_slots?: number,
         id_play?: number,
         id_price_policy?: number,
         timestamp?: string,
     }) {
-        return this.connection(sessions)
+        return trx(sessions)
         .update(payload)
         .where(`${sessions}.id`, id)
     }
 
-    delete(id: number) {
-        return this.connection(sessions)
+    delete(trx: Knex.Transaction, id: number) {
+        return trx(sessions)
             .where(`${sessions}.id`, id)
             .del()
     }
@@ -210,3 +210,5 @@ export class SessionDatabaseModel extends DatabaseModel {
             })
     }
 }
+
+export const SessionDatabaseInstance = new SessionDatabaseModel()

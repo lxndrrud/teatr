@@ -3,6 +3,11 @@ export interface PlayBaseInterface {
     description: string
 }
 
+export function isPlayBaseInterface (obj: any): obj is PlayBaseInterface {
+    if (obj.title && obj.description) return true
+    return false
+}
+
 export interface PlayInterface extends PlayBaseInterface {
     id: number
 }

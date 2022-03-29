@@ -1,15 +1,22 @@
+import { Request } from "express";
 import { Knex } from "knex";
-import { SessionDatabaseModel } from "../dbModels/sessions";
+import { SessionDatabaseInstance } from "../dbModels/sessions";
 import { AuditoriumSessionFilterOption } from "../interfaces/auditoriums";
 import { PlaySessionFilterOptionInterface } from "../interfaces/plays";
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, SessionDatabaseInterface } 
     from "../interfaces/sessions";
 import { SlotIsReservedInterface, SlotInterface } from "../interfaces/slots"
 import { TimestampSessionFilterOptionDatabaseInterface, TimestampSessionFilterOptionInterface } from "../interfaces/timestamps"
+import { KnexConnection } from "../knex/connections";
 import { dateFromTimestamp, extendedDateFromTimestamp, extendedTimestamp } from "../utils/timestamp"
 
 
 class SessionFetchingModel {
+    protected sessionDatabaseInstance 
+
+    constructor() {
+        this.sessionDatabaseInstance = SessionDatabaseInstance
+    }
 
     fixTimestamps(query: SessionInterface[]) {
         for (let session of query) {
@@ -18,34 +25,97 @@ class SessionFetchingModel {
         return query
     }
 
-    async getUnlockedSessions(): Promise<SessionInterface[]> {
-        const query = await new SessionDatabaseModel().unlockedSessions()
-        const fetchedQuery = this.fixTimestamps(query)
-        return fetchedQuery
+    async createSession(payload: SessionBaseInterface) {
+        const trx = await KnexConnection.transaction()
+        try {
+            const newSession: SessionDatabaseInterface = (await this.sessionDatabaseInstance.insert(trx, payload))[0]
+            await trx.commit()
+            return newSession
+        } catch(e) {
+            await trx.rollback()
+            return 500
+        }
     }
 
-    async getSingleUnlockedSession(id: number): Promise<SessionInterface> {
-        const query = await new SessionDatabaseModel().get({
+    async updateSession(idSession: number, payload: SessionBaseInterface) {
+        const query = await this.sessionDatabaseInstance.get({ id: idSession })
+        if (!query) { 
+            return 404
+        }
+        const trx = await KnexConnection.transaction()
+        try {
+            await this.sessionDatabaseInstance.update(trx, idSession, payload)
+            await trx.commit()
+            return 200
+        }
+        catch (e) {
+            await trx.rollback()
+            return 500
+        }
+    }
+
+    async deleteSession(idSession: number) {
+        const query = await this.sessionDatabaseInstance.get({id: idSession})
+        if (!query) {
+            return 404
+        }
+        const trx = await KnexConnection.transaction()
+        try {
+            await this.sessionDatabaseInstance.delete(trx, idSession)
+            await trx.commit()
+            return 200
+        }
+        catch (e) {
+            await trx.rollback()
+            return 500
+        }
+    }
+
+    async getUnlockedSessions(): Promise<SessionInterface[] | 500> {
+        try {
+            const query = await this.sessionDatabaseInstance.unlockedSessions()
+            const fetchedQuery = this.fixTimestamps(query)
+            return fetchedQuery
+        } catch (e) {
+            return 500
+        }
+    }
+
+    async getSingleUnlockedSession(id: number): Promise<SessionInterface | 404> {
+        const query = await this.sessionDatabaseInstance.get({
             id: id,
             is_locked: false
         })
+        if (!query) return 404
         const fetchedQuery = this.fixTimestamps([query])
         return fetchedQuery[0]
     }
 
-    async getSessionsByPlay(idPlay: number): Promise<SessionInterface[]> {
-        const query = await new SessionDatabaseModel().getSessionsByPlay(idPlay)
-        const fetchedQuery = this.fixTimestamps(query)
-        return fetchedQuery
+    async getSessionsByPlay(idPlay: number): Promise<SessionInterface[] | 500> {
+        try {
+            const query = await this.sessionDatabaseInstance.getSessionsByPlay(idPlay)
+            const fetchedQuery = this.fixTimestamps(query)
+            return fetchedQuery
+        } catch (e) {
+            console.log(e)
+            return 500
+        }
     }
     
-    async getSlots(idSession:number, idPricePolicy: number) {
-        const SessionModel = new SessionDatabaseModel()
+    async getSlots(idSession: number) {
+        const session: SessionInterface | undefined = 
+            await this.sessionDatabaseInstance.get({id: idSession})
 
+        if (!session) {
+            return 404
+        }
+
+        const idPricePolicy = session.id_price_policy
+    
         const [rowsQuery, slotsQuery, reservedSlotsQuery] = await Promise.all([
-            SessionModel.getRowsByPricePolicy(idPricePolicy),
-            SessionModel.getSlotsByPricePolicy(idPricePolicy),
-            SessionModel.getReservedSlots(idSession, idPricePolicy)
+            this.sessionDatabaseInstance.getRowsByPricePolicy(idPricePolicy),
+            this.sessionDatabaseInstance.getSlotsByPricePolicy(idPricePolicy),
+            this.sessionDatabaseInstance.getReservedSlots(idSession, idPricePolicy)
         ])
     
         let result: { number: number, seats: SlotIsReservedInterface[] }[] = []
@@ -87,22 +157,21 @@ class SessionFetchingModel {
         }
         return result
     }
-    
-    getReservedSlots(idSession: number, idPricePolicy: number): Promise<SlotInterface[]>{
-        return new SessionDatabaseModel().getReservedSlots(idSession, idPricePolicy)
-    }
 
     async getSessionFilterOptions() {
-        const SessionModel = new SessionDatabaseModel()
-
         let timestamps: TimestampSessionFilterOptionDatabaseInterface[],
             auditoriums: AuditoriumSessionFilterOption[],
             plays: PlaySessionFilterOptionInterface[]
-        [timestamps, auditoriums, plays] = await Promise.all([
-            SessionModel.getSessionFilterTimestamps(),
-            SessionModel.getSessionFilterAuditoriums(),
-            SessionModel.getSessionFilterPlays()
-        ])
+        try {
+            [timestamps, auditoriums, plays] = await Promise.all([
+                this.sessionDatabaseInstance.getSessionFilterTimestamps(),
+                this.sessionDatabaseInstance.getSessionFilterAuditoriums(),
+                this.sessionDatabaseInstance.getSessionFilterPlays()
+            ])
+        } catch (e) {
+            return 500
+        }
+        
     
         let dates: TimestampSessionFilterOptionInterface[] = []
         let distinctCheck: Map<string, string> = new Map()
@@ -123,10 +192,16 @@ class SessionFetchingModel {
         }
     }
 
-    async getFilteredSessions(userQueryPayload: SessionFilterQueryInterface): Promise<SessionInterface[]> {
-        const query = await new SessionDatabaseModel().getFilteredSessions(userQueryPayload)
-        const fetchedQuery = this.fixTimestamps(query)
-        return fetchedQuery
+    async getFilteredSessions(userQueryPayload: SessionFilterQueryInterface): Promise<SessionInterface[] | 500> {
+        try {
+            const query = await this.sessionDatabaseInstance.getFilteredSessions(userQueryPayload)
+            const fetchedQuery = this.fixTimestamps(query)
+            return fetchedQuery
+        } catch (e) {
+            console.log(500)
+            return 500
+        }
+        
     }
 }
 

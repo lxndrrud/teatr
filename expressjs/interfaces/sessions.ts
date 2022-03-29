@@ -6,6 +6,12 @@ export interface SessionBaseInterface {
     max_slots: number
 }
 
+export function isSessionBaseInterface(obj: any): obj is SessionBaseInterface {
+    if(obj.id_play && obj.id_price_policy && obj.timestamp && obj.max_slots && 
+        (typeof obj.is_locked === 'boolean')) return true
+    return false
+}
+
 export interface SessionDatabaseInterface extends SessionBaseInterface {
     id: number
 }
@@ -16,7 +22,13 @@ export interface SessionInterface extends SessionDatabaseInterface {
 }
 
 export interface SessionFilterQueryInterface {
-    date?: string
-    auditorium_title?: string
-    play_title?: string
+    date: string
+    auditorium_title: string
+    play_title: string
+}
+
+export function isSessionFilterQueryInterface(obj: any): obj is SessionFilterQueryInterface {
+    if (typeof obj.date ==='string' && typeof obj.auditorium_title === 'string'
+        && typeof obj.play_title === 'string') return true
+    return false
 }
