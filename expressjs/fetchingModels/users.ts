@@ -6,6 +6,7 @@ import { sign } from 'jsonwebtoken'
 import { UserBaseInterface, UserInterface, UserLoginInterface, UserRegisterInterface, UserRequestOption } from "../interfaces/users";
 import { RoleFetchingInstance } from "./roles";
 import { users } from "../dbModels/tables";
+import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 
 class UserFetchingModel {
     protected userDatabaseInstance
@@ -46,13 +47,15 @@ class UserFetchingModel {
         const existingUserCheck: UserInterface = await this.userDatabaseInstance
             .get({ email: payload.email})
         if (existingUserCheck) {
-            return 409
+            return <InnerErrorInterface>{
+                code: 409,
+                message: 'Пользователь с такой почтой уже существует!'
+            }
         }
         // * Получаем роль "Посетитель" из базы данных
         const visitorRole = await this.roleFetchingInstance.getVisitorRole()
-        if (!visitorRole) {
-            console.log('register user -> Не найдена роль посетителя!')
-            return 500
+        if (isInnerErrorInterface(visitorRole)) {
+            return visitorRole
         }
         const fetchedRequestBody: UserBaseInterface = {...payload, id_role: visitorRole.id}
         // * Транзакция: создать пользователя, затем дать ему токен
@@ -66,7 +69,10 @@ class UserFetchingModel {
         } catch (e) {
             await trx.rollback()
             console.log(e)
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера в транзакции создания пользователя!'
+            }
         }
     }
 

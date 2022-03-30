@@ -3,11 +3,17 @@ import { Request, Response } from "express"
 import * as PlayModel from "../models/plays"
 import { PlayFetchingInstance } from "../fetchingModels/plays"
 import { isPlayBaseInterface, PlayBaseInterface, PlayInterface } from "../interfaces/plays"
-import { ErrorInterface } from "../interfaces/errors"
+import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 
 export const getPlays = async (req: Request, res: Response) => {
     try {
-        const query = await PlayFetchingInstance.getAll({})
+        const query = await PlayFetchingInstance.getAll()
+        if (isInnerErrorInterface(query)) {
+            res.status(query.code).send(<ErrorInterface>{
+                message: query.message
+            })
+            return 
+        }
         res.status(200).send(query)
     } catch (e) {
         res.status(500).send(<ErrorInterface>{
@@ -42,13 +48,14 @@ export const getSinglePlay = async (req: Request, res: Response) => {
         res.status(400).end()
         return 
     }
-    const query = await PlayFetchingInstance.getSinglePlay({ id: idPlay })
-    if (query === 404) {
-        res.status(404).end()
+    const query = await PlayFetchingInstance.getSinglePlay(idPlay)
+    if (isInnerErrorInterface(query)) {
+        res.status(query.code).send(<ErrorInterface>{
+            message: query.message
+        })
         return
     }
     res.status(200).send(query)
-
 }
     
 

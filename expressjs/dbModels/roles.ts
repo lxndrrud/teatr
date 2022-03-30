@@ -83,12 +83,16 @@ class RoleDatabaseModel extends DatabaseModel {
             .del()
     }
 
-    getUserRole (idUser: number, idRole: number) {
+    getUserRole(idUser: number, idRole: number) {
         return this.get({})
+            /*
+            .select(
+                KnexConnection.ref('*').withSchema(roles)
+            )
+            */
             .where(`${users}.id_role`, idRole)
             .andWhere(`${users}.id`, idUser)
-            .join(`${users}`, `${users}.id_role`, `${roles}.id`)
-            .first()
+            .join(users, `${users}.id_role`, `${roles}.id`)
     }
 }
 

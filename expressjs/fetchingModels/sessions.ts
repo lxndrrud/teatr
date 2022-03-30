@@ -2,10 +2,12 @@ import { Request } from "express";
 import { Knex } from "knex";
 import { SessionDatabaseInstance } from "../dbModels/sessions";
 import { AuditoriumSessionFilterOption } from "../interfaces/auditoriums";
+import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { PlaySessionFilterOptionInterface } from "../interfaces/plays";
+import { RowInterface } from "../interfaces/rows";
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, SessionDatabaseInterface } 
     from "../interfaces/sessions";
-import { SlotIsReservedInterface, SlotInterface } from "../interfaces/slots"
+import { SlotIsReservedInterface, SlotInterface, SlotWithRowIdInterface } from "../interfaces/slots"
 import { TimestampSessionFilterOptionDatabaseInterface, TimestampSessionFilterOptionInterface } from "../interfaces/timestamps"
 import { KnexConnection } from "../knex/connections";
 import { dateFromTimestamp, extendedDateFromTimestamp, extendedTimestamp } from "../utils/timestamp"
@@ -71,29 +73,35 @@ class SessionFetchingModel {
         }
     }
 
-    async getUnlockedSessions(): Promise<SessionInterface[] | 500> {
+    async getUnlockedSessions(): Promise<SessionInterface[] | InnerErrorInterface> {
         try {
-            const query = await this.sessionDatabaseInstance.unlockedSessions()
+            const query = await this.sessionDatabaseInstance.getUnlockedSessions()
             const fetchedQuery = this.fixTimestamps(query)
             return fetchedQuery
         } catch (e) {
-            return 500
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске сеансов!'
+            }
         }
     }
 
-    async getSingleUnlockedSession(id: number): Promise<SessionInterface | 404> {
-        const query = await this.sessionDatabaseInstance.get({
-            id: id,
-            is_locked: false
-        })
-        if (!query) return 404
-        const fetchedQuery = this.fixTimestamps([query])
-        return fetchedQuery[0]
+    async getSingleUnlockedSession(idSession: number): Promise<SessionInterface | InnerErrorInterface> {
+        try {
+            const query = await this.sessionDatabaseInstance.getSingleUnlockedSession(idSession)
+            const fetchedQuery = this.fixTimestamps([query])
+            return fetchedQuery[0]
+        } catch (e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске сеанса!'
+            }
+        }
     }
 
     async getSessionsByPlay(idPlay: number): Promise<SessionInterface[] | 500> {
         try {
-            const query = await this.sessionDatabaseInstance.getSessionsByPlay(idPlay)
+            const query: SessionInterface[] = await this.sessionDatabaseInstance.getSessionsByPlay(idPlay)
             const fetchedQuery = this.fixTimestamps(query)
             return fetchedQuery
         } catch (e) {
@@ -103,8 +111,12 @@ class SessionFetchingModel {
     }
     
     async getSlots(idSession: number) {
-        const session: SessionInterface | undefined = 
-            await this.sessionDatabaseInstance.get({id: idSession})
+        let session: SessionInterface | undefined
+        try {
+            session = await this.sessionDatabaseInstance.get({id: idSession})
+        } catch (e) {
+            return 500
+        }
 
         if (!session) {
             return 404
@@ -112,11 +124,20 @@ class SessionFetchingModel {
 
         const idPricePolicy = session.id_price_policy
     
-        const [rowsQuery, slotsQuery, reservedSlotsQuery] = await Promise.all([
-            this.sessionDatabaseInstance.getRowsByPricePolicy(idPricePolicy),
-            this.sessionDatabaseInstance.getSlotsByPricePolicy(idPricePolicy),
-            this.sessionDatabaseInstance.getReservedSlots(idSession, idPricePolicy)
-        ])
+        let rowsQuery: RowInterface[],
+            slotsQuery: SlotWithRowIdInterface[],
+            reservedSlotsQuery: SlotInterface[]
+
+        try {
+            [rowsQuery, slotsQuery, reservedSlotsQuery] = await Promise.all([
+                this.sessionDatabaseInstance.getRowsByPricePolicy(idPricePolicy),
+                this.sessionDatabaseInstance.getSlotsByPricePolicy(idPricePolicy),
+                this.sessionDatabaseInstance.getReservedSlots(idSession, idPricePolicy)
+            ])
+        } catch (e) {
+            return 500
+        }
+        
     
         let result: { number: number, seats: SlotIsReservedInterface[] }[] = []
     
@@ -202,6 +223,19 @@ class SessionFetchingModel {
             return 500
         }
         
+    }
+
+    async getReservedSlots(idReservation: number, idPricePolicy: number): Promise<SlotInterface[] | InnerErrorInterface> {
+        try {
+            const query = await this.sessionDatabaseInstance
+                .getReservedSlots(idReservation, idPricePolicy)
+            return query
+        } catch(e) {
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
+        }
     }
 }
 

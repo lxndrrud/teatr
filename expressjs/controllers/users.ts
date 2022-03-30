@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface, isUserRegisterInterface } 
     from "../interfaces/users";
-import { ErrorInterface } from "../interfaces/errors";
+import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { UserFetchingInstance } from "../fetchingModels/users";
 
 /**
@@ -19,16 +19,14 @@ export const registerUser = async (req: Request, res: Response) => {
 
     const newUser = await UserFetchingInstance.createUser(requestBody)
 
-    if (newUser === 409) {
-        res.status(409).send(<ErrorInterface>{
-            message: 'Пользователь с такой почтой уже существует!'
+    if (isInnerErrorInterface(newUser)) {
+        res.status(newUser.code).send(<ErrorInterface>{
+            message: newUser.message
         })
+        return 
     }
-    else if (newUser === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
-        })
-    }
+
+    res.status(201).send(newUser)
 }
 
 /**

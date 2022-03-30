@@ -2,6 +2,7 @@ import { Knex } from "knex";
 import { KnexConnection } from "../knex/connections";
 import { PlayDatabaseInstance } from "../dbModels/plays";
 import { PlayBaseInterface, PlayInterface } from "../interfaces/plays";
+import { InnerErrorInterface } from "../interfaces/errors";
 
 class PlayFetchingModel {
     protected playDatabaseInstance
@@ -10,22 +11,35 @@ class PlayFetchingModel {
         this.playDatabaseInstance = PlayDatabaseInstance
     }
 
-    getAll(payload: {
-        id?: number,
-        title?: string,
-        description?: string
-    }): Promise<PlayInterface[]> {
-        return this.playDatabaseInstance.getAll(payload)
+    async getAll(): Promise<PlayInterface[] | InnerErrorInterface> {
+        try {
+            const query = await this.playDatabaseInstance.getAll({})
+            return query
+        } catch (e) {
+            console.log(e)
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске спектаклей!'
+            }
+        }
     }
 
-    async getSinglePlay(payload: {
-        id?: number,
-        title?: string,
-        description?: string
-    }) {
-        const query: PlayInterface | undefined = await this.playDatabaseInstance.get(payload)
-        if (!query) return 404
-        return query
+    async getSinglePlay(idPlay: number) {
+        try {
+            const query: PlayInterface | undefined = await this.playDatabaseInstance.get({id: idPlay})
+            if (!query) return <InnerErrorInterface>{
+                code: 404,
+                message: 'Спектакль не найден!'
+            }
+            return query
+        } catch (e) {
+            console.log(e)
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске спектакля!'
+            }
+        }
+        
     }
 
     async createPlay(payload: PlayBaseInterface) {

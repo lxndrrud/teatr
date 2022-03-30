@@ -81,7 +81,7 @@ class SessionDatabaseModel extends DatabaseModel {
             .del()
     }
 
-    unlockedSessions() {
+    getUnlockedSessions() {
         return KnexConnection(`${sessions} as s`)
             .select(
                 KnexConnection.ref('id').withSchema('s'),
@@ -104,8 +104,14 @@ class SessionDatabaseModel extends DatabaseModel {
             .orderBy('s.timestamp', 'asc')
     }
 
+    getSingleUnlockedSession(idSession: number) {
+        return this.getUnlockedSessions()
+            .where('s.id', idSession)
+            .first()
+    }
+
     getSessionsByPlay(idPlay: number)  {
-        return this.unlockedSessions()
+        return this.getUnlockedSessions()
             .andWhere('s.id_play', idPlay)
     }
 
@@ -195,7 +201,7 @@ class SessionDatabaseModel extends DatabaseModel {
     
 
     getFilteredSessions(userQueryPayload: SessionFilterQueryInterface) {
-        return this.unlockedSessions()
+        return this.getUnlockedSessions()
             .andWhere(builder => {
                 if (userQueryPayload.date !== '') {
                     builder.andWhere(innerBuilder => {

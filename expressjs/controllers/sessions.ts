@@ -2,14 +2,14 @@ import { Request, Response } from "express"
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, isSessionBaseInterface, isSessionFilterQueryInterface } 
     from "../interfaces/sessions"
 import { SessionFetchingInstance } from "../fetchingModels/sessions"
-import { ErrorInterface } from "../interfaces/errors"
+import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 
 
 export const getSessions = async (req: Request, res: Response) => {
     const query = await SessionFetchingInstance.getUnlockedSessions()
-    if (query === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
+    if (isInnerErrorInterface(query)) {
+        res.status(query.code).send(<ErrorInterface>{
+            message: query.message
         })
         return
     }
@@ -23,9 +23,9 @@ export const getSingleSession = async (req: Request, res: Response) => {
         return 
     }
     const query = await SessionFetchingInstance.getSingleUnlockedSession(idSession)
-    if (query === 404) {
-        res.status(404).send(<ErrorInterface>{
-            message: 'Запись не найдена!'
+    if (isInnerErrorInterface(query)) {
+        res.status(query.code).send(<ErrorInterface>{
+            message: query.message
         })
         return
     }
@@ -138,6 +138,12 @@ export const getSlotsForSessions = async (req: Request, res: Response) => {
     if (result === 404) {
         res.status(404).send(<ErrorInterface>{
             message: 'Запись не найдена!'
+        })
+        return
+    }
+    else if (result === 500) {
+        res.status(500).send(<ErrorInterface>{
+            message: 'Внутренняя ошибка сервера!'
         })
         return
     }

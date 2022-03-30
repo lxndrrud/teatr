@@ -1,11 +1,11 @@
 import { Knex } from "knex";
 import { RoleDatabaseInstance } from "../dbModels/roles";
+import { InnerErrorInterface } from "../interfaces/errors";
 import { RoleDatabaseInterface } from "../interfaces/roles";
-import { roles, users } from "../dbModels/tables";
 
 
 
-export class RoleFetchingModel {
+class RoleFetchingModel {
     protected roleDatabaseInstance
 
     constructor() {
@@ -18,28 +18,62 @@ export class RoleFetchingModel {
         })
     }
     
-    getAdminRole() {
-        return this.getRoleByTitle('Администратор')
+    async getAdminRole() {
+        try {
+            const query = await this.getRoleByTitle('Администратор')
+            return query
+        } catch(e) {
+            console.log(e)
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера во время поиска роли!'
+            }
+        }
     }
 
-    getVisitorRole () {
-        return this.getRoleByTitle('Посетитель')
+    async getVisitorRole () {
+        try {
+            const query = await this.getRoleByTitle('Посетитель')
+            return query
+        } catch(e) {
+            console.log(e)
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера во время поиска роли!'
+            }
+        }
     } 
 
-    getCashierRole () {
-        return this.getRoleByTitle('Кассир')
+    async getCashierRole () {
+        try {
+            const query = await this.getRoleByTitle('Кассир')
+            return query
+        } catch(e) {
+            console.log(e)
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера во время поиска роли!'
+            }
+        }
     }
 
-    async getUserRole (idUser: number, idRole: number): Promise<RoleDatabaseInterface | 404 | 500> {
+    async getUserRole (idUser: number, idRole: number): Promise<RoleDatabaseInterface | InnerErrorInterface> {
         try {
             const query: RoleDatabaseInterface = await this.roleDatabaseInstance
                 .getUserRole(idUser, idRole)
             if (!query) {
-                return 404
+                return <InnerErrorInterface>{
+                    code: 404,
+                    message: 'Запись роли не найдена!'
+                }
             }
             return query
         } catch (e) {
-            return 500
+            console.log(e)
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера во время поиска роли!'
+            }
         }
         
     }
