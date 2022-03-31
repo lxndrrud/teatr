@@ -76,4 +76,5 @@ export interface ReservationWithoutSlotsInterface extends ReservationDatabaseInt
 export interface ReservationInterface extends ReservationWithoutSlotsInterface {
     slots: SlotInterface[]
     can_user_delete: boolean
+    can_user_confirm: boolean
 }

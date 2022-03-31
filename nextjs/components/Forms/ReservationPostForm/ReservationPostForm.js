@@ -1,5 +1,5 @@
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { showConfirmationField, postReservation, errorSetDefault } from '../../../store/actions/reservationAction'
+import { postReservation, errorSetDefault } from '../../../store/actions/reservationAction'
 import { fetchSlotsBySession } from "../../../store/actions/sessionAction"
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import SlotsFieldMainAuditorium from "../../Slots/SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
@@ -8,10 +8,11 @@ import { useRouter } from "next/router"
 import styles from "./ReservationPostForm.module.css"
 
 
-const ReservationPostForm = ({ session }) => {
+const ReservationPostForm = () => {
     const dispatch = useDispatch()
     const router = useRouter()
     const store = useStore()
+    let session = useSelector(state => state.session.session)
     let [error, setError] = useState()
 
     useEffect(() => {
@@ -37,7 +38,10 @@ const ReservationPostForm = ({ session }) => {
                 setError(errorObj)
                 dispatch(errorSetDefault())
             } else if (needConfirmation) {
-                dispatch(showConfirmationField())
+                if (router.isReady) {
+                    const idReservation = store.getState().reservation.reservation.id
+                    router.push(`/confirm/${idReservation}`)
+                }
             }
             else {
                 if (router.isReady) {
@@ -45,8 +49,6 @@ const ReservationPostForm = ({ session }) => {
                 }
             }
         })
-
-        //if (errorReservation === null) dispatch(showConfirmationField())
     }
 
     return (
@@ -55,7 +57,7 @@ const ReservationPostForm = ({ session }) => {
                 ?
                     <SlotsFieldMainAuditorium rows={slots} />
                 : 
-                    <div></div>
+                    null
             }
             <div className={styles.errorMessage}>{error}</div>
             <CustomButton type="submit" value="Подтвердить" onClickHook={postEmailReservation} />

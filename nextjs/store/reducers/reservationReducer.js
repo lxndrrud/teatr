@@ -29,13 +29,14 @@ const defaultState = {
     loading: false,
     filterOptions: {},
     error: null,
-    showConfirmationField: false
 }
 
 const reservationReducer = (state = defaultState, action) => {
     switch (action.type) {
         case FETCH_RESERVATIONS:
             return {...state, reservations: action.payload }
+        case FETCH_RESERVATION:
+            return {...state, reservation: action.payload }
         case POST_RESERVATION:
             return {
                 ...state, 
@@ -43,14 +44,11 @@ const reservationReducer = (state = defaultState, action) => {
                     id: action.payload.id,
                     id_session: action.payload.id_session
                 }, 
+                slots: defaultState.slots,
                 need_confirmation: action.payload.need_confirmation 
             }
         case SET_RESERVATION:
             return {...state, reservation: action.payload }
-        case SHOW_CONFIRMATION_FIELD:
-            return {...state, showConfirmationField: action.payload }
-        case HIDE_CONFIRMATION_FIELD:
-            return {...state, showConfirmationField: action.payload }
         case ERROR_RESERVATION:
             return {...state, error: action.payload }
         case ERROR_CONFIRMATION:
@@ -62,6 +60,7 @@ const reservationReducer = (state = defaultState, action) => {
         case DELETE_SLOT:
             return {...state, slots: state.slots.filter(slot => slot.id != action.payload.id) }
         case DELETE_RESERVATION:
+            console.log(action.payload)
             return {...state, reservations: state.reservations
                 .filter(reservation => reservation.id != action.payload.id) 
             }

@@ -15,6 +15,7 @@
     .slotsList {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
     }
     .slotsListLabel {
         margin-top: 0;

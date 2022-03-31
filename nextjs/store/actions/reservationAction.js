@@ -9,7 +9,8 @@ import {
     DELETE_SLOT,
     ERROR_SET_DEFAULT,
     FETCH_RESERVATIONS,
-    DELETE_RESERVATION
+    DELETE_RESERVATION,
+    FETCH_RESERVATION
 } from "../types"
 
 export const postReservation = ({ token, id_session, slots }) => async dispatch => {
@@ -66,14 +67,11 @@ export const confirmReservation = ({
         body: JSON.stringify(body)
     })
     
-    if (resp.status == 200)
-        dispatch(hideConfirmationField())
-    else {
+    if (resp.status !== 200) {
         const responseBody = await resp.json()
-        console.log(responseBody, resp.status)
         dispatch({
             type: ERROR_CONFIRMATION,
-            payload: body.message
+            payload: responseBody.message
         })
     }
 }
@@ -90,18 +88,33 @@ export const setReservation = (payload) => async dispatch => {
     })
 }
 
-export const showConfirmationField = () => async dispatch => {
-    dispatch({
-        type: SHOW_CONFIRMATION_FIELD,
-        payload: true
+export const fetchReservation = ({
+    token,
+    id_reservation
+}) => async dispatch => {
+    const url = `/expressjs/reservations/${id_reservation}`
+    const resp = await fetch(url, {
+        headers: {
+            'Accept': 'application/json',
+            'auth-token': token,
+        },
+        method: "GET"
     })
-}
 
-export const hideConfirmationField = () => async dispatch => {
-    dispatch({
-        type: HIDE_CONFIRMATION_FIELD,
-        payload: false
-    })
+    const body = await resp.json()
+
+    if (resp.status === 200) {
+        dispatch({
+            type: FETCH_RESERVATION,
+            payload: body
+        })
+    }
+    else {
+        dispatch({
+            type: ERROR_RESERVATION,
+            payload: body.message
+        })
+    }
 }
 
 export const addSlot = (payload) => async dispatch => {
@@ -152,8 +165,7 @@ export const deleteReservation = ({
     token, 
     id_reservation
 }) => async dispatch => {
-    const body = { token, id_reservation }
-    const resp = await fetch("/expressjs/reservations/"+id_reservation.toString(), {
+    const resp = await fetch(`/expressjs/reservations/${id_reservation}`, {
         method: 'DELETE',
         headers: {
             'Accept': 'application/json',
@@ -161,8 +173,19 @@ export const deleteReservation = ({
             'auth-token': token
         }
     })
-    dispatch({
-        type: DELETE_RESERVATION,
-        payload: { id: id_reservation }
-    })
+
+
+    if (resp.status === 200)
+        dispatch({
+            type: DELETE_RESERVATION,
+            payload: { id: parseInt(id_reservation) }
+        })
+    else {
+        const responseBody = await resp.json()
+        dispatch({
+            type: ERROR_RESERVATION,
+            payload: responseBody.message
+        })
+    }
+       
 }

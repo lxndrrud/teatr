@@ -1,11 +1,11 @@
 import styles from "./ReservationForm.module.css"
 import ReservationPostForm from "../ReservationPostForm/ReservationPostForm"
-import ReservationConfirmationForm from "../ReservationConfirmationForm/ReservationConfirmationForm"
 import { useSelector } from "react-redux"
 
 
-const ReservationForm = ({ session, play }) => {
-    let showConfirmationField = useSelector(state => state.reservation.showConfirmationField)
+const ReservationForm = () => {
+    let play = useSelector(state => state.play.play)
+    let session = useSelector(state => state.session.session)
     
     return (
         <>
@@ -16,12 +16,7 @@ const ReservationForm = ({ session, play }) => {
                 <p className={styles.playInfo}>Зал: {session.auditorium_title}</p>
             </div>
             <form className={styles.postForm}>
-                {showConfirmationField 
-                    ? 
-                    <ReservationConfirmationForm />
-                    : 
-                    <ReservationPostForm session={session} />
-                }
+                <ReservationPostForm />
             </form>
 
         </>

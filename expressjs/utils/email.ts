@@ -22,7 +22,7 @@ export const sendMail = (email: string, confirmation_code: string,
         `Номер вашей брони (понадобится на кассе): ${id_reservation.toString()}\n` +
         `Код подтверждения вашей брони: ${confirmation_code}\n` +
         `Название представления: ${play_title}\n` +
-        `Дата и время представления: ${extendedTimestamp(timestamp)}\n` +
+        `Дата и время представления: ${timestamp}\n` +
         `Название зала: ${auditorium_title}\n`,
     });
 }

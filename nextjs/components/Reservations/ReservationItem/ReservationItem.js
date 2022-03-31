@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from "./ReservationItem.module.css"
 import CustomButton from "../../UI/CustomButton/CustomButton"
+import { ButtonLink } from "../../UI/ButtonLink/ButtonLink"
 import ReservationSlotList from '../../Slots/ReservationSlotList/ReservationSlotList'
 import { useDispatch, useSelector } from 'react-redux'
 import { deleteReservation } from '../../../store/actions/reservationAction'
@@ -33,6 +34,20 @@ const ReservationItem = ({ reservation }) => {
                         <span className={styles.bold}>Время бронирования:</span> {reservation.created_at}
                     </p>
                     <p className={styles.textLabel}>
+                        <span className={styles.bold}>Статус подтверждения:</span> {
+                            reservation.is_confirmed
+                                ? <span>Подтверждена</span>
+                                : <span>Неподтверждена</span>
+                        }
+                    </p>
+                    <p className={styles.textLabel}>
+                        <span className={styles.bold}>Статус оплаты:</span> {
+                            reservation.is_paid
+                                ? <span>Оплачена</span>
+                                : <span>Неоплачена</span>
+                        }
+                    </p>
+                    <p className={styles.textLabel}>
                         <span className={styles.bold}>Стоимость:</span> {reservation.total_cost} рублей
                     </p>
                 </div>
@@ -42,13 +57,19 @@ const ReservationItem = ({ reservation }) => {
                 </div>
             </div>
             {
+                reservation.can_user_confirm
+                ? <ButtonLink 
+                    text='Подтвердить бронь' 
+                    destination={`/confirm/${reservation.id}`} />
+                : null
+            }
+            {
                 reservation.can_user_delete 
                 ? <CustomButton type="submit" value="Удалить бронь" 
                     onClickHook={deleteReservationClick}
                     styleClass={styles.deleteReservationButton} />
-                : <></>
+                : null
             }
-            
         </div>
     )
 }

@@ -383,12 +383,18 @@ class ReservationFetchingModel {
             // Расчет стоимости брони
             reservation.total_cost = this.calculateReservationTotalCost(slots)
 
+            // Проверка на возможность удаления брони
             const canUserDelete = (reservation.id_user === idUser && !reservation.session_is_locked)
                 || (userRole.can_see_all_reservations && userRole.can_access_private)
+
+            // Проверка на возможность подтверждения брони
+            const canUserConfirm = (reservation.id_user === idUser && !reservation.session_is_locked 
+                && !reservation.is_confirmed)
             
             result.push(<ReservationInterface>{
                 ...reservation,
                 can_user_delete: canUserDelete,
+                can_user_confirm: canUserConfirm,
                 slots: slots
             })
         }

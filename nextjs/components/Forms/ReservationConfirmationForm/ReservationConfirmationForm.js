@@ -23,8 +23,7 @@ const ReservationConfirmationForm = () => {
         e.preventDefault()
         const body = {
             token, 
-            id_reservation: reservation.id,
-            // code: reservation.code,
+            id_reservation: parseInt(reservation.id),
             id_session: parseInt(reservation.id_session),
             confirmation_code: confirmationCode
         }
@@ -38,7 +37,7 @@ const ReservationConfirmationForm = () => {
                 dispatch(errorSetDefault())
             } 
             else {
-                router.push('/')
+                router.push('/control')
             }
         })
     }
