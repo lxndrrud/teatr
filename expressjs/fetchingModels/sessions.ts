@@ -35,41 +35,55 @@ class SessionFetchingModel {
             return newSession
         } catch(e) {
             await trx.rollback()
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: "Внутреннняя ошибка сервера при создании сеанса!"
+            }
         }
     }
 
     async updateSession(idSession: number, payload: SessionBaseInterface) {
         const query = await this.sessionDatabaseInstance.get({ id: idSession })
         if (!query) { 
-            return 404
+            return <InnerErrorInterface>{
+                code: 404,
+                message: 'Запись сеанса не найдена!'
+            }
         }
         const trx = await KnexConnection.transaction()
         try {
             await this.sessionDatabaseInstance.update(trx, idSession, payload)
             await trx.commit()
-            return 200
         }
         catch (e) {
+            console.log(e)
             await trx.rollback()
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при обновлении сеанса!'
+            }
         }
     }
 
     async deleteSession(idSession: number) {
         const query = await this.sessionDatabaseInstance.get({id: idSession})
         if (!query) {
-            return 404
+            return <InnerErrorInterface>{
+                code: 404,
+                message: 'Запись сеанса не найдена!'
+            }
         }
         const trx = await KnexConnection.transaction()
         try {
             await this.sessionDatabaseInstance.delete(trx, idSession)
             await trx.commit()
-            return 200
         }
         catch (e) {
             await trx.rollback()
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутреняя ошибка сервера при удалении сеанса!'
+            }
         }
     }
 
@@ -86,9 +100,9 @@ class SessionFetchingModel {
         }
     }
 
-    async getSingleUnlockedSession(idSession: number): Promise<SessionInterface | InnerErrorInterface> {
+    async getSingleUnlockedSession(idSession: number) {
         try {
-            const query = await this.sessionDatabaseInstance.getSingleUnlockedSession(idSession)
+            const query: SessionInterface = await this.sessionDatabaseInstance.getSingleUnlockedSession(idSession)
             const fetchedQuery = this.fixTimestamps([query])
             return fetchedQuery[0]
         } catch (e) {
@@ -99,14 +113,18 @@ class SessionFetchingModel {
         }
     }
 
-    async getSessionsByPlay(idPlay: number): Promise<SessionInterface[] | 500> {
+    async getSessionsByPlay(idPlay: number) {
         try {
-            const query: SessionInterface[] = await this.sessionDatabaseInstance.getSessionsByPlay(idPlay)
+            const query: SessionInterface[] = await this.sessionDatabaseInstance
+                .getSessionsByPlay(idPlay)
             const fetchedQuery = this.fixTimestamps(query)
             return fetchedQuery
         } catch (e) {
             console.log(e)
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске сеансов по спектаклю!'
+            }
         }
     }
     
@@ -115,11 +133,17 @@ class SessionFetchingModel {
         try {
             session = await this.sessionDatabaseInstance.get({id: idSession})
         } catch (e) {
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при нахождении сеанса!'
+            }
         }
 
         if (!session) {
-            return 404
+            return <InnerErrorInterface>{
+                code: 404,
+                message: 'Запись сеанса не найдена!'
+            }
         }
 
         const idPricePolicy = session.id_price_policy
@@ -135,7 +159,10 @@ class SessionFetchingModel {
                 this.sessionDatabaseInstance.getReservedSlots(idSession, idPricePolicy)
             ])
         } catch (e) {
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске слотов!'
+            }
         }
         
     
@@ -190,7 +217,10 @@ class SessionFetchingModel {
                 this.sessionDatabaseInstance.getSessionFilterPlays()
             ])
         } catch (e) {
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске значений для фильтра!'
+            }
         }
         
     
@@ -213,21 +243,25 @@ class SessionFetchingModel {
         }
     }
 
-    async getFilteredSessions(userQueryPayload: SessionFilterQueryInterface): Promise<SessionInterface[] | 500> {
+    async getFilteredSessions(userQueryPayload: SessionFilterQueryInterface) {
         try {
-            const query = await this.sessionDatabaseInstance.getFilteredSessions(userQueryPayload)
+            const query: SessionInterface[] = await this.sessionDatabaseInstance
+                .getFilteredSessions(userQueryPayload)
             const fetchedQuery = this.fixTimestamps(query)
             return fetchedQuery
         } catch (e) {
-            console.log(500)
-            return 500
+            console.log(e)
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске отфильтрованных сеансов!'
+            }
         }
         
     }
 
-    async getReservedSlots(idReservation: number, idPricePolicy: number): Promise<SlotInterface[] | InnerErrorInterface> {
+    async getReservedSlots(idReservation: number, idPricePolicy: number) {
         try {
-            const query = await this.sessionDatabaseInstance
+            const query: SlotInterface[] = await this.sessionDatabaseInstance
                 .getReservedSlots(idReservation, idPricePolicy)
             return query
         } catch(e) {

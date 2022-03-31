@@ -23,6 +23,7 @@ export const getPlays = async (req: Request, res: Response) => {
 }
 
 export const createPlay = async (req: Request, res: Response) => {
+    // Проверка тела запроса
     if(!isPlayBaseInterface(req.body)) {
         res.status(400).send(<ErrorInterface>{
             message: 'Неверное тело запроса!'
@@ -30,13 +31,17 @@ export const createPlay = async (req: Request, res: Response) => {
         return
     }
     const payload: PlayBaseInterface = {...req.body}
+
+    // Создание записи спектакля
     const newPlay = await PlayFetchingInstance.createPlay(payload)
-    if (newPlay === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
+
+    if (isInnerErrorInterface(newPlay)) {
+        res.status(newPlay.code).send(<ErrorInterface>{
+            message: newPlay.message
         })
         return
     }
+    
     res.status(201).send({
         id: newPlay.id
     })
@@ -67,28 +72,27 @@ export const deletePlay = async (req: Request, res: Response) => {
         })
         return
     }
-    const responseCode = await PlayFetchingInstance.deletePlay(idPlay)
-    if (responseCode === 200) {
-        res.status(200).end()
-    }
-    else if (responseCode === 404) {
-        res.status(404).send(<ErrorInterface>{
-            message: 'Запись не найдена!'
+    const response = await PlayFetchingInstance.deletePlay(idPlay)
+
+    if(isInnerErrorInterface(response)) {
+        res.status(response.code).send(<ErrorInterface>{
+            message: response.message
         })
+        return
     }
-    else if (responseCode === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутрення ошибка сервера!'
-        })
-    }
+
+    res.status(200).end()
 }
 
 export const updatePlay = async (req: Request, res: Response) => {
+    // Проверка строки запроса
     const idPlay = parseInt(req.params.idPlay)
     if (!idPlay) {
         res.send(400).end()
         return
     }
+
+    // Проверка тела запроса
     if (!isPlayBaseInterface(req.body)) {
         res.status(400).send({
             message: 'Неверное тело запроса!'
@@ -96,18 +100,16 @@ export const updatePlay = async (req: Request, res: Response) => {
         return
     }
     const payload: PlayBaseInterface = {...req.body}
-    const responseCode = await PlayFetchingInstance.updatePlay(idPlay, payload)
-    if (responseCode === 200) {
-        res.status(200).end()
-    }
-    else if (responseCode === 404) {
-        res.status(404).send(<ErrorInterface>{
-            message: 'Запись не найдена!'
+
+    // Обновление спектакля
+    const response = await PlayFetchingInstance.updatePlay(idPlay, payload)
+
+    if(isInnerErrorInterface(response)) {
+        res.status(response.code).send(<ErrorInterface>{
+            message: response.message
         })
+        return
     }
-    else if (responseCode === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
-        })
-    }
+
+    res.status(200).end()
 }

@@ -43,7 +43,7 @@ class UserFetchingModel {
 
 
     async createUser(payload: UserRegisterInterface) {
-        // * Проверка на существующего пользователя
+        // Проверка на существующего пользователя
         const existingUserCheck: UserInterface = await this.userDatabaseInstance
             .get({ email: payload.email})
         if (existingUserCheck) {
@@ -52,13 +52,13 @@ class UserFetchingModel {
                 message: 'Пользователь с такой почтой уже существует!'
             }
         }
-        // * Получаем роль "Посетитель" из базы данных
+        // Получаем роль "Посетитель" из базы данных
         const visitorRole = await this.roleFetchingInstance.getVisitorRole()
         if (isInnerErrorInterface(visitorRole)) {
             return visitorRole
         }
         const fetchedRequestBody: UserBaseInterface = {...payload, id_role: visitorRole.id}
-        // * Транзакция: создать пользователя, затем дать ему токен
+        // Транзакция: создать пользователя, затем дать ему токен
         const trx = await KnexConnection.transaction()
         try {
             fetchedRequestBody.password = await hash(payload.password, 10)
@@ -76,23 +76,34 @@ class UserFetchingModel {
         }
     }
 
-    async loginUser (payload: UserLoginInterface) {
+    async loginUser(payload: UserLoginInterface) {
         // Получение пользователя и сравнение введенного пароля с хэшем в базе
         const user: UserInterface = await this.userDatabaseInstance.get({email: payload.email})
         if (!(user && compareSync(payload.password, user.password))) {
-            return 401
+            return <InnerErrorInterface>{
+                code: 401,
+                message: 'Пользователь с такими входными данными не найден!'
+            }
         }
         // Транзакция: сгенерировать токен для пользователя, сохранить в БД
         const trx = await KnexConnection.transaction()
         try {
             const fetchedUser = (await this.generateToken(trx, user))[0]
             await trx.commit()
-            if (!fetchedUser.token) return 500
+            if (!fetchedUser.token) {
+                return <InnerErrorInterface>{
+                    code: 500,
+                    message: 'Внутренняя ошибка сервера при генерации токена!'
+                }
+            }
             return fetchedUser.token
         } catch (e) {
-            await trx.rollback()
             console.log(e)
-            return 500
+            await trx.rollback()
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера в транзакции логина!'
+            }
         }  
     }
 
@@ -102,7 +113,10 @@ class UserFetchingModel {
             return query
         } catch (e) {
             console.log(e)
-            return 500
+            return <InnerErrorInterface>{
+                code: 500, 
+                message: 'Внутренняя ошибка сервера при получении всех пользователей!'
+            }
         }
     }
 

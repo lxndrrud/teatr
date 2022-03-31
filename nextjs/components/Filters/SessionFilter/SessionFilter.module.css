@@ -3,10 +3,18 @@
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
+    flex-wrap: wrap;
     width: 100%;
 }
 
 .filterButton {
     display: flex;
     margin-top: 1%;
+}
+
+@media (max-width: 800) {
+    .container {
+        flex-wrap: nowrap;
+        flex-direction: column;
+    }
 }

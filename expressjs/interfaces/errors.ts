@@ -7,5 +7,7 @@ export interface InnerErrorInterface extends ErrorInterface{
 }
 
 export function isInnerErrorInterface(obj: any): obj is InnerErrorInterface {
-    return 'code' in obj && 'message' in obj
+    return obj 
+        && obj.code && typeof obj.code === 'number' 
+        && obj.message && typeof obj.message === 'string'
 }

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface, isUserRegisterInterface } 
     from "../interfaces/users";
-import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
+import { ErrorInterface, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { UserFetchingInstance } from "../fetchingModels/users";
 
 /**
@@ -43,21 +43,17 @@ export const loginUser = async (req: Request, res: Response) => {
     let requestBody: UserLoginInterface = {...req.body}
 
     const token = await UserFetchingInstance.loginUser(requestBody)
-    if (typeof token ==='string') {
-        res.status(200).send({
-            token: token
+
+    if (isInnerErrorInterface(token)) {
+        res.status(token.code).send(<InnerErrorInterface>{
+            message: token.message
         })
+        return
     }
-    else if (token === 401 ) {
-        res.status(401).send(<ErrorInterface>{
-            message: 'Пользователь с такими входными данными не найден!'
-        })
-    }  
-    else if (token === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
-        })
-    }
+
+    res.status(200).send({
+        token: token
+    })
 }
 
 /**
@@ -65,11 +61,13 @@ export const loginUser = async (req: Request, res: Response) => {
  */
 export const getAllUsers = async (req: Request, res: Response) => {
     const query = await UserFetchingInstance.getAll()
-    if (query === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
+
+    if (isInnerErrorInterface(query)) {
+        res.status(query.code).send(<ErrorInterface>{
+            message: query.message
         })
         return
     }
+    
     res.status(200).send(query)
 }

@@ -41,9 +41,9 @@ export const postSession = async (req: Request, res: Response) => {
     }
     const payload: SessionBaseInterface = {...req.body}
     const newSession = await SessionFetchingInstance.createSession(payload)
-    if (newSession === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
+    if (isInnerErrorInterface(newSession)) {
+        res.status(newSession.code).send(<ErrorInterface>{
+            message: newSession.message
         })
         return
     }
@@ -68,20 +68,14 @@ export const updateSession = async (req: Request, res: Response) => {
     }
     const payload: SessionBaseInterface = {...req.body}
     
-    const responseCode = await SessionFetchingInstance.updateSession(idSession, payload)
-    if(responseCode === 200) {
-        res.status(200).end()
-    }
-    else if (responseCode === 404) {
-        res.status(404).send(<ErrorInterface>{
-            message: 'Запись не найдена!'
+    const response = await SessionFetchingInstance.updateSession(idSession, payload)
+    if (isInnerErrorInterface(response)) {
+        res.status(response.code).send(<ErrorInterface>{
+            message: response.message
         })
+        return
     }
-    else if (responseCode === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
-        })
-    }
+    res.status(200).end()
 }
 
 export const deleteSession = async (req: Request, res: Response) => {
@@ -92,20 +86,16 @@ export const deleteSession = async (req: Request, res: Response) => {
         })
         return
     }
-    const responseCode = await SessionFetchingInstance.deleteSession(idSession)
-    if (responseCode === 200) {
-        res.status(200).end()
-    }
-    else if (responseCode === 404) {
-        res.status(404).send(<ErrorInterface>{
-            message: 'Запись не найдена!'
+    const response = await SessionFetchingInstance.deleteSession(idSession)
+
+    if (isInnerErrorInterface(response)) {
+        res.status(response.code).send(<ErrorInterface>{
+            message: response.message
         })
+        return
     }
-    else if (responseCode === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
-        })
-    }
+
+    res.status(200).end()
 }
 
 export const getSessionsByPlay = async (req: Request, res: Response) => {
@@ -118,9 +108,10 @@ export const getSessionsByPlay = async (req: Request, res: Response) => {
     }
     
     const query = await SessionFetchingInstance.getSessionsByPlay(idPlay)
-    if (query === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
+
+    if (isInnerErrorInterface(query)) {
+        res.status(query.code).send(<ErrorInterface>{
+            message: query.message
         })
         return
     }
@@ -135,15 +126,10 @@ export const getSlotsForSessions = async (req: Request, res: Response) => {
         return
     }
     const result = await SessionFetchingInstance.getSlots(idSession)
-    if (result === 404) {
-        res.status(404).send(<ErrorInterface>{
-            message: 'Запись не найдена!'
-        })
-        return
-    }
-    else if (result === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
+
+    if (isInnerErrorInterface(result)) {
+        res.status(result.code).send(<ErrorInterface>{
+            message: result.message
         })
         return
     }
@@ -161,9 +147,11 @@ export const getFilteredSessions = async (req: Request, res: Response) => {
     const userQuery: SessionFilterQueryInterface = {...req.query}
 
     const query = await SessionFetchingInstance.getFilteredSessions(userQuery)
-    if (query === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
+
+    if (isInnerErrorInterface(query)) {
+        res.status(query.code).send(<ErrorInterface>{
+            code: query.code,
+            message: query.message
         })
         return
     }
@@ -174,9 +162,9 @@ export const getFilteredSessions = async (req: Request, res: Response) => {
 export const getSessionFilterOptions = async (req: Request, res: Response) => {
     const query = await SessionFetchingInstance.getSessionFilterOptions()
 
-    if (query === 500) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
+    if (isInnerErrorInterface(query)) {
+        res.status(query.code).send(<ErrorInterface>{
+            message: query.message
         })
         return
     }

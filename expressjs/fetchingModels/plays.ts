@@ -50,7 +50,10 @@ class PlayFetchingModel {
             return newPlay
         } catch (e) {
             await trx.rollback()
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при создании спектакля!'
+            }
         }
     }
 
@@ -59,27 +62,37 @@ class PlayFetchingModel {
         try {
             const query = await this.playDatabaseInstance.get({ id: idPlay})
             if (!query) {
-                return 404
+                return <InnerErrorInterface>{
+                    code: 404,
+                    message: 'Запись спектакля не найдена!'
+                }
             }
             await trx.commit()
-            return 200
         } catch (e) {
             await trx.rollback()
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при обновлении спектакля!'
+            }
         }
     }
 
     async deletePlay(idPlay: number) {
         const query = await this.playDatabaseInstance.get({ id: idPlay })
         if (!query) {
-            return 404
+            return <InnerErrorInterface>{
+                code: 404,
+                message: 'Запись спектакля не найдена!'
+            }
         }
         const trx = await KnexConnection.transaction()
         try {
             await this.playDatabaseInstance.delete(trx, idPlay)
-            return 200
         } catch (e) {
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при удалении спектакля!'
+            }
         }
     }
 }
