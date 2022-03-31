@@ -7,9 +7,6 @@ import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 import { ReservationBaseInterface, ReservationInterface, 
     ReservationCreateInterface, ReservationDatabaseInterface, ReservationConfirmationInterface, isReservationCreateInterface, isReservationConfirmationInterface, ReservationWithoutSlotsInterface, ReservationBaseWithoutConfirmationInterface} from "../interfaces/reservations"
 // * Модели
-import * as ReservationModel from "../models/reservations"
-import * as SessionModel from "../models/sessions"
-import * as RoleModel from "../models/roles"
 import { ReservationFetchingInstance } from "../fetchingModels/reservations"
 // * Утилиты
 import { generateCode } from "../utils/code"

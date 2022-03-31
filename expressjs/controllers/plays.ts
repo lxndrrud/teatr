@@ -1,25 +1,18 @@
 import { KnexConnection }from "../knex/connections"
 import { Request, Response } from "express"
-import * as PlayModel from "../models/plays"
 import { PlayFetchingInstance } from "../fetchingModels/plays"
 import { isPlayBaseInterface, PlayBaseInterface, PlayInterface } from "../interfaces/plays"
 import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 
 export const getPlays = async (req: Request, res: Response) => {
-    try {
-        const query = await PlayFetchingInstance.getAll()
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                message: query.message
-            })
-            return 
-        }
-        res.status(200).send(query)
-    } catch (e) {
-        res.status(500).send(<ErrorInterface>{
-            message: 'Внутренняя ошибка сервера!'
+    const query = await PlayFetchingInstance.getAll()
+    if (isInnerErrorInterface(query)) {
+        res.status(query.code).send(<ErrorInterface>{
+            message: query.message
         })
+        return 
     }
+    res.status(200).send(query)
 }
 
 export const createPlay = async (req: Request, res: Response) => {

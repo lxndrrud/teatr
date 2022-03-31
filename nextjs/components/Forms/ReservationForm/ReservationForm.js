@@ -11,9 +11,18 @@ const ReservationForm = () => {
         <>
             <div className={styles.infoCard}>
                 <p className={styles.infoCardTitle}>Информация о сеансе</p>
-                <p className={styles.playInfo}>Спектакль: {play.title}</p>
-                <p className={styles.playInfo}>Дата и время: {session.timestamp}</p>
-                <p className={styles.playInfo}>Зал: {session.auditorium_title}</p>
+                <p className={styles.playInfo}>
+                    <span className={styles.bold}>Спектакль:</span> {play.title}
+                </p>
+                <p className={styles.playInfo}>
+                    <span className={styles.bold}>Дата и время:</span> {session.timestamp}
+                </p>
+                <p className={styles.playInfo}>
+                    <span className={styles.bold}>Зал:</span> {session.auditorium_title}
+                </p>
+                <p className={styles.playInfo}>
+                    <span className={styles.bold}>Максимум мест:</span> {session.max_slots}
+                </p>
             </div>
             <form className={styles.postForm}>
                 <ReservationPostForm />

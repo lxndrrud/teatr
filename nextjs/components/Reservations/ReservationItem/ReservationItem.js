@@ -22,6 +22,9 @@ const ReservationItem = ({ reservation }) => {
             <div className={styles.flexWidthContainer}>
                 <div className={styles.columnContainer}>
                     <p className={styles.textLabel}>
+                        <span className={styles.bold}>Номер брони:</span> {reservation.id}
+                    </p>
+                    <p className={styles.textLabel}>
                         <span className={styles.bold}>Название спектакля:</span> {reservation.play_title}
                     </p>
                     <p className={styles.textLabel}>
@@ -36,15 +39,15 @@ const ReservationItem = ({ reservation }) => {
                     <p className={styles.textLabel}>
                         <span className={styles.bold}>Статус подтверждения:</span> {
                             reservation.is_confirmed
-                                ? <span>Подтверждена</span>
-                                : <span>Неподтверждена</span>
+                                ? <span className={styles.statusOk}>Подтверждено</span>
+                                : <span className={styles.statusProblem}>Не подтверждено</span>
                         }
                     </p>
                     <p className={styles.textLabel}>
                         <span className={styles.bold}>Статус оплаты:</span> {
                             reservation.is_paid
-                                ? <span>Оплачена</span>
-                                : <span>Неоплачена</span>
+                                ? <span className={styles.statusOk}>Оплачено</span>
+                                : <span className={styles.statusProblem}>Не оплачено</span>
                         }
                     </p>
                     <p className={styles.textLabel}>

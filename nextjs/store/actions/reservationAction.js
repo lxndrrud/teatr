@@ -10,7 +10,8 @@ import {
     ERROR_SET_DEFAULT,
     FETCH_RESERVATIONS,
     DELETE_RESERVATION,
-    FETCH_RESERVATION
+    FETCH_RESERVATION,
+    CLEAR_SLOTS
 } from "../types"
 
 export const postReservation = ({ token, id_session, slots }) => async dispatch => {
@@ -188,4 +189,10 @@ export const deleteReservation = ({
         })
     }
        
+}
+
+export const clearSlots = () => async dispatch => {
+    dispatch({
+        type: CLEAR_SLOTS,
+    })
 }

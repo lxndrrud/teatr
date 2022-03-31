@@ -49,6 +49,16 @@
     flex-direction: column;
 }
 
+.statusOk {
+    color: #4a7140;
+}
+
+.statusProblem {
+    color: #e41220;
+}
+
+
+
 @media (max-width: 1550px) {
     .reservationItem {
         max-width: 100%;

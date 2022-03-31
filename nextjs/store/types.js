@@ -22,6 +22,7 @@ export const FETCH_RESERVATIONS = 'FETCH_RESERVATIONS'
 export const FETCH_RESERVATION = 'FETCH_RESERVATION'
 export const ADD_SLOT = 'ADD_SLOT'
 export const DELETE_SLOT = 'DELETE_SLOT'
+export const CLEAR_SLOTS = 'CLEAR_SLOTS'
 
 // User Reducer
 export const REGISTER = 'REGISTER'
