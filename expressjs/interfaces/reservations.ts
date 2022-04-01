@@ -41,7 +41,6 @@ export function isReservationConfirmationInterface (obj: any): obj is Reservatio
 export interface ReservationBaseInterface {
     id_session: number
     id_user: number
-    //code: string
     confirmation_code: string
 }
 
@@ -77,4 +76,26 @@ export interface ReservationInterface extends ReservationWithoutSlotsInterface {
     slots: SlotInterface[]
     can_user_delete: boolean
     can_user_confirm: boolean
+}
+
+export interface ReservationFilterQueryInterface {
+    date?: string
+    auditorium_title?: string
+    play_title?: string
+    is_locked?: boolean,
+    id_reservation?: number
+}
+
+export function isReservationFilterQueryInterface(obj: any): obj is ReservationFilterQueryInterface {
+    return obj
+        && ((obj.date && typeof obj.date === 'string') 
+            || typeof obj.date === 'undefined')
+        && ((obj.auditorium_title && typeof obj.auditorium_title === 'string') 
+            || typeof obj.auditorium_title === 'undefined')
+        && ((obj.play_title && typeof obj.play_title === 'string') 
+            || typeof obj.play_title === 'undefined')
+        && ((obj.is_locked && typeof obj.is_locked === 'boolean') 
+            || typeof obj.is_locked === 'undefined')
+        && ((obj.id_reservation && typeof obj.id_reservation === 'number') 
+            || typeof obj.id_reservation === 'undefined')
 }

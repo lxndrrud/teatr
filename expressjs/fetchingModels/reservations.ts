@@ -5,7 +5,8 @@ import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors
 import { ReservationCreateInterface, ReservationInterface, ReservationWithoutSlotsInterface,
     ReservationDatabaseInterface, ReservationBaseInterface,
     ReservationBaseWithoutConfirmationInterface, 
-    ReservationConfirmationInterface} from "../interfaces/reservations";
+    ReservationConfirmationInterface,
+    ReservationFilterQueryInterface} from "../interfaces/reservations";
 import { SlotInterface, ReservationsSlotsBaseInterface, 
     ReservationsSlotsInterface} from "../interfaces/slots";
 import { RoleDatabaseInterface } from '../interfaces/roles'
@@ -14,6 +15,10 @@ import { SessionFetchingInstance } from "./sessions";
 import { generateCode } from "../utils/code"
 import { sendMail } from "../utils/email"
 import { UserRequestOption } from "../interfaces/users";
+import { TimestampReservationFilterOptionDatabaseInterface, TimestampReservationFilterOptionInterface } from "../interfaces/timestamps";
+import { AuditoriumReservationFilterOption } from "../interfaces/auditoriums";
+import { PlayReservationFilterOptionInterface } from "../interfaces/plays";
+import { dateFromTimestamp, extendedDateFromTimestamp } from "../utils/timestamp"
 
 
 class ReservationFetchingModel {
@@ -344,6 +349,84 @@ class ReservationFetchingModel {
             return <InnerErrorInterface>{
                 code: 500,
                 message: 'Ошибка в удалении записи!'
+            }
+        }
+    }
+
+    /**
+     * * Получение значений для фильтра броней
+     */
+    async getReservationFilterOptions() {
+        // dates, auditoriums, plays but without isLocked, reservationNumber
+        let timestamps: TimestampReservationFilterOptionDatabaseInterface[],
+            auditoriums: AuditoriumReservationFilterOption[],
+            plays: PlayReservationFilterOptionInterface[]
+
+        try {
+            [timestamps, auditoriums, plays] = await Promise.all([
+                this.reservationDatabaseInstance.getTimestampsOptionsForReservationFilter(),
+                this.reservationDatabaseInstance.getAuditoriumsOptionsForReservationFilter(),
+                this.reservationDatabaseInstance.getPlaysOptionsForReservationFilter()
+            ])
+        } catch (e) {
+            console.log(e)
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске значений для фильтра броней!'
+            }
+        }
+
+        let dates: TimestampReservationFilterOptionInterface[] = []
+        let distinctCheck: Map<string, string> = new Map()
+        for (let row of timestamps) {
+            const extendedDate = extendedDateFromTimestamp(row.timestamp)
+            const simpleDate = dateFromTimestamp(row.timestamp)
+            if (!distinctCheck.has(simpleDate)) {
+                dates.push({
+                    date: simpleDate,
+                    extended_date: extendedDate
+                })
+                distinctCheck.set(simpleDate, simpleDate)
+            }
+        }
+
+        return {
+            dates, auditoriums, plays
+        }
+
+    }
+
+    /**
+     * * Получение отфильтрованных броней
+     */
+    async getFilteredReservations(userQuery: ReservationFilterQueryInterface, user: UserRequestOption) {
+        // Проверка-получение роли
+        let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
+        
+        if (isInnerErrorInterface(userRole)) {
+            return userRole
+        }
+
+        try {
+            // В зависимости от роли выдать либо часть всех броней,
+            // либо часть пользовательских броней
+            let query: ReservationWithoutSlotsInterface[]
+            if (!userRole.can_see_all_reservations)
+                query = await this.reservationDatabaseInstance
+                    .getFilteredReservationsForUser(userQuery, user.id)
+            else 
+                query = await this.reservationDatabaseInstance
+                    .getFilteredReservations(userQuery)
+
+            // Отредактировать результирующий список
+            const result = await this.fetchReservations(user.id, userRole, query)
+            
+            return result
+        } catch (e) {
+            console.log(e)
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при фильтрации броней!'
             }
         }
     }

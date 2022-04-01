@@ -15,3 +15,7 @@ export interface PlayInterface extends PlayBaseInterface {
 export interface PlaySessionFilterOptionInterface {
     title: string
 }
+
+export interface PlayReservationFilterOptionInterface {
+    title: string
+}

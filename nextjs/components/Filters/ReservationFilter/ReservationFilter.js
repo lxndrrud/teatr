@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import Select from '../../UI/Select/Select'
-import Checkbox from '../../UI/Checkbox/Checkbox'
 import CustomButton from '../../UI/CustomButton/CustomButton'
+import CustomInput from "../../UI/CustomInput/CustomInput"
 import styles from "./ReservationFilter.module.css"
 import { useDispatch, useSelector } from 'react-redux'
+import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 
 const ReservationFilter = () => {
     const dispatch = useDispatch()
 
     // Состояния фильтра
-    let [date, setDate] = useState('')
-    let [auditoriumTitle, setAuditoriumTitle] = useState('')
-    let [playTitle, setPlayTitle] = useState('')
-    let [showLocked, setShowLocked] = useState(false)
+    let [date, setDate] = useState()
+    let [auditoriumTitle, setAuditoriumTitle] = useState()
+    let [playTitle, setPlayTitle] = useState()
+    let [reservationNumber, setReservationNumber] = useState()
+    let [showLocked, setShowLocked] = useState()
+    let [error, setError] = useState('')
 
     useEffect(() => {
         
@@ -21,29 +24,36 @@ const ReservationFilter = () => {
 
     // Функции для синронизации состояния с input`ами
     const syncDate = () => {
-        if (e.target.value === 'None') setDate('')
+        if (e.target.value === 'None') setDate(undefined)
         else setDate(e.target.value)
     }
     const syncAuditoriumTitle = (e) => {
-        if (e.target.value === 'None') setAuditoriumTitle('')
+        if (e.target.value === 'None') setAuditoriumTitle(undefined)
         else setAuditoriumTitle(e.target.value)
     }
 
     const syncPlayTitle = (e) => {
-        if (e.target.value === 'None') setPlayTitle('')
+        if (e.target.value === 'None') setPlayTitle(undefined)
         else setPlayTitle(e.target.value)
     }
-    const syncShowLockedCheckbox = (e) => {
+    const syncShowLocked = (e) => {
         setShowLocked(!showLocked)
     }
 
+    const syncReservationNumber = (e) => {
+        const parsedInt = parseInt(e.target.value)
+        if (parsedInt) setReservationNumber(parsedInt)
+        else setError('Неверный номер брони')
+    }
+
     // Получение свойств для выбора в селекторе
-    const reservationfilterOptions = useSelector(state => state.reservation.filterOptions)
+    const reservationFilterOptions = useSelector(state => state.reservation.filterOptions)
 
     const getFilteredReservations = () => {
         e.preventDefault()
         
-        dispatch(fetchFilteredReservations(date, auditoriumTitle, playTitle, showLocked))
+        dispatch(fetchFilteredReservations(date, auditoriumTitle, playTitle,
+             showLocked, reservationNumber))
     }
 
     return (
@@ -51,7 +61,7 @@ const ReservationFilter = () => {
             <Select onChange={syncDate}>
                 <option value="None">Все даты</option>
 
-                {sessionFilterOptions.dates && filterOptions.dates.map(item => (
+                {reservationFilterOptions.dates && reservationFilterOptions.dates.map(item => (
                   <option value={item.date}>
                     {item.extended_date}
                   </option>  
@@ -61,25 +71,37 @@ const ReservationFilter = () => {
             <Select onChange={syncAuditoriumTitle}>
                 <option value="None">Все залы</option>
 
-                {sessionFilterOptions.auditoriums && filterOptions.auditoriums.map(item => (
-                    <option value={item.title}>
-                        {item.title}
-                    </option>
+                {reservationFilterOptions.auditoriums && reservationFilterOptions.auditoriums
+                    .map(item => (
+                        <option value={item.title}>
+                            {item.title}
+                        </option>
                 ))}
             </Select>
 
             <Select onChange={syncPlayTitle}>
                 <option value="None">Все спектакли</option>
 
-                {sessionFilterOptions.plays && filterOptions.plays.map(item => (
+                {reservationFilterOptions.plays && reservationFilterOptions.plays.map(item => (
                     <option value={item.title}>
                         {item.title}
                     </option>
                 ))}   
             </Select>
 
-            <Checkbox id="showLocked" name="showLocked" labelText="Показать закрытые" 
-                defaultChecked={showLocked} onChange={syncShowLockedCheckbox} />
+            <Select onChange={syncShowLocked} >
+                <option value="None">Все брони</option>
+                <option value={true}>Закрытые</option>
+                <option value={false}>Открытые</option>
+            </Select>
+
+            <CustomInput description={'Номер брони'} onChange={syncReservationNumber} />
+
+            {
+                error !== ''
+                ? <ErrorMessage text={error} />
+                : null
+            }
 
             <CustomButton type="submit" value="Подтвердить" onClickHook={getFilteredReservations} />
         </div>

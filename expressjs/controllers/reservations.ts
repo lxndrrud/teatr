@@ -5,7 +5,7 @@ import { Request, Response } from "express"
 import { SlotInterface, ReservationsSlotsBaseInterface } from "../interfaces/slots"
 import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 import { ReservationBaseInterface, ReservationInterface, 
-    ReservationCreateInterface, ReservationDatabaseInterface, ReservationConfirmationInterface, isReservationCreateInterface, isReservationConfirmationInterface, ReservationWithoutSlotsInterface, ReservationBaseWithoutConfirmationInterface} from "../interfaces/reservations"
+    ReservationCreateInterface, ReservationDatabaseInterface, ReservationConfirmationInterface, isReservationCreateInterface, isReservationConfirmationInterface, ReservationWithoutSlotsInterface, ReservationBaseWithoutConfirmationInterface, isReservationFilterQueryInterface, ReservationFilterQueryInterface} from "../interfaces/reservations"
 // * Модели
 import { ReservationFetchingInstance } from "../fetchingModels/reservations"
 // * Утилиты
@@ -166,6 +166,60 @@ export const getReservations = async (req: Request, res: Response) => {
     const response = await ReservationFetchingInstance.getReservations(req.user)
 
     if(isInnerErrorInterface(response)) {
+        res.status(response.code).send(<ErrorInterface>{
+            message: response.message
+        })
+        return
+    }
+
+    res.status(200).send(response)
+}
+
+/**
+ * * Получение опций для фильтра броней (уровень 'Кассир', 'Администратор')
+ */
+export const getReservationFilterOptions = async (req: Request, res: Response) => {
+    // Проверка на авторизованность
+    if (!req.user) {
+        res.status(401).send(<ErrorInterface>{
+            message: 'Ошибка авторизации!'
+        })
+        return
+    }
+
+    const response = await ReservationFetchingInstance.getReservationFilterOptions()
+
+    if (isInnerErrorInterface(response)) {
+        res.status(response.code).send(<ErrorInterface>{
+            message: response.message
+        })
+        return
+    }
+
+    res.status(200).send(response)
+}
+
+export const getFilteredReservations = async (req: Request, res: Response) => {
+    // Проверка на авторизованность
+    if (!req.user) {
+        res.status(401).send(<ErrorInterface>{
+            message: 'Ошибка авторизации!'
+        })
+        return
+    }
+
+    // Проверка строки запроса
+    if (!isReservationFilterQueryInterface(req.query)) {
+        res.status(400).send(<ErrorInterface>{
+            message: ''
+        })
+        return
+    }
+    const userQuery: ReservationFilterQueryInterface = {...req.query}
+
+    const response = await ReservationFetchingInstance.getFilteredReservations(userQuery, req.user)
+
+    if (isInnerErrorInterface(response)) {
         res.status(response.code).send(<ErrorInterface>{
             message: response.message
         })

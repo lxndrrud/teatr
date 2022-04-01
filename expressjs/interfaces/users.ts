@@ -21,9 +21,9 @@ export interface UserLoginInterface {
 }
 
 export const isUserLoginInterface = (obj: any): obj is UserLoginInterface => {
-    if (obj.email && obj.password)
-        return true
-    return false
+    return obj 
+        && obj.email && typeof obj.email === 'string'
+        && obj.password && typeof obj.password === 'string'
 }
 
 export interface UserRegisterInterface extends UserLoginInterface {
@@ -36,10 +36,9 @@ export interface UserRegisterInterface extends UserLoginInterface {
 }
 
 export const isUserRegisterInterface = (obj: any): obj is UserRegisterInterface => {
-    if (obj.email && obj.password) {
-        return true
-    }
-    return false
+    return obj 
+        && obj.email && typeof obj.email === 'string'
+        && obj.password && typeof obj.password === 'string'
 }
 
 export interface UserRequestOption {

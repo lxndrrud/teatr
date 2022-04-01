@@ -227,12 +227,14 @@ class SessionFetchingModel {
         let dates: TimestampSessionFilterOptionInterface[] = []
         let distinctCheck: Map<string, string> = new Map()
         for (let row of timestamps) {
-            if (!distinctCheck.has(dateFromTimestamp(row.timestamp))) {
+            const extendedDate = extendedDateFromTimestamp(row.timestamp)
+            const simpleDate = dateFromTimestamp(row.timestamp)
+            if (!distinctCheck.has(simpleDate)) {
                 dates.push({
-                    date: dateFromTimestamp(row.timestamp),
-                    extended_date: extendedDateFromTimestamp(row.timestamp)
+                    date: simpleDate,
+                    extended_date: extendedDate
                 })
-                distinctCheck.set(dateFromTimestamp(row.timestamp), dateFromTimestamp(row.timestamp))
+                distinctCheck.set(simpleDate, simpleDate)
             }
         }
 

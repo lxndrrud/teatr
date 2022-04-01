@@ -9,7 +9,8 @@ import { UserFetchingInstance } from "../fetchingModels/users";
  */
 export const registerUser = async (req: Request, res: Response) => {
     // * Парсинг тела запроса
-    if (isUserRegisterInterface(req.body)) {
+    if (!isUserRegisterInterface(req.body)) {
+        console.log(req.body, isUserRegisterInterface(req.body))
         res.status(400).send(<ErrorInterface>{
             message: 'Неверное тело запроса!'
         })

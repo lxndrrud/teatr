@@ -1,14 +1,12 @@
 import { 
     SET_RESERVATION, 
     FETCH_RESERVATION ,
-    SHOW_CONFIRMATION_FIELD,
-    HIDE_CONFIRMATION_FIELD,
     POST_RESERVATION,
     ERROR_RESERVATION,
     ADD_SLOT,
     DELETE_SLOT,
     ERROR_CONFIRMATION,
-    ERROR_SET_DEFAULT,
+    ERROR_RESERVATION_SET_DEFAULT,
     FETCH_RESERVATIONS,
     DELETE_RESERVATION,
     CLEAR_SLOTS
@@ -54,7 +52,7 @@ const reservationReducer = (state = defaultState, action) => {
             return {...state, error: action.payload }
         case ERROR_CONFIRMATION:
             return {...state, error: action.payload }
-        case ERROR_SET_DEFAULT:
+        case ERROR_RESERVATION_SET_DEFAULT:
             return {...state, error: defaultState.error }
         case ADD_SLOT:
             return {...state, slots: [...state.slots, action.payload ] }

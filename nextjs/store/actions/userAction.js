@@ -1,4 +1,4 @@
-import { LOG_IN, LOG_OUT, REGISTER } from "../types";
+import { LOG_IN, LOG_OUT, REGISTER, ERROR_USER, ERROR_USER_SET_DEFAULT } from "../types";
 
 export const register = (email, password, 
 firstname=undefined, middlename=undefined, lastname=undefined) => async dispatch => {
@@ -17,10 +17,17 @@ firstname=undefined, middlename=undefined, lastname=undefined) => async dispatch
         })
     })
     const json_ = await response.json()
-    dispatch({
-        type: REGISTER,
-        payload: json_
-    })
+
+    if (response.status === 201)
+        dispatch({
+            type: REGISTER,
+            payload: json_
+        })
+    else 
+        dispatch({
+            type: ERROR_USER,
+            payload: json_.message
+        })
 }
 
 export const logIn = (email, password) => async dispatch =>  {
@@ -36,14 +43,28 @@ export const logIn = (email, password) => async dispatch =>  {
         })
     })
     const json_ = await response.json()
-    dispatch({
-        type: LOG_IN,
-        payload: json_
-    })
+
+    if (response.status === 200)
+        dispatch({
+            type: LOG_IN,
+            payload: json_
+        })
+    else 
+        dispatch({
+            type: ERROR_USER,
+            payload: json_.message
+        })
+
 }
 
 export const logOut = () => async dispatch => {
     dispatch({
         type: LOG_OUT
+    })
+}
+
+export const errorSetDefault = () => async dispatch => {
+    dispatch({
+        type: ERROR_USER_SET_DEFAULT
     })
 }

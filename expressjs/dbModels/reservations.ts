@@ -4,8 +4,9 @@ import { reservations, rows, seats, slots, auditoriums,
     users, plays, sessions, pricePolicies, reservationsSlots } from "./tables";
 import { DatabaseModel } from "./baseModel";
 import { ReservationBaseInterface, ReservationDatabaseInterface,
-    ReservationWithoutSlotsInterface } from "../interfaces/reservations"
+    ReservationWithoutSlotsInterface, ReservationFilterQueryInterface } from "../interfaces/reservations"
 import { ReservationsSlotsBaseInterface } from "../interfaces/slots"
+import { getNextDayOfTimestamp } from "../utils/timestamp"
 
 /**
  * id
@@ -162,6 +163,80 @@ class ReservationDatabaseModel extends DatabaseModel {
         return trx(reservationsSlots)
             .where(`${reservationsSlots}.id_reservation`, idReservation)
             .del()
+    }
+
+
+    getTimestampsOptionsForReservationFilter() {
+        return KnexConnection(`${reservations} as r`)
+            .select(
+                KnexConnection.ref('timestamp').withSchema('s').as('timestamp')
+            )
+            .where('s.is_locked', false)
+            .join(`${sessions} as s`, 's.id', 'r.id_session')
+            .orderBy('s.timestamp', 'asc')
+            .distinct()
+    }
+
+    getAuditoriumsOptionsForReservationFilter() {
+        return KnexConnection(`${reservations} as r`)
+            .select(
+                KnexConnection.ref('title').withSchema('a')
+            )
+            .where('s.is_locked', false)
+            .join(`${sessions} as s`, 's.id', 'r.id_session')
+            .join(`${pricePolicies} as pp`, 'pp.id', 's.id_price_policy')
+            .join(slots, `${slots}.id_price_policy`, 'pp.id')
+            .join(seats, `${seats}.id`, `${slots}.id_seat`)
+            .join(rows, `${rows}.id`, `${seats}.id_row`)
+            .join(`${auditoriums} as a`, 'a.id', `${rows}.id_auditorium`)
+            .distinct()
+    }
+
+    getPlaysOptionsForReservationFilter() {
+        return KnexConnection(`${reservations} as r`)
+            .select(
+                KnexConnection.ref('title').withSchema('p')
+            )
+            .where('s.is_locked', false)
+            .join(`${sessions} as s`, 's.id', 'r.id_session')
+            .join(`${plays} as p`, 'p.id', 's.id_play')
+            .distinct()
+    }
+
+    getFilteredReservations(userQuery: ReservationFilterQueryInterface) {
+        return this.getAllFullInfo()
+            .where(builder => {
+                if (userQuery.date !== undefined) {
+                    builder.andWhere(innerBuilder => {
+                        innerBuilder
+                            .andWhere('s.timestamp', '>=', `${userQuery.date}T00:00:00`)
+                        innerBuilder
+                            .andWhere('s.timestamp', '<', getNextDayOfTimestamp(`${userQuery.date}`))
+                    })
+                }
+                if (userQuery.auditorium_title !== undefined) {
+                    builder.andWhere('a.title', userQuery.auditorium_title)
+                }
+                if (userQuery.play_title !== undefined) {
+                    builder.andWhere('p.title', userQuery.play_title)
+                }
+                if (userQuery.is_locked !== undefined) {
+                    if (userQuery.is_locked) {
+                        builder.andWhere('s.is_locked', true)
+                    }
+                    else {
+                        builder.andWhere('s.is_locked', false)
+                    }
+                }
+                if (userQuery.id_reservation !== undefined) {
+                    builder.andWhere('r.id', userQuery.id_reservation)
+                }
+            })
+    }
+
+    getFilteredReservationsForUser(userQuery: ReservationFilterQueryInterface, idUser: number) {
+        return this.getFilteredReservations(userQuery)
+            .andWhere('r.id_user', idUser)
     }
 
 

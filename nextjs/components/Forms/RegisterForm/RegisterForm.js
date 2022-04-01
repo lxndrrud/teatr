@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector, useStore } from 'react-redux'
 import { useRouter } from 'next/router'
 import BaseForm from '../BaseForm/BaseForm'
 import CustomInput from '../../UI/CustomInput/CustomInput'
 import CustomButton from '../../UI/CustomButton/CustomButton'
-import { register } from '../../../store/actions/userAction'
+import { errorSetDefault, register } from '../../../store/actions/userAction'
 import styles from "./RegisterForm.module.css"
+import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 
 const RegisterForm = () => {
     const dispatch = useDispatch()
     const router = useRouter()
-    const token = useSelector(state => state.user.token)
+    const store = useStore()
+    let token = useSelector(state => state.user.token)
     
+    let [error, setError] = useState('')
     let [email, setEmail] = useState('')
     let [password, setPassword] = useState('')
     let [firstname, setFirstname] = useState(undefined)
@@ -44,6 +47,13 @@ const RegisterForm = () => {
 
         if (email && password)
             dispatch(register(email, password, firstname, middlename, lastname))
+            .then(() => {
+                const errorFromStore = store.getState().user.error
+                if (errorFromStore !== null) {
+                    setError(errorFromStore)
+                    dispatch(errorSetDefault())
+                }
+            })
     }
     return (
         <BaseForm styleClass={styles.registerForm}>
@@ -71,6 +81,12 @@ const RegisterForm = () => {
                 onChange={syncLastname} 
                 description="Фамилия (необязательно)" 
                 inputStyleClass={styles.notRequiredInputBorderColor}  />
+            
+            {
+                error !== '' 
+                ? <ErrorMessage text={error} />
+                : null
+            }
 
             <CustomButton type="submit" value="Подтвердить" 
                 onClickHook={sendPostRequest}

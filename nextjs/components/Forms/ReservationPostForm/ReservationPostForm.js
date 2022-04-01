@@ -6,36 +6,41 @@ import SlotsFieldMainAuditorium from "../../Slots/SlotsFieldMainAuditorium/Slots
 import React, { useEffect, useState } from 'react'
 import { useRouter } from "next/router"
 import styles from "./ReservationPostForm.module.css"
+import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 
 
 const ReservationPostForm = () => {
     const dispatch = useDispatch()
     const router = useRouter()
     const store = useStore()
+
+    let token = useSelector(state => state.user.token)
     let session = useSelector(state => state.session.session)
-    let [error, setError] = useState()
+    let sessionSlots = useSelector(state => state.session.slots)
+    let reservationSlots = useSelector(state => state.reservation.slots)
+
+    let [error, setError] = useState('')
 
     useEffect(() => {
         if (session.id)
             dispatch(fetchSlotsBySession(session.id))
     }, [session])
 
-    let slots = useSelector(state => state.session.slots)
 
     const postEmailReservation = (e) => {
         e.preventDefault()
 
         // Отправить на backend запрос по почте
         dispatch(postReservation({
-            token: store.getState().user.token, 
+            token: token, 
             id_session: session.id,
-            slots: store.getState().reservation.slots
+            slots: reservationSlots
         }))
         .then(() => {
-            const errorObj = store.getState().reservation.error
+            const errorFromStore = store.getState().reservation.error
             const needConfirmation = store.getState().reservation.need_confirmation
-            if (errorObj !== null) {
-                setError(errorObj)
+            if (errorFromStore !== null) {
+                setError(errorFromStore)
                 dispatch(errorSetDefault())
             } else if (needConfirmation) {
                 if (router.isReady) {
@@ -54,12 +59,14 @@ const ReservationPostForm = () => {
     return (
         <>
             { session.auditorium_title === 'Главный зал' 
-                ?
-                    <SlotsFieldMainAuditorium rows={slots} />
-                : 
-                    null
+                ? <SlotsFieldMainAuditorium rows={sessionSlots} />
+                : null
             }
-            <div className={styles.errorMessage}>{error}</div>
+            {
+                error !== ''
+                ? <ErrorMessage text={error} />
+                : null
+            }
             <CustomButton type="submit" value="Подтвердить" onClickHook={postEmailReservation} />
         </>
     )

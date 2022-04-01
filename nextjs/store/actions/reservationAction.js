@@ -3,11 +3,9 @@ import {
     ERROR_CONFIRMATION,
     POST_RESERVATION,
     SET_RESERVATION, 
-    SHOW_CONFIRMATION_FIELD, 
-    HIDE_CONFIRMATION_FIELD,
     ADD_SLOT,
     DELETE_SLOT,
-    ERROR_SET_DEFAULT,
+    ERROR_RESERVATION_SET_DEFAULT,
     FETCH_RESERVATIONS,
     DELETE_RESERVATION,
     FETCH_RESERVATION,
@@ -28,21 +26,20 @@ export const postReservation = ({ token, id_session, slots }) => async dispatch 
         body: JSON.stringify(body)
     })
     body = await resp.json()
-    resp.status == 201 
-        ? 
-            dispatch({
-                type: POST_RESERVATION,
-                payload: {
-                    id: body.id,
-                    id_session: body.id_session,
-                    need_confirmation: body.need_confirmation
-                }
-            })
-        :
-            dispatch({
-                type: ERROR_RESERVATION,
-                payload: body.message
-            })
+    if (resp.status === 201) 
+        dispatch({
+            type: POST_RESERVATION,
+            payload: {
+                id: body.id,
+                id_session: body.id_session,
+                need_confirmation: body.need_confirmation
+            }
+        })
+    else
+        dispatch({
+            type: ERROR_RESERVATION,
+            payload: body.message
+        })
 
 }
 
@@ -145,7 +142,7 @@ export const deleteSlot = (payload) => async dispatch => {
 
 export const errorSetDefault = () => async dispatch => {
     dispatch({
-        type: ERROR_SET_DEFAULT
+        type: ERROR_RESERVATION_SET_DEFAULT
     })
 }
 
