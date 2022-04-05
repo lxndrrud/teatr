@@ -3,11 +3,13 @@ import Select from '../../UI/Select/Select'
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import CustomInput from "../../UI/CustomInput/CustomInput"
 import styles from "./ReservationFilter.module.css"
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector} from 'react-redux'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
+import { fetchFilteredReservations, fetchReservationFilterOptions } from '../../../store/actions/reservationAction'
 
 const ReservationFilter = () => {
     const dispatch = useDispatch()
+    const token = useSelector(state => state.user.token)
 
     // Состояния фильтра
     let [date, setDate] = useState()
@@ -15,49 +17,60 @@ const ReservationFilter = () => {
     let [playTitle, setPlayTitle] = useState()
     let [reservationNumber, setReservationNumber] = useState()
     let [showLocked, setShowLocked] = useState()
-    let [error, setError] = useState('')
+    let [error, setError] = useState(null)
 
     useEffect(() => {
-        
-        dispatch(fetchReservationFilterOptions())
+        dispatch(fetchReservationFilterOptions(token))
     }, [])
 
     // Функции для синронизации состояния с input`ами
-    const syncDate = () => {
-        if (e.target.value === 'None') setDate(undefined)
+    const syncDate = (e) => {
+        if (e.target.value === 'None') setDate()
         else setDate(e.target.value)
     }
     const syncAuditoriumTitle = (e) => {
-        if (e.target.value === 'None') setAuditoriumTitle(undefined)
+        if (e.target.value === 'None') setAuditoriumTitle()
         else setAuditoriumTitle(e.target.value)
     }
 
     const syncPlayTitle = (e) => {
-        if (e.target.value === 'None') setPlayTitle(undefined)
+        if (e.target.value === 'None') setPlayTitle()
         else setPlayTitle(e.target.value)
     }
     const syncShowLocked = (e) => {
-        setShowLocked(!showLocked)
+        if (e.target.value === 'None')  setShowLocked()
+        else if (e.target.value === 'true') setShowLocked(true)
+        else if (e.target.value === 'false') setShowLocked(false)
     }
 
     const syncReservationNumber = (e) => {
         const parsedInt = parseInt(e.target.value)
-        if (parsedInt) setReservationNumber(parsedInt)
-        else setError('Неверный номер брони')
+        if (parsedInt) {
+            setError(null)
+            setReservationNumber(parsedInt)
+        }
+        else if (e.target.value === '') {
+            setError(null)
+            setReservationNumber()
+        }
+        else {
+            setReservationNumber(undefined)
+            setError('Неверный номер брони')
+        }
     }
 
     // Получение свойств для выбора в селекторе
     const reservationFilterOptions = useSelector(state => state.reservation.filterOptions)
 
-    const getFilteredReservations = () => {
+    const getFilteredReservations = (e) => {
         e.preventDefault()
         
-        dispatch(fetchFilteredReservations(date, auditoriumTitle, playTitle,
-             showLocked, reservationNumber))
+        dispatch(fetchFilteredReservations(token, date, auditoriumTitle, playTitle, 
+            showLocked, reservationNumber))
     }
 
     return (
-        <div>
+        <div className={styles.container}>
             <Select onChange={syncDate}>
                 <option value="None">Все даты</option>
 
@@ -91,11 +104,12 @@ const ReservationFilter = () => {
 
             <Select onChange={syncShowLocked} >
                 <option value="None">Все брони</option>
-                <option value={true}>Закрытые</option>
-                <option value={false}>Открытые</option>
+                <option value="true">Закрытые</option>
+                <option value="false">Открытые</option>
             </Select>
 
-            <CustomInput description={'Номер брони'} onChange={syncReservationNumber} />
+            <CustomInput description={'Номер брони'} onChange={syncReservationNumber}
+                type="number" inputStyleClass={styles.inputNumber} />
 
             {
                 error !== ''

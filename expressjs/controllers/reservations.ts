@@ -199,6 +199,9 @@ export const getReservationFilterOptions = async (req: Request, res: Response) =
     res.status(200).send(response)
 }
 
+/**
+ * * Получение броней по фильтру
+ */
 export const getFilteredReservations = async (req: Request, res: Response) => {
     // Проверка на авторизованность
     if (!req.user) {
@@ -211,7 +214,7 @@ export const getFilteredReservations = async (req: Request, res: Response) => {
     // Проверка строки запроса
     if (!isReservationFilterQueryInterface(req.query)) {
         res.status(400).send(<ErrorInterface>{
-            message: ''
+            message: 'Неверная строка запроса!'
         })
         return
     }

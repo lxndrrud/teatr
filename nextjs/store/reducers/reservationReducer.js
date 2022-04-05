@@ -9,7 +9,9 @@ import {
     ERROR_RESERVATION_SET_DEFAULT,
     FETCH_RESERVATIONS,
     DELETE_RESERVATION,
-    CLEAR_SLOTS
+    CLEAR_SLOTS,
+    FETCH_RESERVATION_FILTER_OPTIONS,
+    FETCH_FILTERED_RESERVATIONS
 } from "../types"
 
 
@@ -61,10 +63,13 @@ const reservationReducer = (state = defaultState, action) => {
         case CLEAR_SLOTS:
             return {...state, slots: defaultState.slots}
         case DELETE_RESERVATION:
-            console.log(action.payload)
             return {...state, reservations: state.reservations
                 .filter(reservation => reservation.id != action.payload.id) 
             }
+        case FETCH_RESERVATION_FILTER_OPTIONS:
+            return {...state, filterOptions: action.payload }
+        case FETCH_FILTERED_RESERVATIONS:
+            return {...state, reservations: action.payload }
         default:
             return state
     }

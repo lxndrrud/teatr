@@ -5,6 +5,7 @@ import styles from "./ReservationList.module.css"
 
 const ReservationList = () => {
     const reservations = useSelector(state => state.reservation.reservations)
+    
     return (
         <div className={styles.reservationList} >
             {reservations && reservations.map(reservation => (

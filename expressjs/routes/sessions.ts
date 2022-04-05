@@ -9,7 +9,7 @@ sessionsRouter.get('/play/:idPlay', getSessionsByPlay)
 sessionsRouter.get('/:idSession/slots', getSlotsForSessions)
 
 sessionsRouter.get('/filter', getFilteredSessions)
-sessionsRouter.get('/filterSetup', getSessionFilterOptions)
+sessionsRouter.get('/filter/setup', getSessionFilterOptions)
 
 sessionsRouter.route('/:idSession')
     .get(getSingleSession)

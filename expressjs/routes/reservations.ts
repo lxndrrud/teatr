@@ -1,5 +1,6 @@
 import { getSingleReservation, postReservation, confirmReservation, deleteReservation,
-    getReservations } from "../controllers/reservations";
+    getReservations, getReservationFilterOptions, 
+    getFilteredReservations } from "../controllers/reservations";
 import { Router } from "express";
 import { basicAuthMiddleware } from "../middlewares/auth";
 
@@ -13,6 +14,10 @@ reservationsRouter.route('/')
  * * Использовал ранее, так как не было проверки роли
  * reservationsRouter.get('/user', basicAuthMiddleware, getUserReservations)
  */
+
+ reservationsRouter.get('/filter/setup', basicAuthMiddleware, getReservationFilterOptions)
+ reservationsRouter.get('/filter', basicAuthMiddleware, getFilteredReservations)
+
 reservationsRouter.route('/:idReservation')
     .get(basicAuthMiddleware, getSingleReservation)
     .delete(basicAuthMiddleware, deleteReservation)

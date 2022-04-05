@@ -205,8 +205,8 @@ class ReservationDatabaseModel extends DatabaseModel {
 
     getFilteredReservations(userQuery: ReservationFilterQueryInterface) {
         return this.getAllFullInfo()
-            .where(builder => {
-                if (userQuery.date !== undefined) {
+            .andWhere(builder => {
+                if (userQuery.date !== undefined && userQuery.date !== 'undefined') {
                     builder.andWhere(innerBuilder => {
                         innerBuilder
                             .andWhere('s.timestamp', '>=', `${userQuery.date}T00:00:00`)
@@ -214,22 +214,22 @@ class ReservationDatabaseModel extends DatabaseModel {
                             .andWhere('s.timestamp', '<', getNextDayOfTimestamp(`${userQuery.date}`))
                     })
                 }
-                if (userQuery.auditorium_title !== undefined) {
+                if (userQuery.auditorium_title !== undefined && userQuery.auditorium_title !== 'undefined') {
                     builder.andWhere('a.title', userQuery.auditorium_title)
                 }
-                if (userQuery.play_title !== undefined) {
+                if (userQuery.play_title !== undefined && userQuery.play_title !== 'undefined') {
                     builder.andWhere('p.title', userQuery.play_title)
                 }
-                if (userQuery.is_locked !== undefined) {
-                    if (userQuery.is_locked) {
+                if (userQuery.is_locked !== undefined && userQuery.is_locked !== 'undefined') {
+                    if (userQuery.is_locked === 'true') {
                         builder.andWhere('s.is_locked', true)
                     }
                     else {
                         builder.andWhere('s.is_locked', false)
                     }
                 }
-                if (userQuery.id_reservation !== undefined) {
-                    builder.andWhere('r.id', userQuery.id_reservation)
+                if (userQuery.id_reservation !== undefined && userQuery.id_reservation !== 'undefined') {
+                    builder.andWhere('r.id', parseInt(userQuery.id_reservation))
                 }
             })
     }

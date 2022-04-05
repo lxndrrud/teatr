@@ -23,8 +23,8 @@ export const fetchSessions = () => async dispatch =>  {
 }
 
 export const fetchSessionsByPlay = (playid) => async dispatch => {
-    const resp = await fetch(`/expressjs/sessions/play/${playid}`)
-    const json_ = await resp.json()
+    const response = await fetch(`/expressjs/sessions/play/${playid}`)
+    const json_ = await response.json()
     dispatch({
         type: FETCH_SESSIONS_BY_PLAY,
         payload: json_
@@ -32,8 +32,8 @@ export const fetchSessionsByPlay = (playid) => async dispatch => {
 }
 
 export const fetchSlotsBySession = (sessionid) => async dispatch => {
-    const resp = await fetch(`/expressjs/sessions/${sessionid}/slots`)
-    const json_ = await resp.json()
+    const response = await fetch(`/expressjs/sessions/${sessionid}/slots`)
+    const json_ = await response.json()
     dispatch({
         type: FETCH_SLOTS,
         payload: json_
@@ -41,8 +41,8 @@ export const fetchSlotsBySession = (sessionid) => async dispatch => {
 }
 
 export const fetchSessionFilterOptions = () => async dispatch => {
-    const resp = await fetch('/expressjs/sessions/filterSetup')
-    const json_ = await resp.json()
+    const response = await fetch('/expressjs/sessions/filter/setup')
+    const json_ = await response.json()
 
     dispatch({
         type: FETCH_SESSION_FILTER_OPTIONS,
@@ -52,7 +52,7 @@ export const fetchSessionFilterOptions = () => async dispatch => {
 
 
 export const fetchFilteredSessions = (date, auditoriumTitle, playTitle) => async dispatch => {
-    const resp = await fetch('/expressjs/sessions/filter?' + new URLSearchParams({
+    const response = await fetch('/expressjs/sessions/filter?' + new URLSearchParams({
             'date': date,
             'auditorium_title': auditoriumTitle,
             'play_title': playTitle
@@ -64,10 +64,13 @@ export const fetchFilteredSessions = (date, auditoriumTitle, playTitle) => async
             },
             method: 'GET',
     })
-    const json_ = await resp.json()
 
-    dispatch({
-        type: FETCH_FILTERED_SESSIONS,
-        payload: json_
-    })
+    if (response.status === 200) {
+        const json_ = await response.json()
+
+        dispatch({
+            type: FETCH_FILTERED_SESSIONS,
+            payload: json_
+        })
+    }
 }

@@ -79,23 +79,26 @@ export interface ReservationInterface extends ReservationWithoutSlotsInterface {
 }
 
 export interface ReservationFilterQueryInterface {
-    date?: string
-    auditorium_title?: string
-    play_title?: string
-    is_locked?: boolean,
-    id_reservation?: number
+    date: string
+    auditorium_title: string
+    play_title: string
+    is_locked: string,
+    id_reservation: string
 }
 
 export function isReservationFilterQueryInterface(obj: any): obj is ReservationFilterQueryInterface {
     return obj
-        && ((obj.date && typeof obj.date === 'string') 
-            || typeof obj.date === 'undefined')
-        && ((obj.auditorium_title && typeof obj.auditorium_title === 'string') 
-            || typeof obj.auditorium_title === 'undefined')
-        && ((obj.play_title && typeof obj.play_title === 'string') 
-            || typeof obj.play_title === 'undefined')
-        && ((obj.is_locked && typeof obj.is_locked === 'boolean') 
-            || typeof obj.is_locked === 'undefined')
-        && ((obj.id_reservation && typeof obj.id_reservation === 'number') 
-            || typeof obj.id_reservation === 'undefined')
+        && (obj.date && typeof obj.date === 'string' || obj.date === 'undefined') 
+            //|| typeof obj.date === 'undefined' || obj.date === 'undefined')
+        && (obj.auditorium_title && typeof obj.auditorium_title === 'string'
+            || obj.auditorium_title === 'undefined') 
+            //|| typeof obj.auditorium_title === 'undefined' || obj.auditorium_title === 'undefined')
+        && (obj.play_title && typeof obj.play_title === 'string'
+            || obj.play_title === 'undefined') 
+            //|| typeof obj.play_title === 'undefined' || obj.play_title === 'undefined')
+        && (obj.is_locked && (typeof obj.is_locked === 'boolean'
+            || typeof obj.is_locked === 'string')) 
+            //|| typeof obj.is_locked === 'undefined' || obj.is_locked === 'undefined')
+        && (obj.id_reservation && typeof obj.id_reservation === 'string' ) 
+            //|| typeof obj.id_reservation === 'undefined' || obj.id_reservation === 'undefined')
 }

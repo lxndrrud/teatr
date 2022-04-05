@@ -1,4 +1,5 @@
 import MainLayout from "../../layouts/MainLayout/MainLayout"
+import ReservationFilter from "../../components/Filters/ReservationFilter/ReservationFilter"
 import ReservationList from "../../components/Reservations/ReservationList/ReservationList"
 import { useDispatch, useSelector, useStore } from "react-redux"
 import { fetchReservations } from "../../store/actions/reservationAction"
@@ -23,6 +24,7 @@ export default function ControlIndex() {
     return (
         <>
             <MainLayout title="Управление бронями">
+                <ReservationFilter />
                 <ReservationList />
             </MainLayout>
         </>

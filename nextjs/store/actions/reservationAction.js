@@ -9,7 +9,9 @@ import {
     FETCH_RESERVATIONS,
     DELETE_RESERVATION,
     FETCH_RESERVATION,
-    CLEAR_SLOTS
+    CLEAR_SLOTS,
+    FETCH_FILTERED_RESERVATIONS,
+    FETCH_RESERVATION_FILTER_OPTIONS
 } from "../types"
 
 export const postReservation = ({ token, id_session, slots }) => async dispatch => {
@@ -192,4 +194,59 @@ export const clearSlots = () => async dispatch => {
     dispatch({
         type: CLEAR_SLOTS,
     })
+}
+
+export const fetchReservationFilterOptions = (token) => async dispatch => {
+    const response = await fetch('/expressjs/reservations/filter/setup', {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'auth-token': token
+        },
+        method: 'GET'
+    })
+    if (response.status === 200) {
+        const json_ = await response.json()
+
+        dispatch({
+            type: FETCH_RESERVATION_FILTER_OPTIONS,
+            payload: json_
+        })
+    }
+}
+
+export const fetchFilteredReservations = (token, date, auditoriumTitle, playTitle, isLocked, idReservation) => async dispatch => {
+    const response = await fetch('/expressjs/reservations/filter?' + new URLSearchParams({
+        'date': date,
+        'auditorium_title': auditoriumTitle,
+        'play_title': playTitle,
+        'is_locked': isLocked,
+        'id_reservation': idReservation
+        }),
+        {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'auth-token': token
+            },
+            method: 'GET'
+        }
+    )
+
+    if (response.status === 200) {
+        const json_ = await response.json()
+
+        dispatch({
+            type: FETCH_FILTERED_RESERVATIONS,
+            payload: json_
+        })
+    }   
+    else {
+        const json_ = await response.json()
+
+        dispatch({
+            type: ERROR_RESERVATION,
+            payload:  json_.message
+        })
+    }
 }
