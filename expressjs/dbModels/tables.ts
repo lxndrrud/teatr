@@ -1,5 +1,6 @@
 export const users = 'users'
 export const roles = 'roles'
+export const userActions = 'user_actions'
 
 export const reservations = 'reservations'
 export const reservationsSlots = 'reservations_slots'

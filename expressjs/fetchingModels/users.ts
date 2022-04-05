@@ -7,6 +7,8 @@ import { UserBaseInterface, UserInterface, UserLoginInterface, UserRegisterInter
 import { RoleFetchingInstance } from "./roles";
 import { users } from "../dbModels/tables";
 import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
+import { RoleDatabaseInterface } from "../interfaces/roles";
+import { UserActionBaseInterface } from "../interfaces/userActions";
 
 class UserFetchingModel {
     protected userDatabaseInstance
@@ -116,6 +118,31 @@ class UserFetchingModel {
             return <InnerErrorInterface>{
                 code: 500, 
                 message: 'Внутренняя ошибка сервера при получении всех пользователей!'
+            }
+        }
+    }
+
+    async createAction(trx: Knex.Transaction, idUser: number, userRole: RoleDatabaseInterface, description: string) {
+        if (!userRole.can_see_all_reservations || !userRole.can_access_private) {
+            return <InnerErrorInterface>{
+                code: 403,
+                message: 'Пользователю запрещено выполнять опасные действия!'
+            }
+        }
+
+        try {
+            const payload: UserActionBaseInterface = {
+                id_user: idUser,
+                description: description
+            }
+            await this.userDatabaseInstance.insertAction(trx, payload)
+            await trx.commit()
+        } catch (e) {
+            console.log(e)
+            await trx.rollback()
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при создании действия пользователя'
             }
         }
     }

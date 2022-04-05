@@ -4,7 +4,8 @@ import { UserBaseInterface, UserInterface, UserRequestOption } from "../interfac
 import { hash } from 'bcryptjs';
 import { sign } from 'jsonwebtoken'
 import { DatabaseModel } from "./baseModel";
-import { users } from "./tables";
+import { userActions, users } from "./tables";
+import { UserActionBaseInterface } from "../interfaces/userActions";
 
 /**
  * id
@@ -82,6 +83,12 @@ class UserDatabaseModel extends DatabaseModel {
         return trx(users)
             .where(`${users}.id`, id)
             .del()
+    }
+
+    insertAction(trx: Knex.Transaction, payload: UserActionBaseInterface) {
+        return trx(userActions)
+            .insert(payload)
+            .returning('*')
     }
 }
 

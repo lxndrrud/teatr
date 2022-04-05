@@ -122,6 +122,45 @@ export const confirmReservation = async (req: Request, res: Response) => {
     res.status(200).end()
 }
 
+export const paymentForReservation = async (req: Request, res: Response) => {
+    // Проверка на авторизованность
+    if (!req.user) {
+        res.status(401).send(<ErrorInterface>{
+            message: 'Ошибка авторизации!'
+        })
+        return
+    }
+
+    // Проверка наличия статуса оплаты в теле запроса
+    if (req.body.status === undefined) {
+        res.status(400).send(<ErrorInterface>{
+            message: 'Нет статуса оплаты в теле запроса!'
+        })
+        return
+    }
+
+    // Проверка строки запроса
+    const idReservation = parseInt(req.params.idReservation)
+    if (!idReservation) {
+        res.status(400).send(<ErrorInterface>{
+            message: 'Ошибка в строке запроса!'
+        })
+        return
+    }
+
+    const response = await ReservationFetchingInstance
+        .paymentForReservation(req.user, idReservation, req.body.status)
+
+    if (isInnerErrorInterface(response)) {
+        res.status(response.code).send(<ErrorInterface>{
+            message: response.message
+        })
+        return
+    }
+
+    res.status(200).end()
+}
+
 /**
  * * Удаление брони (уровень 'Посетитель', 'Кассир', 'Администратор')
  */
