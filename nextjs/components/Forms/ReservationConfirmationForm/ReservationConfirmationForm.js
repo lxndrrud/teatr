@@ -3,7 +3,7 @@ import { useRouter } from "next/router"
 import CustomInput from '../../UI/CustomInput/CustomInput'
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
-import { confirmReservation, errorSetDefault, hideConfirmationField } from "../../../store/actions/reservationAction"
+import { confirmReservation, errorSetDefault } from "../../../store/actions/reservationAction"
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { useState } from 'react'
 
@@ -12,7 +12,6 @@ const ReservationConfirmationForm = () => {
     const store = useStore()
     const dispatch = useDispatch()
     let token = useSelector(state => state.user.token)
-    let errorFromStore = useSelector(state => state.reservation.error)
 
     let [confirmationCode, setConfirmationCode] = useState('')
     let [confirmationErrorMessage, setConfirmationErrorMessage] = useState('')
@@ -33,6 +32,7 @@ const ReservationConfirmationForm = () => {
 
         dispatch(confirmReservation(body))
         .then(() => {
+            const errorFromStore = store.getState().reservation.error
             if (errorFromStore !== null) {
                 setConfirmationErrorMessage(errorFromStore)
                 setConfirmationCode('')

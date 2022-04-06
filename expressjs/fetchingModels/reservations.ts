@@ -75,6 +75,9 @@ class ReservationFetchingModel {
         return result[0]
     }
 
+    /**
+     * * Создание брони
+     */
     async createReservation(user: UserRequestOption, requestBody: ReservationCreateInterface) {
         // Получение роли из БД
         let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
@@ -149,41 +152,33 @@ class ReservationFetchingModel {
         const trx = await KnexConnection.transaction()
 
         let reservation: ReservationDatabaseInterface
+
+        let reservationPayload: ReservationBaseInterface | ReservationBaseWithoutConfirmationInterface
         if (!userRole.can_make_reservation_without_confirmation) {
-            const reservationPayload: ReservationBaseInterface = {
+            reservationPayload = {
                 id_user: user.id,
                 id_session: sessionQuery.id,
                 confirmation_code: generateCode()
             }
-            try {
-                reservation = (await this.reservationDatabaseInstance
-                    .insert(trx, reservationPayload))[0]
-            } catch(e) {
-                console.log(e)
-                await trx.rollback()
-                return <InnerErrorInterface>{
-                    code: 500,
-                    message: 'Внутренняя ошибка сервера!'
-                }
-            }
         }
         else {
-            const reservationPayload: ReservationBaseWithoutConfirmationInterface = {
+            reservationPayload = {
                 id_user: user.id,
                 id_session: sessionQuery.id,
                 confirmation_code: generateCode(),
                 is_confirmed: true
             }
-            try {
-                reservation = (await this.reservationDatabaseInstance
-                    .insert( trx, reservationPayload))[0]
-            } catch (e) {
-                console.log(e)
-                await trx.rollback()
-                return <InnerErrorInterface>{
-                    code: 500,
-                    message: 'Внутренняя ошибка сервера!'
-                }
+        }
+
+        try {
+            reservation = (await this.reservationDatabaseInstance
+                .insert(trx, reservationPayload))[0]
+        } catch(e) {
+            console.log(e)
+            await trx.rollback()
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
             }
         }
         
@@ -203,9 +198,20 @@ class ReservationFetchingModel {
             await trx.rollback()
             return <InnerErrorInterface>{
                 code: 500,
-                message: 'Внутренняя ошибка сервера!'
+                message: 'Внутренняя ошибка сервера в резервировании мест на бронь!'
             }
         }
+
+        // Создание записи действия для оператора
+        if (userRole.can_see_all_reservations) {
+            const actionDescription = `Создание брони ${reservation.id}`
+            const response = await this.userFetchingInstance
+                .createAction(trx, user.id, userRole, actionDescription)
+            if (isInnerErrorInterface(response)) {
+                return response
+            }
+        }
+
         await trx.commit()
 
         // Отправка письма на почту с информацией о сеансе и кодом подтверждения
@@ -226,34 +232,42 @@ class ReservationFetchingModel {
      */
     async confirmReservation(user: UserRequestOption, idReservation: number, 
         requestBody: ReservationConfirmationInterface) {
-        // Проверка записи брони
-        let reservationQuery: ReservationDatabaseInterface | undefined
+        // Получение роли из БД
+        let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
+        
+        if (isInnerErrorInterface(userRole)) {
+            return userRole
+        }
+
+        // Проверка на наличие записи в базе данных 
+        let reservation: ReservationWithoutSlotsInterface | undefined
+
         try {
-            reservationQuery = await this.reservationDatabaseInstance.get({id: idReservation})
+            reservation = await this.reservationDatabaseInstance.getSingleFullInfo(idReservation)
         } catch (e) {
-            console.log(e)
             return <InnerErrorInterface>{
                 code: 500,
-                message: 'Внутренняя ошибка сервера!'
+                message: 'Внутренняя ошибка сервера во время поиска брони!'
             }
         }
-        if (!reservationQuery) {
+        if (!reservation) {
             return <InnerErrorInterface>{
                 code: 404,
-                message: 'Бронь не найдена!'
+                message: 'Запись не найдена!'
             }
         }
 
-        // Проверка на владельца брони
-        if (reservationQuery.id_user !== user.id) {
+        // Проверка на доступность подтверждения
+        const canUserConfirm = this.canUserConfirm(reservation, user.id, userRole)
+        if (!canUserConfirm) {
             return <InnerErrorInterface>{
                 code: 403,
-                message: 'Ошибка определения владельца брони!' 
+                message: 'Пользователю данная операция не доступна!' 
             }
         }
 
         // Проверка на валидность кода подтверждения
-        if (reservationQuery.confirmation_code !== requestBody.confirmation_code) {
+        if (reservation.confirmation_code !== requestBody.confirmation_code) {
             return <InnerErrorInterface>{
                 code: 412,
                 message: 'Неправильный код подтверждения!'
@@ -262,8 +276,19 @@ class ReservationFetchingModel {
 
         // Транзакция: изменение флага подтверждения
         const trx = await KnexConnection.transaction()
+
+        // Создание записи действия для оператора
+        if (userRole.can_see_all_reservations) {
+            const actionDescription = `Подтверждение брони Res:${reservation.id}`
+            const response = await this.userFetchingInstance
+                .createAction(trx, user.id, userRole, actionDescription)
+            if (isInnerErrorInterface(response)) {
+                return response
+            }
+        }
+
         try {
-            await this.reservationDatabaseInstance.update(trx, reservationQuery.id, {
+            await this.reservationDatabaseInstance.update(trx, reservation.id, {
                 is_confirmed: true
             })
             await trx.commit()
@@ -288,26 +313,27 @@ class ReservationFetchingModel {
             return userRole
         }
 
-        // Проверка записи брони
-        let reservationQuery: ReservationDatabaseInterface | undefined
+        // Проверка на наличие записи в базе данных 
+        let reservation: ReservationWithoutSlotsInterface | undefined
+
         try {
-            reservationQuery = await this.reservationDatabaseInstance.get({id: idReservation})
+            reservation = await this.reservationDatabaseInstance.getSingleFullInfo(idReservation)
         } catch (e) {
-            console.log(e)
             return <InnerErrorInterface>{
                 code: 500,
-                message: 'Внутренняя ошибка сервера в нахождении брони!'
+                message: 'Внутренняя ошибка сервера во время поиска брони!'
             }
         }
-        if (!reservationQuery) {
+        if (!reservation) {
             return <InnerErrorInterface>{
                 code: 404,
-                message: 'Бронь не найдена!'
+                message: 'Запись не найдена!'
             }
         }
 
         // Проверка прав
-        if (!userRole.can_see_all_reservations) {
+        const canUserPay = this.canUserPay(reservation, user.id, userRole)
+        if (!canUserPay) {
             return <InnerErrorInterface>{
                 code: 403,
                 message: 'У пользователя недостаточно прав для совершения этой операции!'
@@ -316,8 +342,19 @@ class ReservationFetchingModel {
 
         // Транзакция: изменение флага оплаты
         const trx = await KnexConnection.transaction()
+
+        // Создание записи действия для оператора
+        if (userRole.can_see_all_reservations) {
+            const actionDescription = `Изменение флага оплаты на ${status}`
+            const response = await this.userFetchingInstance
+                .createAction(trx, user.id, userRole, actionDescription)
+            if (isInnerErrorInterface(response)) {
+                return response
+            }
+        }
+
         try {
-            await this.reservationDatabaseInstance.update(trx, reservationQuery.id, {
+            await this.reservationDatabaseInstance.update(trx, reservation.id, {
                 is_paid: status
             })
             await trx.commit()
@@ -393,7 +430,8 @@ class ReservationFetchingModel {
         }
 
         // Проверка на владельца брони
-        if (reservation.id_user !== user.id || (userRole.can_access_private && userRole.can_see_all_reservations)) {
+        const canUserDelete = this.canUserDelete(reservation, user.id, userRole)
+        if (!canUserDelete) {
             return <InnerErrorInterface>{
                 code: 403,
                 message: 'Вам запрещено удалять данную бронь!'
@@ -402,14 +440,18 @@ class ReservationFetchingModel {
 
         // Транзакция: удаление забронированных мест, затем удаление брони
         const trx = await KnexConnection.transaction()
-        try {
-            if (userRole.can_see_all_reservations) {
-                const actionDescription = `Удаляет бронь пользователя ${reservation.id_user}`
-                const response = await this.userFetchingInstance.createAction(trx, user.id, userRole, actionDescription)
-                if (isInnerErrorInterface(response)) {
-                    return response
-                }
+
+        // Создание записи действия пользователя
+        if (userRole.can_see_all_reservations) {
+            const actionDescription = `Удаление брони - User:${reservation.id_user}, Res:${user.id} Sum:${reservation.total_cost}`
+            const response = await this.userFetchingInstance
+                .createAction(trx, user.id, userRole, actionDescription)
+            if (isInnerErrorInterface(response)) {
+                return response
             }
+        }
+
+        try {
             await this.reservationDatabaseInstance.deleteReservationsSlots(trx, idReservation)
             await this.reservationDatabaseInstance.delete(trx, idReservation)
             await trx.commit()
@@ -426,18 +468,33 @@ class ReservationFetchingModel {
     /**
      * * Получение значений для фильтра броней
      */
-    async getReservationFilterOptions() {
+    async getReservationFilterOptions(user: UserRequestOption) {
+        // Проверка-получение роли
+        let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
+        
+        if (isInnerErrorInterface(userRole)) {
+            return userRole
+        }
+
         // dates, auditoriums, plays but without isLocked, reservationNumber
         let timestamps: TimestampReservationFilterOptionDatabaseInterface[],
             auditoriums: AuditoriumReservationFilterOption[],
             plays: PlayReservationFilterOptionInterface[]
 
         try {
-            [timestamps, auditoriums, plays] = await Promise.all([
-                this.reservationDatabaseInstance.getTimestampsOptionsForReservationFilter(),
-                this.reservationDatabaseInstance.getAuditoriumsOptionsForReservationFilter(),
-                this.reservationDatabaseInstance.getPlaysOptionsForReservationFilter()
-            ])
+            if (userRole.can_see_all_reservations)
+                [timestamps, auditoriums, plays] = await Promise.all([
+                    this.reservationDatabaseInstance.getTimestampsOptionsForReservationFilter(),
+                    this.reservationDatabaseInstance.getAuditoriumsOptionsForReservationFilter(),
+                    this.reservationDatabaseInstance.getPlaysOptionsForReservationFilter()
+                ])
+            else 
+                [timestamps, auditoriums, plays] = await Promise.all([
+                    this.reservationDatabaseInstance.getTimestampsOptionsForReservationFilter(user.id),
+                    this.reservationDatabaseInstance.getAuditoriumsOptionsForReservationFilter(user.id),
+                    this.reservationDatabaseInstance.getPlaysOptionsForReservationFilter(user.id)
+                ])
+                
         } catch (e) {
             console.log(e)
             return <InnerErrorInterface>{
@@ -537,12 +594,10 @@ class ReservationFetchingModel {
             reservation.total_cost = this.calculateReservationTotalCost(slots)
 
             // Проверка на возможность удаления брони
-            const canUserDelete = (reservation.id_user === idUser && !reservation.session_is_locked)
-                || (userRole.can_see_all_reservations && userRole.can_access_private)
+            const canUserDelete = this.canUserDelete(reservation, idUser, userRole)
 
             // Проверка на возможность подтверждения брони
-            const canUserConfirm = (reservation.id_user === idUser && !reservation.session_is_locked 
-                && !reservation.is_confirmed)
+            const canUserConfirm = this.canUserConfirm(reservation, idUser, userRole)
             
             result.push(<ReservationInterface>{
                 ...reservation,
@@ -564,6 +619,20 @@ class ReservationFetchingModel {
         })
         if (query.length > 0) return true
         return false
+    }
+
+    canUserDelete(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
+        return (reservation.id_user === idUser && !reservation.session_is_locked)
+        || (userRole.can_see_all_reservations && userRole.can_access_private)
+    }
+
+    canUserConfirm(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
+        return reservation.id_user === idUser && !reservation.session_is_locked 
+            && !reservation.is_confirmed
+    }
+
+    canUserPay(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
+        return userRole.can_see_all_reservations && !reservation.is_paid && !reservation.session_is_locked
     }
 }
 

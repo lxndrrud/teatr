@@ -226,7 +226,7 @@ export const getReservationFilterOptions = async (req: Request, res: Response) =
         return
     }
 
-    const response = await ReservationFetchingInstance.getReservationFilterOptions()
+    const response = await ReservationFetchingInstance.getReservationFilterOptions(req.user)
 
     if (isInnerErrorInterface(response)) {
         res.status(response.code).send(<ErrorInterface>{

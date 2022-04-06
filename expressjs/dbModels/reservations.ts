@@ -166,23 +166,31 @@ class ReservationDatabaseModel extends DatabaseModel {
     }
 
 
-    getTimestampsOptionsForReservationFilter() {
+    getTimestampsOptionsForReservationFilter(idUser: number | undefined = undefined) {
         return KnexConnection(`${reservations} as r`)
             .select(
                 KnexConnection.ref('timestamp').withSchema('s').as('timestamp')
             )
+            .andWhere(builder => {
+                if (idUser) 
+                    builder.andWhere('r.id_user', idUser)
+            })
             .where('s.is_locked', false)
             .join(`${sessions} as s`, 's.id', 'r.id_session')
             .orderBy('s.timestamp', 'asc')
             .distinct()
     }
 
-    getAuditoriumsOptionsForReservationFilter() {
+    getAuditoriumsOptionsForReservationFilter(idUser: number | undefined = undefined) {
         return KnexConnection(`${reservations} as r`)
             .select(
                 KnexConnection.ref('title').withSchema('a')
             )
             .where('s.is_locked', false)
+            .andWhere(builder => {
+                if (idUser) 
+                    builder.andWhere('r.id_user', idUser)
+            })
             .join(`${sessions} as s`, 's.id', 'r.id_session')
             .join(`${pricePolicies} as pp`, 'pp.id', 's.id_price_policy')
             .join(slots, `${slots}.id_price_policy`, 'pp.id')
@@ -192,12 +200,16 @@ class ReservationDatabaseModel extends DatabaseModel {
             .distinct()
     }
 
-    getPlaysOptionsForReservationFilter() {
+    getPlaysOptionsForReservationFilter(idUser: number | undefined = undefined) {
         return KnexConnection(`${reservations} as r`)
             .select(
                 KnexConnection.ref('title').withSchema('p')
             )
             .where('s.is_locked', false)
+            .andWhere(builder => {
+                if (idUser) 
+                    builder.andWhere('r.id_user', idUser)
+            })
             .join(`${sessions} as s`, 's.id', 'r.id_session')
             .join(`${plays} as p`, 'p.id', 's.id_play')
             .distinct()

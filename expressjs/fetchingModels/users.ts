@@ -123,7 +123,7 @@ class UserFetchingModel {
     }
 
     async createAction(trx: Knex.Transaction, idUser: number, userRole: RoleDatabaseInterface, description: string) {
-        if (!userRole.can_see_all_reservations || !userRole.can_access_private) {
+        if (!userRole.can_see_all_reservations) {
             return <InnerErrorInterface>{
                 code: 403,
                 message: 'Пользователю запрещено выполнять опасные действия!'
@@ -136,7 +136,6 @@ class UserFetchingModel {
                 description: description
             }
             await this.userDatabaseInstance.insertAction(trx, payload)
-            await trx.commit()
         } catch (e) {
             console.log(e)
             await trx.rollback()

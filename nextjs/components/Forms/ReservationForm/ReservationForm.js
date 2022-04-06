@@ -21,7 +21,7 @@ const ReservationForm = () => {
                     <span className={styles.bold}>Зал:</span> {session.auditorium_title}
                 </p>
                 <p className={styles.playInfo}>
-                    <span className={styles.bold}>Максимум мест:</span> {session.max_slots}
+                    <span className={styles.bold}>Максимум мест для брони:</span> {session.max_slots}
                 </p>
             </div>
             <form className={styles.postForm}>
