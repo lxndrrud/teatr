@@ -66,7 +66,6 @@ export interface ReservationWithoutSlotsInterface extends ReservationDatabaseInt
     session_is_locked: boolean
     auditorium_title: string
     play_title: string
-    total_cost: number
 }
 
 /**
@@ -74,8 +73,10 @@ export interface ReservationWithoutSlotsInterface extends ReservationDatabaseInt
  */
 export interface ReservationInterface extends ReservationWithoutSlotsInterface {
     slots: SlotInterface[]
+    total_cost: number
     can_user_delete: boolean
     can_user_confirm: boolean
+    can_user_pay: boolean
 }
 
 export interface ReservationFilterQueryInterface {

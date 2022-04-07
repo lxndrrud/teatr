@@ -1,6 +1,6 @@
 import { getSingleReservation, postReservation, confirmReservation, deleteReservation,
     getReservations, getReservationFilterOptions, 
-    getFilteredReservations } from "../controllers/reservations";
+    getFilteredReservations, paymentForReservation } from "../controllers/reservations";
 import { Router } from "express";
 import { basicAuthMiddleware } from "../middlewares/auth";
 
@@ -22,3 +22,4 @@ reservationsRouter.route('/:idReservation')
     .get(basicAuthMiddleware, getSingleReservation)
     .delete(basicAuthMiddleware, deleteReservation)
 reservationsRouter.put('/:idReservation/confirm', basicAuthMiddleware, confirmReservation)
+reservationsRouter.put('/:idReservation/payment', basicAuthMiddleware, paymentForReservation)

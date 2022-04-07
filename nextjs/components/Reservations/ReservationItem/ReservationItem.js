@@ -15,6 +15,17 @@ const ReservationItem = ({ reservation }) => {
 
         dispatch(deleteReservation({ token, id_reservation: reservation.id }))
     }
+    /*
+    
+    {
+                reservation.can_user_delete 
+                ? <CustomButton type="submit" value="Удалить бронь" 
+                    onClickHook={deleteReservationClick}
+                    styleClass={styles.deleteReservationButton} />
+                : null
+            }
+    
+    */
 
 
     return (
@@ -57,22 +68,30 @@ const ReservationItem = ({ reservation }) => {
                 
                 <div className={styles.columnContainer}>
                     <ReservationSlotList slots={reservation.slots} />
+                    {
+                        reservation.can_user_confirm
+                        ? <ButtonLink 
+                            text='Подтвердить бронь' 
+                            destination={`/confirm/${reservation.id}`} />
+                        : null
+                    }
+                    {
+                        reservation.can_user_pay
+                        ? <ButtonLink 
+                            text='Пометить оплаченной' 
+                            destination={`/control/payment/${reservation.id}`} />
+                        : null
+                    }
+                    {
+                        reservation.can_user_delete
+                        ? <ButtonLink 
+                            text='Удалить бронь' 
+                            linkType = "red"
+                            destination={`/control/delete/${reservation.id}`} />
+                        : null
+                    }
                 </div>
             </div>
-            {
-                reservation.can_user_confirm
-                ? <ButtonLink 
-                    text='Подтвердить бронь' 
-                    destination={`/confirm/${reservation.id}`} />
-                : null
-            }
-            {
-                reservation.can_user_delete 
-                ? <CustomButton type="submit" value="Удалить бронь" 
-                    onClickHook={deleteReservationClick}
-                    styleClass={styles.deleteReservationButton} />
-                : null
-            }
         </div>
     )
 }

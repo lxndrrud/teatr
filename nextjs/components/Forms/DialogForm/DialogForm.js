@@ -1,16 +1,23 @@
 import React from 'react'
-import BaseForm from '../BaseForm/BaseForm'
+import ErrorMessage from "../../../components/UI/ErrorMessage/ErrorMessage"
 import CustomButton from "../../UI/CustomButton/CustomButton"
 
 import styles from "./DialogForm.module.css"
 
-const DialogForm = ({ text, onClickHook }) => {
+const DialogForm = ({ text, onClickHook, buttonType, error }) => {
+    const buttonStyle = buttonType === "submit" ? "blue" : "red"
+    const buttonValue = buttonType === "submit" ? "Подтвердить" : "Удалить"
     return (
-        <BaseForm styleClass={styles.dialogForm} > 
-            <span className={styles.text}>{text}</span>
-            <CustomButton type="submit" value="Подтвердить"
-                styleClass={styles.postButton} onClickHook={onClickHook}/>
-        </BaseForm>
+        <div className={styles.dialogForm}>
+             <span className={styles.text}>{text}</span>
+            {
+                error !== null 
+                ? <ErrorMessage text={error} />
+                : null
+            }
+            <CustomButton type="submit" value={buttonValue}
+                buttonType={buttonStyle} onClickHook={onClickHook}/>
+        </div>
     )
 }
 

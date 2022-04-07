@@ -7,6 +7,7 @@ import { useDispatch, useSelector, useStore} from 'react-redux'
 //import store from "../../store/store"
 import { useEffect, useState } from 'react'
 import { clearSlots } from '../../store/actions/reservationAction';
+import { checkLogin } from '../../middlewares/auth';
 
 const SessionReservation = () => {
     const router = useRouter()
@@ -17,7 +18,7 @@ const SessionReservation = () => {
 
     useEffect(() => {
         if(router.isReady) {
-            if (!(store.getState().user.token && store.getState().user.token.length > 0)) {
+            if (!checkLogin(store)) {
                 router.push('/login')
                 return
             }
@@ -25,6 +26,7 @@ const SessionReservation = () => {
             if (sessionid)
                 dispatch(fetchSession(sessionid))
                 .then(dispatch(clearSlots()))
+                .catch(() => router.push('/'))
         }  
     }, [router.isReady])
 

@@ -10,9 +10,9 @@ class MyApp extends App {
     render() {
         const { Component, pageProps } = this.props
         return (
-          <Provider store={store}>
-            <Component {...pageProps}></Component>
-          </Provider>
+            <Provider store={store}>
+              <Component {...pageProps}></Component>
+            </Provider>
         )
     }
 }

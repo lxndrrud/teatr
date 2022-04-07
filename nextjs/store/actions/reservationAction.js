@@ -8,6 +8,7 @@ import {
     ERROR_RESERVATION_SET_DEFAULT,
     FETCH_RESERVATIONS,
     DELETE_RESERVATION,
+    PAYMENT_RESERVATION,
     FETCH_RESERVATION,
     CLEAR_SLOTS,
     FETCH_FILTERED_RESERVATIONS,
@@ -159,6 +160,34 @@ export const fetchReservations = (token) => async dispatch => {
         type: FETCH_RESERVATIONS,
         payload: body
     })
+}
+
+export const paymentStatusReservation = ({
+    token, 
+    id_reservation
+}) => async dispatch => {
+    const resp = await fetch(`/expressjs/reservations/${id_reservation}/payment`, {
+        method: 'PUT',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'auth-token': token
+        }
+    })
+
+
+    if (resp.status === 200)
+        dispatch({
+            type: PAYMENT_RESERVATION,
+        })
+    else {
+        const responseBody = await resp.json()
+        dispatch({
+            type: ERROR_RESERVATION,
+            payload: responseBody.message
+        })
+    }
+       
 }
 
 export const deleteReservation = ({

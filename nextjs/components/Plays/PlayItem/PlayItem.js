@@ -9,6 +9,6 @@ export default function PlayItem({play}) {
         <p className={styles.playTitle}>{play.title}</p>
         <p className={styles.playDescription}>{play.description.slice(0, 50)}</p>
         <ButtonLink destination={destinationURL} 
-            styleClass={styles.playButton} text="Посмотреть"/>
+            linkType="green" text="Посмотреть"/>
     </div>)
 }

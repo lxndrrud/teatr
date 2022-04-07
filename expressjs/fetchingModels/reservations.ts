@@ -303,9 +303,9 @@ class ReservationFetchingModel {
     }
 
     /**
-     * * Изменение статуса оплаты (в обе стороны для исправления ошибок оператора)
+     * * Изменение статуса оплаты (из false в true)
      */
-    async paymentForReservation(user: UserRequestOption, idReservation: number, status: boolean) {
+    async paymentForReservation(user: UserRequestOption, idReservation: number) {
         // Получение роли из БД
         let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
         
@@ -345,7 +345,7 @@ class ReservationFetchingModel {
 
         // Создание записи действия для оператора
         if (userRole.can_see_all_reservations) {
-            const actionDescription = `Изменение флага оплаты на ${status}`
+            const actionDescription = `Изменение флага оплаты на ${!reservation.is_paid}`
             const response = await this.userFetchingInstance
                 .createAction(trx, user.id, userRole, actionDescription)
             if (isInnerErrorInterface(response)) {
@@ -355,7 +355,7 @@ class ReservationFetchingModel {
 
         try {
             await this.reservationDatabaseInstance.update(trx, reservation.id, {
-                is_paid: status
+                is_paid: !reservation.is_paid
             })
             await trx.commit()
         } catch (e) { 
@@ -443,7 +443,26 @@ class ReservationFetchingModel {
 
         // Создание записи действия пользователя
         if (userRole.can_see_all_reservations) {
-            const actionDescription = `Удаление брони - User:${reservation.id_user}, Res:${user.id} Sum:${reservation.total_cost}`
+            // Поиск зарезервированных мест
+            let slots: SlotInterface[]
+            try {
+                slots = await this.reservationDatabaseInstance.getReservedSlots(reservation.id)
+            } catch (e) {
+                return <InnerErrorInterface>{
+                    code: 500,
+                    message: 'Внутренняя ошибка сервера во время поиска слотов!'
+                }
+            }
+            let idsSlots = ""
+            slots.forEach(slot => {
+                idsSlots += `${slot.id}, `
+            })
+            
+            const actionDescription = `Удаление брони - 
+            User: ${user.id},
+            ResUser: ${reservation.id_user},
+            Session: ${reservation.id_session},
+            Slots: ${idsSlots}`
             const response = await this.userFetchingInstance
                 .createAction(trx, user.id, userRole, actionDescription)
             if (isInnerErrorInterface(response)) {
@@ -579,6 +598,9 @@ class ReservationFetchingModel {
             reservation.session_timestamp = extendedTimestamp(reservation.session_timestamp)
             reservation.created_at = extendedTimestamp(reservation.created_at)
 
+            // Скрыть код подтверждения
+            reservation.confirmation_code = ''
+
             // Поиск зарезервированных мест
             let slots: SlotInterface[]
             try {
@@ -590,19 +612,22 @@ class ReservationFetchingModel {
                 }
             }
 
-            // Расчет стоимости брони
-            reservation.total_cost = this.calculateReservationTotalCost(slots)
-
             // Проверка на возможность удаления брони
             const canUserDelete = this.canUserDelete(reservation, idUser, userRole)
 
             // Проверка на возможность подтверждения брони
             const canUserConfirm = this.canUserConfirm(reservation, idUser, userRole)
+
+            // Проверка на возможность оплаты брони
+            const canUserPay = this.canUserPay(reservation, idUser, userRole)
             
             result.push(<ReservationInterface>{
                 ...reservation,
                 can_user_delete: canUserDelete,
                 can_user_confirm: canUserConfirm,
+                can_user_pay: canUserPay,
+                // Расчет стоимости брони
+                total_cost: this.calculateReservationTotalCost(slots),
                 slots: slots
             })
         }
@@ -632,7 +657,8 @@ class ReservationFetchingModel {
     }
 
     canUserPay(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
-        return userRole.can_see_all_reservations && !reservation.is_paid && !reservation.session_is_locked
+        return userRole.can_see_all_reservations 
+            && !reservation.is_paid && !reservation.session_is_locked
     }
 }
 

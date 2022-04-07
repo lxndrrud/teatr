@@ -6,7 +6,7 @@ exports.up = function(knex) {
     return knex.schema.withSchema('public').createTable('plays', tbl => {
         tbl.increments('id').primary()
         tbl.string('title', 100).notNullable()
-        tbl.string('description', 300).notNullable()
+        tbl.text('description', 600).notNullable()
     })
 };
 

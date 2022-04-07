@@ -7,7 +7,7 @@ exports.up = function(knex) {
         tbl.increments('id').primary()
         tbl.integer('id_user').notNullable()
             .references('id').inTable('users')
-        tbl.string('description').notNullable()
+        tbl.text('description').notNullable()
         tbl.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
     })
 };

@@ -122,19 +122,14 @@ export const confirmReservation = async (req: Request, res: Response) => {
     res.status(200).end()
 }
 
+/**
+ * * Изменение статуса оплаты
+ */
 export const paymentForReservation = async (req: Request, res: Response) => {
     // Проверка на авторизованность
     if (!req.user) {
         res.status(401).send(<ErrorInterface>{
             message: 'Ошибка авторизации!'
-        })
-        return
-    }
-
-    // Проверка наличия статуса оплаты в теле запроса
-    if (req.body.status === undefined) {
-        res.status(400).send(<ErrorInterface>{
-            message: 'Нет статуса оплаты в теле запроса!'
         })
         return
     }
@@ -149,7 +144,7 @@ export const paymentForReservation = async (req: Request, res: Response) => {
     }
 
     const response = await ReservationFetchingInstance
-        .paymentForReservation(req.user, idReservation, req.body.status)
+        .paymentForReservation(req.user, idReservation)
 
     if (isInnerErrorInterface(response)) {
         res.status(response.code).send(<ErrorInterface>{

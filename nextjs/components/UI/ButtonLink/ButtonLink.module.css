@@ -1,26 +1,44 @@
 .buttonLink {
+    margin: 0.5%;
     display: flex;
     flex-wrap: nowrap;
     text-decoration: none;
-    color: #F1FAEE;
     font-size: 22px;
-    border: 3px solid #1D3557;
-    background-color: #1D3557;
-    /* border: 3px solid #E63946; */
     padding: 7px;
+    border: 3px solid;
     border-radius: 10px;
     justify-content: center;
 }
 
-.buttonLink:hover {
-    background-color: #457B9D;
-    border: 3px solid #457B9D;
+.blue {
+    color: #F1FAEE;
+    border-color: #1e3c66;
+    background-color: #1e3c66;
 }
 
-/*
-.customLink:hover {
-    background-color: #E63946;
-    color: #F1FAEE;
-    /* text-decoration-line: underline; *-/
+.blue:hover {
+    background-color: #072538;
+    border-color: #072538;
 }
-*/
+
+.red {
+    background-color: #c1121f;
+    border-color: #c1121f;
+    color: #F1FAEE;
+}
+
+.red:hover {
+    background-color: #780000;
+    border-color: #780000;
+}
+
+.green {
+    color: #F1FAEE;
+    background-color: #4a7140 ;
+    border-color: #4a7140 ;
+}
+
+.green:hover {
+    background-color: #223b1b ;
+    border: 3px solid #223b1b ;
+}

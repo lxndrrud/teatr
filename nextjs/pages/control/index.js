@@ -5,6 +5,7 @@ import { useDispatch, useSelector, useStore } from "react-redux"
 import { fetchReservations } from "../../store/actions/reservationAction"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
+import { checkLogin } from "../../middlewares/auth"
 
 export default function ControlIndex() {
     const dispatch = useDispatch()
@@ -13,9 +14,11 @@ export default function ControlIndex() {
     useEffect(() => {
         if (router.isReady) {
             const token = store.getState().user.token
-            if(!(token && token.length > 0)) {
-                router.push('/login')
-                return
+            if(!checkLogin(store)) {
+                if (router.isReady) { 
+                    router.push('/login')
+                    return
+                }
             }
             dispatch(fetchReservations(token))
         }

@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import MainLayout from "../../../layouts/MainLayout/MainLayout"
-import DialogForm from '../../../components/Forms/DialogForm/DialogForm'
-import { deleteReservation, errorSetDefault } from "../../../store/actions/reservationAction"
+import React, { useState, useEffect } from 'react'
+import { useDispatch, useStore } from 'react-redux'
+import { checkLogin } from "../../../middlewares/auth"
 import { useRouter } from 'next/router'
-import { useDispatch, useSelector, useStore } from "react-redux"
-import { checkLogin } from '../../../middlewares/auth'
+import MainLayout from "../../../layouts/MainLayout/MainLayout"
+import DialogForm from "../../../components/Forms/DialogForm/DialogForm"
+import { paymentStatusReservation } from '../../../store/actions/reservationAction'
 
-
-const DeleteReservationPage = () => {
+const PaymentReservationPage = () => {
     const dispatch = useDispatch()
     const store = useStore()
     const router = useRouter()
@@ -22,11 +21,11 @@ const DeleteReservationPage = () => {
         }
     })
 
-    const deleteHook = (e) => {
+    const paymentHook = (e) => {
         e.preventDefault()
         
         const token = store.getState().user.token
-        dispatch(deleteReservation({
+        dispatch(paymentStatusReservation({
             token, 
             id_reservation: idReservation
         }))
@@ -43,13 +42,12 @@ const DeleteReservationPage = () => {
             }
         })
     }
-
     return (
-        <MainLayout title="Удаление брони">
-            <DialogForm text={`Вы уверены, что хотите удалить бронь #${idReservation}?`} 
-                onClickHook={deleteHook} error={error} buttonType="delete" />
+        <MainLayout title="Изменение статуса оплаты">
+            <DialogForm text={`Вы уверены, что хотите изменить статус оплаты брони #${idReservation}?`} 
+                onClickHook={paymentHook} error={error} buttonType="submit" />
         </MainLayout>
     )
 }
 
-export default DeleteReservationPage
+export default PaymentReservationPage

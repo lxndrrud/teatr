@@ -1,0 +1,19 @@
+.dialogForm {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.deleteButton {
+    max-width: 100%;
+    min-width: fit-content;
+    background-color: #c1121f;
+    border-color: #c1121f;
+    color: #F1FAEE;
+}
+
+.deleteButton:hover {
+    background-color: #780000;
+    border-color: #780000;
+}

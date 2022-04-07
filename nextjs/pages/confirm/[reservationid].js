@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useSelector, useStore, useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import { fetchReservation } from "../../store/actions/reservationAction";
+import { checkLogin } from "../../middlewares/auth";
 
 const ConfirmationPage = () => {
     const store = useStore()
@@ -12,9 +13,9 @@ const ConfirmationPage = () => {
     const router = useRouter()
 
     useEffect(() => {
+        const token = store.getState().user.token
         if (router.isReady) {
-            const token = store.getState().user.token
-            if(!(token && token.length > 0)) {
+            if (!checkLogin(store)) {
                 router.push('/login')
                 return
             }
