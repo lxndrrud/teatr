@@ -9,7 +9,7 @@ export default function PlayDetail({ play, sessions, images}) {
         <div className={styles.container}>
             <h2>{play.description}</h2>
             <div className={styles.sessionListContainer}>
-                <p>Сеансы</p>
+                <p className={styles.bold}>Сеансы</p>
                 <SessionList sessions={sessions} />
             </div>
             

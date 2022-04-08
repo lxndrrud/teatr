@@ -5,6 +5,9 @@ export const userActions = 'user_actions'
 export const reservations = 'reservations'
 export const reservationsSlots = 'reservations_slots'
 
+export const images = 'images'
+export const playsImages = 'plays_images'
+
 export const plays = 'plays'
 export const sessions = 'sessions'
 

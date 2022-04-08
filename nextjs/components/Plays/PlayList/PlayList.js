@@ -6,11 +6,11 @@ export default function PlayList() {
     const plays = useSelector(state => state.play.plays)
 
     return (
-    <div className={styles.posts}>
-        {plays && plays.map(play => (
-            <PlayItem play={play} key={play.id} />
-        ))}
-    </div>
+        <div className={styles.plays}>
+            {plays && plays.map(play => (
+                <PlayItem play={play} key={play.id} />
+            ))}
+        </div>
     )
 }
 

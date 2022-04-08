@@ -1,0 +1,16 @@
+.cardImage {
+    display: flexbox;
+    justify-content: center;
+    max-width: 500px;
+    height: 500px;
+    border-radius: 10px;
+}
+
+@media (max-width: 1550px) {
+    .cardImage {
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: auto;
+    }
+}

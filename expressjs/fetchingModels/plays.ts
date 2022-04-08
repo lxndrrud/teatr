@@ -1,7 +1,7 @@
 import { Knex } from "knex";
 import { KnexConnection } from "../knex/connections";
 import { PlayDatabaseInstance } from "../dbModels/plays";
-import { PlayBaseInterface, PlayInterface } from "../interfaces/plays";
+import { PlayBaseInterface, PlayInterface, PlayWithPosterInterface } from "../interfaces/plays";
 import { InnerErrorInterface } from "../interfaces/errors";
 
 class PlayFetchingModel {
@@ -11,9 +11,9 @@ class PlayFetchingModel {
         this.playDatabaseInstance = PlayDatabaseInstance
     }
 
-    async getAll(): Promise<PlayInterface[] | InnerErrorInterface> {
+    async getAll(): Promise<PlayWithPosterInterface[] | InnerErrorInterface> {
         try {
-            const query = await this.playDatabaseInstance.getAll({})
+            const query = await this.playDatabaseInstance.getAllWithPoster({})
             return query
         } catch (e) {
             console.log(e)

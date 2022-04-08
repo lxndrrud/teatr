@@ -19,6 +19,7 @@ export interface SessionDatabaseInterface extends SessionBaseInterface {
 export interface SessionInterface extends SessionDatabaseInterface {
     play_title: string
     auditorium_title: string
+    poster_filepath: string
 }
 
 export interface SessionFilterQueryInterface {

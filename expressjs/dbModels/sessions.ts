@@ -1,7 +1,7 @@
 import { Knex } from "knex";
 import { DatabaseModel } from "./baseModel";
 import { KnexConnection } from "../knex/connections";
-import { sessions, plays, pricePolicies, slots, seats, rows, auditoriums, reservationsSlots, reservations } from "./tables";
+import { sessions, plays, pricePolicies, slots, seats, rows, auditoriums, reservationsSlots, reservations, playsImages, images } from "./tables";
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, SessionDatabaseInterface } 
     from "../interfaces/sessions";
 import { getNextDayOfTimestamp } from "../utils/timestamp";
@@ -91,15 +91,19 @@ class SessionDatabaseModel extends DatabaseModel {
                 KnexConnection.ref('id_play').withSchema('s'), 
                 KnexConnection.ref('id_price_policy').withSchema('s'),
                 KnexConnection.ref('title').withSchema('a').as('auditorium_title'), 
-                KnexConnection.ref('title').withSchema('p').as('play_title')
+                KnexConnection.ref('title').withSchema('p').as('play_title'),
+                KnexConnection.ref('filepath').withSchema('i').as('poster_filepath'),
             )
             .join(`${plays} as p`, 'p.id', 's.id_play')
+            .join(`${playsImages} as pi`, 'pi.id_play', 'p.id')
+            .join(`${images} as i`, 'i.id', 'pi.id_image')
             .join(`${pricePolicies} as pp`, 'pp.id', 's.id_price_policy')
             .join(slots, `${slots}.id_price_policy`, 'pp.id')
             .join(seats, `${seats}.id`, `${slots}.id_seat`)
             .join(rows, `${rows}.id`, `${seats}.id`)
             .join(`${auditoriums} as a`, 'a.id', `${rows}.id_auditorium`)
             .where('s.is_locked', false)
+            .andWhere('pi.is_poster', true)
             .distinct()
             .orderBy('s.timestamp', 'asc')
     }

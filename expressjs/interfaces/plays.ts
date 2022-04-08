@@ -12,6 +12,16 @@ export interface PlayInterface extends PlayBaseInterface {
     id: number
 }
 
+export interface PlayQueryInterface extends Omit<PlayInterface, 'id'|'title'|'description'> {
+    id?: number
+    title?: string
+    description?: string
+}
+
+export interface PlayWithPosterInterface extends PlayInterface {
+    poster_filepath: string
+}
+
 export interface PlaySessionFilterOptionInterface {
     title: string
 }

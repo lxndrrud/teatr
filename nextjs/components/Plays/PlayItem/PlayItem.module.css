@@ -20,10 +20,10 @@
 }
 
 
-@media (max-width: 800px) {
+@media (max-width: 1550px) {
     .playItem {
+        display: flexbox;
         max-width: 100%;
         width: 100%;
-        display: flexbox;
     }
 }
