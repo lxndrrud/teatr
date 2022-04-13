@@ -19,8 +19,29 @@
 
 .tableRow {
     display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
     width: 100%;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+}
+
+.balconySideRowsContainer {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.tableColumn {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: fit-content;
+    flex-wrap: wrap;
 }
 
 .rowLabel {
@@ -28,7 +49,14 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 1vw;
+    font-size: 16px;
+}
+
+.tableContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
  /* 

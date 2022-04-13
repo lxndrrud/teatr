@@ -1,6 +1,19 @@
 .container {
+    display: flex;
+    flex-direction: column;
     max-width: 100%;
     width: 100%;
+}
+
+.subcontainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.playDescription {
+    margin-left: 10%;
 }
 
 .sessionListContainer {
@@ -10,4 +23,15 @@
 
 .bold {
     font-weight: bold;
+}
+
+@media (max-width: 1000px) {
+    .subcontainer {
+        flex-direction: column;
+    }
+
+    .playDescription {
+        margin-top: 1rem;
+        margin-left: 0;
+    }
 }

@@ -166,7 +166,12 @@ class SessionFetchingModel {
         }
         
     
-        let result: { number: number, seats: SlotIsReservedInterface[] }[] = []
+        let result: { 
+            id: number,
+            number: number,
+            title: string,
+            seats: SlotIsReservedInterface[] 
+        }[] = []
     
         for (let row of rowsQuery) {
             const rowSlots = slotsQuery.filter((slot) => slot.id_row == row.id)
@@ -199,11 +204,31 @@ class SessionFetchingModel {
                 }
             }
             result.push({
+                id: row.id,
                 number: row.number,
+                title: row.title,
                 seats: slots
             })
         }
-        return result
+        result.sort((a: {  id: number, number: number, title: string, seats: SlotIsReservedInterface[] }, 
+            b: {  id: number, number: number, title: string, seats: SlotIsReservedInterface[] }) => {
+                if (a.id > b.id ) return 1
+                else if (a.id < b.id ) return -1
+                else return 0
+        })
+        const resultList: { 
+            number: number,
+            title: string,
+            seats: SlotIsReservedInterface[] 
+        }[] = []
+        result.forEach(item => {
+            resultList.push({
+                number: item.number,
+                title: item.title,
+                seats: item.seats
+            })
+        })
+        return resultList
     }
 
     async getSessionFilterOptions() {

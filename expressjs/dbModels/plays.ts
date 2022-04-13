@@ -63,6 +63,10 @@ class PlayDatabaseModel extends DatabaseModel {
             .join(`${playsImages} as pi`, 'pi.id_play', 'p.id')
             .join(`${images} as i`, 'i.id', 'pi.id_image')
     }
+
+    getSingleWithPoster(payload: PlayQueryInterface) {
+        return this.getAllWithPoster(payload).first()
+    }
 }
 
 export const PlayDatabaseInstance = new PlayDatabaseModel()

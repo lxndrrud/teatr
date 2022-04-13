@@ -11,9 +11,9 @@ class PlayFetchingModel {
         this.playDatabaseInstance = PlayDatabaseInstance
     }
 
-    async getAll(): Promise<PlayWithPosterInterface[] | InnerErrorInterface> {
+    async getAll() {
         try {
-            const query = await this.playDatabaseInstance.getAllWithPoster({})
+            const query:  PlayWithPosterInterface[] = await this.playDatabaseInstance.getAllWithPoster({})
             return query
         } catch (e) {
             console.log(e)
@@ -26,7 +26,7 @@ class PlayFetchingModel {
 
     async getSinglePlay(idPlay: number) {
         try {
-            const query: PlayInterface | undefined = await this.playDatabaseInstance.get({id: idPlay})
+            const query: PlayWithPosterInterface[] = await this.playDatabaseInstance.getSingleWithPoster({id: idPlay})
             if (!query) return <InnerErrorInterface>{
                 code: 404,
                 message: 'Спектакль не найден!'
@@ -67,6 +67,7 @@ class PlayFetchingModel {
                     message: 'Запись спектакля не найдена!'
                 }
             }
+            await this.playDatabaseInstance.update(trx, idPlay, payload)
             await trx.commit()
         } catch (e) {
             await trx.rollback()
@@ -88,7 +89,9 @@ class PlayFetchingModel {
         const trx = await KnexConnection.transaction()
         try {
             await this.playDatabaseInstance.delete(trx, idPlay)
+            await trx.commit()
         } catch (e) {
+            await trx.rollback()
             return <InnerErrorInterface>{
                 code: 500,
                 message: 'Внутренняя ошибка сервера при удалении спектакля!'
