@@ -9,9 +9,13 @@ exports.up = function(knex) {
         tbl.boolean('is_locked').notNullable().defaultTo(false)
         tbl.integer('max_slots').notNullable().defaultTo(5)
         tbl.integer('id_play').notNullable()
-            .references('id').inTable('plays')
         tbl.integer('id_price_policy').notNullable()
-            .references('id').inTable('price_policies')
+
+        
+        tbl.foreign('id_play')
+            .references('id').inTable('plays').onDelete('CASCADE').onUpdate('CASCADE')
+        tbl.foreign('id_price_policy')
+            .references('id').inTable('price_policies').onDelete('CASCADE').onUpdate('CASCADE')
     })
 };
 

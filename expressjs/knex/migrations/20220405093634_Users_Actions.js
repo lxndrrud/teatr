@@ -6,9 +6,11 @@ exports.up = function(knex) {
     return knex.schema.withSchema('public').createTable('user_actions', tbl => {
         tbl.increments('id').primary()
         tbl.integer('id_user').notNullable()
-            .references('id').inTable('users')
         tbl.text('description').notNullable()
         tbl.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
+
+        tbl.foreign('id_user')
+            .references('id').inTable('users').onDelete('CASCADE').onUpdate('CASCADE')
     })
 };
 

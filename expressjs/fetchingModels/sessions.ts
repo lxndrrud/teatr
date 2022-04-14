@@ -93,6 +93,7 @@ class SessionFetchingModel {
             const fetchedQuery = this.fixTimestamps(query)
             return fetchedQuery
         } catch (e) {
+            console.log(e)
             return <InnerErrorInterface> {
                 code: 500,
                 message: 'Внутренняя ошибка сервера при поиске сеансов!'
@@ -106,6 +107,7 @@ class SessionFetchingModel {
             const fetchedQuery = this.fixTimestamps([query])
             return fetchedQuery[0]
         } catch (e) {
+            console.log(e)
             return <InnerErrorInterface> {
                 code: 500,
                 message: 'Внутренняя ошибка сервера при поиске сеанса!'

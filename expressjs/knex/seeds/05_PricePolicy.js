@@ -7,7 +7,10 @@ exports.seed = async function(knex) {
   await knex('price_policies').del()
   await knex('price_policies').insert([
     {
-      title: 'Тестовая ценовая политиsка'
+      title: 'Тестовая ценовая политика главного зала'
+    }, 
+    {
+      title: 'Тестовая ценовая политика малой сцены'
     }
   ]);
 };

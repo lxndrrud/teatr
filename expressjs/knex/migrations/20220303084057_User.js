@@ -12,7 +12,10 @@ exports.up = function(knex) {
         tbl.string('middlename', 70).nullable().defaultTo('Не указано')
         tbl.string('lastname', 70).nullable().defaultTo('Не указано')
         tbl.integer('id_role').notNullable()
-            .references('id').inTable('roles')
+
+        
+        tbl.foreign('id_role')
+            .references('id').inTable('roles').onDelete('CASCADE').onUpdate('CASCADE')
     })
 };
 

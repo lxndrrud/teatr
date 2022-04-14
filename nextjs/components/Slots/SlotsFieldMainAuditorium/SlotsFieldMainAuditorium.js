@@ -19,11 +19,9 @@ const SlotsFieldMainAuditorium = ({ rows }) => {
         }
     })
 
-    console.log(parterRows.length, sideBalconyRows.length, mainBalconyRows.length, rows.length)
-
     return (
         <div className={styles.container}> 
-            <p className="font-bold text-lg mb-5">Главный зал</p> 
+            <p className={styles.sceneLabel}>Главный зал</p> 
             <span className={styles.scene}>Сцена</span>
             <div className={styles.tableContainer}>
                 {parterRows && parterRows.map(row => (

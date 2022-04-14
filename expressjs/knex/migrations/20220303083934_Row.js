@@ -8,7 +8,9 @@ exports.up = function(knex) {
         tbl.integer('number').notNullable()
         tbl.string('title', 50).notNullable()
         tbl.integer('id_auditorium').notNullable()
-            .references('id').inTable('auditoriums')
+
+        tbl.foreign('id_auditorium')
+            .references('id').inTable('auditoriums').onDelete('CASCADE').onUpdate('CASCADE')
     })
 };
 

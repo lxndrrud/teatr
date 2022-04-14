@@ -22,7 +22,7 @@ exports.seed = async function(knex) {
       id_play: 2,
       is_locked: false,
       timestamp: '2022-04-21T07:30+0300',
-      id_price_policy: 1
+      id_price_policy: 2
     },
     {
       id_play: 2,

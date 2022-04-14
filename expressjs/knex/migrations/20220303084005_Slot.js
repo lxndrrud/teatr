@@ -7,9 +7,13 @@ exports.up = function(knex) {
         tbl.increments('id').primary()
         tbl.float('price').notNullable()
         tbl.integer('id_price_policy').notNullable()
-            .references('id').inTable('price_policies')
         tbl.integer('id_seat').notNullable()
-            .references('id').inTable('seats')
+        
+
+        tbl.foreign('id_price_policy')
+            .references('id').inTable('price_policies').onDelete('CASCADE').onUpdate('CASCADE')
+        tbl.foreign('id_seat')
+            .references('id').inTable('seats').onDelete('CASCADE').onUpdate('CASCADE')
     })
 };
 

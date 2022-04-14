@@ -3,6 +3,7 @@ import { postReservation, errorSetDefault } from '../../../store/actions/reserva
 import { fetchSlotsBySession } from "../../../store/actions/sessionAction"
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import SlotsFieldMainAuditorium from "../../Slots/SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
+import SlotsFieldSmallScene from "../../Slots/SlotsFieldSmallScene/SlotsFieldSmallScene"
 import React, { useEffect, useState } from 'react'
 import { useRouter } from "next/router"
 import styles from "./ReservationPostForm.module.css"
@@ -60,7 +61,9 @@ const ReservationPostForm = () => {
         <>
             { session.auditorium_title === 'Главный зал' 
                 ? <SlotsFieldMainAuditorium rows={sessionSlots} />
-                : null
+                : session.auditorium_title === 'Малая сцена'
+                    ? <SlotsFieldSmallScene rows={sessionSlots} />
+                    : null
             }
             {
                 error !== ''

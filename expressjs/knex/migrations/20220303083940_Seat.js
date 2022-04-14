@@ -7,7 +7,9 @@ exports.up = function(knex) {
         tbl.increments('id').primary()
         tbl.integer('number').notNullable()
         tbl.integer('id_row').notNullable()
-            .references('id').inTable('rows')
+
+        tbl.foreign('id_row')
+            .references('id').inTable('rows').onDelete('CASCADE').onUpdate('CASCADE')
     })
 };
 
