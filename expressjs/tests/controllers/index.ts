@@ -1,10 +1,11 @@
-import { PlaysControllerTests } from "./plays";
 import { app } from "../../app";
+import { PlaysControllerTests } from "./plays";
+import { SessionsControllerTest } from "./sessions";
 
 export function ControllersTests() {
     before(function() {
         this.apiLink = "/expressjs"
-        this.authLink = `${this.apiLink}/login`
+        this.authLink = `${this.apiLink}/users/login`
         this.server = app.listen(8083, () => {
             console.log(`⚡️[test-server]: Test Server is running at https://localhost:8083`)
         })
@@ -14,5 +15,6 @@ export function ControllersTests() {
     })
     describe("Controllers", function() {
         PlaysControllerTests()
+        SessionsControllerTest()
     })
 }

@@ -1,6 +1,6 @@
-import { doesNotMatch } from "assert";
 import { assert, should, expect } from "chai";
 import { agent as request } from "supertest";
+import { PlayBaseInterface } from "../../interfaces/plays";
 
 export function PlaysControllerTests () {
     describe("Plays contoller", () => {
@@ -39,6 +39,109 @@ export function PlaysControllerTests () {
                 })
             })
         })
+
+        describe("POST /expressjs/plays/", function() {
+            const postPayload: PlayBaseInterface = {
+                title: "test",
+                description: "test",
+            }
+            const postPlayLink = `/expressjs/plays/`
+            it("should be ok and return new play id", async function() {
+                const response = await request(this.server)
+                    .post(postPlayLink)
+                    .send(postPayload)
+                
+                expect(response.status).to.equal(201)
+                expect(response.body).to.eql({
+                    id: 3
+                })
+            })
+
+            it("should fail because of payload", async function () {
+                const response = await request(this.server)
+                    .post(postPlayLink)
+                    .send({
+                        title: postPayload.title
+                    })
+                
+                expect(response.status).to.equal(400)
+            })
+        })
+
+        describe("GET /expressjs/plays/1", function() {
+            const getPlayLink = `/expressjs/plays/1`
+            const failGetPlayLink = `/expressjs/plays/114`
+            const failGetPlayLinkBadRequest = `/expressjs/plays/`
+            it("should be OK", async function() {
+                const response = await request(this.server)
+                    .get(getPlayLink)
+
+                expect(response.status).to.equal(200)
+            })
+
+            it("should have 404 status", async function () {
+                const response = await request(this.server)
+                    .get(failGetPlayLink)
+
+                expect(response.status).to.equal(404)
+            })
+        })
+
+        describe("PUT /expressjs/plays/1", function() {
+            const updatePayload: PlayBaseInterface = {
+                title: "test",
+                description: "test",
+            }
+            const updatePlayLink = `/expressjs/plays/1`
+            const failUpdatePlayLink = `/expressjs/plays/114`
+            it("should be OK", async function () {
+                const response = await request(this.server)
+                    .put(updatePlayLink)
+                    .send(updatePayload)
+                
+                expect(response.status).to.equal(200)
+            })
+
+            it("should have 404 status because wrong idPlay", async function () {
+                const response = await request(this.server)
+                    .put(failUpdatePlayLink)
+                    .send(updatePayload)
+                
+                expect(response.status).to.equal(404)
+            })
+
+            it("should have 400 status because wrong payload", async function () {
+                const response = await request(this.server)
+                    .put(updatePlayLink)
+                    .send({
+                        title: updatePayload.title
+                    })
+                
+                expect(response.status).to.equal(400)
+            })
+        })
+
+        describe("DELETE /expressjs/plays/1", function() {
+            const deleteLink = `/expressjs/plays/1`
+            const failDeleteLink = `/expressjs/plays/114`
+            it("should be OK", async function() {
+                const response = await request(this.server)
+                    .delete(deleteLink)
+
+                expect(response.status).to.equal(200)
+            })
+
+            it("should have status 404", async function() {
+                const response = await request(this.server)
+                    .delete(failDeleteLink)
+
+                expect(response.status).to.equal(404)
+            })
+        })
+
+        
+
+        
     })
 
 }

@@ -26,7 +26,7 @@ class PlayFetchingModel {
 
     async getSinglePlay(idPlay: number) {
         try {
-            const query: PlayWithPosterInterface[] = await this.playDatabaseInstance.getSingleWithPoster({id: idPlay})
+            const query: PlayWithPosterInterface = await this.playDatabaseInstance.getSingleWithPoster({id: idPlay})
             if (!query) return <InnerErrorInterface>{
                 code: 404,
                 message: 'Спектакль не найден!'

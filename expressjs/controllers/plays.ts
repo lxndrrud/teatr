@@ -41,11 +41,13 @@ export const createPlay = async (req: Request, res: Response) => {
 }
 
 export const getSinglePlay = async (req: Request, res: Response) => {
-    const idPlay = parseInt(req.params.idPlay)
-    if (!idPlay) {
+    // Проверка строки запроса
+    if (!req.params.idPlay) {
         res.status(400).end()
         return 
     }
+    const idPlay = parseInt(req.params.idPlay)
+    
     const query = await PlayFetchingInstance.getSinglePlay(idPlay)
     if (isInnerErrorInterface(query)) {
         res.status(query.code).send(<ErrorInterface>{
@@ -58,13 +60,15 @@ export const getSinglePlay = async (req: Request, res: Response) => {
     
 
 export const deletePlay = async (req: Request, res: Response) => {
-    const idPlay = parseInt(req.params.idPlay)
-    if (!idPlay) {
+    // Проверка строки запроса
+    if (!req.params.idPlay) {
         res.status(400).send(<ErrorInterface>{
             message: 'Неверное тело запроса!'
         })
         return
     }
+    const idPlay = parseInt(req.params.idPlay)
+
     const response = await PlayFetchingInstance.deletePlay(idPlay)
 
     if(isInnerErrorInterface(response)) {
@@ -74,16 +78,16 @@ export const deletePlay = async (req: Request, res: Response) => {
         return
     }
 
-    res.status(200).end()
+    res.sendStatus(200).end()
 }
 
 export const updatePlay = async (req: Request, res: Response) => {
     // Проверка строки запроса
-    const idPlay = parseInt(req.params.idPlay)
-    if (!idPlay) {
-        res.send(400).end()
+    if (!req.params.idPlay) {
+        res.sendStatus(400).end()
         return
     }
+    const idPlay = parseInt(req.params.idPlay)
 
     // Проверка тела запроса
     if (!isPlayBaseInterface(req.body)) {
@@ -104,5 +108,5 @@ export const updatePlay = async (req: Request, res: Response) => {
         return
     }
 
-    res.status(200).end()
+    res.sendStatus(200).end()
 }

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getSessions, getSessionsByPlay, getSingleSession, 
     postSession, updateSession, deleteSession, getSlotsForSessions, getFilteredSessions, getSessionFilterOptions } from "../controllers/sessions";
+import { basicAuthMiddleware } from "../middlewares/auth";
  
 export const sessionsRouter = Router();
 
@@ -12,9 +13,9 @@ sessionsRouter.get('/filter', getFilteredSessions)
 sessionsRouter.get('/filter/setup', getSessionFilterOptions)
 
 sessionsRouter.route('/:idSession')
-    .get(getSingleSession)
-    .put(updateSession)
-    .delete(deleteSession)
+    .get(basicAuthMiddleware, getSingleSession)
+    .put(basicAuthMiddleware, updateSession)
+    .delete(basicAuthMiddleware, deleteSession)
 
 sessionsRouter.route('/')
     .get(getSessions)

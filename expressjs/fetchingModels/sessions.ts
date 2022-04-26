@@ -89,7 +89,7 @@ class SessionFetchingModel {
 
     async getUnlockedSessions(): Promise<SessionInterface[] | InnerErrorInterface> {
         try {
-            const query = await this.sessionDatabaseInstance.getUnlockedSessions()
+            const query: SessionInterface[] = await this.sessionDatabaseInstance.getUnlockedSessions()
             const fetchedQuery = this.fixTimestamps(query)
             return fetchedQuery
         } catch (e) {
@@ -103,7 +103,13 @@ class SessionFetchingModel {
 
     async getSingleUnlockedSession(idSession: number) {
         try {
-            const query: SessionInterface = await this.sessionDatabaseInstance.getSingleUnlockedSession(idSession)
+            const query: SessionInterface | undefined = await this.sessionDatabaseInstance.getSingleUnlockedSession(idSession)
+            if (!query) {
+                return <InnerErrorInterface>{
+                    code: 404,
+                    message: 'Сеанс не найден!'
+                }
+            }
             const fetchedQuery = this.fixTimestamps([query])
             return fetchedQuery[0]
         } catch (e) {

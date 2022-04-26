@@ -36,7 +36,7 @@
       "db-up": "npx knex migrate:latest --env main && npx knex seed:run --env main",
       "db-down": "npx knex migrate:rollback --env main",
       "dev": "nodemon index.ts",
-      "test-dev": "mocha --exit -r ts-node/register 'tests/**/*.ts'",
+      "test": "npm run db-down && npm run db-up && mocha --exit -r ts-node/register 'tests/**/*.ts'",
       "start": "ts-node index.ts",
       "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js"
    },
