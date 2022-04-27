@@ -146,7 +146,6 @@ class SessionFetchingModel {
                 message: 'Внутренняя ошибка сервера при нахождении сеанса!'
             }
         }
-
         if (!session) {
             return <InnerErrorInterface>{
                 code: 404,

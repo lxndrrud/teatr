@@ -7,7 +7,7 @@ export const sessionsRouter = Router();
 
 
 sessionsRouter.get('/play/:idPlay', getSessionsByPlay)
-sessionsRouter.get('/:idSession/slots', getSlotsForSessions)
+sessionsRouter.get('/:idSession/slots', basicAuthMiddleware, getSlotsForSessions)
 
 sessionsRouter.get('/filter', getFilteredSessions)
 sessionsRouter.get('/filter/setup', getSessionFilterOptions)
@@ -19,7 +19,7 @@ sessionsRouter.route('/:idSession')
 
 sessionsRouter.route('/')
     .get(getSessions)
-    .post(postSession)
+    .post(basicAuthMiddleware, postSession)
 
 
 

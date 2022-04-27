@@ -1,4 +1,5 @@
 import moment from "moment"
+import { SessionDatabaseInterface } from "../interfaces/sessions"
 import { KnexConnection } from "../knex/connections"
 
 
@@ -10,7 +11,7 @@ export const processTime = () => {
 
 
 const processSessions = async () => {
-    const query = await KnexConnection('sessions as s')
+    const query: SessionDatabaseInterface[] = await KnexConnection('sessions as s')
         .where('s.is_locked', false)
         .orderBy('s.timestamp', 'asc')
     
