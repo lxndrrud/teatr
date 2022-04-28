@@ -1,5 +1,6 @@
 import { app } from "../../app";
 import { PlaysControllerTests } from "./plays";
+import { ReservationsControllerTest } from "./reservations";
 import { SessionsControllerTest } from "./sessions";
 
 export function ControllersTests() {
@@ -16,5 +17,6 @@ export function ControllersTests() {
     describe("Controllers", function() {
         PlaysControllerTests()
         SessionsControllerTest()
+        ReservationsControllerTest()
     })
 }

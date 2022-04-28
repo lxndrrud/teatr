@@ -1,11 +1,11 @@
-import { SlotInterface } from "./slots"
+import { ReservationSlotDependency, SlotInterface } from "./slots"
 
 /**
  * * Интерфейс для создания брони
  */
 export interface ReservationCreateInterface {
     id_session: number
-    slots: SlotInterface[]
+    slots: ReservationSlotDependency[]
 }
 
 /**

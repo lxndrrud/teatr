@@ -1,9 +1,16 @@
 import { assert, should, expect } from "chai";
 import { agent as request } from "supertest";
 import { PlayBaseInterface } from "../../interfaces/plays";
+import { KnexConnection } from "../../knex/connections";
 
 export function PlaysControllerTests () {
     describe("Plays contoller", () => {
+        before(async function() {
+            await KnexConnection.migrate.rollback()
+            await KnexConnection.migrate.latest()
+            await KnexConnection.seed.run()
+        })
+
         describe("GET /expressjs/plays/", function() {
             const getPlaysLink = `/expressjs/plays/`
             it("should be status 200 with info", async function() {

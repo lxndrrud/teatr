@@ -15,6 +15,9 @@ export interface SlotWithRowIdInterface extends SlotInterface {
     id_row: number
 }
 
+export interface ReservationSlotDependency {
+    id: number
+}
 export interface ReservationsSlotsBaseInterface {
     id_slot: number
     id_reservation: number

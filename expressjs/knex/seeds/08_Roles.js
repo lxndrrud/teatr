@@ -12,7 +12,8 @@ exports.seed = async function(knex) {
             can_have_more_than_one_reservation_on_session: true,
             can_see_all_reservations: true,
             can_access_private: true,
-            can_make_reservation_without_confirmation: true
+            can_make_reservation_without_confirmation: true,
+            can_avoid_max_slots_property: true,
         },
         {
             id: 9342,
@@ -20,7 +21,8 @@ exports.seed = async function(knex) {
             can_have_more_than_one_reservation_on_session: true,
             can_see_all_reservations: true,
             can_access_private: false,
-            can_make_reservation_without_confirmation: true
+            can_make_reservation_without_confirmation: true,
+            can_avoid_max_slots_property: true,
         },
         {
             id: 3,
@@ -28,7 +30,8 @@ exports.seed = async function(knex) {
             can_have_more_than_one_reservation_on_session: false,
             can_see_all_reservations: false,
             can_access_private: false,
-            can_make_reservation_without_confirmation: false
+            can_make_reservation_without_confirmation: false,
+            can_avoid_max_slots_property: false,
         },
     ]);
 };

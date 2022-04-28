@@ -10,6 +10,7 @@ exports.up = function(knex) {
         tbl.boolean('can_have_more_than_one_reservation_on_session').notNullable()
         tbl.boolean('can_access_private').notNullable()
         tbl.boolean('can_make_reservation_without_confirmation').notNullable()
+        tbl.boolean('can_avoid_max_slots_property').notNullable()
     })
 };
 

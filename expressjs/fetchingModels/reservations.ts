@@ -63,6 +63,19 @@ class ReservationFetchingModel {
             }
         }
 
+        // Проверка на возможность доступа к брони и "ложный" 404-ответ 
+        //(подразумевается 403)
+        if (!userRole.can_see_all_reservations) {
+            console.log("here")
+            if (reservationQuery.id_user !== idUser) {
+                return <InnerErrorInterface>{
+                    code: 404,
+                    message: 'Бронь не найдена!'
+                }
+            }
+        }
+        
+
         const result = await this.fetchReservations(
                 idUser,
                 userRole,
@@ -104,23 +117,26 @@ class ReservationFetchingModel {
         }
 
         // Проверка на максимум слотов
-        if (requestBody.slots.length > sessionQuery.max_slots) {
+        if (!userRole.can_avoid_max_slots_property && requestBody.slots.length > sessionQuery.max_slots) {
             return <InnerErrorInterface>{
                 code: 403,
                 message: 'Превышено максимальное количество мест для брони!'
             }
         }
 
-        // Проверка на наличие брони на сеанс у пользователя
-        const checkVisitorReservation = await this
-            .checkUserHasReservedSession(user.id, requestBody.id_session)
+        if (!userRole.can_have_more_than_one_reservation_on_session) {
+            // Проверка на наличие брони на сеанс у пользователя
+            const checkVisitorReservation = await this
+                .checkUserHasReservedSession(user.id, requestBody.id_session)
 
-        if (!userRole.can_have_more_than_one_reservation_on_session && checkVisitorReservation) {
-            return <InnerErrorInterface> {
-                code: 403,
-                message: "Пользователь уже имеет брони на данный сеанс!"
+            if (checkVisitorReservation) {
+                return <InnerErrorInterface> {
+                    code: 403,
+                    message: "Пользователь уже имеет брони на данный сеанс!"
+                }
             }
         }
+        
 
         // Проверка на коллизию выбранных слотов и уже забронированных мест
         const reservedSlotsQuery = await this.sessionFetchingInstance

@@ -4,6 +4,7 @@ export interface RoleBaseInterface {
     can_see_all_reservations: boolean
     can_access_private: boolean
     can_make_reservation_without_confirmation: boolean
+    can_avoid_max_slots_property: boolean
 }
 
 export interface RoleDatabaseInterface extends RoleBaseInterface {
