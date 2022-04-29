@@ -21,8 +21,6 @@ export function isReservationCreateInterface (obj: any): obj is ReservationCreat
  * * Интерфейс подтверждения брони
  */
 export interface ReservationConfirmationInterface {
-    id_session: number
-    // code: string
     confirmation_code: string
 }
 
@@ -31,7 +29,7 @@ export interface ReservationConfirmationInterface {
  * * для интерфейса подтверждения брони
  */
 export function isReservationConfirmationInterface (obj: any): obj is ReservationConfirmationInterface {
-    if (obj.id_session && obj.confirmation_code) return true
+    if (obj.confirmation_code) return true
     return false
 }
 

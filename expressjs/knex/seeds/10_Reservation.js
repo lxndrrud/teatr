@@ -8,7 +8,7 @@
     await knex('reservations').insert([
         {
             is_paid: false,
-            is_confirmed: true,
+            is_confirmed: false,
             //code: '123456',
             confirmation_code: '123456',
             id_session: 2,

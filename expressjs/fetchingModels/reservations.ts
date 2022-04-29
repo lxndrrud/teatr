@@ -66,7 +66,6 @@ class ReservationFetchingModel {
         // Проверка на возможность доступа к брони и "ложный" 404-ответ 
         //(подразумевается 403)
         if (!userRole.can_see_all_reservations) {
-            console.log("here")
             if (reservationQuery.id_user !== idUser) {
                 return <InnerErrorInterface>{
                     code: 404,
@@ -285,7 +284,7 @@ class ReservationFetchingModel {
         // Проверка на валидность кода подтверждения
         if (reservation.confirmation_code !== requestBody.confirmation_code) {
             return <InnerErrorInterface>{
-                code: 412,
+                code: 409,
                 message: 'Неправильный код подтверждения!'
             }
         }
@@ -371,7 +370,8 @@ class ReservationFetchingModel {
 
         try {
             await this.reservationDatabaseInstance.update(trx, reservation.id, {
-                is_paid: !reservation.is_paid
+                is_paid: !reservation.is_paid,
+                is_confirmed: true
             })
             await trx.commit()
         } catch (e) { 

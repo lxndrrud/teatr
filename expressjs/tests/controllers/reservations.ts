@@ -2,7 +2,7 @@ import { assert, should, expect } from "chai";
 import { response } from "express";
 import moment from "moment";
 import { agent as request } from "supertest";
-import { ReservationCreateInterface } from "../../interfaces/reservations";
+import { ReservationConfirmationInterface, ReservationCreateInterface } from "../../interfaces/reservations";
 import { KnexConnection } from "../../knex/connections";
 
 export function ReservationsControllerTest() {
@@ -301,5 +301,189 @@ export function ReservationsControllerTest() {
                 expect(response.status).to.equal(404)
             })
         })
+
+        describe("PUT /expressjs/reservations/:idReservation/confirm", function() {
+            const confirmReservationLink = `/expressjs/reservations/1/confirm`
+            const failConfirmReservationLink = `/expressjs/reservations/114/confirm`
+            const confirmationPayload: ReservationConfirmationInterface = {
+                confirmation_code: "123456"
+            }
+            const failConfirmationPayload: ReservationConfirmationInterface = {
+                confirmation_code: "123455"
+            }
+
+            it("should have status 403 FORBIDDEN (Without token)", async function() {
+                const response = await request(this.server)
+                    .put(confirmReservationLink)
+                    .send(confirmationPayload)
+
+                expect(response.status).to.equal(403)
+            })
+
+            it("should have status 404 NOT FOUND (Non existing reservation)", async function() {
+                const response = await request(this.server)
+                    .put(failConfirmReservationLink)
+                    .set({
+                        "auth-token": this.visitorToken
+                    })
+                    .send(confirmationPayload)
+
+                expect(response.status).to.equal(404)
+            })
+
+            it("should have status 403 FORBIDDEN (Cashier tries to confirm)", async function() {
+                const response = await request(this.server)
+                    .put(confirmReservationLink)
+                    .set({
+                        "auth-token": this.cashierToken
+                    })
+                    .send(confirmationPayload)
+
+                expect(response.status).to.equal(403)
+            })
+
+            it("should have status 409 CONFLICT (Visitors sends wrong confirmation code)", async function() {
+                const response = await request(this.server)
+                    .put(confirmReservationLink)
+                    .set({
+                        "auth-token": this.visitorToken
+                    })
+                    .send(failConfirmationPayload)
+
+                expect(response.status).to.equal(409)
+            })
+
+            it("should be OK (Visitor sends correct confirmation code)", async function() {
+                const response = await request(this.server)
+                    .put(confirmReservationLink)
+                    .set({
+                        "auth-token": this.visitorToken
+                    })
+                    .send(confirmationPayload)
+
+                expect(response.status).to.equal(200)
+            })
+
+        })
+
+        describe("PUT /expressjs/reservations/:idReservation/payment", function() {
+            const paymentLink = `/expressjs/reservations/1/payment`
+            const failPaymentLink = `/expressjs/reservations/114/payment`
+
+            it("should have status 403 FORBIDDEN (Without token)", async function() {
+                const response = await request(this.server)
+                    .put(paymentLink)
+                
+                expect(response.status).to.equal(403)
+            })
+
+            it("should have status 403 FORBIDDEN (Visitor tries to change payment flag)", async function() {
+                const response = await request(this.server)
+                    .put(paymentLink)
+                    .set({
+                        "auth-token": this.visitorToken
+                    })
+
+                expect(response.status).to.equal(403)
+            })
+
+            it("should have status 404 NOT FOUND (Non existing reservation)", async function() {
+                const response = await request(this.server)
+                    .put(failPaymentLink)
+                    .set({
+                        "auth-token": this.cashierToken
+                    })
+
+                expect(response.status).to.equal(404)
+            })
+
+            it("should be OK (Cashier changes Visitor`s reservation payment flag)", async function() {
+                const response = await request(this.server)
+                    .put(paymentLink)
+                    .set({
+                        "auth-token": this.cashierToken
+                    })
+
+                expect(response.status).to.equal(200)
+            })
+        })
+
+        describe("DELETE /expressjs/reservations/:idReservation", function() {
+            const deleteCashierReservationLink = `/expressjs/reservations/5`
+            const deleteCashierReservationLink2 = `/expressjs/reservations/2`
+            const deleteVisitorReservationLink = `/expressjs/reservations/3`
+            const deleteVisitorReservationLink2 = `/expressjs/reservations/1`
+            const deleteAdminReservationLink = `/expressjs/reservations/4`
+            const failDeleteLink = `/expressjs/reservations/114`
+
+            it("should be OK (Visitor deletes his own reservation)", async function() {
+                const response = await request(this.server)
+                    .delete(deleteVisitorReservationLink)
+                    .set({
+                        "auth-token": this.visitorToken
+                    })
+
+                expect(response.status).to.equal(200)
+            })
+
+            it("should be OK (Admin deletes another user`s reservation)", async function() {
+                const response = await request(this.server)
+                    .delete(deleteVisitorReservationLink2)
+                    .set({
+                        "auth-token": this.adminToken
+                    })
+
+                expect(response.status).to.equal(200)
+            })
+
+            it("should be OK (Cashier deletes his own reservation)", async function() {
+                const response = await request(this.server)
+                    .delete(deleteCashierReservationLink2)
+                    .set({
+                        "auth-token": this.adminToken
+                    })
+
+                expect(response.status).to.equal(200)
+            })
+
+            it("should have status 403 FORBIDDEN (Cashier deletes another user`s reservation)", async function() {
+                const response = await request(this.server)
+                    .delete(deleteAdminReservationLink)
+                    .set({
+                        "auth-token": this.cashierToken
+                    })
+
+                expect(response.status).to.equal(403)
+            })
+
+            it("should have status 403 FORBIDDEN (Without token)", async function() {
+                const response = await request(this.server)
+                    .delete(deleteCashierReservationLink)
+                    
+                expect(response.status).to.equal(403)
+            })
+
+            it("should have status 403 FORBIDDEN (Visitor deletes another user`s reservation)", async function() {
+                const response = await request(this.server)
+                    .delete(deleteCashierReservationLink)
+                    .set({
+                        "auth-token": this.visitorToken
+                    })
+
+                expect(response.status).to.equal(403)
+            })
+
+            it("should have status 404 NOT FOUND for any role (Non existing reservation)", async function() {
+                const response = await request(this.server)
+                    .delete(failDeleteLink)
+                    .set({
+                        "auth-token": this.adminToken
+                    })
+
+                expect(response.status).to.equal(404)
+            })
+        })
+
+        
     })
 }
