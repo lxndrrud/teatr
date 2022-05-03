@@ -3,8 +3,14 @@ import { FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS,
 
 
 
-export const fetchSession = (sessionid) => async dispatch =>  {
-    const response = await fetch(`/expressjs/sessions/${sessionid}`)
+export const fetchSession = (token, sessionid) => async dispatch =>  {
+    const response = await fetch(`/expressjs/sessions/${sessionid}`, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'auth-token': token
+        }
+    })
     const json_ = await response.json()
     dispatch({
         type: FETCH_SESSION,
@@ -31,8 +37,14 @@ export const fetchSessionsByPlay = (playid) => async dispatch => {
     })
 }
 
-export const fetchSlotsBySession = (sessionid) => async dispatch => {
-    const response = await fetch(`/expressjs/sessions/${sessionid}/slots`)
+export const fetchSlotsBySession = (token, sessionid) => async dispatch => {
+    const response = await fetch(`/expressjs/sessions/${sessionid}/slots`, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'auth-token': token
+        }
+    })
     const json_ = await response.json()
     dispatch({
         type: FETCH_SLOTS,
@@ -60,7 +72,7 @@ export const fetchFilteredSessions = (date, auditoriumTitle, playTitle) => async
         {
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             method: 'GET',
     })

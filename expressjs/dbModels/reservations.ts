@@ -236,7 +236,7 @@ class ReservationDatabaseModel extends DatabaseModel {
                     if (userQuery.is_locked === 'true') {
                         builder.andWhere('s.is_locked', true)
                     }
-                    else {
+                    else if (userQuery.is_locked === 'false') {
                         builder.andWhere('s.is_locked', false)
                     }
                 }

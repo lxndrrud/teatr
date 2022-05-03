@@ -1,33 +1,11 @@
 import React from 'react'
 import styles from "./ReservationItem.module.css"
-import CustomButton from "../../UI/CustomButton/CustomButton"
 import { ButtonLink } from "../../UI/ButtonLink/ButtonLink"
 import ReservationSlotList from '../../Slots/ReservationSlotList/ReservationSlotList'
 import { useDispatch, useSelector } from 'react-redux'
 import { deleteReservation } from '../../../store/actions/reservationAction'
 
 const ReservationItem = ({ reservation }) => {
-    const dispatch = useDispatch()
-    const token = useSelector(state => state.user.token)
-    
-    const deleteReservationClick = (e) => {
-        e.preventDefault()
-
-        dispatch(deleteReservation({ token, id_reservation: reservation.id }))
-    }
-    /*
-    
-    {
-                reservation.can_user_delete 
-                ? <CustomButton type="submit" value="Удалить бронь" 
-                    onClickHook={deleteReservationClick}
-                    styleClass={styles.deleteReservationButton} />
-                : null
-            }
-    
-    */
-
-
     return (
         <div className={styles.reservationItem}>
             <div className={styles.flexWidthContainer}>

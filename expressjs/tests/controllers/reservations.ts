@@ -2,7 +2,7 @@ import { assert, should, expect } from "chai";
 import { response } from "express";
 import moment from "moment";
 import { agent as request } from "supertest";
-import { ReservationConfirmationInterface, ReservationCreateInterface } from "../../interfaces/reservations";
+import { ReservationConfirmationInterface, ReservationCreateInterface, ReservationFilterQueryInterface } from "../../interfaces/reservations";
 import { KnexConnection } from "../../knex/connections";
 
 export function ReservationsControllerTest() {
@@ -481,6 +481,188 @@ export function ReservationsControllerTest() {
                     })
 
                 expect(response.status).to.equal(404)
+            })
+        })
+
+        describe("GET /expressjs/reservations/filter/setup", function() {
+            const setupFilterLink = `/expressjs/reservations/filter/setup`
+
+            it("should be OK (Visitor)", async function() {
+                const response = await request(this.server)
+                    .get(setupFilterLink)
+                    .set({
+                        "auth-token": this.visitorToken
+                    })
+
+                expect(response.status).to.equal(200)
+
+                expect(response.body).to.haveOwnProperty("dates")
+                expect(response.body).to.haveOwnProperty("auditoriums")
+                expect(response.body).to.haveOwnProperty("plays")
+
+                expect(response.body.dates).to.haveOwnProperty("length").that.equals(0)
+                expect(response.body.auditoriums).to.haveOwnProperty("length").that.equals(0)
+                expect(response.body.plays).to.haveOwnProperty("length").that.equals(0)
+            })
+
+            it("should be OK (Admin)", async function() {
+                const response = await request(this.server)
+                    .get(setupFilterLink)
+                    .set({
+                        "auth-token": this.adminToken
+                    })
+                
+                expect(response.status).to.equal(200)
+                
+                expect(response.body).to.haveOwnProperty("dates")
+                expect(response.body).to.haveOwnProperty("auditoriums")
+                expect(response.body).to.haveOwnProperty("plays")
+
+                expect(response.body.dates).to.haveOwnProperty("length").that.equals(1)
+                expect(typeof response.body.dates[0].date).to.equal("string")
+                expect(typeof response.body.dates[0].extended_date).to.equal("string")
+
+                expect(response.body.auditoriums).to.haveOwnProperty("length").that.equals(1)
+                expect(typeof response.body.auditoriums[0].title).that.equals("string")
+
+                expect(response.body.plays).to.haveOwnProperty("length").that.equals(1)
+                expect(typeof response.body.plays[0].title).that.equals("string")
+            })
+
+            it("should be OK (Cashier)", async function() {
+                const response = await request(this.server)
+                    .get(setupFilterLink)
+                    .set({
+                        "auth-token": this.cashierToken
+                    })
+                
+                expect(response.status).to.equal(200)
+
+                expect(response.body).to.haveOwnProperty("dates")
+                expect(response.body).to.haveOwnProperty("auditoriums")
+                expect(response.body).to.haveOwnProperty("plays")
+
+                expect(response.body.dates).to.haveOwnProperty("length").that.equals(1)
+                expect(typeof response.body.dates[0].date).to.equal("string")
+                expect(typeof response.body.dates[0].extended_date).to.equal("string")
+
+                expect(response.body.auditoriums).to.haveOwnProperty("length").that.equals(1)
+                expect(typeof response.body.auditoriums[0].title).that.equals("string")
+
+                expect(response.body.plays).to.haveOwnProperty("length").that.equals(1)
+                expect(typeof response.body.plays[0].title).that.equals("string")
+            })
+            
+            it("should have status 403 FORBIDDEN (Without token)", async function() {
+                const response = await request(this.server)
+                    .get(setupFilterLink)
+
+                expect(response.status).to.equal(403)
+            })
+        })
+
+        describe("GET /expressjs/reservations/filter/", function() {
+            const filterLink = `/expressjs/reservations/filter/`
+            const dateFilterPayload: ReservationFilterQueryInterface = {
+                date: '2022-06-22',
+                auditorium_title: "undefined",
+                play_title: "undefined",
+                is_locked: "false",
+                id_reservation: "undefined",
+            }
+            const auditoriumFilterPayload: ReservationFilterQueryInterface = {
+                date: "undefined",
+                auditorium_title: "Главный зал",
+                play_title: "undefined",
+                is_locked: "false",
+                id_reservation: "undefined",
+            }
+            const playFilterPayload: ReservationFilterQueryInterface = {
+                date: "undefined",
+                auditorium_title: "undefined",
+                play_title: "Спектакль 2",
+                is_locked: "false",
+                id_reservation: "undefined",
+            }
+
+            it("should be OK (Admin user gets reservations for play payload)", async function() {
+                const link = `${filterLink}?` +  new URLSearchParams({...playFilterPayload})
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        "auth-token": this.adminToken
+                    })
+
+                expect(response.status).to.equal(200)
+                expect(response.body.length).to.equal(2)
+                expect(response.body[0]).to.haveOwnProperty("session_timestamp")
+                expect(response.body[0]).to.haveOwnProperty("auditorium_title")
+                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Спектакль 2")
+            })
+
+            it("should be OK (Admin user gets reservations for date payload)", async function() {
+                const link = `${filterLink}?` +  new URLSearchParams({...dateFilterPayload})
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        "auth-token": this.adminToken
+                    })
+
+                expect(response.status).to.equal(200)
+                expect(response.body.length).to.equal(2)
+                expect(response.body[0]).to.haveOwnProperty("session_timestamp")
+                expect(response.body[0]).to.haveOwnProperty("auditorium_title")
+                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Спектакль 2")
+            })
+
+            it("should be OK (Admin user gets reservations for auditorium payload)", async function() {
+                const link = `${filterLink}?` +  new URLSearchParams({...auditoriumFilterPayload})
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        "auth-token": this.adminToken
+                    })
+
+                expect(response.status).to.equal(200)
+                expect(response.body.length).to.equal(2)
+                expect(response.body[0]).to.haveOwnProperty("session_timestamp")
+                expect(response.body[0]).to.haveOwnProperty("auditorium_title")
+                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Спектакль 2")
+            })
+
+            it("should be OK (Cashier gets reservations for play payload)", async function() {
+                const link = `${filterLink}?` +  new URLSearchParams({...playFilterPayload})
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        "auth-token": this.cashierToken
+                    })
+
+                expect(response.status).to.equal(200)
+                expect(response.body.length).to.equal(2)
+                expect(response.body[0]).to.haveOwnProperty("session_timestamp")
+                expect(response.body[0]).to.haveOwnProperty("auditorium_title")
+                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Спектакль 2")
+            })
+
+            it("should be OK (Visitor gets empty list)", async function() {
+                const link = `${filterLink}?` +  new URLSearchParams({...playFilterPayload})
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        "auth-token": this.visitorToken
+                    })
+
+                expect(response.status).to.equal(200)
+                expect(response.body.length).to.equal(0)
+            })
+
+            it("should have status 403 FORBIDDEN (Without token)", async function() {
+                const response = await request(this.server)
+                    .get(filterLink)
+                    .send(playFilterPayload)
+
+                expect(response.status).to.equal(403)
             })
         })
 

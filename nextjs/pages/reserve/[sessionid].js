@@ -13,6 +13,7 @@ const SessionReservation = () => {
     const router = useRouter()
     const dispatch = useDispatch()
     const store = useStore()
+    let token = useSelector(state => state.user.token)
   
   
 
@@ -24,7 +25,7 @@ const SessionReservation = () => {
             }
             const { sessionid } = router.query
             if (sessionid)
-                dispatch(fetchSession(sessionid))
+                dispatch(fetchSession(token, sessionid))
                 .then(dispatch(clearSlots()))
                 .catch(() => router.push('/'))
         }  
