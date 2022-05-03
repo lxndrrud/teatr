@@ -2,6 +2,7 @@ import { app } from "../../app";
 import { PlaysControllerTests } from "./plays";
 import { ReservationsControllerTest } from "./reservations";
 import { SessionsControllerTest } from "./sessions";
+import { UsersControllerTests } from "./users";
 
 export function ControllersTests() {
     before(function() {
@@ -18,5 +19,6 @@ export function ControllersTests() {
         PlaysControllerTests()
         SessionsControllerTest()
         ReservationsControllerTest()
+        UsersControllerTests()
     })
 }

@@ -78,7 +78,6 @@ export function PlaysControllerTests () {
         describe("GET /expressjs/plays/1", function() {
             const getPlayLink = `/expressjs/plays/1`
             const failGetPlayLink = `/expressjs/plays/114`
-            const failGetPlayLinkBadRequest = `/expressjs/plays/`
             it("should be OK", async function() {
                 const response = await request(this.server)
                     .get(getPlayLink)
@@ -145,10 +144,6 @@ export function PlaysControllerTests () {
                 expect(response.status).to.equal(404)
             })
         })
-
-        
-
-        
     })
 
 }
