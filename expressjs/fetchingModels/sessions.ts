@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { Knex } from "knex";
-import { SessionDatabaseInstance } from "../dbModels/sessions";
+import { SessionModel } from "../dbModels/sessions";
 import { AuditoriumSessionFilterOption } from "../interfaces/auditoriums";
 import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { PlaySessionFilterOptionInterface } from "../interfaces/plays";
@@ -13,11 +13,33 @@ import { KnexConnection } from "../knex/connections";
 import { dateFromTimestamp, extendedDateFromTimestamp, extendedTimestamp } from "../utils/timestamp"
 
 
-class SessionFetchingModel {
+export interface SessionService {
+    fixTimestamps(query: SessionInterface[]): SessionInterface[]
+    createSession(payload: SessionBaseInterface): Promise<SessionDatabaseInterface | InnerErrorInterface>
+    updateSession(idSession: number, payload: SessionBaseInterface): Promise<InnerErrorInterface | undefined>
+    deleteSession(idSession: number): Promise<InnerErrorInterface | undefined>
+    getUnlockedSessions(): Promise<SessionInterface[] | InnerErrorInterface>
+    getSingleUnlockedSession(idSession: number): Promise<InnerErrorInterface | SessionInterface>
+    getSessionsByPlay(idPlay: number): Promise<SessionInterface[] | InnerErrorInterface>
+    getSlots(idSession: number): Promise<InnerErrorInterface | {
+        number: number;
+        title: string;
+        seats: SlotIsReservedInterface[];
+    }[]>
+    getSessionFilterOptions(): Promise<InnerErrorInterface | {
+        dates: TimestampSessionFilterOptionInterface[];
+        auditoriums: AuditoriumSessionFilterOption[];
+        plays: PlaySessionFilterOptionInterface[];
+    }>
+    getFilteredSessions(userQueryPayload: SessionFilterQueryInterface): Promise<SessionInterface[] | InnerErrorInterface>
+    getReservedSlots(idReservation: number, idPricePolicy: number): Promise<SlotInterface[] | InnerErrorInterface>
+}
+
+export class SessionFetchingModel implements SessionService {
     protected sessionDatabaseInstance 
 
-    constructor() {
-        this.sessionDatabaseInstance = SessionDatabaseInstance
+    constructor(sessionDatabaseModel: SessionModel) {
+        this.sessionDatabaseInstance = sessionDatabaseModel
     }
 
     fixTimestamps(query: SessionInterface[]) {
@@ -87,7 +109,7 @@ class SessionFetchingModel {
         }
     }
 
-    async getUnlockedSessions(): Promise<SessionInterface[] | InnerErrorInterface> {
+    async getUnlockedSessions() {
         try {
             const query: SessionInterface[] = await this.sessionDatabaseInstance.getUnlockedSessions()
             const fetchedQuery = this.fixTimestamps(query)
@@ -306,5 +328,3 @@ class SessionFetchingModel {
         }
     }
 }
-
-export const SessionFetchingInstance = new SessionFetchingModel()

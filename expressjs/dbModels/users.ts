@@ -7,6 +7,38 @@ import { DatabaseModel } from "./baseModel";
 import { userActions, users } from "./tables";
 import { UserActionBaseInterface } from "../interfaces/userActions";
 
+export interface UserModel {
+    getAll(payload: {
+        id?: number
+        email?: string
+        password?: string
+        token?: string
+        firstname?: string
+        middlename?: string
+        lastname?: string
+        id_role?: number
+    }): Knex.QueryBuilder
+
+    get(payload: {
+        id?: number
+        email?: string
+        password?: string
+        token?: string
+        firstname?: string
+        middlename?: string
+        lastname?: string
+        id_role?: number
+    }): Knex.QueryBuilder
+
+    insert(trx: Knex.Transaction, payload: UserBaseInterface): Knex.QueryBuilder
+
+    update(trx: Knex.Transaction<any, any[]>, id: number, payload: UserInterface): Knex.QueryBuilder
+
+    delete(trx: Knex.Transaction<any, any[]>, id: number): Knex.QueryBuilder
+
+    insertAction(trx: Knex.Transaction, payload: UserActionBaseInterface): Knex.QueryBuilder
+}
+
 /**
  * id
  * email
@@ -18,7 +50,7 @@ import { UserActionBaseInterface } from "../interfaces/userActions";
  * id_role
  */
 
-class UserDatabaseModel extends DatabaseModel {
+export class UserDatabaseModel extends DatabaseModel implements UserModel {
     constructor() {
         super(users)
     }
@@ -91,6 +123,3 @@ class UserDatabaseModel extends DatabaseModel {
             .returning('*')
     }
 }
-
-
-export const UserDatabaseInstance = new UserDatabaseModel()

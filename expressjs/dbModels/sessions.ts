@@ -8,6 +8,58 @@ import { getNextDayOfTimestamp } from "../utils/timestamp";
 
 
 
+export interface SessionModel {
+    getAll(payload: {
+        id?: number,
+        is_locked?: boolean,
+        max_slots?: number,
+        id_play?: number,
+        id_price_policy?: number,
+        timestamp?: string,
+    }): Knex.QueryBuilder
+
+    get(payload: {
+        id?: number,
+        is_locked?: boolean,
+        max_slots?: number,
+        id_play?: number,
+        id_price_policy?: number,
+        timestamp?: string,
+    }): Knex.QueryBuilder
+
+    insert(trx: Knex.Transaction, payload: SessionBaseInterface): Knex.QueryBuilder
+
+    update(trx: Knex.Transaction, id: number, payload: {
+        is_locked?: boolean,
+        max_slots?: number,
+        id_play?: number,
+        id_price_policy?: number,
+        timestamp?: string,
+    }): Knex.QueryBuilder
+
+    delete(trx: Knex.Transaction, id: number): Knex.QueryBuilder
+    
+    getUnlockedSessions(): Knex.QueryBuilder
+
+    getSingleUnlockedSession(idSession: number): Knex.QueryBuilder
+
+    getSessionsByPlay(idPlay: number): Knex.QueryBuilder
+
+    getRowsByPricePolicy(idPricePolicy: number): Knex.QueryBuilder
+
+    getSlotsByPricePolicy(idPricePolicy: number): Knex.QueryBuilder
+
+    getReservedSlots(idSession: number, idPricePolicy: number): Knex.QueryBuilder
+
+    getSessionFilterTimestamps(): Knex.QueryBuilder
+
+    getSessionFilterAuditoriums(): Knex.QueryBuilder
+
+    getSessionFilterPlays(): Knex.QueryBuilder
+
+    getFilteredSessions(userQueryPayload: SessionFilterQueryInterface): Knex.QueryBuilder
+}
+
 /**
  * id: number
  * is_locked: boolean
@@ -16,7 +68,7 @@ import { getNextDayOfTimestamp } from "../utils/timestamp";
  * id_price_policy: number
  * timestamp: timestamp(string)
  */
-class SessionDatabaseModel extends DatabaseModel {
+export class SessionDatabaseModel extends DatabaseModel implements SessionModel {
     constructor() {
         super(sessions)
     }
@@ -220,5 +272,3 @@ class SessionDatabaseModel extends DatabaseModel {
             })
     }
 }
-
-export const SessionDatabaseInstance = new SessionDatabaseModel()

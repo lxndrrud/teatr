@@ -4,13 +4,24 @@ import { DatabaseModel } from "./baseModel";
 import { PlayBaseInterface, PlayInterface, PlayQueryInterface } from "../interfaces/plays";
 import { images, plays, playsImages } from "./tables";
 
+export interface PlayModel {
+    getAll(payload: PlayQueryInterface): Knex.QueryBuilder
+    get(payload: PlayQueryInterface): Knex.QueryBuilder
+    insert(trx: Knex.Transaction, payload: PlayBaseInterface): Knex.QueryBuilder
+    update(trx: Knex.Transaction, id: number, payload: { title?: string, description?: string }): Knex.QueryBuilder
+    delete(trx: Knex.Transaction, id: number): Knex.QueryBuilder
+    getAllWithPoster(payload: PlayQueryInterface): Knex.QueryBuilder
+    getSingleWithPoster(payload: PlayQueryInterface): Knex.QueryBuilder
+}
+
+
 /**
  * Play 
  * id: number
  * title: string
  * description: string
  */
-class PlayDatabaseModel extends DatabaseModel {
+export class PlayDatabaseModel extends DatabaseModel implements PlayModel {
     constructor() {
         super(plays)
     }
@@ -68,5 +79,3 @@ class PlayDatabaseModel extends DatabaseModel {
         return this.getAllWithPoster(payload).first()
     }
 }
-
-export const PlayDatabaseInstance = new PlayDatabaseModel()

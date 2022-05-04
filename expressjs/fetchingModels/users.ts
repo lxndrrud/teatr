@@ -1,22 +1,34 @@
 import { Knex } from "knex";
 import { KnexConnection } from "../knex/connections";
-import { UserDatabaseInstance } from "../dbModels/users";
+import { UserModel } from "../dbModels/users";
 import { hash, compareSync } from 'bcryptjs';
 import { sign } from 'jsonwebtoken'
 import { UserBaseInterface, UserInterface, UserLoginInterface, UserRegisterInterface, UserRequestOption } from "../interfaces/users";
-import { RoleFetchingInstance } from "./roles";
+import { RoleService } from "./roles";
 import { users } from "../dbModels/tables";
 import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { RoleDatabaseInterface } from "../interfaces/roles";
 import { UserActionBaseInterface } from "../interfaces/userActions";
 
-class UserFetchingModel {
+
+export interface UserService {
+    generateToken (trx: Knex.Transaction, user: UserInterface): Knex.QueryBuilder
+    createUser(payload: UserRegisterInterface): Promise<InnerErrorInterface | UserInterface>
+    loginUser(payload: UserLoginInterface): Promise<string | InnerErrorInterface>
+    getAll(): Promise<UserInterface[] | InnerErrorInterface>
+    createAction(
+        trx: Knex.Transaction, 
+        idUser: number, 
+        userRole: RoleDatabaseInterface, 
+        description: string): Promise<InnerErrorInterface | undefined>
+}
+export class UserFetchingModel implements UserService {
     protected userDatabaseInstance
     protected roleFetchingInstance
 
-    constructor() {
-        this.userDatabaseInstance = UserDatabaseInstance
-        this.roleFetchingInstance = RoleFetchingInstance
+    constructor(userDatabaseModel: UserModel, roleServiceInstance: RoleService) {
+        this.userDatabaseInstance = userDatabaseModel
+        this.roleFetchingInstance = roleServiceInstance
     }
 
     generateToken (trx: Knex.Transaction, user: UserInterface) {
@@ -41,8 +53,6 @@ class UserFetchingModel {
             })
             .returning('*')
     }
-
-
 
     async createUser(payload: UserRegisterInterface) {
         // Проверка на существующего пользователя
@@ -145,7 +155,4 @@ class UserFetchingModel {
             }
         }
     }
-
 }
-
-export const UserFetchingInstance = new UserFetchingModel()

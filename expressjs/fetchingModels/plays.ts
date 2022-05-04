@@ -1,14 +1,22 @@
 import { Knex } from "knex";
 import { KnexConnection } from "../knex/connections";
-import { PlayDatabaseInstance } from "../dbModels/plays";
+import { PlayModel } from "../dbModels/plays";
 import { PlayBaseInterface, PlayInterface, PlayWithPosterInterface } from "../interfaces/plays";
 import { InnerErrorInterface } from "../interfaces/errors";
 
-class PlayFetchingModel {
+export interface PlayService {
+    getAll(): Promise<PlayWithPosterInterface[] | InnerErrorInterface>
+    getSinglePlay(idPlay: number): Promise<InnerErrorInterface | PlayWithPosterInterface>
+    createPlay(payload: PlayBaseInterface): Promise<PlayInterface | InnerErrorInterface>
+    updatePlay(idPlay: number, payload: PlayBaseInterface): Promise<InnerErrorInterface | undefined>
+    deletePlay(idPlay: number): Promise<InnerErrorInterface | undefined>
+}
+
+export class PlayFetchingModel implements PlayService {
     protected playDatabaseInstance
 
-    constructor() {
-        this.playDatabaseInstance = PlayDatabaseInstance
+    constructor(playModelInstance: PlayModel) {
+        this.playDatabaseInstance = playModelInstance
     }
 
     async getAll() {
@@ -99,5 +107,3 @@ class PlayFetchingModel {
         }
     }
 }
-
-export const PlayFetchingInstance = new PlayFetchingModel()

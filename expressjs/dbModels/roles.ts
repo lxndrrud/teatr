@@ -3,6 +3,46 @@ import { DatabaseModel } from "./baseModel";
 import { KnexConnection } from "../knex/connections";
 import { roles, users } from "./tables";
 
+export interface RoleModel {
+    getAll(payload: {
+        id?: number 
+        title?: string,
+        can_see_all_reservations?: boolean,
+        can_have_more_than_one_reservation_on_session?: boolean,
+        can_access_private?: boolean,
+        can_make_reservation_without_confirmation?: boolean
+    }): Knex.QueryBuilder
+
+    get(payload: {
+        id?: number 
+        title?: string,
+        can_see_all_reservations?: boolean,
+        can_have_more_than_one_reservation_on_session?: boolean,
+        can_access_private?: boolean,
+        can_make_reservation_without_confirmation?: boolean
+    }): Knex.QueryBuilder
+
+    insert(trx: Knex.Transaction, payload: {
+        title: string,
+        can_see_all_reservations: boolean,
+        can_have_more_than_one_reservation_on_session: boolean,
+        can_access_private: boolean,
+        can_make_reservation_without_confirmation: boolean
+    }): Knex.QueryBuilder
+
+    update(trx: Knex.Transaction, id: number, payload: {
+        title?: string,
+        can_see_all_reservations?: boolean,
+        can_have_more_than_one_reservation_on_session?: boolean,
+        can_access_private?: boolean,
+        can_make_reservation_without_confirmation?: boolean
+    }): Knex.QueryBuilder
+
+    delete(trx: Knex.Transaction, id: number): Knex.QueryBuilder
+
+    getUserRole(idUser: number, idRole: number): Knex.QueryBuilder
+}
+
 /**
  * Role
  * id: number 
@@ -12,7 +52,7 @@ import { roles, users } from "./tables";
  * can_access_private: boolean,
  * can_make_reservation_without_confirmation: boolean
  */
-class RoleDatabaseModel extends DatabaseModel {
+export class RoleDatabaseModel extends DatabaseModel implements RoleModel {
     constructor() {
         super(roles)
     }
@@ -95,5 +135,3 @@ class RoleDatabaseModel extends DatabaseModel {
             .join(users, `${users}.id_role`, `${roles}.id`)
     }
 }
-
-export const RoleDatabaseInstance = new RoleDatabaseModel()

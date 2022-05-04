@@ -1,15 +1,24 @@
 import { Knex } from "knex";
-import { RoleDatabaseInstance } from "../dbModels/roles";
+import { RoleModel } from "../dbModels/roles";
 import { InnerErrorInterface } from "../interfaces/errors";
 import { RoleDatabaseInterface } from "../interfaces/roles";
 
 
+export interface RoleService {
+    getRoleByTitle (title: string): Promise<RoleDatabaseInterface>
+    getAdminRole(): Promise<RoleDatabaseInterface | InnerErrorInterface>
+    getVisitorRole(): Promise<RoleDatabaseInterface | InnerErrorInterface>
+    getCashierRole(): Promise<RoleDatabaseInterface | InnerErrorInterface>
+    getUserRole (idUser: number, idRole: number): Promise<InnerErrorInterface | RoleDatabaseInterface>
 
-class RoleFetchingModel {
+}
+
+
+export class RoleFetchingModel implements RoleService {
     protected roleDatabaseInstance
 
-    constructor() {
-        this.roleDatabaseInstance = RoleDatabaseInstance
+    constructor(roleDatabaseModel: RoleModel) {
+        this.roleDatabaseInstance = roleDatabaseModel
     }
     
     getRoleByTitle (title: string): Promise<RoleDatabaseInterface> {
@@ -31,7 +40,7 @@ class RoleFetchingModel {
         }
     }
 
-    async getVisitorRole () {
+    async getVisitorRole() {
         try {
             const query = await this.getRoleByTitle('Посетитель')
             return query
@@ -44,7 +53,7 @@ class RoleFetchingModel {
         }
     } 
 
-    async getCashierRole () {
+    async getCashierRole() {
         try {
             const query = await this.getRoleByTitle('Кассир')
             return query
@@ -57,7 +66,7 @@ class RoleFetchingModel {
         }
     }
 
-    async getUserRole (idUser: number, idRole: number): Promise<RoleDatabaseInterface | InnerErrorInterface> {
+    async getUserRole (idUser: number, idRole: number) {
         try {
             const query: RoleDatabaseInterface = await this.roleDatabaseInstance
                 .getUserRole(idUser, idRole)
@@ -79,5 +88,3 @@ class RoleFetchingModel {
     }
     
 }
-
-export const RoleFetchingInstance = new RoleFetchingModel()

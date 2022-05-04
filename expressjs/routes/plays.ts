@@ -1,12 +1,15 @@
-import { deletePlay, getPlays, getSinglePlay, createPlay, updatePlay } from "../controllers/plays";
+import { PlayController } from "../controllers/plays";
 import { Router } from "express";
+import { PlayFetchingModel } from "../fetchingModels/plays";
+import { PlayDatabaseModel } from "../dbModels/plays";
 
 export const playsRouter = Router()
+const playController = new PlayController(new PlayFetchingModel(new PlayDatabaseModel))
 
 playsRouter.route('/')
-    .get(getPlays)
-    .post(createPlay)
+    .get(playController.getPlays)
+    .post(playController.createPlay)
 playsRouter.route('/:idPlay')
-    .get(getSinglePlay)
-    .put(updatePlay)
-    .delete(deletePlay)
+    .get(playController.getSinglePlay)
+    .put(playController.updatePlay)
+    .delete(playController.deletePlay)
