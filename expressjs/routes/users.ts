@@ -9,9 +9,10 @@ import { RoleDatabaseModel } from "../dbModels/roles";
 export const usersRouter = Router()
 const userController = new UserController(new UserFetchingModel(
     new UserDatabaseModel(), 
-    new RoleFetchingModel(new RoleDatabaseModel())))
+    new RoleFetchingModel(new RoleDatabaseModel())
+))
 
 usersRouter.route('/')
-    .get(basicAuthMiddleware, userController.getAllUsers)
-    .post(userController.registerUser)
-usersRouter.post('/login', userController.loginUser)
+    .get(basicAuthMiddleware, userController.getAllUsers.bind(userController))
+    .post(userController.registerUser.bind(userController))
+usersRouter.post('/login', userController.loginUser.bind(userController))

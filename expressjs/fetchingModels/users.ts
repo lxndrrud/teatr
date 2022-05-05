@@ -22,6 +22,7 @@ export interface UserService {
         userRole: RoleDatabaseInterface, 
         description: string): Promise<InnerErrorInterface | undefined>
 }
+
 export class UserFetchingModel implements UserService {
     protected userDatabaseInstance
     protected roleFetchingInstance

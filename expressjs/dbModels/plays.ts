@@ -5,13 +5,13 @@ import { PlayBaseInterface, PlayInterface, PlayQueryInterface } from "../interfa
 import { images, plays, playsImages } from "./tables";
 
 export interface PlayModel {
-    getAll(payload: PlayQueryInterface): Knex.QueryBuilder
-    get(payload: PlayQueryInterface): Knex.QueryBuilder
-    insert(trx: Knex.Transaction, payload: PlayBaseInterface): Knex.QueryBuilder
-    update(trx: Knex.Transaction, id: number, payload: { title?: string, description?: string }): Knex.QueryBuilder
-    delete(trx: Knex.Transaction, id: number): Knex.QueryBuilder
-    getAllWithPoster(payload: PlayQueryInterface): Knex.QueryBuilder
-    getSingleWithPoster(payload: PlayQueryInterface): Knex.QueryBuilder
+    getAll(payload: PlayQueryInterface): any
+    get(payload: PlayQueryInterface): any
+    insert(trx: Knex.Transaction, payload: PlayBaseInterface): any
+    update(trx: Knex.Transaction, id: number, payload: { title?: string, description?: string }): any
+    delete(trx: Knex.Transaction, id: number): any
+    getAllWithPoster(payload: PlayQueryInterface): any
+    getSingleWithPoster(payload: PlayQueryInterface): any
 }
 
 

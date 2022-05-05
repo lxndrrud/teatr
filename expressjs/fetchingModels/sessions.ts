@@ -14,7 +14,6 @@ import { dateFromTimestamp, extendedDateFromTimestamp, extendedTimestamp } from 
 
 
 export interface SessionService {
-    fixTimestamps(query: SessionInterface[]): SessionInterface[]
     createSession(payload: SessionBaseInterface): Promise<SessionDatabaseInterface | InnerErrorInterface>
     updateSession(idSession: number, payload: SessionBaseInterface): Promise<InnerErrorInterface | undefined>
     deleteSession(idSession: number): Promise<InnerErrorInterface | undefined>
@@ -42,14 +41,14 @@ export class SessionFetchingModel implements SessionService {
         this.sessionDatabaseInstance = sessionDatabaseModel
     }
 
-    fixTimestamps(query: SessionInterface[]) {
+    private fixTimestamps(query: SessionInterface[]) {
         for (let session of query) {
             session.timestamp = extendedTimestamp(session.timestamp)
         }
         return query
     }
 
-    async createSession(payload: SessionBaseInterface) {
+    public async createSession(payload: SessionBaseInterface) {
         const trx = await KnexConnection.transaction()
         try {
             const newSession: SessionDatabaseInterface = (await this.sessionDatabaseInstance.insert(trx, payload))[0]
@@ -64,7 +63,7 @@ export class SessionFetchingModel implements SessionService {
         }
     }
 
-    async updateSession(idSession: number, payload: SessionBaseInterface) {
+    public async updateSession(idSession: number, payload: SessionBaseInterface) {
         const query = await this.sessionDatabaseInstance.get({ id: idSession })
         if (!query) { 
             return <InnerErrorInterface>{
@@ -87,7 +86,7 @@ export class SessionFetchingModel implements SessionService {
         }
     }
 
-    async deleteSession(idSession: number) {
+    public async deleteSession(idSession: number) {
         const query = await this.sessionDatabaseInstance.get({id: idSession})
         if (!query) {
             return <InnerErrorInterface>{
@@ -109,7 +108,7 @@ export class SessionFetchingModel implements SessionService {
         }
     }
 
-    async getUnlockedSessions() {
+    public async getUnlockedSessions() {
         try {
             const query: SessionInterface[] = await this.sessionDatabaseInstance.getUnlockedSessions()
             const fetchedQuery = this.fixTimestamps(query)
@@ -123,7 +122,7 @@ export class SessionFetchingModel implements SessionService {
         }
     }
 
-    async getSingleUnlockedSession(idSession: number) {
+    public async getSingleUnlockedSession(idSession: number) {
         try {
             const query: SessionInterface | undefined = await this.sessionDatabaseInstance.getSingleUnlockedSession(idSession)
             if (!query) {
@@ -143,7 +142,7 @@ export class SessionFetchingModel implements SessionService {
         }
     }
 
-    async getSessionsByPlay(idPlay: number) {
+    public async getSessionsByPlay(idPlay: number) {
         try {
             const query: SessionInterface[] = await this.sessionDatabaseInstance
                 .getSessionsByPlay(idPlay)
@@ -260,7 +259,7 @@ export class SessionFetchingModel implements SessionService {
         return resultList
     }
 
-    async getSessionFilterOptions() {
+    public async getSessionFilterOptions() {
         let timestamps: TimestampSessionFilterOptionDatabaseInterface[],
             auditoriums: AuditoriumSessionFilterOption[],
             plays: PlaySessionFilterOptionInterface[]
@@ -299,7 +298,7 @@ export class SessionFetchingModel implements SessionService {
         }
     }
 
-    async getFilteredSessions(userQueryPayload: SessionFilterQueryInterface) {
+    public async getFilteredSessions(userQueryPayload: SessionFilterQueryInterface) {
         try {
             const query: SessionInterface[] = await this.sessionDatabaseInstance
                 .getFilteredSessions(userQueryPayload)
@@ -315,7 +314,7 @@ export class SessionFetchingModel implements SessionService {
         
     }
 
-    async getReservedSlots(idReservation: number, idPricePolicy: number) {
+    public async getReservedSlots(idReservation: number, idPricePolicy: number) {
         try {
             const query: SlotInterface[] = await this.sessionDatabaseInstance
                 .getReservedSlots(idReservation, idPricePolicy)

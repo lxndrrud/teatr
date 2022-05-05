@@ -1,6 +1,6 @@
 import { KnexConnection } from "../knex/connections";
-import { ReservationDatabaseInstance } from "../dbModels/reservations";
-import { RoleFetchingInstance } from "./roles";
+import { ReservationModel } from "../dbModels/reservations";
+import { RoleService } from "./roles";
 import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { ReservationCreateInterface, ReservationInterface, ReservationWithoutSlotsInterface,
     ReservationDatabaseInterface, ReservationBaseInterface,
@@ -11,7 +11,7 @@ import { SlotInterface, ReservationsSlotsBaseInterface,
     ReservationsSlotsInterface} from "../interfaces/slots";
 import { RoleDatabaseInterface } from '../interfaces/roles'
 import { extendedTimestamp } from "../utils/timestamp"
-import { SessionFetchingInstance } from "./sessions";
+import { SessionService } from "./sessions";
 import { generateCode } from "../utils/code"
 import { sendMail } from "../utils/email"
 import { UserRequestOption } from "../interfaces/users";
@@ -19,42 +19,78 @@ import { TimestampReservationFilterOptionDatabaseInterface, TimestampReservation
 import { AuditoriumReservationFilterOption } from "../interfaces/auditoriums";
 import { PlayReservationFilterOptionInterface } from "../interfaces/plays";
 import { dateFromTimestamp, extendedDateFromTimestamp } from "../utils/timestamp"
-import { UserFetchingInstance } from "./users";
+import { UserService } from "./users";
 
+export interface ReservationService {
+    getAllFullInfo(): Promise<ReservationInterface[] | InnerErrorInterface>
 
-class ReservationFetchingModel {
-    protected reservationDatabaseInstance
-    protected roleFetchingInstance
-    protected sessionFetchingInstance
-    protected userFetchingInstance
+    getSingleFullInfo(idUser: number, idRole: number, idReservation: number): Promise<InnerErrorInterface | ReservationInterface>
 
-    constructor() {
-        this.reservationDatabaseInstance = ReservationDatabaseInstance
-        this.roleFetchingInstance = RoleFetchingInstance
-        this.sessionFetchingInstance = SessionFetchingInstance
-        this.userFetchingInstance = UserFetchingInstance
+    createReservation(user: UserRequestOption, requestBody: ReservationCreateInterface): Promise<InnerErrorInterface | {
+        id: number;
+        id_session: number;
+        need_confirmation: boolean;
+    }>
+
+    confirmReservation(user: UserRequestOption, idReservation: number, 
+        requestBody: ReservationConfirmationInterface): Promise<InnerErrorInterface | undefined>
+
+    paymentForReservation(user: UserRequestOption, idReservation: number): Promise<InnerErrorInterface | undefined>
+
+    getReservations(user: UserRequestOption): Promise<InnerErrorInterface | ReservationInterface[]>
+
+    deleteReservation(user: UserRequestOption, idReservation: number): Promise<InnerErrorInterface | undefined>
+
+    getReservationFilterOptions(user: UserRequestOption): Promise<InnerErrorInterface | {
+        dates: TimestampReservationFilterOptionInterface[];
+        auditoriums: AuditoriumReservationFilterOption[];
+        plays: PlayReservationFilterOptionInterface[];
+    }>
+
+    getFilteredReservations(userQuery: ReservationFilterQueryInterface, user: UserRequestOption): Promise<InnerErrorInterface | ReservationInterface[]>
+}
+
+export class ReservationFetchingModel implements ReservationService {
+    protected reservationModel
+    protected roleService
+    protected sessionService
+    protected userService 
+
+    constructor(
+            reservationDatabaseInstance: ReservationModel,
+            roleServiceInstance: RoleService,
+            sessionServiceInstance: SessionService,
+            userServiceInstance: UserService
+        ) {
+        this.reservationModel = reservationDatabaseInstance
+        this.roleService = roleServiceInstance
+        this.sessionService = sessionServiceInstance
+        this.userService = userServiceInstance
     }
 
     async getAllFullInfo() {
         try {
-            const query: ReservationInterface[] = await this.reservationDatabaseInstance
+            const query: ReservationInterface[] = await this.reservationModel
                 .getAllFullInfo()
             return query
         } catch (e) {
-            return 500
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске броней!'
+            }
         }
     }
 
     async getSingleFullInfo(idUser: number, idRole: number, idReservation: number) {
         // Проверка-получение роли
-        let userRole = await this.roleFetchingInstance
+        let userRole = await this.roleService
             .getUserRole(idUser, idRole)
         if (isInnerErrorInterface(userRole)) {
             return userRole
         }
         
         // Проверка наличия записи в базе данных
-        const reservationQuery: ReservationInterface | undefined = await this.reservationDatabaseInstance
+        const reservationQuery: ReservationInterface | undefined = await this.reservationModel
             .getSingleFullInfo(idReservation)
         if (!reservationQuery) {
             return <InnerErrorInterface>{
@@ -92,14 +128,14 @@ class ReservationFetchingModel {
      */
     async createReservation(user: UserRequestOption, requestBody: ReservationCreateInterface) {
         // Получение роли из БД
-        let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
+        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
         
         if (isInnerErrorInterface(userRole)) {
             return userRole
         }
 
         // Проверка наличия сеанса
-        const sessionQuery = await this.sessionFetchingInstance
+        const sessionQuery = await this.sessionService
             .getSingleUnlockedSession(requestBody.id_session)
 
         if (isInnerErrorInterface(sessionQuery)) {
@@ -138,7 +174,7 @@ class ReservationFetchingModel {
         
 
         // Проверка на коллизию выбранных слотов и уже забронированных мест
-        const reservedSlotsQuery = await this.sessionFetchingInstance
+        const reservedSlotsQuery = await this.sessionService
             .getReservedSlots(sessionQuery.id, sessionQuery.id_price_policy)
 
         if (isInnerErrorInterface(reservedSlotsQuery)) {
@@ -186,7 +222,7 @@ class ReservationFetchingModel {
         }
 
         try {
-            reservation = (await this.reservationDatabaseInstance
+            reservation = (await this.reservationModel
                 .insert(trx, reservationPayload))[0]
         } catch(e) {
             console.log(e)
@@ -207,7 +243,7 @@ class ReservationFetchingModel {
             slots.push(item)
         }
         try {
-            await this.reservationDatabaseInstance.insertReservationsSlotsList(trx, slots)
+            await this.reservationModel.insertReservationsSlotsList(trx, slots)
         } catch (e) {
             console.log(e)
             await trx.rollback()
@@ -220,7 +256,7 @@ class ReservationFetchingModel {
         // Создание записи действия для оператора
         if (userRole.can_see_all_reservations) {
             const actionDescription = `Создание брони ${reservation.id}`
-            const response = await this.userFetchingInstance
+            const response = await this.userService
                 .createAction(trx, user.id, userRole, actionDescription)
             if (isInnerErrorInterface(response)) {
                 return response
@@ -248,7 +284,7 @@ class ReservationFetchingModel {
     async confirmReservation(user: UserRequestOption, idReservation: number, 
         requestBody: ReservationConfirmationInterface) {
         // Получение роли из БД
-        let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
+        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
         
         if (isInnerErrorInterface(userRole)) {
             return userRole
@@ -258,7 +294,7 @@ class ReservationFetchingModel {
         let reservation: ReservationWithoutSlotsInterface | undefined
 
         try {
-            reservation = await this.reservationDatabaseInstance.getSingleFullInfo(idReservation)
+            reservation = await this.reservationModel.getSingleFullInfo(idReservation)
         } catch (e) {
             return <InnerErrorInterface>{
                 code: 500,
@@ -295,7 +331,7 @@ class ReservationFetchingModel {
         // Создание записи действия для оператора
         if (userRole.can_see_all_reservations) {
             const actionDescription = `Подтверждение брони Res:${reservation.id}`
-            const response = await this.userFetchingInstance
+            const response = await this.userService
                 .createAction(trx, user.id, userRole, actionDescription)
             if (isInnerErrorInterface(response)) {
                 return response
@@ -303,7 +339,7 @@ class ReservationFetchingModel {
         }
 
         try {
-            await this.reservationDatabaseInstance.update(trx, reservation.id, {
+            await this.reservationModel.update(trx, reservation.id, {
                 is_confirmed: true
             })
             await trx.commit()
@@ -322,7 +358,7 @@ class ReservationFetchingModel {
      */
     async paymentForReservation(user: UserRequestOption, idReservation: number) {
         // Получение роли из БД
-        let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
+        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
         
         if (isInnerErrorInterface(userRole)) {
             return userRole
@@ -332,7 +368,7 @@ class ReservationFetchingModel {
         let reservation: ReservationWithoutSlotsInterface | undefined
 
         try {
-            reservation = await this.reservationDatabaseInstance.getSingleFullInfo(idReservation)
+            reservation = await this.reservationModel.getSingleFullInfo(idReservation)
         } catch (e) {
             return <InnerErrorInterface>{
                 code: 500,
@@ -361,7 +397,7 @@ class ReservationFetchingModel {
         // Создание записи действия для оператора
         if (userRole.can_see_all_reservations) {
             const actionDescription = `Изменение флага оплаты на ${!reservation.is_paid}`
-            const response = await this.userFetchingInstance
+            const response = await this.userService
                 .createAction(trx, user.id, userRole, actionDescription)
             if (isInnerErrorInterface(response)) {
                 return response
@@ -369,7 +405,7 @@ class ReservationFetchingModel {
         }
 
         try {
-            await this.reservationDatabaseInstance.update(trx, reservation.id, {
+            await this.reservationModel.update(trx, reservation.id, {
                 is_paid: !reservation.is_paid,
                 is_confirmed: true
             })
@@ -389,7 +425,7 @@ class ReservationFetchingModel {
      */
     async getReservations(user: UserRequestOption) {
         // Проверка-получение роли
-        let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
+        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
         
         if (isInnerErrorInterface(userRole)) {
             return userRole
@@ -399,9 +435,9 @@ class ReservationFetchingModel {
             // В зависимости от роли выдать либо все брони, либо только на пользователя
             let reservationsQuery: ReservationWithoutSlotsInterface[]
             if (!userRole.can_see_all_reservations)
-                reservationsQuery = await this.reservationDatabaseInstance.getUserReservations(user.id)
+                reservationsQuery = await this.reservationModel.getUserReservations(user.id)
             else
-                reservationsQuery = await this.reservationDatabaseInstance.getAllFullInfo()
+                reservationsQuery = await this.reservationModel.getAllFullInfo()
             
             // Отредактировать результирующий список
             const result = await this.fetchReservations(user.id, userRole, reservationsQuery)
@@ -421,7 +457,7 @@ class ReservationFetchingModel {
      */
     async deleteReservation(user: UserRequestOption, idReservation: number) {
         // Проверка-получение роли
-        let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
+        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
         
         if (isInnerErrorInterface(userRole)) {
             return userRole
@@ -431,7 +467,7 @@ class ReservationFetchingModel {
         let reservation: ReservationWithoutSlotsInterface | undefined
 
         try {
-            reservation = await this.reservationDatabaseInstance.getSingleFullInfo(idReservation)
+            reservation = await this.reservationModel.getSingleFullInfo(idReservation)
         } catch (e) {
             return <InnerErrorInterface>{
                 code: 500,
@@ -462,7 +498,7 @@ class ReservationFetchingModel {
             // Поиск зарезервированных мест
             let slots: SlotInterface[]
             try {
-                slots = await this.reservationDatabaseInstance.getReservedSlots(reservation.id)
+                slots = await this.reservationModel.getReservedSlots(reservation.id)
             } catch (e) {
                 return <InnerErrorInterface>{
                     code: 500,
@@ -479,7 +515,7 @@ class ReservationFetchingModel {
             ResUser: ${reservation.id_user},
             Session: ${reservation.id_session},
             Slots: ${idsSlots}`
-            const response = await this.userFetchingInstance
+            const response = await this.userService
                 .createAction(trx, user.id, userRole, actionDescription)
             if (isInnerErrorInterface(response)) {
                 return response
@@ -487,8 +523,8 @@ class ReservationFetchingModel {
         }
 
         try {
-            await this.reservationDatabaseInstance.deleteReservationsSlots(trx, idReservation)
-            await this.reservationDatabaseInstance.delete(trx, idReservation)
+            await this.reservationModel.deleteReservationsSlots(trx, idReservation)
+            await this.reservationModel.delete(trx, idReservation)
             await trx.commit()
         } catch (e) {
             console.log(e)
@@ -505,7 +541,7 @@ class ReservationFetchingModel {
      */
     async getReservationFilterOptions(user: UserRequestOption) {
         // Проверка-получение роли
-        let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
+        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
         
         if (isInnerErrorInterface(userRole)) {
             return userRole
@@ -519,15 +555,15 @@ class ReservationFetchingModel {
         try {
             if (userRole.can_see_all_reservations)
                 [timestamps, auditoriums, plays] = await Promise.all([
-                    this.reservationDatabaseInstance.getTimestampsOptionsForReservationFilter(),
-                    this.reservationDatabaseInstance.getAuditoriumsOptionsForReservationFilter(),
-                    this.reservationDatabaseInstance.getPlaysOptionsForReservationFilter()
+                    this.reservationModel.getTimestampsOptionsForReservationFilter(undefined),
+                    this.reservationModel.getAuditoriumsOptionsForReservationFilter(undefined),
+                    this.reservationModel.getPlaysOptionsForReservationFilter(undefined)
                 ])
             else 
                 [timestamps, auditoriums, plays] = await Promise.all([
-                    this.reservationDatabaseInstance.getTimestampsOptionsForReservationFilter(user.id),
-                    this.reservationDatabaseInstance.getAuditoriumsOptionsForReservationFilter(user.id),
-                    this.reservationDatabaseInstance.getPlaysOptionsForReservationFilter(user.id)
+                    this.reservationModel.getTimestampsOptionsForReservationFilter(user.id),
+                    this.reservationModel.getAuditoriumsOptionsForReservationFilter(user.id),
+                    this.reservationModel.getPlaysOptionsForReservationFilter(user.id)
                 ])
                 
         } catch (e) {
@@ -563,7 +599,7 @@ class ReservationFetchingModel {
      */
     async getFilteredReservations(userQuery: ReservationFilterQueryInterface, user: UserRequestOption) {
         // Проверка-получение роли
-        let userRole = await this.roleFetchingInstance.getUserRole(user.id, user.id_role)
+        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
         
         if (isInnerErrorInterface(userRole)) {
             return userRole
@@ -574,10 +610,10 @@ class ReservationFetchingModel {
             // либо часть пользовательских броней
             let query: ReservationWithoutSlotsInterface[]
             if (!userRole.can_see_all_reservations)
-                query = await this.reservationDatabaseInstance
+                query = await this.reservationModel
                     .getFilteredReservationsForUser(userQuery, user.id)
             else 
-                query = await this.reservationDatabaseInstance
+                query = await this.reservationModel
                     .getFilteredReservations(userQuery)
 
             // Отредактировать результирующий список
@@ -596,7 +632,7 @@ class ReservationFetchingModel {
     /**
      * * Расчет стоимости брони
      */
-    calculateReservationTotalCost (slots: SlotInterface[]) {
+    private calculateReservationTotalCost(slots: SlotInterface[]) {
         let totalCost = 0
         for (let slot of slots) {
             totalCost += slot.price
@@ -607,7 +643,7 @@ class ReservationFetchingModel {
     /**
      * * Вывести полную информацию о бронях с необходимым редактированием
      */
-    async fetchReservations(idUser: number, userRole: RoleDatabaseInterface, reservations: ReservationWithoutSlotsInterface[]): Promise<ReservationInterface[] | InnerErrorInterface> {
+    private async fetchReservations(idUser: number, userRole: RoleDatabaseInterface, reservations: ReservationWithoutSlotsInterface[]): Promise<ReservationInterface[] | InnerErrorInterface> {
         let result: ReservationInterface[] = []  
         for (let reservation of reservations) {
             // Редактирование формата timestamp`ов
@@ -620,7 +656,7 @@ class ReservationFetchingModel {
             // Поиск зарезервированных мест
             let slots: SlotInterface[]
             try {
-                slots = await this.reservationDatabaseInstance.getReservedSlots(reservation.id)
+                slots = await this.reservationModel.getReservedSlots(reservation.id)
             } catch (e) {
                 return <InnerErrorInterface>{
                     code: 500,
@@ -653,8 +689,8 @@ class ReservationFetchingModel {
     /**
      * * Проверка наличия у пользователя броней на сеанс
      */
-    async checkUserHasReservedSession (idUser: number, idSession: number): Promise<boolean> {
-        const query = await this.reservationDatabaseInstance.getAll({
+    private async checkUserHasReservedSession (idUser: number, idSession: number): Promise<boolean> {
+        const query = await this.reservationModel.getAll({
             id_user: idUser,
             id_session: idSession
         })
@@ -662,20 +698,18 @@ class ReservationFetchingModel {
         return false
     }
 
-    canUserDelete(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
+    private canUserDelete(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
         return (reservation.id_user === idUser && !reservation.session_is_locked)
         || (userRole.can_see_all_reservations && userRole.can_access_private)
     }
 
-    canUserConfirm(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
+    private canUserConfirm(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
         return reservation.id_user === idUser && !reservation.session_is_locked 
             && !reservation.is_confirmed
     }
 
-    canUserPay(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
+    private canUserPay(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
         return userRole.can_see_all_reservations 
             && !reservation.is_paid && !reservation.session_is_locked
     }
 }
-
-export const ReservationFetchingInstance = new ReservationFetchingModel()

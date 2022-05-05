@@ -8,6 +8,50 @@ import { ReservationBaseInterface, ReservationDatabaseInterface,
 import { ReservationsSlotsBaseInterface } from "../interfaces/slots"
 import { getNextDayOfTimestamp } from "../utils/timestamp"
 
+export interface ReservationModel {
+    getAll(payload: {
+        id?: number
+        created_at?: string 
+        is_paid?: boolean
+        is_confirmed?: boolean
+        confirmation_code?: string
+        id_session?: number
+        id_user?: number
+    }): Knex.QueryBuilder
+    get(payload: {
+        id?: number
+        created_at?: string 
+        is_paid?: boolean
+        is_confirmed?: boolean
+        confirmation_code?: string
+        id_session?: number
+        id_user?: number
+    }): Knex.QueryBuilder
+    insert(trx: Knex.Transaction<any, any[]>, payload: ReservationBaseInterface): Knex.QueryBuilder
+    update(trx: Knex.Transaction<any, any[]>, id: number, payload: {
+        id?: number
+        created_at?: string 
+        is_paid?: boolean
+        is_confirmed?: boolean
+        confirmation_code?: string
+        id_session?: number
+        id_user?: number
+    }): Knex.QueryBuilder
+    delete(trx: Knex.Transaction<any, any[]>, id: number): Knex.QueryBuilder
+    getAllFullInfo(): Knex.QueryBuilder
+    getSingleFullInfo(idReservation: number): Knex.QueryBuilder
+    getUserReservations (idUser: number): Knex.QueryBuilder
+    getReservedSlots (idReservation: number): Knex.QueryBuilder
+    insertReservationsSlotsList(trx: Knex.Transaction, payloadList: ReservationsSlotsBaseInterface[]): Knex.QueryBuilder
+    deleteReservationsSlots(trx: Knex.Transaction, idReservation: number): Knex.QueryBuilder
+    getTimestampsOptionsForReservationFilter(idUser: number | undefined): Knex.QueryBuilder
+    getAuditoriumsOptionsForReservationFilter(idUser: number | undefined): Knex.QueryBuilder
+    getPlaysOptionsForReservationFilter(idUser: number | undefined): Knex.QueryBuilder
+    getFilteredReservations(userQuery: ReservationFilterQueryInterface): Knex.QueryBuilder
+    getFilteredReservationsForUser(userQuery: ReservationFilterQueryInterface, idUser: number): Knex.QueryBuilder
+}
+
+
 /**
  * id
  * created_at
@@ -17,7 +61,7 @@ import { getNextDayOfTimestamp } from "../utils/timestamp"
  * id_session
  * id_user
  */
-class ReservationDatabaseModel extends DatabaseModel {
+export class ReservationDatabaseModel extends DatabaseModel implements ReservationModel {
     constructor() {
         super(reservations)
     }
@@ -166,7 +210,7 @@ class ReservationDatabaseModel extends DatabaseModel {
     }
 
 
-    getTimestampsOptionsForReservationFilter(idUser: number | undefined = undefined) {
+    getTimestampsOptionsForReservationFilter(idUser: number | undefined) {
         return KnexConnection(`${reservations} as r`)
             .select(
                 KnexConnection.ref('timestamp').withSchema('s').as('timestamp')
@@ -181,7 +225,7 @@ class ReservationDatabaseModel extends DatabaseModel {
             .distinct()
     }
 
-    getAuditoriumsOptionsForReservationFilter(idUser: number | undefined = undefined) {
+    getAuditoriumsOptionsForReservationFilter(idUser: number | undefined) {
         return KnexConnection(`${reservations} as r`)
             .select(
                 KnexConnection.ref('title').withSchema('a')
@@ -200,7 +244,7 @@ class ReservationDatabaseModel extends DatabaseModel {
             .distinct()
     }
 
-    getPlaysOptionsForReservationFilter(idUser: number | undefined = undefined) {
+    getPlaysOptionsForReservationFilter(idUser: number | undefined) {
         return KnexConnection(`${reservations} as r`)
             .select(
                 KnexConnection.ref('title').withSchema('p')
@@ -250,8 +294,4 @@ class ReservationDatabaseModel extends DatabaseModel {
         return this.getFilteredReservations(userQuery)
             .andWhere('r.id_user', idUser)
     }
-
-
 }
-
-export const ReservationDatabaseInstance = new ReservationDatabaseModel()

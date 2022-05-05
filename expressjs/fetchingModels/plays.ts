@@ -57,6 +57,7 @@ export class PlayFetchingModel implements PlayService {
             await trx.commit()
             return newPlay
         } catch (e) {
+            console.error(e)
             await trx.rollback()
             return <InnerErrorInterface>{
                 code: 500,
