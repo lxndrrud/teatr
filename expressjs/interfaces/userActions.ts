@@ -3,7 +3,7 @@ export interface UserActionBaseInterface {
     description: string
 }
 
-export interface UserActionDatabaseInterface {
+export interface UserActionDatabaseInterface extends UserActionBaseInterface {
     id: number
     created_at: string
 }

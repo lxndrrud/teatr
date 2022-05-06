@@ -21,10 +21,10 @@ export class PlayFetchingModel implements PlayService {
 
     async getAll() {
         try {
-            const query:  PlayWithPosterInterface[] = await this.playDatabaseInstance.getAllWithPoster({})
+            const query: PlayWithPosterInterface[] = await this.playDatabaseInstance.getAllWithPoster({})
             return query
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return <InnerErrorInterface>{
                 code: 500,
                 message: 'Внутренняя ошибка сервера при поиске спектаклей!'
@@ -41,7 +41,7 @@ export class PlayFetchingModel implements PlayService {
             }
             return query
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return <InnerErrorInterface>{
                 code: 500,
                 message: 'Внутренняя ошибка сервера при поиске спектакля!'
@@ -79,6 +79,7 @@ export class PlayFetchingModel implements PlayService {
             await this.playDatabaseInstance.update(trx, idPlay, payload)
             await trx.commit()
         } catch (e) {
+            console.error(e)
             await trx.rollback()
             return <InnerErrorInterface>{
                 code: 500,
@@ -88,18 +89,19 @@ export class PlayFetchingModel implements PlayService {
     }
 
     async deletePlay(idPlay: number) {
-        const query = await this.playDatabaseInstance.get({ id: idPlay })
-        if (!query) {
-            return <InnerErrorInterface>{
-                code: 404,
-                message: 'Запись спектакля не найдена!'
-            }
-        }
         const trx = await KnexConnection.transaction()
         try {
+            const query = await this.playDatabaseInstance.get({ id: idPlay })
+            if (!query) {
+                return <InnerErrorInterface>{
+                    code: 404,
+                    message: 'Запись спектакля не найдена!'
+                }
+            }
             await this.playDatabaseInstance.delete(trx, idPlay)
             await trx.commit()
         } catch (e) {
+            console.error(e)
             await trx.rollback()
             return <InnerErrorInterface>{
                 code: 500,

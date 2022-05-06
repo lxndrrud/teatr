@@ -11,7 +11,7 @@ export interface RoleModel {
         can_have_more_than_one_reservation_on_session?: boolean,
         can_access_private?: boolean,
         can_make_reservation_without_confirmation?: boolean
-    }): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
 
     get(payload: {
         id?: number 
@@ -20,7 +20,7 @@ export interface RoleModel {
         can_have_more_than_one_reservation_on_session?: boolean,
         can_access_private?: boolean,
         can_make_reservation_without_confirmation?: boolean
-    }): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
 
     insert(trx: Knex.Transaction, payload: {
         title: string,
@@ -28,7 +28,7 @@ export interface RoleModel {
         can_have_more_than_one_reservation_on_session: boolean,
         can_access_private: boolean,
         can_make_reservation_without_confirmation: boolean
-    }): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
 
     update(trx: Knex.Transaction, id: number, payload: {
         title?: string,
@@ -36,11 +36,11 @@ export interface RoleModel {
         can_have_more_than_one_reservation_on_session?: boolean,
         can_access_private?: boolean,
         can_make_reservation_without_confirmation?: boolean
-    }): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
 
-    delete(trx: Knex.Transaction, id: number): Knex.QueryBuilder
+    delete(trx: Knex.Transaction, id: number): Knex.QueryBuilder | any
 
-    getUserRole(idUser: number, idRole: number): Knex.QueryBuilder
+    getUserRole(idUser: number, idRole: number): Knex.QueryBuilder | any
 }
 
 /**

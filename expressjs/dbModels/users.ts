@@ -17,7 +17,7 @@ export interface UserModel {
         middlename?: string
         lastname?: string
         id_role?: number
-    }): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
 
     get(payload: {
         id?: number
@@ -28,15 +28,17 @@ export interface UserModel {
         middlename?: string
         lastname?: string
         id_role?: number
-    }): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
 
-    insert(trx: Knex.Transaction, payload: UserBaseInterface): Knex.QueryBuilder
+    insert(trx: Knex.Transaction, payload: UserBaseInterface): Knex.QueryBuilder | any
 
-    update(trx: Knex.Transaction<any, any[]>, id: number, payload: UserInterface): Knex.QueryBuilder
+    update(trx: Knex.Transaction<any, any[]>, id: number, payload: UserInterface): Knex.QueryBuilder | any
 
-    delete(trx: Knex.Transaction<any, any[]>, id: number): Knex.QueryBuilder
+    delete(trx: Knex.Transaction<any, any[]>, id: number): Knex.QueryBuilder | any
 
-    insertAction(trx: Knex.Transaction, payload: UserActionBaseInterface): Knex.QueryBuilder
+    insertAction(trx: Knex.Transaction, payload: UserActionBaseInterface): Knex.QueryBuilder | any
+
+    generateToken(trx: Knex.Transaction, idUser: number, token: string): Knex.QueryBuilder | any
 }
 
 /**
@@ -122,4 +124,16 @@ export class UserDatabaseModel extends DatabaseModel implements UserModel {
             .insert(payload)
             .returning('*')
     }
+
+    generateToken(trx: Knex.Transaction, idUser: number, token: string) {
+        return trx<UserInterface>(users)
+            .where({
+                id: idUser
+            })
+            .update({
+                token
+            })
+            .returning('*')
+    }
+    
 }

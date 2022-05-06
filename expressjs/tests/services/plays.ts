@@ -3,74 +3,7 @@ import { assert, should, expect } from "chai";
 import { PlayModel } from "../../dbModels/plays"
 import { PlayFetchingModel } from "../../fetchingModels/plays"
 import { PlayBaseInterface, PlayQueryInterface, PlayWithPosterInterface } from "../../interfaces/plays"
-class PlayMockModel implements PlayModel {
-    public playsList: PlayWithPosterInterface[] 
-    constructor() {
-        this.playsList = [
-            {
-                id: 1,
-                title: "Test 1",
-                description: "Test description 1",
-                poster_filepath: "poster_filepath 1"
-            },
-            {
-                id: 2,
-                title: "Test 2",
-                description: "Test description 2",
-                poster_filepath: "poster_filepath 2"
-            }
-        ]
-    }
-
-    getAll(payload: PlayQueryInterface) {
-        return this.playsList
-    }
-
-    get(payload: PlayQueryInterface) {
-        for (let play of this.playsList) {
-            if (payload.id && play.id === payload.id) {
-                return play
-            }
-            else if (payload.id === 500) {
-                throw "Database mock error"
-            }
-        }
-        return undefined
-    }
-
-    insert(trx: Knex.Transaction, payload: PlayBaseInterface) {
-        if (payload.title === "fail") { 
-            throw "Database mock error"
-        }
-        const newPlay = {
-            id: this.playsList.length + 1,
-            title: payload.title,
-            description: payload.description,
-            poster_filepath: "test insert" 
-        }
-        this.playsList.push(newPlay)
-        return [newPlay]
-    }
-
-    update(trx: Knex.Transaction, id: number, payload: {
-        title?: string,
-        description?: string
-    }) {
-        return
-    }
-
-    delete(trx: Knex.Transaction, id: number) {
-        return
-    }
-
-    getAllWithPoster(payload: PlayQueryInterface) {
-        return this.getAll(payload)
-    }
-
-    getSingleWithPoster(payload: PlayQueryInterface) {
-        return this.get(payload)
-    }
-}
+import { PlayMockModel } from "../mockModels/plays";
 
 
 export function PlayServiceTests() {
@@ -126,6 +59,56 @@ export function PlayServiceTests() {
 
                 expect(response).to.haveOwnProperty("code").that.equals(500)
                 expect(response).to.haveOwnProperty("message")
+            })
+        })
+        describe("Update Play", function() {
+            const goodPayload: PlayBaseInterface = {
+                title: "Test update",
+                description: "Test update"
+            }
+            it("should be OK", async function() {
+                const response = await playService.updatePlay(1, goodPayload)
+
+                expect(response).to.equal(undefined)
+                expect(playMockModel.playsList[0].title).to.equal(goodPayload.title)
+                expect(playMockModel.playsList[0].description).to.equal(goodPayload.description)
+            })
+
+            it("should return inner error 404", async function() {
+                const response = await playService.updatePlay(114, goodPayload)
+
+                expect(response).to.haveOwnProperty("code").that.equals(404)
+            })
+
+            it("should return inner error 500", async function() { 
+                const response = await playService.updatePlay(500, goodPayload)
+
+                expect(response).to.haveOwnProperty("code").that.equals(500)
+            })
+        })
+        describe("Delete Play", function() {
+            it("should be OK", async function() {
+                const lengthBefore = playMockModel.playsList.length
+                const response = await playService.deletePlay(1)
+
+                expect(response).to.equal(undefined)
+                expect(playMockModel.playsList.length).to.equal(lengthBefore-1)
+            })
+
+            it("should return inner error 404", async function() {
+                const lengthBefore = playMockModel.playsList.length
+                const response = await playService.deletePlay(114)
+
+                expect(response).to.haveOwnProperty("code").that.equals(404)
+                expect(playMockModel.playsList.length).to.equal(lengthBefore)
+            })
+
+            it("should return inner error 500", async function() {
+                const lengthBefore = playMockModel.playsList.length
+                const response = await playService.deletePlay(500)
+
+                expect(response).to.haveOwnProperty("code").that.equals(500)
+                expect(playMockModel.playsList.length).to.equal(lengthBefore)
             })
         })
     })

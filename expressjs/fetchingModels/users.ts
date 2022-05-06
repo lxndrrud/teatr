@@ -12,7 +12,7 @@ import { UserActionBaseInterface } from "../interfaces/userActions";
 
 
 export interface UserService {
-    generateToken (trx: Knex.Transaction, user: UserInterface): Knex.QueryBuilder
+    generateToken (trx: Knex.Transaction, user: UserInterface): Promise<Knex.QueryBuilder>
     createUser(payload: UserRegisterInterface): Promise<InnerErrorInterface | UserInterface>
     loginUser(payload: UserLoginInterface): Promise<string | InnerErrorInterface>
     getAll(): Promise<UserInterface[] | InnerErrorInterface>
@@ -32,7 +32,7 @@ export class UserFetchingModel implements UserService {
         this.roleFetchingInstance = roleServiceInstance
     }
 
-    generateToken (trx: Knex.Transaction, user: UserInterface) {
+    async generateToken (trx: Knex.Transaction, user: UserInterface) {
         const userRequestOption: UserRequestOption = {
             id: user.id,
             email: user.email,
@@ -45,35 +45,30 @@ export class UserFetchingModel implements UserService {
                 expiresIn: "2h",
             }
         )
-        return trx<UserInterface>(users)
-            .where({
-                id: user.id
-            })
-            .update({
-                token
-            })
-            .returning('*')
+        return await this.userDatabaseInstance.generateToken(trx, user.id, token)
     }
 
     async createUser(payload: UserRegisterInterface) {
-        // Проверка на существующего пользователя
-        const existingUserCheck: UserInterface = await this.userDatabaseInstance
-            .get({ email: payload.email})
-        if (existingUserCheck) {
-            return <InnerErrorInterface>{
-                code: 409,
-                message: 'Пользователь с такой почтой уже существует!'
-            }
-        }
-        // Получаем роль "Посетитель" из базы данных
-        const visitorRole = await this.roleFetchingInstance.getVisitorRole()
-        if (isInnerErrorInterface(visitorRole)) {
-            return visitorRole
-        }
-        const fetchedRequestBody: UserBaseInterface = {...payload, id_role: visitorRole.id}
         // Транзакция: создать пользователя, затем дать ему токен
         const trx = await KnexConnection.transaction()
         try {
+            // Проверка на существующего пользователя
+            const existingUserCheck: UserInterface = await this.userDatabaseInstance
+                .get({ email: payload.email})
+            if (existingUserCheck) {
+                return <InnerErrorInterface>{
+                    code: 409,
+                    message: 'Пользователь с такой почтой уже существует!'
+                }
+            }
+            // Получаем роль "Посетитель" из базы данных
+            const visitorRole = await this.roleFetchingInstance.getVisitorRole()
+            if (isInnerErrorInterface(visitorRole)) {
+                return visitorRole
+            }
+            const fetchedRequestBody: UserBaseInterface = {...payload, id_role: visitorRole.id}
+            
+        
             fetchedRequestBody.password = await hash(payload.password, 10)
             let user: UserInterface = (await this.userDatabaseInstance.insert(trx, fetchedRequestBody))[0]
             user = (await this.generateToken(trx, user))[0]
