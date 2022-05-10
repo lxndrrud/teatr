@@ -1,4 +1,5 @@
 import { Knex } from "knex"
+import { title } from "process"
 import { RoleModel } from "../../dbModels/roles"
 import { RoleBaseInterface, RoleDatabaseInterface } from "../../interfaces/roles"
 
@@ -9,7 +10,7 @@ export class RoleMockModel implements RoleModel {
         this.rolesList = [
             {
                 id: 3,
-                title: "Test role",
+                title: "Посетитель",
                 can_access_private: false,
                 can_avoid_max_slots_property: false,
                 can_have_more_than_one_reservation_on_session: false,
@@ -40,7 +41,8 @@ export class RoleMockModel implements RoleModel {
     }) {
         if (payload.id === 500) throw new Error("Database mock error")
         for (const role of this.rolesList) {
-            if (role.id === payload.id) return role
+            if (payload.id && role.id === payload.id) return role
+            if (payload.title && role.title === payload.title) return role
         } 
         return undefined
     }

@@ -62,14 +62,16 @@ export class UserMockModel implements UserModel {
         lastname?: string
         id_role?: number
     }) {
-        if (payload.id === 500) {
+        if (payload.id && payload.id === 500) {
             throw new Error("Database mock error")
         }
+        if(payload.email && payload.email === "fail")
+            throw new Error("Database mock error")
         for (const user of this.usersList) {
-            if (user.id === payload.id) {
+            if (user.id && user.id === payload.id) {
                 return user
             }
-            if (user.email === payload.email) {
+            if (user.email && user.email === payload.email) {
                 return user
             }
         }
@@ -78,7 +80,7 @@ export class UserMockModel implements UserModel {
 
     insert(trx: Knex.Transaction, payload: UserBaseInterface) {
         if (payload.firstname === "fail") throw new Error("Database mock error")
-        this.usersList.push(<UserInterface>{
+        const newUser = <UserInterface>{
             id: this.usersList.length + 1,
             id_role: payload.id_role,
             firstname: payload.firstname,
@@ -86,7 +88,9 @@ export class UserMockModel implements UserModel {
             lastname: payload.lastname,
             email: payload.email,
             password: payload.password
-        })
+        }
+        this.usersList.push(newUser)
+        return [newUser]
     }
 
     update(trx: Knex.Transaction<any, any[]>, id: number, payload: UserInterface) {
@@ -118,8 +122,6 @@ export class UserMockModel implements UserModel {
 
     generateToken(trx: Knex.Transaction, idUser: number, token: string) {
         if (idUser === 500) throw new Error("Database mock error")
-        for (let i=0; i<this.usersList.length; i++) {
-            if (this.usersList[i].id === idUser) this.usersList[i].token = token
-        }
+        return [this.usersList.at(-1)]
     }
 }
