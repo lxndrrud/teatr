@@ -17,7 +17,7 @@ export interface ReservationModel {
         confirmation_code?: string
         id_session?: number
         id_user?: number
-    }): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
     get(payload: {
         id?: number
         created_at?: string 
@@ -26,8 +26,8 @@ export interface ReservationModel {
         confirmation_code?: string
         id_session?: number
         id_user?: number
-    }): Knex.QueryBuilder
-    insert(trx: Knex.Transaction<any, any[]>, payload: ReservationBaseInterface): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
+    insert(trx: Knex.Transaction<any, any[]>, payload: ReservationBaseInterface): Knex.QueryBuilder | any
     update(trx: Knex.Transaction<any, any[]>, id: number, payload: {
         id?: number
         created_at?: string 
@@ -36,19 +36,19 @@ export interface ReservationModel {
         confirmation_code?: string
         id_session?: number
         id_user?: number
-    }): Knex.QueryBuilder
-    delete(trx: Knex.Transaction<any, any[]>, id: number): Knex.QueryBuilder
-    getAllFullInfo(): Knex.QueryBuilder
-    getSingleFullInfo(idReservation: number): Knex.QueryBuilder
-    getUserReservations (idUser: number): Knex.QueryBuilder
-    getReservedSlots (idReservation: number): Knex.QueryBuilder
-    insertReservationsSlotsList(trx: Knex.Transaction, payloadList: ReservationsSlotsBaseInterface[]): Knex.QueryBuilder
-    deleteReservationsSlots(trx: Knex.Transaction, idReservation: number): Knex.QueryBuilder
-    getTimestampsOptionsForReservationFilter(idUser: number | undefined): Knex.QueryBuilder
-    getAuditoriumsOptionsForReservationFilter(idUser: number | undefined): Knex.QueryBuilder
-    getPlaysOptionsForReservationFilter(idUser: number | undefined): Knex.QueryBuilder
-    getFilteredReservations(userQuery: ReservationFilterQueryInterface): Knex.QueryBuilder
-    getFilteredReservationsForUser(userQuery: ReservationFilterQueryInterface, idUser: number): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
+    delete(trx: Knex.Transaction<any, any[]>, id: number): Knex.QueryBuilder | any
+    getAllFullInfo(): Knex.QueryBuilder | any
+    getSingleFullInfo(idReservation: number): Knex.QueryBuilder | any
+    getUserReservations (idUser: number): Knex.QueryBuilder | any
+    getReservedSlots (idReservation: number): Knex.QueryBuilder | any
+    insertReservationsSlotsList(trx: Knex.Transaction, payloadList: ReservationsSlotsBaseInterface[]): Knex.QueryBuilder | any
+    deleteReservationsSlots(trx: Knex.Transaction, idReservation: number): Knex.QueryBuilder | any
+    getTimestampsOptionsForReservationFilter(idUser: number | undefined): Knex.QueryBuilder | any
+    getAuditoriumsOptionsForReservationFilter(idUser: number | undefined): Knex.QueryBuilder | any
+    getPlaysOptionsForReservationFilter(idUser: number | undefined): Knex.QueryBuilder | any
+    getFilteredReservations(userQuery: ReservationFilterQueryInterface): Knex.QueryBuilder | any
+    getFilteredReservationsForUser(userQuery: ReservationFilterQueryInterface, idUser: number): Knex.QueryBuilder | any
 }
 
 
