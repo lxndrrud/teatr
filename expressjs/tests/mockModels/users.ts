@@ -13,7 +13,19 @@ export class UserMockModel implements UserModel {
             {
                 id: 1,
                 email: "test",
-                password: "123456",
+                // 123456
+                password: '$2a$10$.7sVPajSPR/JTa4g8tWToe7O31A0Gz4EnL6TA8BzMaD8IAxXbFqwS',
+                token: "token",
+                firstname: "test firstname 1",
+                middlename: "test middlename 1",
+                lastname: "test lastname 1",
+                id_role: 3
+            },
+            {
+                id: 500,
+                email: "fail token",
+                // 123456
+                password: '$2a$10$.7sVPajSPR/JTa4g8tWToe7O31A0Gz4EnL6TA8BzMaD8IAxXbFqwS',
                 token: "token",
                 firstname: "test firstname 1",
                 middlename: "test middlename 1",
@@ -122,6 +134,13 @@ export class UserMockModel implements UserModel {
 
     generateToken(trx: Knex.Transaction, idUser: number, token: string) {
         if (idUser === 500) throw new Error("Database mock error")
-        return [this.usersList.at(-1)]
+        const toReturn: UserInterface[] = []
+        for (let i=0; i<this.usersList.length; i++) {
+            if (this.usersList[i].id === idUser) {
+                this.usersList[i].token = token
+                toReturn.push( this.usersList[i])
+            }
+        }
+        return toReturn
     }
 }

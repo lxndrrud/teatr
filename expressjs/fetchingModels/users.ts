@@ -134,7 +134,7 @@ export class UserFetchingModel implements UserService {
                     message: 'Внутренняя ошибка сервера при генерации токена!'
                 }
             }
-            return fetchedUser.token
+            return <string> fetchedUser.token
         } catch (e) {
             console.log(e)
             await trx.rollback()
