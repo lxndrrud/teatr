@@ -16,7 +16,7 @@ export interface SessionModel {
         id_play?: number,
         id_price_policy?: number,
         timestamp?: string,
-    }): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
 
     get(payload: {
         id?: number,
@@ -25,9 +25,9 @@ export interface SessionModel {
         id_play?: number,
         id_price_policy?: number,
         timestamp?: string,
-    }): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
 
-    insert(trx: Knex.Transaction, payload: SessionBaseInterface): Knex.QueryBuilder
+    insert(trx: Knex.Transaction, payload: SessionBaseInterface): Knex.QueryBuilder | any
 
     update(trx: Knex.Transaction, id: number, payload: {
         is_locked?: boolean,
@@ -35,29 +35,29 @@ export interface SessionModel {
         id_play?: number,
         id_price_policy?: number,
         timestamp?: string,
-    }): Knex.QueryBuilder
+    }): Knex.QueryBuilder | any
 
-    delete(trx: Knex.Transaction, id: number): Knex.QueryBuilder
+    delete(trx: Knex.Transaction, id: number): Knex.QueryBuilder | any
     
-    getUnlockedSessions(): Knex.QueryBuilder
+    getUnlockedSessions(): Knex.QueryBuilder | any
 
-    getSingleUnlockedSession(idSession: number): Knex.QueryBuilder
+    getSingleUnlockedSession(idSession: number): Knex.QueryBuilder | any
 
-    getSessionsByPlay(idPlay: number): Knex.QueryBuilder
+    getSessionsByPlay(idPlay: number): Knex.QueryBuilder | any
 
-    getRowsByPricePolicy(idPricePolicy: number): Knex.QueryBuilder
+    getRowsByPricePolicy(idPricePolicy: number): Knex.QueryBuilder | any
 
-    getSlotsByPricePolicy(idPricePolicy: number): Knex.QueryBuilder
+    getSlotsByPricePolicy(idPricePolicy: number): Knex.QueryBuilder | any
 
-    getReservedSlots(idSession: number, idPricePolicy: number): Knex.QueryBuilder
+    getReservedSlots(idSession: number, idPricePolicy: number): Knex.QueryBuilder | any
 
-    getSessionFilterTimestamps(): Knex.QueryBuilder
+    getSessionFilterTimestamps(): Knex.QueryBuilder | any
 
-    getSessionFilterAuditoriums(): Knex.QueryBuilder
+    getSessionFilterAuditoriums(): Knex.QueryBuilder | any
 
-    getSessionFilterPlays(): Knex.QueryBuilder
+    getSessionFilterPlays(): Knex.QueryBuilder | any
 
-    getFilteredSessions(userQueryPayload: SessionFilterQueryInterface): Knex.QueryBuilder
+    getFilteredSessions(userQueryPayload: SessionFilterQueryInterface): Knex.QueryBuilder | any
 }
 
 /**

@@ -46,7 +46,6 @@ export class ReservationMockModel implements ReservationModel {
     }
 
     update(trx: Knex.Transaction<any, any[]>, id: number, payload: {
-        id?: number
         created_at?: string 
         is_paid?: boolean
         is_confirmed?: boolean
@@ -54,11 +53,23 @@ export class ReservationMockModel implements ReservationModel {
         id_session?: number
         id_user?: number
     }) {
-
+        if (id === 500) throw new Error("Database mock error")
+        for(let i=0; i<this.reservationsList.length; i++) {
+            if (this.reservationsList[i].id === id) {
+                if(payload.is_paid) this.reservationsList[i].is_paid = payload.is_paid
+                if(payload.is_confirmed) this.reservationsList[i].is_confirmed = payload.is_confirmed
+            }
+        }
     }
 
     delete(trx: Knex.Transaction<any, any[]>, id: number) {
-
+        if (id === 500) throw new Error("Database mock error")
+        for (let i=0; i<this.reservationsList.length; i++) {
+            if (this.reservationsList[i].id === id) {
+                this.reservationsList.splice(i, 1)
+                break
+            }
+        }
     }
 
     getAllFullInfo() {
