@@ -7,9 +7,9 @@ import styles from './SlotItem.module.css'
 const SlotItem = ({ slotObject }) => { 
     let [isClicked, setIsClicked] = useState(false)
     const slotStyle = () => {
-        if (slotObject.is_reserved) return `rounded ${styles.slot} ${styles.reservedContainer}`
-        if (isClicked) return `rounded ${styles.slot} ${styles.clickedContainer}`
-        return `rounded ${styles.slot} ${styles.freeContainer}`
+        if (slotObject.is_reserved) return `${styles.slot} ${styles.reservedContainer}`
+        if (isClicked) return `${styles.slot} ${styles.clickedContainer}`
+        return `${styles.slot} ${styles.freeContainer}`
     }
     let [styleClass, setStyleClass] = useState(slotStyle())
 

@@ -151,6 +151,14 @@ export class ReservationFetchingModel implements ReservationService {
             }
         }
 
+        // Проверка на минимум слотов
+        if (requestBody.slots.length === 0 ) {
+            return <InnerErrorInterface>{
+                code: 400,
+                message: 'Вы не выбрали места для бронирования!'
+            }
+        }
+
         // Проверка на максимум слотов
         if (!userRole.can_avoid_max_slots_property && requestBody.slots.length > sessionQuery.max_slots) {
             return <InnerErrorInterface>{

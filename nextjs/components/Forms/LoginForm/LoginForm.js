@@ -14,7 +14,6 @@ const LoginForm = () => {
     const store = useStore()
     let token = useSelector(state => state.user.token)
 
-
     let [error, setError] = useState('')
     let [email, setEmail] = useState('')
     let [password, setPassword] = useState('')
@@ -25,35 +24,28 @@ const LoginForm = () => {
         }
     })
 
-    const syncEmail = (e) => {
-        setEmail(e.target.value)
-    }
-    const syncPassword = (e) => {
-        setPassword(e.target.value)
-    }
     const sendPostRequest = (e) => {
         e.preventDefault()
         
-        if (email && password) { 
-            dispatch(logIn(email, password))
-            .then(() => {
-                const errorFromStore = store.getState().user.error 
-                if (errorFromStore !== null) {
-                    setError(errorFromStore)
-                    dispatch(errorSetDefault())
-                }
-            })
-        }
+        
+        dispatch(logIn(email, password))
+        .then(() => {
+            const errorFromStore = store.getState().user.error 
+            if (errorFromStore !== null) {
+                setError(errorFromStore)
+                dispatch(errorSetDefault())
+            }
+        })
     }
     return (
         <BaseForm styleClass={styles.loginForm}>
             <CustomInput type="email" name="email" value={email} 
-                onChange={syncEmail} 
+                onChange={(e) => setEmail(e.target.value)} 
                 description="Почта" 
                 required />
 
             <CustomInput type="password" name="password" value={password} 
-                onChange={syncPassword} 
+                onChange={(e) => setPassword(e.target.value)} 
                 description="Пароль" 
                 required />
 
