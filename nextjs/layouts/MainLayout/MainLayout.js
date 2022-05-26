@@ -42,21 +42,24 @@ export default function MainLayout({ children, title }) {
             !isLoggedIn
             ? (
                 <nav className={styles.navLinks}>
-                    <Image src={mainLogo} alt="Главное лого" height="100" width="100" />
-                    <CustomLink destination="/" text="Главная" style={styles.navLink} />
+                    <div className={styles.logoContainer}>
+                        <Image className={styles.logoPicture } layout="fill" objectFit="cover" src={mainLogo} alt="Главное лого" height="100" width="100" />
+                    </div><CustomLink destination="/" text="Главная" style={styles.navLink} />
                     <CustomLink destination="/repertoire" text="Репертуар" style={styles.navLink} />
                     <CustomLink destination="/schedule" text="Расписание" style={styles.navLink} />
-                    <CustomLink destination="/register" text="Зарегистрироваться" style={styles.navLink} />
+                    <CustomLink destination="/register" text="Регистрация" style={styles.navLink} />
                     <CustomLink destination="/login" text="Войти" style={styles.navLink} />
                 </nav>
             )
             : (
                 <nav className={styles.navLinks}>
-                    <Image src={mainLogo} alt="Главное лого" height="100" width="100" />
+                    <div className={styles.logoContainer}>
+                        <Image className={styles.logoPicture } layout="fill" objectFit="cover" src={mainLogo} alt="Главное лого" height="100" width="100" />
+                    </div>
                     <CustomLink destination="/" text="Главная" style={styles.navLink} />
                     <CustomLink destination="/repertoire" text="Репертуар" style={styles.navLink} />
                     <CustomLink destination="/schedule" text="Расписание" style={styles.navLink} />
-                    <CustomLink destination="/control" text="Управление бронями" style={styles.navLink} />
+                    <CustomLink destination="/control" text="Брони" style={styles.navLink} />
                     <CustomButton type="submit" value="Выйти" 
                         onClickHook={logOutOnClick}
                         styleClass={styles.logOutButton}/>
