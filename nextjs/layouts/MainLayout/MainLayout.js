@@ -5,6 +5,7 @@ import { useRouter } from "next/router"
 import styles from './MainLayout.module.css'
 import { logOut } from '../../store/actions/userAction'
 import { useEffect, useState } from 'react'
+import {Button, Offcanvas} from "react-bootstrap"
 import Image from 'next/image'
 import mainLogo from "../../storage/index-logo.png"
 
@@ -35,37 +36,43 @@ export default function MainLayout({ children, title }) {
         })
     }
 
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
     return (
     <div className={styles.layout}>
-       
-        { 
-            !isLoggedIn
-            ? (
-                <nav className={styles.navLinks}>
-                    <div className={styles.logoContainer}>
-                        <Image className={styles.logoPicture } layout="fill" objectFit="cover" src={mainLogo} alt="Главное лого" height="100" width="100" />
-                    </div><CustomLink destination="/" text="Главная" style={styles.navLink} />
-                    <CustomLink destination="/repertoire" text="Репертуар" style={styles.navLink} />
-                    <CustomLink destination="/schedule" text="Расписание" style={styles.navLink} />
-                    <CustomLink destination="/register" text="Регистрация" style={styles.navLink} />
-                    <CustomLink destination="/login" text="Войти" style={styles.navLink} />
-                </nav>
-            )
-            : (
-                <nav className={styles.navLinks}>
-                    <div className={styles.logoContainer}>
-                        <Image className={styles.logoPicture } layout="fill" objectFit="cover" src={mainLogo} alt="Главное лого" height="100" width="100" />
-                    </div>
-                    <CustomLink destination="/" text="Главная" style={styles.navLink} />
-                    <CustomLink destination="/repertoire" text="Репертуар" style={styles.navLink} />
-                    <CustomLink destination="/schedule" text="Расписание" style={styles.navLink} />
-                    <CustomLink destination="/control" text="Брони" style={styles.navLink} />
-                    <CustomButton type="submit" value="Выйти" 
-                        onClickHook={logOutOnClick}
-                        styleClass={styles.logOutButton}/>
-                </nav>
-            )
-        }
+        
+            { 
+                !isLoggedIn
+                ? (
+                    <nav className={styles.navLinks}>
+                        <div className={styles.logoContainer}>
+                            <Image className={styles.logoPicture } layout="fill" objectFit="cover" src={mainLogo} alt="Главное лого" height="100" width="100" />
+                        </div><CustomLink destination="/" text="Главная" style={styles.navLink} />
+                        <CustomLink destination="/repertoire" text="Репертуар" style={styles.navLink} />
+                        <CustomLink destination="/schedule" text="Расписание" style={styles.navLink} />
+                        <CustomLink destination="/register" text="Регистрация" style={styles.navLink} />
+                        <CustomLink destination="/login" text="Войти" style={styles.navLink} />
+                    </nav>
+                )
+                : (
+                    <nav className={styles.navLinks}>
+                        <div className={styles.logoContainer}>
+                            <Image className={styles.logoPicture } layout="fill" objectFit="cover" src={mainLogo} alt="Главное лого" height="100" width="100" />
+                        </div>
+                        <CustomLink destination="/" text="Главная" style={styles.navLink} />
+                        <CustomLink destination="/repertoire" text="Репертуар" style={styles.navLink} />
+                        <CustomLink destination="/schedule" text="Расписание" style={styles.navLink} />
+                        <CustomLink destination="/control" text="Брони" style={styles.navLink} />
+                        <CustomButton type="submit" value="Выйти" 
+                            onClickHook={logOutOnClick}
+                            styleClass={styles.logOutButton}/>
+                    </nav>
+                )
+            }
+            
         <main className={styles.mainContent}>
             <h1 className={styles.title}>{title}</h1>
             { children }

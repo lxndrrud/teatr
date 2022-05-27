@@ -97,6 +97,7 @@ export const fetchReservation = ({
     const resp = await fetch(url, {
         headers: {
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
             'auth-token': token,
         },
         method: "GET"

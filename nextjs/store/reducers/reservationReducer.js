@@ -24,7 +24,7 @@ const defaultState = {
         id_session: 0
     }
     */
-    reservation: undefined,
+    reservation: {},
     reservations: [],
     need_confirmation: true,
     slots: [],

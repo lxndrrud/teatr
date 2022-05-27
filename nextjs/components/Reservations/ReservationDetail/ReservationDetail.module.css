@@ -1,0 +1,78 @@
+.reservationItem {
+    display: flex;
+    flex-direction: column;
+    max-width: 30%;
+    /* background-color: #ffb703; */
+    /* background-color: #ffcb77; */
+    background-color: #ffbf69;
+    margin: 1.5% 1.5%;
+    border-radius: 10px;
+    padding: 1%;
+}
+
+.flexWidthContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;      
+}
+
+.textLabel {
+    font-size: 24px;
+    margin-bottom: 0.5%;
+}
+
+
+.deleteReservationButton {
+    max-width: 100%;
+    min-width: fit-content;
+    background-color: #c1121f;
+    border-color: #c1121f;
+    color: #F1FAEE;
+}
+
+.deleteReservationButton:hover {
+    background-color: #780000;
+    border-color: #780000;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.rowContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.columnContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.statusOk {
+    color: #4a7140;
+}
+
+.statusProblem {
+    color: #e41220;
+}
+
+
+
+@media (max-width: 1550px) {
+    .reservationItem {
+        max-width: 100%;
+        width: 100%;
+        display: flex;
+    }
+    .flexWidthContainer {
+        flex-direction: row;
+    }
+}
+
+@media (max-width: 1250px) {
+    .flexWidthContainer {
+        flex-direction: column;
+    }
+}
