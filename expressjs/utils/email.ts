@@ -1,21 +1,27 @@
 import { extendedTimestamp } from "./timestamp";
 import nodemailer from "nodemailer"
+import 'dotenv/config'
+
+
+const HOST = process.env.MAIL_HOST || ""
+const PORT = process.env.MAIL_PORT ? parseInt(process.env.MAIL_PORT) : 0
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
+    host: HOST,
+    port: PORT,
     secure: true,
     auth: {
-      user: 'for.mailing.shop@gmail.com',
-      pass: 'MaiL123454!'
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASSWORD
     }
 });
 
 export const sendMail = (email: string, confirmation_code: string,
     id_reservation: number, play_title: string, timestamp: string, 
     auditorium_title: string) => {
+    
     return transporter.sendMail({
-        from: '"Театр на Оборонной" <for.mailing.shop@gmail.com>',
+        from: `"Театр на Оборонной" <${process.env.MAIL_USER}@yandex.ru>`,
         to: email,
         subject: "Бронь в театре на Оборонной",
         text: 
