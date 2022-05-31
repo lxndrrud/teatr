@@ -5,7 +5,6 @@ import styles from "./ReservationItem.module.css"
 import React from 'react'
 
 function ReservationItem({ reservation }) {
-    console.log(reservation)
     return (
         <Card className={styles.card}>
             {
@@ -19,18 +18,18 @@ function ReservationItem({ reservation }) {
                     </Card.Header>
             }
             <Card.Body className={styles.cardBody}>
-                    <p>Бронь #{reservation.id}</p>
+                    <p><strong> Номер брони:</strong> {reservation.id}</p>
                     <p className={styles.textLabel}>
-                        <span className={styles.bold}>Название спектакля:</span> {reservation.play_title}
+                        <strong>Название спектакля:</strong> {reservation.play_title}
                     </p>
                     <p className={styles.textLabel}>
-                        <span className={styles.bold}>Зал:</span> {reservation.auditorium_title}
+                        <strong>Зал:</strong> {reservation.auditorium_title}
                     </p>
                     <p className={styles.textLabel}>
-                        <span className={styles.bold}>Время сеанса:</span> {reservation.session_timestamp}
+                        <strong>Время сеанса:</strong> {reservation.session_timestamp}
                     </p>
                     <p className={styles.textLabel}>
-                    <span className={styles.bold}>Количество мест:</span> {reservation.slots.length}
+                        <strong>Количество мест:</strong> {reservation.slots.length}
                     </p>
                     <ButtonLink destination={`/control/${reservation.id}`} text="Подробнее" 
                         linkType="green"/>

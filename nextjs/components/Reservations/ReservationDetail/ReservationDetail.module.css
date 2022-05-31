@@ -1,20 +1,22 @@
 .reservationItem {
     display: flex;
-    flex-direction: column;
-    max-width: 30%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 98%;
     /* background-color: #ffb703; */
     /* background-color: #ffcb77; */
     background-color: #ffbf69;
-    margin: 1.5% 1.5%;
+    /* margin: 1.5% 1.5%; */
+    margin-right: 2%;
     border-radius: 10px;
     padding: 1%;
 }
 
 .flexWidthContainer {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 100%;      
+    flex-direction: row;
+    max-width: 100%;      
 }
 
 .textLabel {
@@ -66,13 +68,10 @@
         width: 100%;
         display: flex;
     }
-    .flexWidthContainer {
-        flex-direction: row;
-    }
 }
 
 @media (max-width: 1250px) {
-    .flexWidthContainer {
+    .reservationItem {
         flex-direction: column;
     }
 }

@@ -49,7 +49,7 @@ export default function MainLayout({ children, title }) {
                 ? (
                     <nav className={styles.navLinks}>
                         <div className={styles.logoContainer}>
-                            <Image className={styles.logoPicture } layout="fill" objectFit="cover" src={mainLogo} alt="Главное лого" height="100" width="100" />
+                            <Image className={styles.logoPicture } layout="fill" objectFit="cover" src={mainLogo} alt="Главное лого"  />
                         </div><CustomLink destination="/" text="Главная" style={styles.navLink} />
                         <CustomLink destination="/repertoire" text="Репертуар" style={styles.navLink} />
                         <CustomLink destination="/schedule" text="Расписание" style={styles.navLink} />
@@ -60,7 +60,7 @@ export default function MainLayout({ children, title }) {
                 : (
                     <nav className={styles.navLinks}>
                         <div className={styles.logoContainer}>
-                            <Image className={styles.logoPicture } layout="fill" objectFit="cover" src={mainLogo} alt="Главное лого" height="100" width="100" />
+                            <Image className={styles.logoPicture } layout="fill" objectFit="cover" src={mainLogo} alt="Главное лого"  />
                         </div>
                         <CustomLink destination="/" text="Главная" style={styles.navLink} />
                         <CustomLink destination="/repertoire" text="Репертуар" style={styles.navLink} />

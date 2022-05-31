@@ -8,7 +8,6 @@ import { deleteReservation } from '../../../store/actions/reservationAction'
 const ReservationDetail = ({ reservation }) => {
     return (
         <div className={styles.reservationItem}>
-            <div className={styles.flexWidthContainer}>
                 <div className={styles.columnContainer}>
                     <p className={styles.textLabel}>
                         <span className={styles.bold}>Номер брони:</span> {reservation.id}
@@ -70,7 +69,6 @@ const ReservationDetail = ({ reservation }) => {
                     }
                 </div>
             </div>
-        </div>
     )
 }
 

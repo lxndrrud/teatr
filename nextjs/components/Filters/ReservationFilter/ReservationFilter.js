@@ -44,19 +44,31 @@ const ReservationFilter = () => {
     }
 
     const syncReservationNumber = (e) => {
-        const parsedInt = parseInt(e.target.value)
-        if (parsedInt) {
-            setError(null)
-            setReservationNumber(parsedInt)
-        }
-        else if (e.target.value === '') {
-            setError(null)
-            setReservationNumber()
-        }
-        else {
-            setReservationNumber(undefined)
-            setError('Неверный номер брони')
-        }
+        setTimeout(() => {
+            const parsedInt = parseInt(e.target.value)
+            console.log(parsedInt === undefined)
+
+            if (e.target.value === '') {
+                setError(null)
+                setReservationNumber()
+                return
+            }
+
+            if (parsedInt <= 0 ) {
+                setReservationNumber(undefined)
+                setError("Значение должно быть больше нуля")
+            }
+            else if (isNaN(parsedInt)) {
+                setReservationNumber(undefined)
+                setError('Неверный номер брони')
+            }
+            else if (parsedInt) {
+                setError(null)
+                setReservationNumber(parsedInt)
+            }
+            
+        }, 500)
+        
     }
 
     // Получение свойств для выбора в селекторе
@@ -75,7 +87,7 @@ const ReservationFilter = () => {
                 <option value="None">Все даты</option>
 
                 {reservationFilterOptions.dates && reservationFilterOptions.dates.map(item => (
-                  <option value={item.date}>
+                  <option value={item.date} key={item.date} >
                     {item.extended_date}
                   </option>  
                 ))}
@@ -86,7 +98,7 @@ const ReservationFilter = () => {
 
                 {reservationFilterOptions.auditoriums && reservationFilterOptions.auditoriums
                     .map(item => (
-                        <option value={item.title}>
+                        <option value={item.title} key={item.title}>
                             {item.title}
                         </option>
                 ))}
@@ -96,7 +108,7 @@ const ReservationFilter = () => {
                 <option value="None">Все спектакли</option>
 
                 {reservationFilterOptions.plays && reservationFilterOptions.plays.map(item => (
-                    <option value={item.title}>
+                    <option value={item.title} key={item.title}>
                         {item.title}
                     </option>
                 ))}   
@@ -109,7 +121,7 @@ const ReservationFilter = () => {
             </Select>
 
             <CustomInput description={'Номер брони'} onChange={syncReservationNumber}
-                type="number" inputStyleClass={styles.inputNumber} />
+                type="number" inputStyleClass={styles.inputNumber} min="1" />
 
             {
                 error !== ''
