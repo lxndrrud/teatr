@@ -4,3 +4,9 @@
     flex-wrap: wrap;
     width: 100%;
 }
+
+@media (max-width: 1250px) {
+    .reservationList {
+        flex-direction: column;
+    }
+}

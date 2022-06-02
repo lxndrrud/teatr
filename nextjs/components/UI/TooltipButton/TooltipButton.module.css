@@ -1,0 +1,16 @@
+.tooltipText {
+    padding: 0.5%;
+    font-size: medium;
+    background-color: #F1FAEE;
+    border-radius: 10px;
+}
+
+.tooltipButton {
+    border: 1px dashed black;
+    border-radius: 15px;
+    padding: 0.5%;
+}
+
+.tooltipButton:hover {
+    border: 1px solid black;
+}

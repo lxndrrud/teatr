@@ -1,4 +1,4 @@
-import { Card } from "react-bootstrap"
+import { Card, Table } from "react-bootstrap"
 import { ButtonLink } from "../../UI/ButtonLink/ButtonLink"
 import styles from "./ReservationItem.module.css"
 
@@ -18,21 +18,21 @@ function ReservationItem({ reservation }) {
                     </Card.Header>
             }
             <Card.Body className={styles.cardBody}>
-                    <p><strong> Номер брони:</strong> {reservation.id}</p>
-                    <p className={styles.textLabel}>
-                        <strong>Название спектакля:</strong> {reservation.play_title}
-                    </p>
-                    <p className={styles.textLabel}>
-                        <strong>Зал:</strong> {reservation.auditorium_title}
-                    </p>
-                    <p className={styles.textLabel}>
-                        <strong>Время сеанса:</strong> {reservation.session_timestamp}
-                    </p>
-                    <p className={styles.textLabel}>
-                        <strong>Количество мест:</strong> {reservation.slots.length}
-                    </p>
-                    <ButtonLink destination={`/control/${reservation.id}`} text="Подробнее" 
-                        linkType="green"/>
+                <p><strong> Номер брони:</strong> {reservation.id}</p>
+                <p className={styles.textLabel}>
+                    <strong>Название спектакля:</strong> {reservation.play_title}
+                </p>
+                <p className={styles.textLabel}>
+                    <strong>Зал:</strong> {reservation.auditorium_title}
+                </p>
+                <p className={styles.textLabel}>
+                    <strong>Время сеанса:</strong> {reservation.session_timestamp}
+                </p>
+                <p className={styles.textLabel}>
+                    <strong>Количество мест:</strong> {reservation.slots.length}
+                </p>
+                <ButtonLink destination={`/control/${reservation.id}`} text="Подробнее" 
+                    linkType="green"/>
             </Card.Body>
 
         </Card>

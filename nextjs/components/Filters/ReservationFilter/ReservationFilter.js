@@ -46,7 +46,6 @@ const ReservationFilter = () => {
     const syncReservationNumber = (e) => {
         setTimeout(() => {
             const parsedInt = parseInt(e.target.value)
-            console.log(parsedInt === undefined)
 
             if (e.target.value === '') {
                 setError(null)
@@ -129,7 +128,7 @@ const ReservationFilter = () => {
                 : null
             }
 
-            <CustomButton type="submit" value="Подтвердить" onClickHook={getFilteredReservations} />
+            <CustomButton type="submit" value="Фильтр" onClickHook={getFilteredReservations} />
         </div>
     )
 }

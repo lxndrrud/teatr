@@ -19,6 +19,9 @@ export default function MainLayout({ children, title }) {
     }
     let [isLoggedIn, setIsLoggedIn] = useState(tokenCheck())
     useEffect(() => {
+        document.title = "Брони на Оборонной"
+    })
+    useEffect(() => {
         if (tokenCheck())
             setIsLoggedIn(true)
         else

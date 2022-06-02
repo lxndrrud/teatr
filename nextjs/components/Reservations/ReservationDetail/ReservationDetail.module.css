@@ -50,6 +50,7 @@
 .columnContainer {
     display: flex;
     flex-direction: column;
+    width: max-content;
 }
 
 .statusOk {
@@ -58,6 +59,15 @@
 
 .statusProblem {
     color: #e41220;
+}
+
+.table td {
+    border-bottom: 3px solid black;
+    padding: 2%;
+}
+
+.table tr:hover {
+    background-color: #f3b96c;
 }
 
 

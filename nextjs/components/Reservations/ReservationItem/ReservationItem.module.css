@@ -43,3 +43,10 @@
     border-right:  1px solid black;
     border-radius: 10px;
 }
+
+
+@media (max-width: 1250px) {
+    .card {
+        max-width: 100%;
+    }
+}
