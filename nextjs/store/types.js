@@ -34,3 +34,6 @@ export const LOG_IN = 'LOG_IN'
 export const LOG_OUT = 'LOG_OUT'
 export const ERROR_USER = 'ERROR_USER'
 export const ERROR_USER_SET_DEFAULT = 'ERROR_USER_SET_DEFAULT'
+
+// Design Reducer
+export const TOGGLE_NAVBAR = "TOGGLE_NAVBAR"
