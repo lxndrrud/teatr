@@ -3,14 +3,14 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
-    width: 98%;
+    /* width: 100%; */
     /* background-color: #ffb703; */
     /* background-color: #ffcb77; */
     background-color: #ffbf69;
     /* margin: 1.5% 1.5%; */
-    margin-right: 2%;
     border-radius: 10px;
     padding: 1%;
+    margin: 0 auto;
 }
 
 .flexWidthContainer {
@@ -50,7 +50,7 @@
 .columnContainer {
     display: flex;
     flex-direction: column;
-    width: max-content;
+    width: 100%;
 }
 
 .statusOk {
@@ -61,7 +61,12 @@
     color: #e41220;
 }
 
+.table {
+    max-width: 100%;
+}
+
 .table td {
+    max-width: 100%;
     border-bottom: 3px solid black;
     padding: 2%;
 }
@@ -74,8 +79,6 @@
 
 @media (max-width: 1550px) {
     .reservationItem {
-        max-width: 100%;
-        width: 100%;
         display: flex;
     }
 }

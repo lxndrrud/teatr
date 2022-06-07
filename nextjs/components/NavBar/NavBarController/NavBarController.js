@@ -9,8 +9,9 @@ import { toggleNavbar } from "../../../store/actions/designAction"
 import Image from 'next/image'
 import styles from "./NavBarController.module.css"
 import mainLogo from "../../../storage/index-logo.png"
-import menuIcon from "../../../storage/menu.png"
-import closeIcon from "../../../storage/close.png"
+import { logOut } from "../../../store/actions/userAction"
+/*import menuIcon from "../../../storage/menu.png"
+import closeIcon from "../../../storage/close.png"*/
 
 
 const NavBarController = () => {
@@ -50,9 +51,8 @@ const NavBarController = () => {
                     </svg>
                </Button>
             :
+                
                 <div>
-                    
-                   
                     { 
                         !isLoggedIn
                         ? (
@@ -95,7 +95,6 @@ const NavBarController = () => {
                         )
                     }
                 </div>
-                
         }
         </div>
     )

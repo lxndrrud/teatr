@@ -4,9 +4,10 @@
     display: flex;
     height: 100%;
     flex-direction: column;
-    max-width: 200px;
-    min-width: min-content;
+    max-width: 250px;
+    min-width: 55px;
     background-color: #f1e1f5;
+    border-right: 1px solid black;
 }
 
 /* Стили навбара */
@@ -18,10 +19,9 @@
     flex-grow: 2;
     flex-wrap: nowrap;
     flex-direction: column;
-    max-width: 15%;
-    min-width: min-content;
-    padding: 0.5%;
-    padding-top: 40px;
+    width: 250px;
+    padding: 5%;
+    /* padding-top: 40px; */
     justify-content: flex-start;
     align-items: flex-start;
 }

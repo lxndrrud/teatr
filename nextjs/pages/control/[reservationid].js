@@ -35,7 +35,7 @@ const ReservationDetailPage = () => {
 
     return (
         <>
-            <MainLayout title={`Бронь #${reservation.id}`}>
+            <MainLayout title={`Информация о брони`}>
                 <ReservationDetail reservation={reservation} />
             </MainLayout>
         </>

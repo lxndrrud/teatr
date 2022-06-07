@@ -1,8 +1,18 @@
 .tooltipText {
+    display: flex;
+    flex-direction: row;
+    max-width: max-content;
+    display: flex;
+    flex-wrap: nowrap;
     padding: 0.5%;
     font-size: medium;
     background-color: #F1FAEE;
     border-radius: 10px;
+    visibility: visible;
+}
+
+.hiddenText {
+    visibility: hidden;
 }
 
 .tooltipButton {

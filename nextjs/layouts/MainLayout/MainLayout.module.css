@@ -15,8 +15,13 @@
     flex-wrap: wrap;
     flex-direction: column;
     align-items: start;
-    margin-left: 50px;
+    margin-left: 70px;
 }
+
+.mainContentExpanded {
+    margin-left: 270px;
+}
+
 
 .title{
     margin: 1rem 0px;
