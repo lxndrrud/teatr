@@ -5,9 +5,10 @@
     border-radius: 10px;
     background-color: #99d98c;
     padding: 1rem;
-    margin: 1%;
+    margin-right: 2%;
     max-width: 30%;
     width: 30%;
+    box-shadow: 1px 1px 10px #1c8501;
 }
 
 .playTitle {

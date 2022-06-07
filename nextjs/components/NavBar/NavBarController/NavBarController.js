@@ -41,7 +41,7 @@ const NavBarController = () => {
         
     }, [token])
     return (
-        <div className={styles.fixedContainer}>
+        <div className={styles.fixedContainer} >
         {
             isHidden
             ?

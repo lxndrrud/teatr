@@ -7,7 +7,9 @@
     max-width: 250px;
     min-width: 55px;
     background-color: #f1e1f5;
-    border-right: 1px solid black;
+    /* border-right: 1px solid black;*/
+    transition: all 0.6s ease;
+    box-shadow: 1px 1px 40px 10px blueviolet;
 }
 
 /* Стили навбара */
