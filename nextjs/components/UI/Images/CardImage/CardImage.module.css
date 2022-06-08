@@ -1,9 +1,9 @@
 .cardImage {
     display: flexbox;
     justify-content: center;
-    max-width: 500px;
-    height: 500px;
-    border-radius: 10px;
+    max-width: 200px;
+    height: 300px;
+    border-radius: 5px;
 }
 
 @media (max-width: 1550px) {

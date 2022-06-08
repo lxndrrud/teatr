@@ -41,11 +41,11 @@ const NavBarController = () => {
         
     }, [token])
     return (
-        <div className={styles.fixedContainer} >
+        <div className={styles.fixedContainer}>
         {
             isHidden
             ?
-               <Button onClick={() => { dispatch(toggleNavbar()) }}>
+               <Button onClick={() => { if (isHidden) dispatch(toggleNavbar()) }}>
                     <svg style={{width: "48px", height: "48px"}} viewBox="0 0 24 24">
                         <path fill="#000" d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
                     </svg>
@@ -57,7 +57,7 @@ const NavBarController = () => {
                         !isLoggedIn
                         ? (
                             <nav className={styles.navLinks}>
-                                <Button onClick={() => { dispatch(toggleNavbar()) }} >
+                                <Button onClick={() => { if(!isHidden) dispatch(toggleNavbar()) }} >
                                     <svg style={{width: "48px", height: "48px"}} viewBox="0 0 24 24">
                                         <path fill="#000" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
                                     </svg>
@@ -65,11 +65,14 @@ const NavBarController = () => {
                                 <div className={styles.logoContainer}>
                                     <Image className={styles.logoPicture } layout="fill" objectFit="cover" 
                                         src={mainLogo} alt="Главное лого"  />
-                                </div><CustomLink destination="/" text="Главная" style={styles.navLink} />
-                                <CustomLink destination="/repertoire" text="Репертуар" style={styles.navLink} />
-                                <CustomLink destination="/schedule" text="Расписание" style={styles.navLink} />
-                                <CustomLink destination="/register" text="Регистрация" style={styles.navLink} />
-                                <CustomLink destination="/login" text="Войти" style={styles.navLink} />
+                                </div>
+                                <div className={styles.linksContainer} >
+                                    <CustomLink destination="/" text="Главная"  />
+                                    <CustomLink destination="/repertoire" text="Репертуар"  />
+                                    <CustomLink destination="/schedule" text="Расписание"  />
+                                    <CustomLink destination="/register" text="Регистрация"  />
+                                    <CustomLink destination="/login" text="Войти"  />
+                                </div>
                             </nav>  
                             
                         )
@@ -84,13 +87,15 @@ const NavBarController = () => {
                                     <Image className={styles.logoPicture } layout="fill" objectFit="cover" 
                                         src={mainLogo} alt="Главное лого"  />
                                 </div>
-                                <CustomLink destination="/" text="Главная" style={styles.navLink} />
-                                <CustomLink destination="/repertoire" text="Репертуар" style={styles.navLink} />
-                                <CustomLink destination="/schedule" text="Расписание" style={styles.navLink} />
-                                <CustomLink destination="/control" text="Брони" style={styles.navLink} />
-                                <CustomButton type="submit" value="Выйти" 
-                                    onClickHook={logOutOnClick}
-                                    styleClass={styles.logOutButton}/>
+                                <div className={styles.linksContainer} >
+                                    <CustomLink destination="/" text="Главная"  />
+                                    <CustomLink destination="/repertoire" text="Репертуар"  />
+                                    <CustomLink destination="/schedule" text="Расписание"  />
+                                    <CustomLink destination="/control" text="Брони" />
+                                    <CustomButton type="submit" value="Выйти" 
+                                        onClickHook={logOutOnClick}
+                                        styleClass={styles.logOutButton}/>
+                                </div>
                             </nav>
                         )
                     }
