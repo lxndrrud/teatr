@@ -55,6 +55,10 @@
     padding-right: 5px;
 }
 
+.bordered {
+    border-bottom: 1px solid black;
+}
+
 
 
 

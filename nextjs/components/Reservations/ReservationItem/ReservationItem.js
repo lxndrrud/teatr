@@ -47,16 +47,16 @@ function ReservationItem({ reservation }) {
                             </svg>
                             <strong>Номер брони</strong>
                         </td>
-                        <td>{reservation.id}</td>
+                        <td className={styles.bordered}>{reservation.id}</td>
                     </tr>
-                    <tr>
+                    <tr >
                         <td>
                             <svg style={{ width: "24px", height:"24px", viewBox: "0 0 24 24", float: "left", marginRight: "10px"}}>
                                 <path fill="#000" d="M15,20A1,1 0 0,0 16,19V4H8A1,1 0 0,0 7,5V16H5V5A3,3 0 0,1 8,2H19A3,3 0 0,1 22,5V6H20V5A1,1 0 0,0 19,4A1,1 0 0,0 18,5V9L18,19A3,3 0 0,1 15,22H5A3,3 0 0,1 2,19V18H13A2,2 0 0,0 15,20Z" />   
                             </svg>
                             <strong>Название спектакля</strong>
                         </td>
-                        <td>{reservation.play_title}</td>
+                        <td className={styles.bordered}>{reservation.play_title}</td>
                     </tr>
                     <tr>
                         <td>
@@ -65,16 +65,16 @@ function ReservationItem({ reservation }) {
                             </svg>
                             <strong>Зал</strong>
                         </td>
-                        <td>{reservation.auditorium_title}</td>
+                        <td  className={styles.bordered}>{reservation.auditorium_title}</td>
                     </tr>
-                    <tr>
+                    <tr >
                         <td>
                             <svg style={{ width:"24px", height:"24px", viewBox: "0 0 24 24", float: "left", marginRight: "10px"}}>
                                 <path fill="#000" d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z" />
                             </svg>
                             <strong>Время сеанса</strong>
                         </td>
-                        <td>{reservation.session_timestamp}</td>
+                        <td className={styles.bordered}>{reservation.session_timestamp}</td>
                     </tr>
                     <tr>
                         <td>
@@ -83,7 +83,7 @@ function ReservationItem({ reservation }) {
                             </svg>
                             <strong>Количество мест</strong>
                         </td>
-                        <td>{reservation.slots.length}</td>
+                        <td className={styles.bordered}>{reservation.slots.length}</td>
                     </tr>
                     
                 </tbody>
