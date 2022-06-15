@@ -1,4 +1,12 @@
 
+/*
+@keyframes pulseAnimation {
+    50% { box-shadow: 1px 1px 40px  blueviolet; }
+    /*  box-shadow: 1px 1px 40px 10px blueviolet; *
+}
+*/
+
+
 .fixedContainer {
     position: fixed;
     display: flex;

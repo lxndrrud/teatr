@@ -10,7 +10,19 @@ body {
   font-family: Helvetica, sans-serif;
   font-size: 22px;
   /* background-color: #F1FAEE; */
-  background-color: rgb(251, 250, 209);
+  /*background-color: rgb(251, 250, 209);*/
+
+
+  /* Линейный градиент */
+  background: rgb(223, 218, 228);
+  background: linear-gradient(90deg, rgb(223, 218, 228) 0%, rgba(251,250,209,1) 30%);
+  
+
+  /* Радиальный градиент *
+  background: rgb(223,218,228);
+  background: radial-gradient(circle, rgba(223,218,228,1) 30%, rgba(251,250,209,1) 100%);
+  */
+  
   /* background-image: url("/masks.png"); */
   
     /*
