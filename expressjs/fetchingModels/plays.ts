@@ -3,6 +3,11 @@ import { KnexConnection } from "../knex/connections";
 import { PlayModel } from "../dbModels/plays";
 import { PlayBaseInterface, PlayInterface, PlayWithPosterInterface } from "../interfaces/plays";
 import { InnerErrorInterface } from "../interfaces/errors";
+import { UploadedFile } from "express-fileupload";
+import { UserRequestOption } from "../interfaces/users";
+import fs from "fs"
+import csvParser from "csv-parser";
+import { resolve } from "path";
 
 export interface PlayService {
     getAll(): Promise<PlayWithPosterInterface[] | InnerErrorInterface>
@@ -10,6 +15,8 @@ export interface PlayService {
     createPlay(payload: PlayBaseInterface): Promise<PlayInterface | InnerErrorInterface>
     updatePlay(idPlay: number, payload: PlayBaseInterface): Promise<InnerErrorInterface | undefined>
     deletePlay(idPlay: number): Promise<InnerErrorInterface | undefined>
+    createPlaysCSV(file: UploadedFile): 
+        Promise<InnerErrorInterface | void>
 }
 
 export class PlayFetchingModel implements PlayService {
@@ -108,5 +115,29 @@ export class PlayFetchingModel implements PlayService {
                 message: 'Внутренняя ошибка сервера при удалении спектакля!'
             }
         }
+    }
+    async createPlaysCSV(file: UploadedFile) {
+        let dataArray: PlayBaseInterface[] = []
+        fs.createReadStream(file.tempFilePath)
+            .pipe(csvParser())
+            .on("data", (data) => {
+                dataArray.push({ 
+                    title: data["Название"], 
+                    description: data["Описание"]
+                })
+            })
+            .on("end", async () => {
+                let trx = await KnexConnection.transaction()
+                try {
+                    this.playDatabaseInstance.insertAll(trx, dataArray)
+                    await trx.commit()
+                } catch(e) {
+                    await trx.rollback()
+                    return <InnerErrorInterface>{
+                        code: 500,
+                        message: 'Внутренняя ошибка при вставке записей: ' + e
+                    }
+                }
+            })
     }
 }

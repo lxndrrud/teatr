@@ -13,3 +13,6 @@ playsRouter.route('/:idPlay')
     .get(playController.getSinglePlay.bind(playController))
     .put(playController.updatePlay.bind(playController))
     .delete(playController.deletePlay.bind(playController))
+
+playsRouter.route("/csv")
+    .post(playController.createPlaysCSV.bind(playController))

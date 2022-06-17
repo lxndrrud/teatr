@@ -132,5 +132,43 @@ export function UsersControllerTests() {
                 expect(response.status).to.equal(409)
             })
         })
+
+        describe("POST /expressjs/users/adminLogin", function() {
+            const adminLoginLink = `/expressjs/users/adminLogin`
+            const loginPayload: UserLoginInterface = {
+                email: "admin@admin.ru",
+                password: "123456"
+            }
+            const failLoginPayloadWrong: UserLoginInterface = {
+                email: "admin@admin.ru",
+                password: '123123123'
+            }
+            const failLoginPayloadForbidden: UserLoginInterface = {
+                email: "lxndrrud@yandex.ru",
+                password: "123456"
+            }
+            it("should fail (403 Forbidden for non-admin users)", async function() {
+                const response = await request(this.server)
+                    .post(adminLoginLink)
+                    .send(failLoginPayloadForbidden)
+                
+                expect(response.statusCode).to.equal(403)
+            })
+            it("should fail (401 wrong credentials are sent)", async function() {
+                const response = await request(this.server)
+                    .post(adminLoginLink)
+                    .send(failLoginPayloadWrong)
+            
+                expect(response.statusCode).to.equal(401)
+            })
+            it("should be OK (200 OK with token )", async function() {
+                const response = await request(this.server)
+                    .post(adminLoginLink)
+                    .send(loginPayload)
+
+                expect(response.statusCode).to.equal(200)
+                expect(response.body).to.haveOwnProperty("token")
+            })
+        })
     })
 }

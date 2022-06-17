@@ -4,6 +4,8 @@ import { PlayFetchingModel, PlayService } from "../fetchingModels/plays"
 import { PlayDatabaseModel } from "../dbModels/plays"
 import { isPlayBaseInterface, PlayBaseInterface, PlayInterface } from "../interfaces/plays"
 import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
+import csv from "csv-parser"
+import { UploadedFile } from "express-fileupload"
 
 export class PlayController {
     private playService
@@ -114,6 +116,36 @@ export class PlayController {
             return
         }
     
+        res.sendStatus(200).end()
+    }
+
+    /**
+     * Загрузка спектаклей CSV
+     */
+    async createPlaysCSV(req: Request, res: Response) {
+        if (!req.files) { 
+            res.status(400).send(<ErrorInterface>{
+                message: "Запрос без прикрепленного csv-файла!"
+            })
+            return
+        }
+        /*
+        if (!req.user) {
+            res.status(401).send(<ErrorInterface>{
+                message: "Неавторизованный запрос!"
+            })
+            return
+        }
+        */
+        
+        const response = await this.playService
+            .createPlaysCSV(<UploadedFile>req.files.csv)
+        if (isInnerErrorInterface(response)) {
+            res.status(response.code).send(<ErrorInterface>{
+                message: response.message
+            })
+            return
+        }
         res.sendStatus(200).end()
     }
 }

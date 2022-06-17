@@ -3,11 +3,13 @@ import { Knex } from "knex";
 import { DatabaseModel } from "./baseModel";
 import { PlayBaseInterface, PlayInterface, PlayQueryInterface } from "../interfaces/plays";
 import { images, plays, playsImages } from "./tables";
+import { AnyTxtRecord } from "dns";
 
 export interface PlayModel {
     getAll(payload: PlayQueryInterface): Knex.QueryBuilder | any
     get(payload: PlayQueryInterface): Knex.QueryBuilder | any
     insert(trx: Knex.Transaction, payload: PlayBaseInterface): Knex.QueryBuilder | any
+    insertAll(trx: Knex.Transaction, payload: PlayBaseInterface[]): Knex.QueryBuilder | any
     update(trx: Knex.Transaction, id: number, payload: { title?: string, description?: string }): Knex.QueryBuilder | any
     delete(trx: Knex.Transaction, id: number): Knex.QueryBuilder | any
     getAllWithPoster(payload: PlayQueryInterface): Knex.QueryBuilder | any
@@ -47,6 +49,12 @@ export class PlayDatabaseModel extends DatabaseModel implements PlayModel {
         return trx(plays)
             .insert(payload)
             .returning('*')
+    }
+
+    insertAll(trx: Knex.Transaction, payload: PlayBaseInterface[]) {
+        return trx(plays)
+            .insert(payload)
+            .returning("id")
     }
 
     update(trx: Knex.Transaction, id: number, payload: {

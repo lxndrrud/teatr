@@ -1,6 +1,6 @@
 import styles from '../Layout.module.css'
 import { useEffect } from 'react'
-import NavBarController from '../../components/NavBar/NavBarController/NavBarController'
+import AdminNavBar from '../../components/NavBar/AdminNavBar/AdminNavBar'
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleNavbar } from "../../store/actions/designAction"
 
@@ -11,12 +11,12 @@ export default function MainLayout({ children, title }) {
         ? styles.mainContent 
         : `${styles.mainContent} ${styles.mainContentExpanded}`
     useEffect(() => {
-        document.title = "Брони на Оборонной"
+        document.title = "Администрирование"
     })
 
     return (
         <div className={styles.layout}>
-            <NavBarController />
+            <AdminNavBar />
             <main className={mainContentStyle} onClick={() => {
                 if (!isHidden) {
                     dispatch(toggleNavbar())

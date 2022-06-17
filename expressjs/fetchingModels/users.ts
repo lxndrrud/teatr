@@ -15,6 +15,7 @@ export interface UserService {
     generateToken (trx: Knex.Transaction, user: UserInterface): Promise<UserInterface | InnerErrorInterface>
     createUser(payload: UserRegisterInterface): Promise<InnerErrorInterface | UserInterface>
     loginUser(payload: UserLoginInterface): Promise<string | InnerErrorInterface>
+    loginAdmin(payload: UserLoginInterface): Promise<string | InnerErrorInterface>
     getAll(): Promise<UserInterface[] | InnerErrorInterface>
     createAction(
         trx: Knex.Transaction, 
@@ -117,6 +118,68 @@ export class UserFetchingModel implements UserService {
             return <InnerErrorInterface>{
                 code: 401,
                 message: 'Пользователь с такими входными данными не найден!'
+            }
+        }
+        // Транзакция: сгенерировать токен для пользователя, сохранить в БД
+        const trx = await KnexConnection.transaction()
+        try {
+            const fetchedUser = await this.generateToken(trx, user)
+            if (isInnerErrorInterface(fetchedUser)) {
+                await trx.rollback()
+                return fetchedUser
+            }
+            await trx.commit()
+            if (!fetchedUser.token) {
+                return <InnerErrorInterface>{
+                    code: 500,
+                    message: 'Внутренняя ошибка сервера при генерации токена!'
+                }
+            }
+            return <string> fetchedUser.token
+        } catch (e) {
+            console.log(e)
+            await trx.rollback()
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера в транзакции логина!'
+            }
+        }  
+    }
+
+    /**
+     * * Логика логина для администраторской части сайта
+     */
+    async loginAdmin(payload: UserLoginInterface) {
+        // Получение пользователя и сравнение введенного пароля с хэшем в базе
+        let user: UserInterface 
+        try {
+            user = await this.userDatabaseInstance.get({email: payload.email})
+        } catch (e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: "Внутренняя ошибка при поиске пользователя!"
+            }
+        }
+        // Проверка пароля
+        if (!(user && compareSync(payload.password, user.password))) {
+            return <InnerErrorInterface>{
+                code: 401,
+                message: 'Пользователь с такими входными данными не найден!'
+            }
+        }
+        // Получение роли адмиинистратора
+        let role = await this.roleFetchingInstance.getAdminRole()
+        if (isInnerErrorInterface(role)) {
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске роли!'
+            }
+        }
+        // Проверка роли пользователя на соответствие роли администратора
+        if (user.id_role !== role.id) {
+            return <InnerErrorInterface>{
+                code: 403,
+                message: 'Вход запрещен!'
             }
         }
         // Транзакция: сгенерировать токен для пользователя, сохранить в БД

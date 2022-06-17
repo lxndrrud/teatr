@@ -64,6 +64,33 @@ export class UserController {
     }
 
     /**
+     * * Контроллер логина админа для администраторской части сайта
+     */
+    async loginAdmin(req: Request, res: Response) {
+         // * Проверка тела запроса
+         if (!isUserLoginInterface(req.body)) {
+            res.status(400).send(<ErrorInterface>{
+                message: 'Неверное тело запроса!'
+            })
+            return
+        }
+        let requestBody: UserLoginInterface = {...req.body}
+    
+        const token = await this.userService.loginAdmin(requestBody)
+    
+        if (isInnerErrorInterface(token)) {
+            res.status(token.code).send(<InnerErrorInterface>{
+                message: token.message
+            })
+            return
+        }
+    
+        res.status(200).send({
+            token: token
+        })
+    }
+
+    /**
      * * Получить всех пользователей с БД
      */
     async getAllUsers(req: Request, res: Response) {

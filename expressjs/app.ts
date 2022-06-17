@@ -1,5 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import fileUpload from 'express-fileupload';
 import { CronJob } from 'cron';
 import { processTime } from './cron/cron';
 import { prefixRouter } from './routes/prefixRouter';
@@ -9,6 +10,10 @@ import { UserRequestOption } from './interfaces/users';
 export const app = express();
 
 app.use(bodyParser.json())
+app.use(fileUpload({
+    useTempFiles: true,
+    limits: { fileSize: 5 * 1024 * 1024 }
+}))
 app.use(logger)
 
 app.use('/expressjs', prefixRouter);
