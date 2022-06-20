@@ -29,6 +29,8 @@ export interface SessionModel {
 
     insert(trx: Knex.Transaction, payload: SessionBaseInterface): Knex.QueryBuilder | any
 
+    insertAll(trx: Knex.Transaction, payload: SessionBaseInterface[]): Knex.QueryBuilder | any
+
     update(trx: Knex.Transaction, id: number, payload: {
         is_locked?: boolean,
         max_slots?: number,
@@ -113,6 +115,12 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
         return trx(sessions)
             .insert(payload)
             .returning('*')
+    }
+
+    insertAll(trx: Knex.Transaction, payload: SessionBaseInterface[]) {
+        return trx(sessions)
+            .insert(payload)
+            .returning("id")
     }
 
     update(trx: Knex.Transaction, id: number, payload: {

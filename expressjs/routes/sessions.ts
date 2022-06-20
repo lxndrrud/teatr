@@ -22,5 +22,8 @@ sessionsRouter.route('/')
     .get(sessionController.getSessions.bind(sessionController))
     .post(basicAuthMiddleware, sessionController.postSession.bind(sessionController))
 
+sessionsRouter.route("/csv")
+    .post(sessionController.createSessionsCSV.bind(sessionController))
+
 
 

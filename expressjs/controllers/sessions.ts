@@ -2,7 +2,8 @@ import { Request, Response } from "express"
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, isSessionBaseInterface, isSessionFilterQueryInterface } 
     from "../interfaces/sessions"
 import { SessionService } from "../fetchingModels/sessions"
-import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
+import { ErrorInterface, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
+import { UploadedFile } from "express-fileupload"
 
 
 export class SessionController {
@@ -56,6 +57,38 @@ export class SessionController {
         res.status(201).send({
             id: newSession.id
         })
+    }
+
+    async createSessionsCSV(req: Request, res: Response) {
+        if (!req.files) {
+            res.status(400).send(<ErrorInterface>{
+                message: "Запрос без прикрепленного csv-файла!"
+            })
+            return
+        }
+        //try {
+            const response = await this.sessionService.createSessionsCSV(<UploadedFile> req.files.csv)
+
+           
+            
+            if (isInnerErrorInterface(response)) {
+                res.status(response.code).send(<ErrorInterface>{
+                    message: response.message
+                })
+                return
+            }
+            
+            res.status(201).end()
+/*
+        } catch (e: any) {
+            console.log("here controller")
+            res.status(e.code).send(<ErrorInterface>{
+                message: e.message
+            })
+        }
+        */
+       
+        
     }
 
     async updateSession(req: Request, res: Response) {

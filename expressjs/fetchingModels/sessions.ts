@@ -1,4 +1,5 @@
-import { Request } from "express";
+import fs from "fs"
+import { UploadedFile } from "express-fileupload";
 import { Knex } from "knex";
 import { SessionModel } from "../dbModels/sessions";
 import { AuditoriumSessionFilterOption } from "../interfaces/auditoriums";
@@ -11,10 +12,14 @@ import { SlotIsReservedInterface, SlotInterface, SlotWithRowIdInterface } from "
 import { TimestampSessionFilterOptionDatabaseInterface, TimestampSessionFilterOptionInterface } from "../interfaces/timestamps"
 import { KnexConnection } from "../knex/connections";
 import { dateFromTimestamp, extendedDateFromTimestamp, extendedTimestamp } from "../utils/timestamp"
+import csvParser from "csv-parser";
+import { Readable } from "stream";
+import { FileStreamHelper } from "../utils/fileStreams";
 
 
 export interface SessionService {
     createSession(payload: SessionBaseInterface): Promise<SessionDatabaseInterface | InnerErrorInterface>
+    createSessionsCSV(file: UploadedFile): Promise<undefined | InnerErrorInterface>
     updateSession(idSession: number, payload: SessionBaseInterface): Promise<InnerErrorInterface | undefined>
     deleteSession(idSession: number): Promise<InnerErrorInterface | undefined>
     getUnlockedSessions(): Promise<SessionInterface[] | InnerErrorInterface>
@@ -59,6 +64,36 @@ export class SessionFetchingModel implements SessionService {
             return <InnerErrorInterface>{
                 code: 500,
                 message: "Внутреннняя ошибка сервера при создании сеанса!"
+            }
+        }
+    }
+
+    public async createSessionsCSV(file: UploadedFile) {
+        let dataArray: SessionBaseInterface[] = []
+        const data = await FileStreamHelper
+            .readData(fs.createReadStream(file.tempFilePath).pipe(csvParser()))
+        for (const chunk of data) {
+            let toPush: SessionBaseInterface = {
+                id_play: parseInt(chunk["Спектакль"]) ,
+                id_price_policy: parseInt(chunk["Ценовая политика"]),
+                timestamp: chunk["Дата и время"],
+                is_locked: chunk["Закрыт"] === "Да"? true: false,
+                max_slots: parseInt(chunk["Максимум мест"])
+            }
+            dataArray.push(toPush)
+        }
+        fs.unlinkSync(file.tempFilePath)
+        let trx = await KnexConnection.transaction()
+        try {
+            await this.sessionDatabaseInstance.insertAll(trx, dataArray)
+            await trx.commit()
+        } catch(e) {
+            console.log("here")
+            console.error(e)
+            await trx.rollback()
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка при вставке записей: ' + e
             }
         }
     }

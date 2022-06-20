@@ -8,6 +8,7 @@ import { UserRequestOption } from "../interfaces/users";
 import fs from "fs"
 import csvParser from "csv-parser";
 import { resolve } from "path";
+import { FileStreamHelper } from "../utils/fileStreams";
 
 export interface PlayService {
     getAll(): Promise<PlayWithPosterInterface[] | InnerErrorInterface>
@@ -118,26 +119,26 @@ export class PlayFetchingModel implements PlayService {
     }
     async createPlaysCSV(file: UploadedFile) {
         let dataArray: PlayBaseInterface[] = []
-        fs.createReadStream(file.tempFilePath)
-            .pipe(csvParser())
-            .on("data", (data) => {
-                dataArray.push({ 
-                    title: data["Название"], 
-                    description: data["Описание"]
-                })
+        const data = await FileStreamHelper
+            .readData(fs.createReadStream(file.tempFilePath).pipe(csvParser()))
+        for (const chunk of data) {
+            dataArray.push({ 
+                title: chunk["Название"], 
+                description: chunk["Описание"]
             })
-            .on("end", async () => {
-                let trx = await KnexConnection.transaction()
-                try {
-                    this.playDatabaseInstance.insertAll(trx, dataArray)
-                    await trx.commit()
-                } catch(e) {
-                    await trx.rollback()
-                    return <InnerErrorInterface>{
-                        code: 500,
-                        message: 'Внутренняя ошибка при вставке записей: ' + e
-                    }
-                }
-            })
+        }
+        fs.unlinkSync(file.tempFilePath)
+        let trx = await KnexConnection.transaction()
+        try {
+            await this.playDatabaseInstance.insertAll(trx, dataArray)
+            await trx.commit()
+        } catch(e) {
+            console.error(e)
+            await trx.rollback()
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка при вставке записей: ' + e
+            }
+        }
     }
 }
