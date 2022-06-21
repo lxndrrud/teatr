@@ -52,6 +52,10 @@ export class PlayMockModel implements PlayModel {
         return [newPlay]
     }
 
+    insertAll(trx: Knex.Transaction<any, any[]>, payload: PlayBaseInterface[]) {
+        
+    }
+
     update(trx: Knex.Transaction, id: number, payload: {
         title?: string,
         description?: string

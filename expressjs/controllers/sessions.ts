@@ -66,29 +66,15 @@ export class SessionController {
             })
             return
         }
-        //try {
-            const response = await this.sessionService.createSessionsCSV(<UploadedFile> req.files.csv)
-
-           
-            
-            if (isInnerErrorInterface(response)) {
-                res.status(response.code).send(<ErrorInterface>{
-                    message: response.message
-                })
-                return
-            }
-            
-            res.status(201).end()
-/*
-        } catch (e: any) {
-            console.log("here controller")
-            res.status(e.code).send(<ErrorInterface>{
-                message: e.message
+        const response = await this.sessionService.createSessionsCSV(<UploadedFile> req.files.csv)
+        if (isInnerErrorInterface(response)) {
+            res.status(response.code).send(<ErrorInterface>{
+                message: response.message
             })
+            return
         }
-        */
-       
         
+        res.status(201).end()
     }
 
     async updateSession(req: Request, res: Response) {

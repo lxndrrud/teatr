@@ -4,6 +4,8 @@ import { agent as request } from "supertest";
 import { SessionBaseInterface, SessionDatabaseInterface, SessionFilterQueryInterface } from "../../interfaces/sessions";
 import { KnexConnection } from "../../knex/connections";
 import { timestampFromMoment } from "../../utils/timestamp";
+import fs from "fs"
+import path from "path";
 
 
 export function SessionsControllerTest() {
@@ -20,6 +22,7 @@ export function SessionsControllerTest() {
                     password: "123456"
                 })
             this.token = tokenResponse.body.token
+            return
         })
         describe("GET /expressjs/sessions/", function() {
             const getSessionsLink = `/expressjs/sessions`
@@ -281,6 +284,44 @@ export function SessionsControllerTest() {
                     .query(failFilterQueryPayload)
 
                 expect(response.status).to.equal(400)
+            })
+        })
+
+        describe("POST /expressjs/sessions/csv", function() {
+            const postSessionsCSVLink = `/expressjs/sessions/csv/`
+            it("should fail because of invalid csv file", async function() {
+                const response = await request(this.server)
+                    .post(postSessionsCSVLink)
+                    .set('content-type', 'multipart/form-data')
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/sessions/test_sessions_FAIL.csv"), 
+                        "test_sessions.csv")
+
+                expect(response.statusCode).to.equal(400)
+            })
+
+            it("should fail because request is sent without file", async function() {
+                const response = await request(this.server)
+                    .post(postSessionsCSVLink)
+                    .set('content-type', 'multipart/form-data')
+                    /*
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/sessions/test_sessions_FAIL.csv"), 
+                        "test_sessions.csv")
+                        */
+
+                expect(response.statusCode).to.equal(400)
+            })
+
+            it("should be OK", async function() {
+                const response = await request(this.server)
+                    .post(postSessionsCSVLink)
+                    .set('content-type', 'multipart/form-data')
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/sessions/test_sessions_OK.csv"), 
+                        "test_sessions.csv")
+
+                expect(response.statusCode).to.equal(201)
             })
         })
 

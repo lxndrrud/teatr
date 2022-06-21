@@ -2,6 +2,7 @@ import { assert, should, expect } from "chai";
 import { agent as request } from "supertest";
 import { PlayBaseInterface } from "../../interfaces/plays";
 import { KnexConnection } from "../../knex/connections";
+import fs from "fs"
 
 export function PlaysControllerTests () {
     describe("Plays contoller", () => {
@@ -142,6 +143,44 @@ export function PlaysControllerTests () {
                     .delete(failDeleteLink)
 
                 expect(response.status).to.equal(404)
+            })
+        })
+
+        describe("POST /expressjs/plays/csv", function() {
+            const postPlaysCSVLink = `/expressjs/plays/csv/`
+            it("should fail because of invalid csv file", async function() {
+                const response = await request(this.server)
+                    .post(postPlaysCSVLink)
+                    .set('content-type', 'multipart/form-data')
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/plays/test_plays_FAIL.csv"), 
+                        "test_plays.csv")
+
+                expect(response.statusCode).to.equal(400)
+            })
+
+            it("should fail because request is sent without file", async function() {
+                const response = await request(this.server)
+                    .post(postPlaysCSVLink)
+                    .set('content-type', 'multipart/form-data')
+                    /*
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/plays/test_plays_FAIL.csv"), 
+                        "test_plays.csv")
+                        */
+
+                expect(response.statusCode).to.equal(400)
+            })
+
+            it("should be OK", async function() {
+                const response = await request(this.server)
+                    .post(postPlaysCSVLink)
+                    .set('content-type', 'multipart/form-data')
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/plays/test_plays_OK.csv"), 
+                        "test_plays.csv")
+
+                expect(response.statusCode).to.equal(201)
             })
         })
     })
