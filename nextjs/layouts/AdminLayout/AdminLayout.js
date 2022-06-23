@@ -4,7 +4,7 @@ import AdminNavBar from '../../components/NavBar/AdminNavBar/AdminNavBar'
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleNavbar } from "../../store/actions/designAction"
 
-export default function MainLayout({ children, title }) {
+export default function AdminLayout({ children, title }) {
     const dispatch = useDispatch()
     let isHidden = useSelector(state => state.design.navbarIsHidden)
     let mainContentStyle = isHidden 

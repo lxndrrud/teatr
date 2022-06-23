@@ -1,52 +1,42 @@
-import React, { useState } from 'react'
-import { Button } from "react-bootstrap"
+import React from 'react'
+import CustomButton from '../CustomButton/CustomButton'
+import ErrorMessage from '../ErrorMessage/ErrorMessage'
+import { useSelector } from "react-redux"
+import styles from "./FilePicker.module.css"
 
-const FilePicker = ({id}) => {
-    let [isError, setIsError] = useState(false)
-    let [error, setError] = useState()
-    let [selectedFile, setSelectedFile] = useState()
-    onFileChange = event => {
-        // Update the state
-        setSelectedFile(event.target.files[0])
-      
-    };
-    // On file upload (click the upload button)
-    onFileUpload = () => {
+const FilePicker = ({ onClickHook, onChangeHook }) => {
+    let error = useSelector(state => state.session.error)
+    let success = useSelector(state => state.session.success)
     
-        // Create an object of formData
-        const formData = new FormData();
-      
-        // Update the formData object
-        formData.append(
-          id,
-          selectedFile,
-          selectedFile.name
-        );
-      
-        // Details of the uploaded file
-        console.log(this.state.selectedFile);
-      
-        // Request made to the backend api
-        // Send formData object
-        
-        //axios.post("api/uploadfile", formData);
-
-        // TODO Сделать тут action для загрузки файла на сервер
-      };
-      
+    const onFileChange = event => {
+        // Update the state
+        onChangeHook(event.target.files[0])
+    };
     return (
         <div>
             <span>Выберите файл</span>
+            <input id="upload" type="file" onChange={onFileChange} style={{ display: "none"}} />
+            <label for="upload" class="button" 
+                style={{border: "1px solid #ae2876", color: "#F1FAEE", backgroundColor: "#ae2876" ,
+                borderRadius: "10px", padding: "10px", display: "flex"}}>
+                Загрузить
+            </label>
+            <CustomButton type="submit" 
+                onClickHook={onClickHook} 
+                value="Загрузить файл" 
+                buttonType={'green'}/>
             {
-                isError 
+                success
                 ?
-                <span style={{ color: "red" }}>
-                    {error}
+                <span>
+                    {success}
                 </span>
-                : null
+                : (error
+                    ?
+                    <ErrorMessage text={error} />
+                    : null)
             }
-            <input id={id} type="file" onChange={onFileChange} />
-            <Button />
+            
         </div>
     )
 }

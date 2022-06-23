@@ -1,0 +1,17 @@
+
+.uploadButtonLabel {
+    /* display: flex;*/
+    flex-wrap: nowrap;
+    text-decoration: none;
+    color: #F1FAEE;
+    font-size: 22px;
+    font-weight: bold;
+    border: 3px solid ;
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+    min-width: 50px;
+    color: #F1FAEE;
+    border-color: #ae2876;
+    background-color: #ae2876;
+}

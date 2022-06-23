@@ -1,5 +1,5 @@
-import { FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS, 
-    FETCH_SESSIONS_BY_PLAY, FETCH_SESSION_FILTER_OPTIONS, FETCH_SLOTS } from '../types'
+import { CLEAR_SUCCESS_ERROR_SESSION, ERROR_SESSION, FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS, 
+    FETCH_SESSIONS_BY_PLAY, FETCH_SESSION_FILTER_OPTIONS, FETCH_SLOTS, SUCCESS_SESSION } from '../types'
 
 
 
@@ -85,4 +85,37 @@ export const fetchFilteredSessions = (date, auditoriumTitle, playTitle) => async
             payload: json_
         })
     }
+}
+
+export const createSessionsCSV = (file) => async dispatch => {
+    const formData = new FormData()
+    formData.append('csv', file)
+    const response = await fetch('/expressjs/sessions/csv', {
+        /*headers: {
+            'Content-Type': 'multipart/form-data',
+        },*/
+        method: "POST",
+        body: formData
+    })
+    console.log(response.status)
+
+    if (response.status !== 201 ) {
+        let body = await response.json()
+        dispatch({
+            type: ERROR_SESSION,
+            payload: body.message
+        })
+    }
+    else {
+        dispatch({
+            type: SUCCESS_SESSION,
+            payload: "Спектакли успешно загружены!"
+        })
+    }
+}
+
+export const clearSuccessErrorSession = () => async dispatch => {
+    dispatch({
+        type: CLEAR_SUCCESS_ERROR_SESSION
+    })
 }

@@ -122,11 +122,11 @@ export class PlayFetchingModel implements PlayService {
         const data = await FileStreamHelper
             .readData(fs.createReadStream(file.tempFilePath).pipe(csvParser()))
         for (const chunk of data) {
-            if (chunk["Номер строки"] === "") return <InnerErrorInterface> {
+            if (!chunk["Номер строки"]) return <InnerErrorInterface> {
                 code: 400,
                 message: `Не указан номер строки в файле!`
             }
-            else if (chunk["Название"] === "") return <InnerErrorInterface> {
+            else if (!chunk["Название"]) return <InnerErrorInterface> {
                 code: 400,
                 message: `В строке ${chunk["Номер строки"]} не указано название спектакля!`
             }

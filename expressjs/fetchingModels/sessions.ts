@@ -73,29 +73,30 @@ export class SessionFetchingModel implements SessionService {
         const data = await FileStreamHelper
             .readData(fs.createReadStream(file.tempFilePath).pipe(csvParser()))
         for (const chunk of data) {
-            if (chunk["Номер строки"] === "") return <InnerErrorInterface> {
+            if (!chunk["Номер строки"]) return <InnerErrorInterface> {
                 code: 400,
                 message: `Не указан номер строки в файле!`
             }   
-            else if (chunk["Спектакль" ]=== "") return <InnerErrorInterface> {
+            else if (!chunk["Спектакль" ]) return <InnerErrorInterface> {
                 code: 400,
                 message: `В строке ${chunk["Номер строки"]} не указан идентификатор спектакля!`
             }
-            else if (chunk["Ценовая политика"] === "") return <InnerErrorInterface> {
+            else if (!chunk["Ценовая политика"]) return <InnerErrorInterface> {
                 code: 400,
                 message: `В строке ${chunk["Номер строки"]} не указан идентификатор ценовой политики!`
             }
-            else if (chunk["Максимум мест"] === "") return <InnerErrorInterface> {
+            else if (!chunk["Максимум мест"]) return <InnerErrorInterface> {
                 code: 400,
                 message: `В строке ${chunk["Номер строки"]} не указан максимум мест для брони!`
             }
-            dataArray.push(<SessionBaseInterface> {
+            let toPush = <SessionBaseInterface> {
                 id_play: parseInt(chunk["Спектакль"]) ,
                 id_price_policy: parseInt(chunk["Ценовая политика"]),
                 timestamp: chunk["Дата и время"],
                 is_locked: chunk["Закрыт"] === "Да"? true: false,
                 max_slots: parseInt(chunk["Максимум мест"])
-            })
+            }
+            dataArray.push(toPush)
         }
         fs.unlinkSync(file.tempFilePath)
         let trx = await KnexConnection.transaction()

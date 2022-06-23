@@ -14,8 +14,9 @@ body {
 
 
   /* Линейный градиент */
-  background: rgb(223, 218, 228);
-  background: linear-gradient(90deg, rgb(223, 218, 228) 0%, rgba(251,250,209,1) 30%);
+  background-color: #F1FAEE;
+  /* background: rgb(223, 218, 228);
+  background: linear-gradient(90deg, rgb(223, 218, 228) 0%, rgba(251,250,209,1) 30%); */
   
 
   /* Радиальный градиент *

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import FilePicker from "../components/UI/FilePicker/FilePicker";
-import MainLayout from "../layouts/MainLayout/MainLayout";
-import {createSessionsCSV} from "../store/actions/sessionAction"
+import AdminLayout from "../../../layouts/AdminLayout/AdminLayout";
+import { createSessionsCSV } from "../store/actions/sessionAction"
 
-export default function TestPage() {
+export default function SessionCSVUploadingPage() {
     const dispatch = useDispatch()
     let [selectedFile, setSelectedFile] = useState()
     const onChangeHook = (file) => {
@@ -14,8 +14,8 @@ export default function TestPage() {
         dispatch(createSessionsCSV(selectedFile))
     }
     return (
-        <MainLayout title="Тестовая страница">
+        <AdminLayout title="Импорт сеансов">
             <FilePicker onClickHook={onButtonClick} onChangeHook={onChangeHook} />
-        </MainLayout>
+        </AdminLayout>
     )
 }
