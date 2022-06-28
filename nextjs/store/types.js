@@ -1,6 +1,9 @@
 // Play Reducer
 export const FETCH_PLAY = 'FETCH_PLAY'
 export const FETCH_PLAYS = 'FETCH_PLAYS'
+export const ERROR_PLAY = 'ERROR_PLAY'
+export const SUCCESS_PLAY = 'SUCCESS_PLAY'
+export const CLEAR_SUCCESS_ERROR_PLAY = "CLEAR_SUCCESS_ERROR_PLAY"
 
 // Session Reducer
 export const FETCH_SESSION = 'FETCH_SESSION'

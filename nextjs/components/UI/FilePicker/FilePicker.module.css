@@ -1,7 +1,9 @@
 
 .uploadButtonLabel {
-    /* display: flex;*/
+    display: flex;
+    flex-direction: row;
     flex-wrap: nowrap;
+    justify-content: center;
     text-decoration: none;
     color: #F1FAEE;
     font-size: 22px;
@@ -11,6 +13,7 @@
     margin: 5px;
     border-radius: 10px;
     min-width: 50px;
+    max-width: 200px;
     color: #F1FAEE;
     border-color: #ae2876;
     background-color: #ae2876;

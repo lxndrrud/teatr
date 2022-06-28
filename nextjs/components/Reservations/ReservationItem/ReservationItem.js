@@ -31,10 +31,10 @@ function ReservationItem({ reservation }) {
             {
                 !reservation.session_is_locked
                 ? 
-                    <Card.Header className={styles.cardHeader}>
+                    <Card.Header className={`${styles.cardHeader} ${styles.unlockedCardHeader}`}>
                         Сеанс еще не состоялся!
                     </Card.Header>
-                :   <Card.Header className={styles.invisibleCardHeader}>
+                :   <Card.Header className={`${styles.cardHeader} ${styles.lockedCardHeader}`}>
                         Сеанс состоялся!
                     </Card.Header>
             }

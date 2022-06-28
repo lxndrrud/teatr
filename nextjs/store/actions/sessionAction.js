@@ -97,7 +97,6 @@ export const createSessionsCSV = (file) => async dispatch => {
         method: "POST",
         body: formData
     })
-    console.log(response.status)
 
     if (response.status !== 201 ) {
         let body = await response.json()
@@ -108,7 +107,7 @@ export const createSessionsCSV = (file) => async dispatch => {
     }
     else {
         dispatch({
-            type: SUCCESS_SESSION,
+            type: SUCCESS_PLAY,
             payload: "Спектакли успешно загружены!"
         })
     }

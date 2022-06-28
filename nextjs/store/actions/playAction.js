@@ -1,4 +1,4 @@
-import { FETCH_PLAY, FETCH_PLAYS } from '../types'
+import { FETCH_PLAY, FETCH_PLAYS, ERROR_PLAY, CLEAR_SUCCESS_ERROR_PLAY } from '../types'
 
 
 
@@ -18,5 +18,37 @@ export const fetchPlays = () => async dispatch =>  {
     dispatch({
         type: FETCH_PLAYS,
         payload: json_
+    })
+}
+
+export const createPlaysCSV = (file) => async dispatch => {
+    const formData = new FormData()
+    formData.append('csv', file)
+    const response = await fetch('/expressjs/plays/csv', {
+        /*headers: {
+            'Content-Type': 'multipart/form-data',
+        },*/
+        method: "POST",
+        body: formData
+    })
+
+    if (response.status !== 201 ) {
+        let body = await response.json()
+        dispatch({
+            type: ERROR_PLAY,
+            payload: body.message
+        })
+    }
+    else {
+        dispatch({
+            type: SUCCESS_SESSION,
+            payload: "Спектакли успешно загружены!"
+        })
+    }
+}
+
+export const clearSuccessErrorPlay = () => async dispatch => {
+    dispatch({
+        type: CLEAR_SUCCESS_ERROR_PLAY
     })
 }

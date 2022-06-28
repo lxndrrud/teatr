@@ -123,7 +123,7 @@ const ReservationFilter = () => {
                 type="number" inputStyleClass={styles.inputNumber} min="1" />
 
             {
-                error !== ''
+                error !== null
                 ? <ErrorMessage text={error} />
                 : null
             }

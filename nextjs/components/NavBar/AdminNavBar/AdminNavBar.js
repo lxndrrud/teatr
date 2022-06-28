@@ -70,6 +70,11 @@ const NavBarController = () => {
                                         <IconSVG data="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
                                         <CustomLink destination="/reservation-admin" text="Главная"  />
                                     </span>
+                                    <span>
+                                        <IconSVG data="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
+                                        <CustomLink destination="/reservation-admin/csv/session"
+                                            text="Загрузка сеансов"  />
+                                    </span>
                                 </div>
                             </nav>  
                             
