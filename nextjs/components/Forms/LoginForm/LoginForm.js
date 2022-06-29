@@ -8,7 +8,7 @@ import { errorSetDefault, logIn } from "../../../store/actions/userAction"
 import styles from "./LoginForm.module.css"
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 
-const LoginForm = () => {
+function LoginForm({ pushToDestination="/", isAdmin=false }) {
     const dispatch = useDispatch()
     const router = useRouter()
     const store = useStore()
@@ -20,22 +20,22 @@ const LoginForm = () => {
 
     useEffect(() => {
         if (token && token.length !== 0) {
-            router.push('/')
+            router.push(pushToDestination)
         }
     })
 
     const sendPostRequest = (e) => {
         e.preventDefault()
-        
-        
-        dispatch(logIn(email, password))
-        .then(() => {
-            const errorFromStore = store.getState().user.error 
-            if (errorFromStore !== null) {
-                setError(errorFromStore)
-                dispatch(errorSetDefault())
-            }
-        })
+        if (!isAdmin) {
+            dispatch(logIn(email, password))
+            .then(() => {
+                const errorFromStore = store.getState().user.error 
+                if (errorFromStore !== null) {
+                    setError(errorFromStore)
+                    dispatch(errorSetDefault())
+                }
+            })
+        }
     }
     return (
         <BaseForm styleClass={styles.loginForm}>

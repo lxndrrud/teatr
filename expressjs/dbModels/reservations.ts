@@ -219,7 +219,7 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
                 if (idUser) 
                     builder.andWhere('r.id_user', idUser)
             })
-            .where('s.is_locked', false)
+            //.where('s.is_locked', false)
             .join(`${sessions} as s`, 's.id', 'r.id_session')
             .orderBy('s.timestamp', 'asc')
             .distinct()
@@ -230,7 +230,7 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
             .select(
                 KnexConnection.ref('title').withSchema('a')
             )
-            .where('s.is_locked', false)
+            //.where('s.is_locked', false)
             .andWhere(builder => {
                 if (idUser) 
                     builder.andWhere('r.id_user', idUser)
@@ -249,7 +249,7 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
             .select(
                 KnexConnection.ref('title').withSchema('p')
             )
-            .where('s.is_locked', false)
+            //.where('s.is_locked', false)
             .andWhere(builder => {
                 if (idUser) 
                     builder.andWhere('r.id_user', idUser)

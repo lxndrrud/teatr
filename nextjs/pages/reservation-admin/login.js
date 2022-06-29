@@ -1,8 +1,12 @@
 import React from 'react'
+import AdminLayout from '../../layouts/AdminLayout/AdminLayout'
+import LoginForm from '../../components/Forms/LoginForm/LoginForm'
 
 const AdminLoginPage = () => {
     return (
-        <div>AdminLoginPage</div>
+        <AdminLayout title='Вход'>
+            <LoginForm pushToDestination="/reservation-admin" />
+        </AdminLayout>
     )
 }
 

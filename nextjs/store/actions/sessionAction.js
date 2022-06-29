@@ -107,7 +107,7 @@ export const createSessionsCSV = (file) => async dispatch => {
     }
     else {
         dispatch({
-            type: SUCCESS_PLAY,
+            type: SUCCESS_SESSION,
             payload: "Спектакли успешно загружены!"
         })
     }

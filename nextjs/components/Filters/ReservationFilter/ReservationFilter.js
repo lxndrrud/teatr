@@ -6,6 +6,7 @@ import styles from "./ReservationFilter.module.css"
 import { useDispatch, useSelector} from 'react-redux'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { fetchFilteredReservations, fetchReservationFilterOptions } from '../../../store/actions/reservationAction'
+import InputDate from '../../UI/InputDate/InputDate'
 
 const ReservationFilter = () => {
     const dispatch = useDispatch()
@@ -24,8 +25,15 @@ const ReservationFilter = () => {
     }, [])
 
     // Функции для синронизации состояния с input`ами
+    /*
     const syncDate = (e) => {
         if (e.target.value === 'None') setDate()
+        else setDate(e.target.value)
+    }
+    */
+
+    const syncDate = (e) => {
+        if (!e.target.value) setDate()
         else setDate(e.target.value)
     }
     const syncAuditoriumTitle = (e) => {
@@ -80,9 +88,8 @@ const ReservationFilter = () => {
             showLocked, reservationNumber))
     }
 
-    return (
-        <div className={styles.container}>
-            <Select onChange={syncDate}>
+    /*
+    <Select onChange={syncDate}>
                 <option value="None">Все даты</option>
 
                 {reservationFilterOptions.dates && reservationFilterOptions.dates.map(item => (
@@ -91,7 +98,11 @@ const ReservationFilter = () => {
                   </option>  
                 ))}
             </Select>
+    */
 
+    return (
+        <div className={styles.container}>
+            <InputDate onChange={syncDate} />
             <Select onChange={syncAuditoriumTitle}>
                 <option value="None">Все залы</option>
 

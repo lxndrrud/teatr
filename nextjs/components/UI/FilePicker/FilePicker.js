@@ -6,7 +6,7 @@ import styles from "./FilePicker.module.css"
 import SuccessMessage from '../SuccessMessage/SuccessMessage'
 import IconSVG from '../IconSVG/IconSVG'
 
-const FilePicker = ({ onClickHook, onChangeHook }) => {
+const FilePicker = ({ onClickHook, onChangeHook, isMultiple=false }) => {
     let error = useSelector(state => state.session.error)
     let success = useSelector(state => state.session.success)
     let [filename, setFilename] = useState(null)
@@ -14,7 +14,17 @@ const FilePicker = ({ onClickHook, onChangeHook }) => {
     const onFileChange = event => {
         // Update the state
         onChangeHook(event.target.files[0])
-        setFilename(event.target.files[0].name)
+        if (!isMultiple) { 
+            setFilename(event.target.files[0].name)
+            return
+        }
+        if (!filename) setFilename("")
+        let filenames = filename ? filename : ''
+        for (let file of event.target.files) {
+            filenames += `${file.name}, `
+        }
+        filenames.slice(0, -2)
+        setFilename(filenames)
     };
     return (
         <div>
@@ -23,7 +33,13 @@ const FilePicker = ({ onClickHook, onChangeHook }) => {
                 ? <span>{filename}</span>
                 : null
             }
-            <input id="upload" type="file" onChange={onFileChange} style={{ display: "none"}} />
+            <input 
+                id="upload" 
+                type="file" 
+                onChange={onFileChange} 
+                style={{ display: "none"}} 
+                multiple={ isMultiple }
+            />
             <label for="upload" className={styles.uploadButtonLabel} >
                 <IconSVG data={"M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"}
                     color="#fff" />

@@ -267,15 +267,18 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
     getFilteredSessions(userQueryPayload: SessionFilterQueryInterface) {
         return this.getUnlockedSessions()
             .andWhere(builder => {
-                if (userQueryPayload.date !== '') {
+                if (userQueryPayload.date !== undefined 
+                        && userQueryPayload.date !== 'undefined') {
                     builder.andWhere(innerBuilder => {
                         innerBuilder.andWhere('s.timestamp', '>=', `${userQueryPayload.date}T00:00:00`)
                         innerBuilder.andWhere('s.timestamp', '<', getNextDayOfTimestamp(`${userQueryPayload.date}`))
                     })
                 }
-                if (userQueryPayload.auditorium_title !== '')
+                if (userQueryPayload.auditorium_title !== undefined  
+                        && userQueryPayload.auditorium_title !== 'undefined')
                     builder.andWhere('a.title', userQueryPayload.auditorium_title)
-                if (userQueryPayload.play_title !== '')
+                if (userQueryPayload.play_title !== undefined 
+                        && userQueryPayload.play_title !== 'undefined')
                     builder.andWhere('p.title', userQueryPayload.play_title)
             })
     }

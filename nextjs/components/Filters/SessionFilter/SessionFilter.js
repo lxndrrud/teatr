@@ -4,6 +4,7 @@ import CustomButton from "../../UI/CustomButton/CustomButton"
 import Select from '../../UI/Select/Select'
 import styles from './SessionFilter.module.css'
 import { fetchFilteredSessions, fetchSessionFilterOptions } from "../../../store/actions/sessionAction"
+import InputDate from '../../UI/InputDate/InputDate'
 
 const SessionFilter = () => {
     const dispatch = useDispatch()
@@ -19,26 +20,32 @@ const SessionFilter = () => {
         dispatch(fetchFilteredSessions(date, auditoriumTitle, playTitle))
     } 
 
+    /*
     const syncDate = (e) => {
         if (e.target.value === 'None') setDate('')
         else setDate(e.target.value)
     }
+    */
+    const syncDate = (e) => {
+        if (!e.target.value) setDate()
+        else setDate(e.target.value)
+    }
+    
 
     const syncAuditoriumTitle = (e) => {
-        if (e.target.value === 'None') setAuditoriumTitle('')
+        if (e.target.value === 'None') setAuditoriumTitle()
         else setAuditoriumTitle(e.target.value)
     }
 
     const syncPlayTitle = (e) => {
-        if (e.target.value === 'None') setPlayTitle('')
+        if (e.target.value === 'None') setPlayTitle()
         else setPlayTitle(e.target.value)
     }
 
     const filterOptions = useSelector(state => state.session.filterOptions)
 
-    return (
-        <div className={styles.container}>
-            <Select onChange={syncDate}>
+    /*
+    <Select onChange={syncDate}>
                 <option value="None">Все даты</option>
                 {filterOptions.dates && filterOptions.dates.map(item => (
                   <option value={item.date}>
@@ -46,6 +53,10 @@ const SessionFilter = () => {
                   </option>  
                 ))}
             </Select>
+    */
+    return (
+        <div className={styles.container}>
+            <InputDate onChange={syncDate} />
             <Select onChange={syncAuditoriumTitle}>
                 <option value="None">Все залы</option>
                 {filterOptions.auditoriums && filterOptions.auditoriums.map(item => (

@@ -1,4 +1,4 @@
-import { FETCH_PLAY, FETCH_PLAYS, ERROR_PLAY, CLEAR_SUCCESS_ERROR_PLAY } from '../types'
+import { FETCH_PLAY, FETCH_PLAYS, ERROR_PLAY, CLEAR_SUCCESS_ERROR_PLAY, SUCCESS_PLAY } from '../types'
 
 
 
@@ -41,7 +41,7 @@ export const createPlaysCSV = (file) => async dispatch => {
     }
     else {
         dispatch({
-            type: SUCCESS_SESSION,
+            type: SUCCESS_PLAY,
             payload: "Спектакли успешно загружены!"
         })
     }

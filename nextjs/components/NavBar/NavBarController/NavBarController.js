@@ -11,8 +11,6 @@ import styles from "../NavBar.module.css"
 import mainLogo from "../../../storage/index-logo.png"
 import { logOut } from "../../../store/actions/userAction"
 import IconSVG from '../../UI/IconSVG/IconSVG'
-/*import menuIcon from "../../../storage/menu.png"
-import closeIcon from "../../../storage/close.png"*/
 
 
 const NavBarController = () => {

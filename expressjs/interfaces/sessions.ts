@@ -23,13 +23,15 @@ export interface SessionInterface extends SessionDatabaseInterface {
 }
 
 export interface SessionFilterQueryInterface {
-    date: string
-    auditorium_title: string
-    play_title: string
+    date: string | undefined
+    auditorium_title: string | undefined
+    play_title: string | undefined
 }
 
 export function isSessionFilterQueryInterface(obj: any): obj is SessionFilterQueryInterface {
-    if (typeof obj.date ==='string' && typeof obj.auditorium_title === 'string'
-        && typeof obj.play_title === 'string') return true
+    if ((typeof obj.date ==='string' || typeof obj.date==='undefined') 
+        && (typeof obj.auditorium_title === 'string' || typeof obj.auditorium_title === 'undefined')
+        && (typeof obj.play_title === 'string' || typeof obj.auditorium_title === 'undefined')) 
+            return true
     return false
 }
