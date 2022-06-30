@@ -6,9 +6,7 @@ import styles from "./FilePicker.module.css"
 import SuccessMessage from '../SuccessMessage/SuccessMessage'
 import IconSVG from '../IconSVG/IconSVG'
 
-const FilePicker = ({ onClickHook, onChangeHook, isMultiple=false }) => {
-    let error = useSelector(state => state.session.error)
-    let success = useSelector(state => state.session.success)
+const FilePicker = ({ onClickHook, onChangeHook, error, success, isMultiple=false }) => {
     let [filename, setFilename] = useState(null)
     
     const onFileChange = event => {

@@ -5,7 +5,7 @@
 exports.up = function(knex) {
     return knex.schema.withSchema('public').createTable('sessions', tbl => {
         tbl.increments('id').primary()
-        tbl.timestamp('timestamp').notNullable()
+        tbl.timestamp('timestamp').notNullable().unique()
         tbl.boolean('is_locked').notNullable().defaultTo(false)
         tbl.integer('max_slots').notNullable().defaultTo(5)
         tbl.integer('id_play').notNullable()

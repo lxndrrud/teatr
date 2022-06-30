@@ -1,17 +1,34 @@
 import moment from "moment"
 import { SessionDatabaseInterface } from "../interfaces/sessions"
 import { KnexConnection } from "../knex/connections"
+import {reservations, reservationsSlots, sessions} from "../dbModels/tables"
 
-
+/*
 export const processTime = () => {
     console.log(`cron ${moment()}`)
     processSessions()
     processReservations()
 }
+*/
+
+export const everyMinute = () => {
+    console.log(`1m cron ${moment()}`)
+    processReservations()
+}
+
+export const everyMinuteOnWorkHours = () => {
+    console.log(`1m cron work hours ${moment()}`)
+    processSessions()
+}
+
+export const everyDay = () => {
+    console.log(`1d cron ${moment()}`)
+    deleteIntersectionReservations()
+}
 
 
 const processSessions = async () => {
-    const query: SessionDatabaseInterface[] = await KnexConnection('sessions as s')
+    const query: SessionDatabaseInterface[] = await KnexConnection(`${sessions} as s`)
         .where('s.is_locked', false)
         .orderBy('s.timestamp', 'asc')
     
@@ -26,7 +43,7 @@ const processSessions = async () => {
         }
     }
 
-    if  (idsArr.length > 0) {
+    if (idsArr.length > 0) {
         console.log(`sessions arr length = ${idsArr.length}`)
         const trx = await KnexConnection.transaction()
         try {
@@ -44,18 +61,25 @@ const processSessions = async () => {
 }
 
 const processReservations = async () => {
-    const query = await KnexConnection('reservations as r')
-        .where('r.is_confirmed', false)
-        .orderBy('r.created_at', 'desc')
+    const query = await KnexConnection(`${reservations} as r`)
+            .select('r.*', 
+                's.is_locked as session_is_locked', 's.timestamp as session_timestamp')
+            .join(`${sessions} as s`,'s.id', 'r.id_session')
+            //.where('r.is_confirmed', false)
+            .where("s.is_locked", false)
 
     const idsArr = []
 
     for (let reservation of query) {
-        if (moment().isSameOrAfter(moment(reservation.created_at).add(15, 'minutes'))) {
+        // Удаление неподтвержденной брони спустя 15 минут после её создания
+        if (moment().isSameOrAfter(moment(reservation.created_at).add(15, 'minutes'))
+        && !reservation.is_confirmed) {
             idsArr.push(reservation.id)
         }
-        else {
-            break
+        // Удаление неоплаченной брони за 15 минут до начала сеанса
+        else if (moment().add(15, 'minutes').isSameOrAfter(moment(reservation.session_timestamp))
+        && !reservation.paid) {
+            idsArr.push(reservation.id)
         }
     }
 
@@ -63,11 +87,11 @@ const processReservations = async () => {
         console.log(`reservations arr length = ${idsArr.length}`)
         const trx = await KnexConnection.transaction()
         try {
-            await trx('reservations_slots')
+            await trx(reservationsSlots)
                 .whereIn('id_reservation', idsArr)
                 .del()
 
-            await trx('reservations')
+            await trx(reservations)
                 .whereIn('id', idsArr)
                 .del()
 
@@ -78,4 +102,36 @@ const processReservations = async () => {
         }
     } 
 
+}
+
+/**
+ * Неоплаченные брони, которые создались менее чем за 30 минут до начала сеанса
+ * будут висеть на сайте, хотя должны быть удалены
+ */
+const deleteIntersectionReservations = async () => {
+    const query = await KnexConnection(`${reservations} as r`)
+        .select("r.id")
+        .join(`${sessions} as s`, 's.id', 'r.id_session')
+        .where('s.is_locked', true)
+        .andWhere('r.is_paid', false)
+    
+    let idsArr = []
+    for (let reservation of query) {
+        idsArr.push(reservation.id)
+    }
+    
+    if (query.length > 0) {
+        console.log(`reservations locked arr length = ${idsArr.length}`)
+        const trx = await KnexConnection.transaction()
+        try {
+            await trx(reservations)
+                .whereIn('id', idsArr)
+                .del()
+            await trx.commit()
+        } catch (e) {
+            await trx.rollback()
+            console.log(e)
+        }
+        
+    }
 }

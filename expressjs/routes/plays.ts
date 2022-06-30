@@ -2,6 +2,7 @@ import { PlayController } from "../controllers/plays";
 import { Router } from "express";
 import { PlayFetchingModel } from "../fetchingModels/plays";
 import { PlayDatabaseModel } from "../dbModels/plays";
+import { basicAuthMiddleware } from "../middlewares/auth";
 
 export const playsRouter = Router()
 const playController = new PlayController(new PlayFetchingModel(new PlayDatabaseModel))

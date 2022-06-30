@@ -31,6 +31,7 @@ export const createPlaysCSV = (file) => async dispatch => {
         method: "POST",
         body: formData
     })
+    console.log(response.status)
 
     if (response.status !== 201 ) {
         let body = await response.json()
@@ -40,6 +41,7 @@ export const createPlaysCSV = (file) => async dispatch => {
         })
     }
     else {
+        console.log('успех')
         dispatch({
             type: SUCCESS_PLAY,
             payload: "Спектакли успешно загружены!"

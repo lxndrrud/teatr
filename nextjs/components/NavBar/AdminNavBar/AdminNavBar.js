@@ -13,7 +13,7 @@ import { logOut } from "../../../store/actions/userAction"
 import IconSVG from '../../UI/IconSVG/IconSVG'
 
 
-const NavBarController = () => {
+const AdminNavBar = () => {
     let isHidden = useSelector(state => state.design.navbarIsHidden)
     const store = useStore()
     const router = useRouter()
@@ -28,7 +28,7 @@ const NavBarController = () => {
         .then(() => {
             setToken('')
             if (router.isReady) {
-                router.push('/')
+                router.push('/reservation-admin/login')
             }
         })
     }
@@ -67,16 +67,6 @@ const NavBarController = () => {
                                     <span>
                                         <IconSVG data="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z" />
                                         <CustomLink destination="/reservation-admin" text="Главная"  />
-                                    </span>
-                                    <span>
-                                        <IconSVG data={"M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"} />
-                                        <CustomLink destination="/reservation-admin/csv/session"
-                                            text="Загрузка сеансов"  />
-                                    </span>
-                                    <span>
-                                        <IconSVG data={"M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"} />
-                                        <CustomLink destination="/reservation-admin/csv/play"
-                                            text="Загрузка спектаклей"  />
                                     </span>
                                     <span>
                                         <IconSVG data="M10,17V14H3V10H10V7L15,12L10,17M10,2H19A2,2 0 0,1 21,4V20A2,2 0 0,1 19,22H10A2,2 0 0,1 8,20V18H10V20H19V4H10V6H8V4A2,2 0 0,1 10,2Z" />
@@ -124,4 +114,4 @@ const NavBarController = () => {
     )
 }
 
-export default NavBarController
+export default AdminNavBar

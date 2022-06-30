@@ -12,7 +12,7 @@ const PaymentReservationPage = () => {
     const router = useRouter()
 
     const idReservation = router.query.reservationid
-    let [error, setError] = useState('')
+    let [error, setError] = useState(null)
 
 
     useEffect(() => {

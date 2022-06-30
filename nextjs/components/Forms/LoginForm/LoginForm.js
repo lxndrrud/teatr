@@ -4,11 +4,11 @@ import CustomInput from "../../UI/CustomInput/CustomInput"
 import CustomButton from "../../UI/CustomButton/CustomButton"
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { useRouter } from 'next/router'
-import { errorSetDefault, logIn } from "../../../store/actions/userAction"
+import { errorSetDefault, logIn, logInAdmin } from "../../../store/actions/userAction"
 import styles from "./LoginForm.module.css"
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 
-function LoginForm({ pushToDestination="/", isAdmin=false }) {
+function LoginForm({ isAdmin=false }) {
     const dispatch = useDispatch()
     const router = useRouter()
     const store = useStore()
@@ -20,7 +20,10 @@ function LoginForm({ pushToDestination="/", isAdmin=false }) {
 
     useEffect(() => {
         if (token && token.length !== 0) {
-            router.push(pushToDestination)
+            if (!isAdmin)
+                router.push("/")
+            else 
+                router.push("/reservation-admin")
         }
     })
 
@@ -28,6 +31,15 @@ function LoginForm({ pushToDestination="/", isAdmin=false }) {
         e.preventDefault()
         if (!isAdmin) {
             dispatch(logIn(email, password))
+            .then(() => {
+                const errorFromStore = store.getState().user.error 
+                if (errorFromStore !== null) {
+                    setError(errorFromStore)
+                    dispatch(errorSetDefault())
+                }
+            })
+        } else {
+            dispatch(logInAdmin(email, password))
             .then(() => {
                 const errorFromStore = store.getState().user.error 
                 if (errorFromStore !== null) {

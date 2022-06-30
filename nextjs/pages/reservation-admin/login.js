@@ -5,7 +5,7 @@ import LoginForm from '../../components/Forms/LoginForm/LoginForm'
 const AdminLoginPage = () => {
     return (
         <AdminLayout title='Вход'>
-            <LoginForm pushToDestination="/reservation-admin" />
+            <LoginForm isAdmin />
         </AdminLayout>
     )
 }

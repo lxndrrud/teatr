@@ -146,7 +146,7 @@ export class PlayController {
             })
             return
         }
-        res.sendStatus(201).end()
+        res.status(201).end()
     }
 }
 
