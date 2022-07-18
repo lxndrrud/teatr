@@ -1,24 +1,47 @@
 import { ReservationController } from "../controllers/reservations";
 import { Router } from "express";
 import { basicAuthMiddleware } from "../middlewares/auth";
-import { ReservationFetchingModel } from "../fetchingModels/reservations";
 import { ReservationDatabaseModel } from "../dbModels/reservations";
-import { RoleFetchingModel } from "../fetchingModels/roles";
+import { RoleFetchingModel } from "../services/roles";
 import { RoleDatabaseModel } from "../dbModels/roles";
-import { SessionFetchingModel } from "../fetchingModels/sessions";
+import { SessionFetchingModel } from "../services/sessions";
 import { SessionDatabaseModel } from "../dbModels/sessions";
-import { UserFetchingModel } from "../fetchingModels/users";
+import { UserFetchingModel } from "../services/users";
 import { UserDatabaseModel } from "../dbModels/users";
+import { ReservationInfrastructure } from "../infrastructure/Reservation.infra";
+import { ReservationGuard } from "../guards/Reservation.guard";
+import { ReservationFilterService } from "../services/reservations/ReservationFilter.service";
+import { ReservationCRUDService } from "../services/reservations/ReservationCRUD.service";
+import { ReservationPaymentService } from "../services/reservations/ReservationPayment.service";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
-    new ReservationFetchingModel(
+    new ReservationPaymentService(
+        new ReservationDatabaseModel(),
+        new RoleFetchingModel(new RoleDatabaseModel()),
+        new UserFetchingModel(
+            new UserDatabaseModel(), new RoleFetchingModel(new RoleDatabaseModel())
+        ),
+        new ReservationGuard()
+    ),
+    new ReservationCRUDService(
         new ReservationDatabaseModel(),
         new RoleFetchingModel(new RoleDatabaseModel()),
         new SessionFetchingModel(new SessionDatabaseModel()),
         new UserFetchingModel(
             new UserDatabaseModel(), new RoleFetchingModel(new RoleDatabaseModel())
-        )
+        ),
+        new ReservationInfrastructure(
+            new ReservationDatabaseModel(), new ReservationGuard()
+        ),
+        new ReservationGuard()
+    ),
+    new ReservationFilterService(
+        new ReservationDatabaseModel(),
+        new RoleFetchingModel(new RoleDatabaseModel()),
+        new ReservationInfrastructure(
+            new ReservationDatabaseModel(), new ReservationGuard()
+        ),
     )
 )
 

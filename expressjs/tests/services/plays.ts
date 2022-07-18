@@ -1,7 +1,7 @@
 import { Knex } from "knex"
 import { assert, should, expect } from "chai";
 import { PlayModel } from "../../dbModels/plays"
-import { PlayFetchingModel } from "../../fetchingModels/plays"
+import { PlayFetchingModel } from "../../services/plays"
 import { PlayBaseInterface, PlayQueryInterface, PlayWithPosterInterface } from "../../interfaces/plays"
 import { PlayMockModel } from "../mockModels/plays";
 

@@ -1,6 +1,6 @@
 import { PlayController } from "../controllers/plays";
 import { Router } from "express";
-import { PlayFetchingModel } from "../fetchingModels/plays";
+import { PlayFetchingModel } from "../services/plays";
 import { PlayDatabaseModel } from "../dbModels/plays";
 import { basicAuthMiddleware } from "../middlewares/auth";
 

@@ -114,11 +114,19 @@ export class SessionFetchingModel implements SessionService {
     }
 
     public async updateSession(idSession: number, payload: SessionBaseInterface) {
-        const query = await this.sessionDatabaseInstance.get({ id: idSession })
-        if (!query) { 
+        try {
+            const query = await this.sessionDatabaseInstance.get({ id: idSession })
+            if (!query) { 
+                return <InnerErrorInterface>{
+                    code: 404,
+                    message: 'Запись сеанса не найдена!'
+                }
+            }
+        } catch (e) {
+            console.log(e)
             return <InnerErrorInterface>{
-                code: 404,
-                message: 'Запись сеанса не найдена!'
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске записи сеанса: ' + e
             }
         }
         const trx = await KnexConnection.transaction()
@@ -131,7 +139,7 @@ export class SessionFetchingModel implements SessionService {
             await trx.rollback()
             return <InnerErrorInterface>{
                 code: 500,
-                message: 'Внутренняя ошибка сервера при обновлении сеанса!'
+                message: 'Внутренняя ошибка сервера при обновлении сеанса: ' + e
             }
         }
     }

@@ -1,6 +1,6 @@
 import { KnexConnection }from "../knex/connections"
 import { Request, Response } from "express"
-import { PlayFetchingModel, PlayService } from "../fetchingModels/plays"
+import { PlayFetchingModel, PlayService } from "../services/plays"
 import { PlayDatabaseModel } from "../dbModels/plays"
 import { isPlayBaseInterface, PlayBaseInterface, PlayInterface } from "../interfaces/plays"
 import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"

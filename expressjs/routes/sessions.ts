@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { SessionController } from "../controllers/sessions";
 import { SessionDatabaseModel } from "../dbModels/sessions";
-import { SessionFetchingModel } from "../fetchingModels/sessions";
+import { SessionFetchingModel } from "../services/sessions";
 import { basicAuthMiddleware } from "../middlewares/auth";
  
 export const sessionsRouter = Router();

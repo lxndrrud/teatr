@@ -1,9 +1,9 @@
 import { UserController } from "../controllers/users";
 import { Router } from "express";
 import { basicAuthMiddleware } from "../middlewares/auth";
-import { UserFetchingModel } from "../fetchingModels/users";
+import { UserFetchingModel } from "../services/users";
 import { UserDatabaseModel } from "../dbModels/users";
-import { RoleFetchingModel } from "../fetchingModels/roles";
+import { RoleFetchingModel } from "../services/roles";
 import { RoleDatabaseModel } from "../dbModels/roles";
 
 export const usersRouter = Router()

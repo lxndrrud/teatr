@@ -1,22 +1,26 @@
 // * Библиотеки
-import { KnexConnection } from "../knex/connections"
 import { Request, Response } from "express"
 // * Интерфейсы
-import { SlotInterface, ReservationsSlotsBaseInterface } from "../interfaces/slots"
 import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 import { ReservationBaseInterface, ReservationInterface, 
     ReservationCreateInterface, ReservationDatabaseInterface, ReservationConfirmationInterface, isReservationCreateInterface, isReservationConfirmationInterface, ReservationWithoutSlotsInterface, ReservationBaseWithoutConfirmationInterface, isReservationFilterQueryInterface, ReservationFilterQueryInterface} from "../interfaces/reservations"
-// * Модели
-import { ReservationService } from "../fetchingModels/reservations"
 // * Утилиты
-import { generateCode } from "../utils/code"
-import { sendMail } from "../utils/email"
-import { RoleDatabaseInterface } from "../interfaces/roles"
+import { IReservationFilterService} from "../services/reservations/ReservationFilter.service"
+import { IReservationCRUDService } from "../services/reservations/ReservationCRUD.service"
+import { IReservationPaymentService } from "../services/reservations/ReservationPayment.service"
 
 export class ReservationController {
-    private reservationService
-    constructor(reservationServiceInstance: ReservationService) {
-        this.reservationService = reservationServiceInstance
+    private reservationPaymentService
+    private reservationCRUDService
+    private reservationFilterService
+    constructor(
+        reservationPaymentServiceInstance: IReservationPaymentService, 
+        reservationCRUDServiceInstance: IReservationCRUDService,
+        reservationFilterServiceInstance: IReservationFilterService
+    ) {
+        this.reservationPaymentService = reservationPaymentServiceInstance
+        this.reservationCRUDService = reservationCRUDServiceInstance
+        this.reservationFilterService = reservationFilterServiceInstance
     }
 
     /**
@@ -38,7 +42,7 @@ export class ReservationController {
             return
         }
 
-        const query = await this.reservationService
+        const query = await this.reservationCRUDService
             .getSingleFullInfo(req.user.id, req.user.id_role, idReservation)
 
         if (isInnerErrorInterface(query)) {
@@ -72,7 +76,7 @@ export class ReservationController {
         }
         requestBody = { ...req.body }
 
-        const response = await this.reservationService.createReservation(req.user, requestBody)
+        const response = await this.reservationCRUDService.createReservation(req.user, requestBody)
 
         if (isInnerErrorInterface(response)) {
             res.status(response.code).send(<ErrorInterface>{
@@ -115,7 +119,7 @@ export class ReservationController {
         }
         requestBody = {...req.body}
 
-        const response = await this.reservationService
+        const response = await this.reservationPaymentService
             .confirmReservation(req.user, idReservation, requestBody)
 
         if (isInnerErrorInterface(response)) {
@@ -149,7 +153,7 @@ export class ReservationController {
             return
         }
 
-        const response = await this.reservationService
+        const response = await this.reservationPaymentService
             .paymentForReservation(req.user, idReservation)
 
         if (isInnerErrorInterface(response)) {
@@ -179,7 +183,7 @@ export class ReservationController {
             return
         }
 
-        const response = await this.reservationService.deleteReservation(req.user, idReservation)
+        const response = await this.reservationCRUDService.deleteReservation(req.user, idReservation)
 
         if (isInnerErrorInterface(response)) {
             res.status(response.code).send(<ErrorInterface>{
@@ -203,7 +207,7 @@ export class ReservationController {
             return
         }
 
-        const response = await this.reservationService.getReservations(req.user)
+        const response = await this.reservationCRUDService.getReservations(req.user)
 
         if(isInnerErrorInterface(response)) {
             res.status(response.code).send(<ErrorInterface>{
@@ -227,7 +231,7 @@ export class ReservationController {
             return
         }
 
-        const response = await this.reservationService.getReservationFilterOptions(req.user)
+        const response = await this.reservationFilterService.getReservationFilterOptions(req.user)
 
         if (isInnerErrorInterface(response)) {
             res.status(response.code).send(<ErrorInterface>{
@@ -260,7 +264,7 @@ export class ReservationController {
         }
         const userQuery: ReservationFilterQueryInterface = {...req.query}
 
-        const response = await this.reservationService.getFilteredReservations(userQuery, req.user)
+        const response = await this.reservationFilterService.getFilteredReservations(userQuery, req.user)
 
         if (isInnerErrorInterface(response)) {
             res.status(response.code).send(<ErrorInterface>{

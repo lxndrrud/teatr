@@ -1,10 +1,10 @@
 import { Knex } from "knex"
 import { assert, should, expect } from "chai";
-import { ReservationFetchingModel } from "../../fetchingModels/reservations";
+import { ReservationFetchingModel } from "../../services/reservations";
 import { ReservationMockModel } from "../mockModels/reservations";
-import { RoleFetchingModel } from "../../fetchingModels/roles";
+import { RoleFetchingModel } from "../../services/roles";
 import { RoleMockModel } from "../mockModels/roles";
-import { SessionFetchingModel } from "../../fetchingModels/sessions";
+import { SessionFetchingModel } from "../../services/sessions";
 
 export function ReservationServiceTests() {
     describe("Reservation Service", () => {

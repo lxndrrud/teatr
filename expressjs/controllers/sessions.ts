@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, isSessionBaseInterface, isSessionFilterQueryInterface } 
     from "../interfaces/sessions"
-import { SessionService } from "../fetchingModels/sessions"
+import { SessionService } from "../services/sessions"
 import { ErrorInterface, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 import { UploadedFile } from "express-fileupload"
 

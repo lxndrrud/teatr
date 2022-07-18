@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface, isUserRegisterInterface } 
     from "../interfaces/users";
 import { ErrorInterface, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
-import { UserService } from "../fetchingModels/users";
+import { UserService } from "../services/users";
 
 export class UserController {
     private userService
