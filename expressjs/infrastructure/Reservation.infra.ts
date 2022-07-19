@@ -4,7 +4,7 @@ import { InnerErrorInterface } from "../interfaces/errors"
 import { ReservationInterface, ReservationWithoutSlotsInterface } from "../interfaces/reservations"
 import { RoleDatabaseInterface } from "../interfaces/roles"
 import { SlotInterface } from "../interfaces/slots"
-import { extendedTimestamp } from "../utils/timestamp"
+import { TimestampHelper } from "../utils/timestamp"
 
 export interface IReservationInfrastructure {
     fetchReservations(idUser: number, userRole: RoleDatabaseInterface, 
@@ -20,13 +20,16 @@ export interface IReservationInfrastructure {
 export class ReservationInfrastructure implements IReservationInfrastructure {
     private reservationModel
     private reservationGuard
+    private timestampHelper
 
     constructor(
         reservationDatabaseInstance: ReservationModel, 
-        reservationGuard: IReservationGuard
+        reservationGuardInstance: IReservationGuard,
+        timestampHelperInstance: TimestampHelper
     ) {
         this.reservationModel = reservationDatabaseInstance
-        this.reservationGuard = reservationGuard
+        this.reservationGuard = reservationGuardInstance
+        this.timestampHelper = timestampHelperInstance
     }
 
     /**
@@ -36,8 +39,10 @@ export class ReservationInfrastructure implements IReservationInfrastructure {
         let result: ReservationInterface[] = []  
         for (let reservation of reservations) {
             // Редактирование формата timestamp`ов
-            reservation.session_timestamp = extendedTimestamp(reservation.session_timestamp)
-            reservation.created_at = extendedTimestamp(reservation.created_at)
+            reservation.session_timestamp = this.timestampHelper
+                .extendedTimestamp(reservation.session_timestamp)
+            reservation.created_at = this.timestampHelper
+                .extendedTimestamp(reservation.created_at)
 
             // Скрыть код подтверждения
             reservation.confirmation_code = ''

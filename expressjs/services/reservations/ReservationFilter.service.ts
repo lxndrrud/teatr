@@ -6,7 +6,7 @@ import { PlayReservationFilterOptionInterface } from "../../interfaces/plays";
 import { ReservationFilterQueryInterface, ReservationWithoutSlotsInterface, ReservationInterface } from "../../interfaces/reservations";
 import { TimestampReservationFilterOptionDatabaseInterface, TimestampReservationFilterOptionInterface } from "../../interfaces/timestamps";
 import { UserRequestOption } from "../../interfaces/users";
-import { dateFromTimestamp, extendedDateFromTimestamp } from "../../utils/timestamp";
+import { TimestampHelper } from "../../utils/timestamp";
 import { RoleService } from "../roles";
 
 export interface IReservationFilterService {
@@ -25,15 +25,18 @@ export class ReservationFilterService implements IReservationFilterService {
     protected reservationModel
     protected roleService
     protected reservationInfrastructure
+    protected timestampHelper
 
     constructor(
         reservationDatabaseInstance: ReservationModel,
         roleServiceInstance: RoleService,
         reservationInfrastructureInstance: IReservationInfrastructure,
+        timestampHelperInstance: TimestampHelper
     ) {
         this.reservationModel = reservationDatabaseInstance
         this.roleService = roleServiceInstance
         this.reservationInfrastructure = reservationInfrastructureInstance
+        this.timestampHelper = timestampHelperInstance
     }
 
     /**
@@ -77,8 +80,10 @@ export class ReservationFilterService implements IReservationFilterService {
         let dates: TimestampReservationFilterOptionInterface[] = []
         let distinctCheck: Map<string, string> = new Map()
         for (let row of timestamps) {
-            const extendedDate = extendedDateFromTimestamp(row.timestamp)
-            const simpleDate = dateFromTimestamp(row.timestamp)
+            const extendedDate = this.timestampHelper
+                .extendedDateFromTimestamp(row.timestamp)
+            const simpleDate = this.timestampHelper
+                .dateFromTimestamp(row.timestamp)
             if (!distinctCheck.has(simpleDate)) {
                 dates.push({
                     date: simpleDate,

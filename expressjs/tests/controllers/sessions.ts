@@ -3,12 +3,13 @@ import moment from "moment";
 import { agent as request } from "supertest";
 import { SessionBaseInterface, SessionDatabaseInterface, SessionFilterQueryInterface } from "../../interfaces/sessions";
 import { KnexConnection } from "../../knex/connections";
-import { timestampFromMoment } from "../../utils/timestamp";
+import { TimestampHelper } from "../../utils/timestamp";
 import fs from "fs"
 import path from "path";
 
 
 export function SessionsControllerTest() {
+    const timestampHelper = new TimestampHelper()
     describe("Sessions Controller", () => {
         before(async function() {
             await KnexConnection.migrate.rollback()
@@ -42,13 +43,13 @@ export function SessionsControllerTest() {
                 id_play: 2,
                 id_price_policy: 2,
                 is_locked: false,
-                timestamp: timestampFromMoment(moment()),
+                timestamp: timestampHelper.timestampFromMoment(moment()),
                 max_slots: 10
             }
             const failPostPayload = {
                 id_price_policy: 2,
                 is_locked: false,
-                timestamp: timestampFromMoment(moment())
+                timestamp: timestampHelper.timestampFromMoment(moment())
             }
 
             it("should be 201 CREATED", async function () {
@@ -160,13 +161,13 @@ export function SessionsControllerTest() {
                 id_price_policy: 1,
                 is_locked: false,
                 // При имзенении может вызвать ошибку нарушения уникальности timestamp поля в базе 
-                timestamp: timestampFromMoment(moment('2022-09-01')),
+                timestamp: timestampHelper.timestampFromMoment(moment('2022-09-01')),
                 max_slots: 5
             }
             const failUpdateSessionLink = "/expressjs/sessions/114"
             const failUpdatePayload = {
                 is_locked: false,
-                timestamp: timestampFromMoment(moment()),
+                timestamp: timestampHelper.timestampFromMoment(moment()),
                 max_slots: 5
             }
             it("should be OK", async function () {
@@ -297,7 +298,10 @@ export function SessionsControllerTest() {
             it("should fail because of invalid csv file", async function() {
                 const response = await request(this.server)
                     .post(postSessionsCSVLink)
-                    .set('content-type', 'multipart/form-data')
+                    .set({
+                        'auth-token': this.token,
+                        'content-type': 'multipart/form-data'
+                    })
                     .attach("csv", 
                     fs.readFileSync("/usr/src/app/tests/test_files/csv/sessions/test_sessions_FAIL.csv"), 
                         "test_sessions.csv")
@@ -308,7 +312,10 @@ export function SessionsControllerTest() {
             it("should fail because request is sent without file", async function() {
                 const response = await request(this.server)
                     .post(postSessionsCSVLink)
-                    .set('content-type', 'multipart/form-data')
+                    .set({
+                        'auth-token': this.token,
+                        'content-type': 'multipart/form-data'
+                    })
                     /*
                     .attach("csv", 
                     fs.readFileSync("/usr/src/app/tests/test_files/csv/sessions/test_sessions_FAIL.csv"), 
@@ -321,7 +328,10 @@ export function SessionsControllerTest() {
             it("should be OK", async function() {
                 const response = await request(this.server)
                     .post(postSessionsCSVLink)
-                    .set('content-type', 'multipart/form-data')
+                    .set({
+                        'auth-token': this.token,
+                        'content-type': 'multipart/form-data'
+                    })
                     .attach("csv", 
                     fs.readFileSync("/usr/src/app/tests/test_files/csv/sessions/test_sessions_OK.csv"), 
                         "test_sessions.csv")

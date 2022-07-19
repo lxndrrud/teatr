@@ -22,9 +22,14 @@ export interface PlayService {
 
 export class PlayFetchingModel implements PlayService {
     protected playDatabaseInstance
+    protected fileStreamHelper
 
-    constructor(playModelInstance: PlayModel) {
+    constructor(
+        playModelInstance: PlayModel,
+        fileStreamHelperInstance: FileStreamHelper
+    ) {
         this.playDatabaseInstance = playModelInstance
+        this.fileStreamHelper = fileStreamHelperInstance
     }
 
     async getAll() {
@@ -119,7 +124,7 @@ export class PlayFetchingModel implements PlayService {
     }
     async createPlaysCSV(file: UploadedFile) {
         let dataArray: PlayBaseInterface[] = []
-        const data = await FileStreamHelper
+        const data = await this.fileStreamHelper
             .readData(fs.createReadStream(file.tempFilePath).pipe(csvParser()))
         for (const chunk of data) {
             if (!chunk["Номер строки"]) return <InnerErrorInterface> {

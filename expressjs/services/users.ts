@@ -244,4 +244,16 @@ export class UserFetchingModel implements UserService {
             }
         }
     }
+
+    async checkIsUserStaff(user: UserRequestOption): Promise<boolean | InnerErrorInterface>  {
+        try{ 
+            let check = await this.userDatabaseInstance.checkIsUserStaff(user.id, user.id_role)
+            return check ? true : false
+        } catch (e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка во время авторизации: ' + e
+            }
+        }
+    }
 }

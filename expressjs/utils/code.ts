@@ -1,7 +1,13 @@
-const randomInt = () => {
-    return Math.floor(Math.random() * 9);
-}
+export class CodeGenerator {
+    private randomInt() {
+        return Math.floor(Math.random() * 9);
+    }
 
-export const generateCode = () => {
-    return `${randomInt()}${randomInt()}${randomInt()}${randomInt()}${randomInt()}${randomInt()}`
+    public generateCode() {
+        let code = ''
+        for (let i=0; i < 6; i++) {
+            code += this.randomInt().toString()
+        }
+        return code
+    }
 }

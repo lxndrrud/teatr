@@ -10,6 +10,15 @@ export function PlaysControllerTests () {
             await KnexConnection.migrate.rollback()
             await KnexConnection.migrate.latest()
             await KnexConnection.seed.run()
+
+            const tokenResponse = await request(this.server)
+                .post(this.authLink)
+                .send({
+                    email: "admin@admin.ru",
+                    password: "123456"
+                })
+            this.token = tokenResponse.body.token
+            return
         })
 
         describe("GET /expressjs/plays/", function() {
@@ -57,6 +66,9 @@ export function PlaysControllerTests () {
             it("should be ok and return new play id", async function() {
                 const response = await request(this.server)
                     .post(postPlayLink)
+                    .set({
+                        'auth-token': this.token
+                    })
                     .send(postPayload)
                 
                 expect(response.status).to.equal(201)
@@ -68,29 +80,14 @@ export function PlaysControllerTests () {
             it("should fail because of payload", async function () {
                 const response = await request(this.server)
                     .post(postPlayLink)
+                    .set({
+                        'auth-token': this.token
+                    })
                     .send({
                         title: postPayload.title
                     })
                 
                 expect(response.status).to.equal(400)
-            })
-        })
-
-        describe("GET /expressjs/plays/1", function() {
-            const getPlayLink = `/expressjs/plays/1`
-            const failGetPlayLink = `/expressjs/plays/114`
-            it("should be OK", async function() {
-                const response = await request(this.server)
-                    .get(getPlayLink)
-
-                expect(response.status).to.equal(200)
-            })
-
-            it("should have 404 status", async function () {
-                const response = await request(this.server)
-                    .get(failGetPlayLink)
-
-                expect(response.status).to.equal(404)
             })
         })
 
@@ -101,17 +98,14 @@ export function PlaysControllerTests () {
             }
             const updatePlayLink = `/expressjs/plays/1`
             const failUpdatePlayLink = `/expressjs/plays/114`
-            it("should be OK", async function () {
-                const response = await request(this.server)
-                    .put(updatePlayLink)
-                    .send(updatePayload)
-                
-                expect(response.status).to.equal(200)
-            })
+            
 
             it("should have 404 status because wrong idPlay", async function () {
                 const response = await request(this.server)
                     .put(failUpdatePlayLink)
+                    .set({
+                        'auth-token': this.token
+                    })
                     .send(updatePayload)
                 
                 expect(response.status).to.equal(404)
@@ -120,29 +114,67 @@ export function PlaysControllerTests () {
             it("should have 400 status because wrong payload", async function () {
                 const response = await request(this.server)
                     .put(updatePlayLink)
+                    .set({
+                        'auth-token': this.token
+                    })
                     .send({
                         title: updatePayload.title
                     })
                 
                 expect(response.status).to.equal(400)
             })
+
+            it("should have 403 status because without token", async function() {
+                const response = await request(this.server)
+                    .put(updatePlayLink)
+                    .send({
+                        title: updatePayload.title
+                    })
+                
+                expect(response.status).to.equal(403)
+            })
+
+            it("should be OK", async function () {
+                const response = await request(this.server)
+                    .put(updatePlayLink)
+                    .set({
+                        'auth-token': this.token
+                    })
+                    .send(updatePayload)
+                
+                expect(response.status).to.equal(200)
+            })
         })
 
         describe("DELETE /expressjs/plays/1", function() {
             const deleteLink = `/expressjs/plays/1`
             const failDeleteLink = `/expressjs/plays/114`
-            it("should be OK", async function() {
+            
+            it("should have status 403 because without token", async function() {
                 const response = await request(this.server)
-                    .delete(deleteLink)
+                    .delete(failDeleteLink)
 
-                expect(response.status).to.equal(200)
+                expect(response.status).to.equal(403)
             })
 
             it("should have status 404", async function() {
                 const response = await request(this.server)
                     .delete(failDeleteLink)
+                    .set({
+                        'auth-token': this.token
+                    })
 
                 expect(response.status).to.equal(404)
+            })
+
+            it("should be OK", async function() {
+                const response = await request(this.server)
+                    .delete(deleteLink)
+                    .set({
+                        'auth-token': this.token
+                    })
+
+                expect(response.status).to.equal(200)
             })
         })
 
@@ -151,7 +183,10 @@ export function PlaysControllerTests () {
             it("should fail because of invalid csv file", async function() {
                 const response = await request(this.server)
                     .post(postPlaysCSVLink)
-                    .set('content-type', 'multipart/form-data')
+                    .set({
+                        'auth-token': this.token, 
+                        'content-type': 'multipart/form-data'
+                    })
                     .attach("csv", 
                     fs.readFileSync("/usr/src/app/tests/test_files/csv/plays/test_plays_FAIL.csv"), 
                         "test_plays.csv")
@@ -162,7 +197,10 @@ export function PlaysControllerTests () {
             it("should fail because request is sent without file", async function() {
                 const response = await request(this.server)
                     .post(postPlaysCSVLink)
-                    .set('content-type', 'multipart/form-data')
+                    .set({
+                        'auth-token': this.token, 
+                        'content-type': 'multipart/form-data'
+                    })
                     /*
                     .attach("csv", 
                     fs.readFileSync("/usr/src/app/tests/test_files/csv/plays/test_plays_FAIL.csv"), 
@@ -172,10 +210,26 @@ export function PlaysControllerTests () {
                 expect(response.statusCode).to.equal(400)
             })
 
+            it("should fail (403) because request is sent without token", async function() {
+                const response = await request(this.server)
+                    .post(postPlaysCSVLink)
+                    .set({
+                        'content-type': 'multipart/form-data'
+                    })
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/plays/test_plays_FAIL.csv"), 
+                        "test_plays.csv")
+
+                expect(response.statusCode).to.equal(403)
+            })
+
             it("should be OK", async function() {
                 const response = await request(this.server)
                     .post(postPlaysCSVLink)
-                    .set('content-type', 'multipart/form-data')
+                    .set({
+                        'auth-token': this.token, 
+                        'content-type': 'multipart/form-data'
+                    })
                     .attach("csv", 
                     fs.readFileSync("/usr/src/app/tests/test_files/csv/plays/test_plays_OK.csv"), 
                         "test_plays.csv")

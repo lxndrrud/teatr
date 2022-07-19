@@ -4,7 +4,7 @@ import { KnexConnection } from "../knex/connections";
 import { sessions, plays, pricePolicies, slots, seats, rows, auditoriums, reservationsSlots, reservations, playsImages, images } from "./tables";
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, SessionDatabaseInterface } 
     from "../interfaces/sessions";
-import { getNextDayOfTimestamp } from "../utils/timestamp";
+import { TimestampHelper } from "../utils/timestamp";
 
 
 
@@ -71,8 +71,13 @@ export interface SessionModel {
  * timestamp: timestamp(string)
  */
 export class SessionDatabaseModel extends DatabaseModel implements SessionModel {
-    constructor() {
+    private timestampHelper
+
+    constructor(
+        timestampHelperInstance: TimestampHelper
+    ) {
         super(sessions)
+        this.timestampHelper = timestampHelperInstance
     }
 
     getAll(payload: {
@@ -271,7 +276,8 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
                         && userQueryPayload.date !== 'undefined') {
                     builder.andWhere(innerBuilder => {
                         innerBuilder.andWhere('s.timestamp', '>=', `${userQueryPayload.date}T00:00:00`)
-                        innerBuilder.andWhere('s.timestamp', '<', getNextDayOfTimestamp(`${userQueryPayload.date}`))
+                        innerBuilder.andWhere('s.timestamp', '<', 
+                            this.timestampHelper.getNextDayOfTimestamp(`${userQueryPayload.date}`))
                     })
                 }
                 if (userQueryPayload.auditorium_title  

@@ -1,15 +1,16 @@
 import { ReservationModel } from "../../dbModels/reservations"
 import { IReservationGuard } from "../../guards/Reservation.guard"
 import { IReservationInfrastructure } from "../../infrastructure/Reservation.infra"
+import { SessionInfrastructure } from "../../infrastructure/Session.infra"
 import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors"
 import { ReservationBaseInterface, ReservationBaseWithoutConfirmationInterface, ReservationCreateInterface, ReservationDatabaseInterface, ReservationInterface, ReservationWithoutSlotsInterface } from "../../interfaces/reservations"
 import { ReservationsSlotsBaseInterface, SlotInterface } from "../../interfaces/slots"
 import { UserRequestOption } from "../../interfaces/users"
 import { KnexConnection } from "../../knex/connections"
-import { generateCode } from "../../utils/code"
-import { sendMail } from "../../utils/email"
+import { CodeGenerator } from "../../utils/code"
+import { EmailSender } from "../../utils/email"
 import { RoleService } from "../roles"
-import { SessionService } from "../sessions"
+import { SessionCRUDService } from "../sessions/SessionCRUD.service"
 import { UserService } from "../users"
 
 export interface IReservationCRUDService {
@@ -33,25 +34,34 @@ export interface IReservationCRUDService {
 export class ReservationCRUDService implements IReservationCRUDService {
     protected reservationModel
     protected roleService
-    protected sessionService
+    protected sessionCRUDService
+    protected sessionInfrastructure
     protected userService
     protected reservationInfrastructure
     protected reservationGuard
+    protected emailSender
+    protected codeGenerator
 
     constructor(
             reservationDatabaseInstance: ReservationModel,
             roleServiceInstance: RoleService,
-            sessionServiceInstance: SessionService,
+            sessionCRUDServiceInstance: SessionCRUDService,
+            sessionInfrastructure: SessionInfrastructure,
             userServiceInstance: UserService,
             reservationInfrastructureInstance: IReservationInfrastructure,
-            reservationGuardInstance: IReservationGuard
+            reservationGuardInstance: IReservationGuard,
+            emailSenderInstance: EmailSender,
+            codeGeneratorInstance: CodeGenerator
         ) {
         this.reservationModel = reservationDatabaseInstance
         this.roleService = roleServiceInstance
-        this.sessionService = sessionServiceInstance
+        this.sessionCRUDService = sessionCRUDServiceInstance
+        this.sessionInfrastructure = sessionInfrastructure
         this.userService = userServiceInstance
         this.reservationInfrastructure = reservationInfrastructureInstance
         this.reservationGuard = reservationGuardInstance
+        this.emailSender = emailSenderInstance
+        this.codeGenerator = codeGeneratorInstance
     }
 
     /**
@@ -111,7 +121,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
         }
 
         // Проверка наличия сеанса
-        const sessionQuery = await this.sessionService
+        const sessionQuery = await this.sessionCRUDService
             .getSingleUnlockedSession(requestBody.id_session)
 
         if (isInnerErrorInterface(sessionQuery)) {
@@ -158,7 +168,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
         
 
         // Проверка на коллизию выбранных слотов и уже забронированных мест
-        const reservedSlotsQuery = await this.sessionService
+        const reservedSlotsQuery = await this.sessionInfrastructure
             .getReservedSlots(sessionQuery.id, sessionQuery.id_price_policy)
 
         if (isInnerErrorInterface(reservedSlotsQuery)) {
@@ -193,14 +203,14 @@ export class ReservationCRUDService implements IReservationCRUDService {
             reservationPayload = {
                 id_user: user.id,
                 id_session: sessionQuery.id,
-                confirmation_code: generateCode()
+                confirmation_code: this.codeGenerator.generateCode()
             }
         }
         else {
             reservationPayload = {
                 id_user: user.id,
                 id_session: sessionQuery.id,
-                confirmation_code: generateCode(),
+                confirmation_code: this.codeGenerator.generateCode(),
                 is_confirmed: true
             }
         }
@@ -251,7 +261,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
 
         // Отправка письма на почту с информацией о сеансе и кодом подтверждения
         if (!userRole.can_make_reservation_without_confirmation)
-            sendMail(user.email, reservation.confirmation_code,
+            this.emailSender.sendMail(user.email, reservation.confirmation_code,
                 reservation.id, sessionQuery.play_title, sessionQuery.timestamp,
                 sessionQuery.auditorium_title)
         

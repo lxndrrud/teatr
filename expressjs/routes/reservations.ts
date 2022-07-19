@@ -4,7 +4,6 @@ import { basicAuthMiddleware } from "../middlewares/auth";
 import { ReservationDatabaseModel } from "../dbModels/reservations";
 import { RoleFetchingModel } from "../services/roles";
 import { RoleDatabaseModel } from "../dbModels/roles";
-import { SessionFetchingModel } from "../services/sessions";
 import { SessionDatabaseModel } from "../dbModels/sessions";
 import { UserFetchingModel } from "../services/users";
 import { UserDatabaseModel } from "../dbModels/users";
@@ -13,35 +12,73 @@ import { ReservationGuard } from "../guards/Reservation.guard";
 import { ReservationFilterService } from "../services/reservations/ReservationFilter.service";
 import { ReservationCRUDService } from "../services/reservations/ReservationCRUD.service";
 import { ReservationPaymentService } from "../services/reservations/ReservationPayment.service";
+import { EmailSender } from "../utils/email";
+import { SessionCRUDService } from "../services/sessions/SessionCRUD.service";
+import { SessionInfrastructure } from "../infrastructure/Session.infra";
+import { TimestampHelper } from "../utils/timestamp";
+import { CodeGenerator } from "../utils/code";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
     new ReservationPaymentService(
-        new ReservationDatabaseModel(),
+        new ReservationDatabaseModel(
+            new TimestampHelper()
+        ),
         new RoleFetchingModel(new RoleDatabaseModel()),
         new UserFetchingModel(
-            new UserDatabaseModel(), new RoleFetchingModel(new RoleDatabaseModel())
+            new UserDatabaseModel(), 
+            new RoleFetchingModel(new RoleDatabaseModel())
         ),
         new ReservationGuard()
     ),
     new ReservationCRUDService(
-        new ReservationDatabaseModel(),
+        new ReservationDatabaseModel(
+            new TimestampHelper()
+        ),
         new RoleFetchingModel(new RoleDatabaseModel()),
-        new SessionFetchingModel(new SessionDatabaseModel()),
+        new SessionCRUDService(
+            new SessionDatabaseModel(
+                new TimestampHelper()
+            ),
+            new SessionInfrastructure(
+                new SessionDatabaseModel(
+                    new TimestampHelper()
+                ),
+                new TimestampHelper())
+        ),
+        new SessionInfrastructure(
+            new SessionDatabaseModel(
+                new TimestampHelper()
+            ),
+            new TimestampHelper()),
         new UserFetchingModel(
-            new UserDatabaseModel(), new RoleFetchingModel(new RoleDatabaseModel())
+            new UserDatabaseModel(), 
+            new RoleFetchingModel(new RoleDatabaseModel())
         ),
         new ReservationInfrastructure(
-            new ReservationDatabaseModel(), new ReservationGuard()
+            new ReservationDatabaseModel(
+                new TimestampHelper()
+            ), 
+            new ReservationGuard(),
+            new TimestampHelper()
         ),
-        new ReservationGuard()
+        new ReservationGuard(),
+        new EmailSender(),
+        new CodeGenerator()
     ),
     new ReservationFilterService(
-        new ReservationDatabaseModel(),
+        new ReservationDatabaseModel(
+            new TimestampHelper()
+        ),
         new RoleFetchingModel(new RoleDatabaseModel()),
         new ReservationInfrastructure(
-            new ReservationDatabaseModel(), new ReservationGuard()
+            new ReservationDatabaseModel(
+                new TimestampHelper()
+            ), 
+            new ReservationGuard(),
+            new TimestampHelper()
         ),
+        new TimestampHelper()
     )
 )
 

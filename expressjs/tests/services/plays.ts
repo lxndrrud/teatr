@@ -4,12 +4,14 @@ import { PlayModel } from "../../dbModels/plays"
 import { PlayFetchingModel } from "../../services/plays"
 import { PlayBaseInterface, PlayQueryInterface, PlayWithPosterInterface } from "../../interfaces/plays"
 import { PlayMockModel } from "../mockModels/plays";
+import { FileStreamHelper } from "../../utils/fileStreams";
 
 
 export function PlayServiceTests() {
     describe("Play Service", () => {
         const playMockModel = new PlayMockModel()
-        const playService = new PlayFetchingModel(playMockModel)
+        const fileStreamHelper = new FileStreamHelper()
+        const playService = new PlayFetchingModel(playMockModel, fileStreamHelper)
 
         describe("Get All With Poster", function() {
             it("should be OK", async function() {

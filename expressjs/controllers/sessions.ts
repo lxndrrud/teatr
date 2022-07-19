@@ -1,19 +1,30 @@
 import { Request, Response } from "express"
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, isSessionBaseInterface, isSessionFilterQueryInterface } 
     from "../interfaces/sessions"
-import { SessionService } from "../services/sessions"
 import { ErrorInterface, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 import { UploadedFile } from "express-fileupload"
+import { ISessionCRUDService } from "../services/sessions/SessionCRUD.service"
+import { ISessionCSVService } from "../services/sessions/SessionCSV.service"
+import { ISessionFilterService } from "../services/sessions/SessionFilter.service"
 
 
 export class SessionController {
-    private sessionService
-    constructor(sessionServiceInstance: SessionService) {
-        this.sessionService = sessionServiceInstance
+    private sessionCRUDService
+    private sessionCSVService
+    private sessionFilterService
+
+    constructor(
+        sessionCRUDServiceInstance: ISessionCRUDService,
+        sessionCSVServiceInstance: ISessionCSVService,
+        sessionFilterService: ISessionFilterService
+    ) {
+        this.sessionCRUDService = sessionCRUDServiceInstance
+        this.sessionCSVService = sessionCSVServiceInstance
+        this.sessionFilterService = sessionFilterService
     }
 
     async getSessions(req: Request, res: Response) {
-        const query = await this.sessionService.getUnlockedSessions()
+        const query = await this.sessionCRUDService.getUnlockedSessions()
         if (isInnerErrorInterface(query)) {
             res.status(query.code).send(<ErrorInterface>{
                 message: query.message
@@ -29,7 +40,7 @@ export class SessionController {
             res.status(400).end()
             return 
         }
-        const query = await this.sessionService.getSingleUnlockedSession(idSession)
+        const query = await this.sessionCRUDService.getSingleUnlockedSession(idSession)
         if (isInnerErrorInterface(query)) {
             res.status(query.code).send(<ErrorInterface>{
                 message: query.message
@@ -47,7 +58,7 @@ export class SessionController {
             return
         }
         const payload: SessionBaseInterface = {...req.body}
-        const newSession = await this.sessionService.createSession(payload)
+        const newSession = await this.sessionCRUDService.createSession(payload)
         if (isInnerErrorInterface(newSession)) {
             res.status(newSession.code).send(<ErrorInterface>{
                 message: newSession.message
@@ -66,7 +77,7 @@ export class SessionController {
             })
             return
         }
-        const response = await this.sessionService.createSessionsCSV(<UploadedFile> req.files.csv)
+        const response = await this.sessionCSVService.createSessionsCSV(<UploadedFile> req.files.csv)
         if (isInnerErrorInterface(response)) {
             res.status(response.code).send(<ErrorInterface>{
                 message: response.message
@@ -93,7 +104,7 @@ export class SessionController {
         }
         const payload: SessionBaseInterface = {...req.body}
         
-        const response = await this.sessionService.updateSession(idSession, payload)
+        const response = await this.sessionCRUDService.updateSession(idSession, payload)
         if (isInnerErrorInterface(response)) {
             res.status(response.code).send(<ErrorInterface>{
                 message: response.message
@@ -111,7 +122,7 @@ export class SessionController {
             })
             return
         }
-        const response = await this.sessionService.deleteSession(idSession)
+        const response = await this.sessionCRUDService.deleteSession(idSession)
     
         if (isInnerErrorInterface(response)) {
             res.status(response.code).send(<ErrorInterface>{
@@ -132,7 +143,7 @@ export class SessionController {
             return 
         }
         
-        const query = await this.sessionService.getSessionsByPlay(idPlay)
+        const query = await this.sessionCRUDService.getSessionsByPlay(idPlay)
     
         if (isInnerErrorInterface(query)) {
             res.status(query.code).send(<ErrorInterface>{
@@ -150,7 +161,7 @@ export class SessionController {
             res.status(400).end()
             return
         }
-        const result = await this.sessionService.getSlots(idSession)
+        const result = await this.sessionCRUDService.getSlots(idSession)
     
         if (isInnerErrorInterface(result)) {
             res.status(result.code).send(<ErrorInterface>{
@@ -171,7 +182,7 @@ export class SessionController {
         }
         const userQuery: SessionFilterQueryInterface = {...req.query}
     
-        const query = await this.sessionService.getFilteredSessions(userQuery)
+        const query = await this.sessionFilterService.getFilteredSessions(userQuery)
     
         if (isInnerErrorInterface(query)) {
             res.status(query.code).send(<ErrorInterface>{
@@ -185,7 +196,7 @@ export class SessionController {
     }
 
     async getSessionFilterOptions(req: Request, res: Response) {
-        const query = await this.sessionService.getSessionFilterOptions()
+        const query = await this.sessionFilterService.getSessionFilterOptions()
     
         if (isInnerErrorInterface(query)) {
             res.status(query.code).send(<ErrorInterface>{

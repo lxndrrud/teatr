@@ -6,7 +6,7 @@ import { DatabaseModel } from "./baseModel";
 import { ReservationBaseInterface, ReservationDatabaseInterface,
     ReservationWithoutSlotsInterface, ReservationFilterQueryInterface } from "../interfaces/reservations"
 import { ReservationsSlotsBaseInterface } from "../interfaces/slots"
-import { getNextDayOfTimestamp } from "../utils/timestamp"
+import { TimestampHelper } from "../utils/timestamp"
 
 export interface ReservationModel {
     getAll(payload: {
@@ -62,8 +62,13 @@ export interface ReservationModel {
  * id_user
  */
 export class ReservationDatabaseModel extends DatabaseModel implements ReservationModel {
-    constructor() {
+    private timestampHelper
+
+    constructor(
+        timestampHelperInstance: TimestampHelper
+    ) {
         super(reservations)
+        this.timestampHelper = timestampHelperInstance
     }
 
     getAll(payload: {
@@ -267,7 +272,8 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
                         innerBuilder
                             .andWhere('s.timestamp', '>=', `${userQuery.date}T00:00:00`)
                         innerBuilder
-                            .andWhere('s.timestamp', '<', getNextDayOfTimestamp(`${userQuery.date}`))
+                            .andWhere('s.timestamp', '<', 
+                                this.timestampHelper.getNextDayOfTimestamp(`${userQuery.date}`))
                     })
                 }
                 if (userQuery.auditorium_title !== undefined && userQuery.auditorium_title !== 'undefined') {

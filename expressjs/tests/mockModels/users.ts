@@ -143,4 +143,9 @@ export class UserMockModel implements UserModel {
         }
         return toReturn
     }
+
+    checkIsUserStaff(idUser: number, idRole: number) {
+        if (idRole === 3) return false
+        return true
+    }
 }

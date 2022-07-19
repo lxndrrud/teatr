@@ -4,7 +4,7 @@ import { UserBaseInterface, UserInterface, UserRequestOption } from "../interfac
 import { hash } from 'bcryptjs';
 import { sign } from 'jsonwebtoken'
 import { DatabaseModel } from "./baseModel";
-import { userActions, users } from "./tables";
+import { roles, userActions, users } from "./tables";
 import { UserActionBaseInterface } from "../interfaces/userActions";
 
 export interface UserModel {
@@ -39,6 +39,8 @@ export interface UserModel {
     insertAction(trx: Knex.Transaction, payload: UserActionBaseInterface): Knex.QueryBuilder | any
 
     generateToken(trx: Knex.Transaction, idUser: number, token: string): Knex.QueryBuilder | any
+
+    checkIsUserStaff(idUser: number, idRole: number): any
 }
 
 /**
@@ -134,6 +136,18 @@ export class UserDatabaseModel extends DatabaseModel implements UserModel {
                 token
             })
             .returning('*')
+    }
+
+    checkIsUserStaff(idUser: number, idRole: number) {
+        return KnexConnection(`${users} as u`)
+            .select('u.*')
+            .join(`roles as r`, 'r.id', 'u.id_role')
+            .where('u.id', idUser)
+            .andWhere('u.id_role', idRole)
+            .andWhere(builder => {
+                builder.whereNot('r.title', 'Посетитель')
+            })
+            .first()
     }
     
 }
