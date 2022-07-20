@@ -6,7 +6,7 @@ import store from '../store/store'
 import { createWrapper} from 'next-redux-wrapper'
 
 
-class MyApp extends App {
+/*class MyApp extends App {
     render() {
         const { Component, pageProps } = this.props
         return (
@@ -16,6 +16,24 @@ class MyApp extends App {
         )
     }
 }
+*/
+
+const MyApp = ({ Component, pageProps }) => {
+    return (
+      <Provider store={store}>
+        <Component {...pageProps}></Component>
+      </Provider>
+  )
+} 
+
+/*
+MyApp.getInitialProps = async (appContext) => {
+  // calls page's `getInitialProps` and fills `appProps.pageProps`
+  const appProps = await App.getInitialProps(appContext);
+
+  return { ...appProps }
+}
+*/
 
 const makeStore = () => store
 const wrapper = createWrapper(makeStore)

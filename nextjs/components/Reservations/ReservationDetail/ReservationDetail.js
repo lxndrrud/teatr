@@ -5,6 +5,8 @@ import ReservationSlotList from '../../Slots/ReservationSlotList/ReservationSlot
 import { useDispatch, useSelector } from 'react-redux'
 import { Table } from 'react-bootstrap'
 import TooltipButton from '../../UI/TooltipButton/TooltipButton'
+import Link from 'next/link'
+import { CustomLink } from '../../UI/CustomLink/CustomLink'
 
 const ReservationDetail = ({ reservation }) => {
     /*
@@ -63,7 +65,10 @@ const ReservationDetail = ({ reservation }) => {
                         </tr>
                         <tr>
                             <td><span className={styles.bold}>Название спектакля:</span></td>
-                            <td>{reservation.play_title}</td>
+                            <td> 
+                                <CustomLink text={reservation.play_title} 
+                                    destination={`/repertoire/${reservation.id_play}`}/>
+                            </td>
                         </tr>
                         <tr>
                             <td><span className={styles.bold}>Зал:</span></td>
@@ -121,7 +126,8 @@ const ReservationDetail = ({ reservation }) => {
                     <ReservationSlotList slots={reservation.slots} />
                     {
                         reservation.can_user_confirm
-                        ? <ButtonLink 
+                        ? <ButtonLink
+                            linkType="green" 
                             text='Подтвердить бронь' 
                             destination={`/confirm/${reservation.id}`} />
                         : null
@@ -129,6 +135,7 @@ const ReservationDetail = ({ reservation }) => {
                     {
                         reservation.can_user_pay
                         ? <ButtonLink 
+                            linkType="green"
                             text='Пометить оплаченной' 
                             destination={`/control/payment/${reservation.id}`} />
                         : null

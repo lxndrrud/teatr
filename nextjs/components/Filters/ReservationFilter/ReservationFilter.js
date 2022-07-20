@@ -22,7 +22,7 @@ const ReservationFilter = () => {
 
     useEffect(() => {
         dispatch(fetchReservationFilterOptions(token))
-    }, [])
+    }, [dispatch, token])
 
     // Функции для синронизации состояния с input`ами
     /*
@@ -108,7 +108,7 @@ const ReservationFilter = () => {
 
                 {reservationFilterOptions.auditoriums && reservationFilterOptions.auditoriums
                     .map(item => (
-                        <option value={item.title} key={item.title}>
+                        <option value={item.title} key={item.id}>
                             {item.title}
                         </option>
                 ))}
@@ -118,7 +118,7 @@ const ReservationFilter = () => {
                 <option value="None">Все спектакли</option>
 
                 {reservationFilterOptions.plays && reservationFilterOptions.plays.map(item => (
-                    <option value={item.title} key={item.title}>
+                    <option value={item.title} key={item.id}>
                         {item.title}
                     </option>
                 ))}   

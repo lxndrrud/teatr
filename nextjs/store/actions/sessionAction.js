@@ -87,13 +87,14 @@ export const fetchFilteredSessions = (date, auditoriumTitle, playTitle) => async
     }
 }
 
-export const createSessionsCSV = (file) => async dispatch => {
+export const createSessionsCSV = (token, file) => async dispatch => {
     const formData = new FormData()
     formData.append('csv', file)
     const response = await fetch('/expressjs/sessions/csv', {
-        /*headers: {
-            'Content-Type': 'multipart/form-data',
-        },*/
+        headers: {
+            //'Content-Type': 'multipart/form-data',
+            'auth-token': token
+        },
         method: "POST",
         body: formData
     })

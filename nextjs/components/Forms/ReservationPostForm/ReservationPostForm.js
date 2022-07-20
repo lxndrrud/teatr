@@ -25,7 +25,7 @@ const ReservationPostForm = () => {
     useEffect(() => {
         if (session.id)
             dispatch(fetchSlotsBySession(token, session.id))
-    }, [session])
+    }, [dispatch, token, session])
 
 
     const postEmailReservation = (e) => {

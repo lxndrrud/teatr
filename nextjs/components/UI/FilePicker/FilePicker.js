@@ -38,7 +38,7 @@ const FilePicker = ({ onClickHook, onChangeHook, error, success, isMultiple=fals
                 style={{ display: "none"}} 
                 multiple={ isMultiple }
             />
-            <label for="upload" className={styles.uploadButtonLabel} >
+            <label htmlFor="upload" className={styles.uploadButtonLabel} >
                 <IconSVG data={"M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"}
                     color="#fff" />
                 <span>Загрузить</span>

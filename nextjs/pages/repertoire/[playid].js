@@ -14,7 +14,7 @@ export default function PlayPage() {
             dispatch(fetchPlay(router.query.playid))
             dispatch(fetchSessionsByPlay(router.query.playid))
         }
-    }, [router.isReady])
+    }, [router, dispatch])
 
     const play = useSelector(state => state.play.play)
     const sessions = useSelector(state => state.session.sessions)    

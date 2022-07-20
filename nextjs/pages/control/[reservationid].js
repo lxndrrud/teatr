@@ -29,7 +29,7 @@ const ReservationDetailPage = () => {
                 .catch(() => router.push('/control'))
             }
         }
-    }, [router.isReady])
+    }, [router, store, dispatch, token])
 
     const reservation = useSelector(state => state.reservation.reservation)
 

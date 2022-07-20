@@ -13,7 +13,7 @@ const SessionFilter = () => {
     let [playTitle, setPlayTitle] = useState('')
     useEffect(() => {
         dispatch(fetchSessionFilterOptions())
-    }, [])
+    }, [dispatch])
     const getFilteredSessions = (e) => {
         e.preventDefault()
 
@@ -60,7 +60,7 @@ const SessionFilter = () => {
             <Select onChange={syncAuditoriumTitle}>
                 <option value="None">Все залы</option>
                 {filterOptions.auditoriums && filterOptions.auditoriums.map(item => (
-                    <option value={item.title}>
+                    <option key={item.id} value={item.title}>
                         {item.title}
                     </option>
                 ))}
@@ -69,7 +69,7 @@ const SessionFilter = () => {
                 <option value="None">Все спектакли</option>
 
                 {filterOptions.plays && filterOptions.plays.map(item => (
-                    <option value={item.title}>
+                    <option key={item.id} value={item.title}>
                         {item.title}
                     </option>
                 ))}   

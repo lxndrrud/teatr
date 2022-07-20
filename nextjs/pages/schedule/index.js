@@ -11,7 +11,7 @@ export default function Schedule() {
     
     useEffect(() => {
         dispatch(fetchSessions())
-    }, [])
+    }, [dispatch])
     
 
     return (

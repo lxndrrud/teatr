@@ -34,7 +34,7 @@ const SlotsFieldMainAuditorium = ({ rows }) => {
                 ))}
                 <div className={styles.balconySideRowsContainer} >
                     {sideBalconyRows && sideBalconyRows.map(row => (
-                        <div className={styles.tableColumn}>
+                        <div key={row.id} className={styles.tableColumn}>
                             <span className={styles.rowLabel}>{row.title} Ряд #{row.number}</span>
                             {row.seats.map(slot => (
                                 <SlotItem key={slot.id} slotObject={slot} />

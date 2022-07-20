@@ -38,7 +38,7 @@ const AdminNavBar = () => {
         else
             setIsLoggedIn(false)
         
-    }, [token])
+    }, [store, token])
     return (
         <div className={styles.fixedContainer}>
         {

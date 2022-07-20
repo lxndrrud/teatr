@@ -66,6 +66,7 @@
 }
 
 .table td {
+    border-radius: 10px;
     max-width: 100%;
     border-bottom: 3px solid black;
     padding: 2%;
@@ -73,6 +74,9 @@
 
 .table tr:hover {
     background-color: #f3b96c;
+    background-color: #64aff1;
+    background-color: violet;
+    transition: all 0.5s;
 }
 
 

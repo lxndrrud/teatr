@@ -147,6 +147,7 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
             KnexConnection.ref('*').withSchema('r'), 
             KnexConnection.ref('id').withSchema('s').as('id_session'), 
             KnexConnection.ref('id').withSchema('u').as('id_user'),
+            KnexConnection.ref('id').withSchema('p').as('id_play'),
             KnexConnection.ref('timestamp').withSchema('s').as('session_timestamp'),
             KnexConnection.ref('title').withSchema('p').as('play_title'),
             KnexConnection.ref('title').withSchema('a').as('auditorium_title'),

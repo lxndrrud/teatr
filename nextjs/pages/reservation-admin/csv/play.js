@@ -10,6 +10,7 @@ export default function SessionCSVUploadingPage() {
     const dispatch = useDispatch()
     const store = useStore()
     const router = useRouter()
+    let token = useSelector(state => state.user.token)
     let [errorMessage, setErrorMessage] = useState()
     let [successMessage, setSuccessMessage] = useState()
     let [selectedFile, setSelectedFile] = useState()
@@ -21,16 +22,15 @@ export default function SessionCSVUploadingPage() {
                 return
             }
         }
-    })
+    }, [router, store])
     const onChangeHook = (file) => {
         setSelectedFile(file)
     }
     const onButtonClick = (e) => {
-        dispatch(createPlaysCSV(selectedFile))
+        dispatch(createPlaysCSV(token, selectedFile))
         .then(() => {
             const error = store.getState().play.error
             const success = store.getState().play.success
-            console.log(error, success)
             if (error) {
                 setErrorMessage(error)
             }

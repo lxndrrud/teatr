@@ -21,17 +21,17 @@ export const fetchPlays = () => async dispatch =>  {
     })
 }
 
-export const createPlaysCSV = (file) => async dispatch => {
+export const createPlaysCSV = (token, file) => async dispatch => {
     const formData = new FormData()
     formData.append('csv', file)
     const response = await fetch('/expressjs/plays/csv', {
-        /*headers: {
-            'Content-Type': 'multipart/form-data',
-        },*/
+        headers: {
+            //'Content-Type': 'multipart/form-data',
+            'auth-token': token
+        },
         method: "POST",
         body: formData
     })
-    console.log(response.status)
 
     if (response.status !== 201 ) {
         let body = await response.json()

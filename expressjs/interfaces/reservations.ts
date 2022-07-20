@@ -64,6 +64,7 @@ export interface ReservationWithoutSlotsInterface extends ReservationDatabaseInt
     session_is_locked: boolean
     auditorium_title: string
     play_title: string
+    id_play: number
 }
 
 /**

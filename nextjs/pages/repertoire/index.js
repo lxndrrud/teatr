@@ -9,7 +9,7 @@ export default function Repertoire() {
 
     useEffect(() => {
         dispatch(fetchPlays())
-    }, [])
+    }, [dispatch])
 
     return (
     <>

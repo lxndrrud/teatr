@@ -29,14 +29,14 @@ const SessionReservation = () => {
                 .then(dispatch(clearSlots()))
                 .catch(() => router.push('/'))
         }  
-    }, [router.isReady])
+    }, [router, dispatch, store, token])
 
     const sessionFromStore = useSelector(state => state.session.session)
 
     useEffect( () => {
         if (sessionFromStore.id_play)
           dispatch(fetchPlay(sessionFromStore.id_play))
-    }, [sessionFromStore])
+    }, [sessionFromStore, dispatch])
 
     const playFromStore = useSelector(state => state.play.play)
 
