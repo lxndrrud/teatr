@@ -2,6 +2,7 @@ import { ReservationModel } from "../../dbModels/reservations"
 import { IReservationGuard } from "../../guards/Reservation.guard"
 import { IReservationInfrastructure } from "../../infrastructure/Reservation.infra"
 import { SessionInfrastructure } from "../../infrastructure/Session.infra"
+import { IUserInfrastructure } from "../../infrastructure/User.infra"
 import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors"
 import { ReservationBaseInterface, ReservationBaseWithoutConfirmationInterface, ReservationCreateInterface, ReservationDatabaseInterface, ReservationInterface, ReservationWithoutSlotsInterface } from "../../interfaces/reservations"
 import { ReservationsSlotsBaseInterface, SlotInterface } from "../../interfaces/slots"
@@ -36,7 +37,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
     protected roleService
     protected sessionCRUDService
     protected sessionInfrastructure
-    protected userService
+    protected userInfrastructure
     protected reservationInfrastructure
     protected reservationGuard
     protected emailSender
@@ -47,7 +48,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
             roleServiceInstance: RoleService,
             sessionCRUDServiceInstance: SessionCRUDService,
             sessionInfrastructure: SessionInfrastructure,
-            userServiceInstance: UserService,
+            userInfrastructureInstance: IUserInfrastructure,
             reservationInfrastructureInstance: IReservationInfrastructure,
             reservationGuardInstance: IReservationGuard,
             emailSenderInstance: EmailSender,
@@ -57,7 +58,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
         this.roleService = roleServiceInstance
         this.sessionCRUDService = sessionCRUDServiceInstance
         this.sessionInfrastructure = sessionInfrastructure
-        this.userService = userServiceInstance
+        this.userInfrastructure = userInfrastructureInstance
         this.reservationInfrastructure = reservationInfrastructureInstance
         this.reservationGuard = reservationGuardInstance
         this.emailSender = emailSenderInstance
@@ -250,7 +251,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
         // Создание записи действия для оператора
         if (userRole.can_see_all_reservations) {
             const actionDescription = `Создание брони ${reservation.id}`
-            const response = await this.userService
+            const response = await this.userInfrastructure
                 .createAction(trx, user.id, userRole, actionDescription)
             if (isInnerErrorInterface(response)) {
                 return response
@@ -368,7 +369,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
             ResUser: ${reservation.id_user},
             Session: ${reservation.id_session},
             Slots: ${idsSlots}`
-            const response = await this.userService
+            const response = await this.userInfrastructure
                 .createAction(trx, user.id, userRole, actionDescription)
             if (isInnerErrorInterface(response)) {
                 return response

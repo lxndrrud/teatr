@@ -40,7 +40,9 @@ export interface UserModel {
 
     generateToken(trx: Knex.Transaction, idUser: number, token: string): Knex.QueryBuilder | any
 
-    checkIsUserStaff(idUser: number, idRole: number): any
+    checkIsUserStaff(idUser: number, idRole: number): Knex.QueryBuilder | any
+
+    getUser(idUser: number): Knex.QueryBuilder | any
 }
 
 /**
@@ -141,12 +143,22 @@ export class UserDatabaseModel extends DatabaseModel implements UserModel {
     checkIsUserStaff(idUser: number, idRole: number) {
         return KnexConnection(`${users} as u`)
             .select('u.*')
-            .join(`roles as r`, 'r.id', 'u.id_role')
+            .join(`${roles} as r`, 'r.id', 'u.id_role')
             .where('u.id', idUser)
             .andWhere('u.id_role', idRole)
             .andWhere(builder => {
                 builder.whereNot('r.title', 'Посетитель')
             })
+            .first()
+    }
+
+    getUser(idUser: number) {
+        return KnexConnection(`${users} as u`)
+            .select(
+                'u.*', 'r.title as role_title'
+            )
+            .join(`${roles} as r`, 'r.id', 'u.id_role')
+            .where('u.id', idUser)
             .first()
     }
     

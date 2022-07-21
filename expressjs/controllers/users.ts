@@ -106,4 +106,55 @@ export class UserController {
         res.status(200).send(query)
     }
 
+    /**
+     * * Получение информации о пользователе для личного кабинета
+     */
+    async getPersonalArea(req: Request, res: Response) {
+        if (!req.user) {
+            res.status(401).send(<ErrorInterface>{
+                message: "Пользователь не распознан!"
+            })
+            return
+        }
+        const query = await this.userService.getPersonalArea(req.user)
+        if (isInnerErrorInterface(query)) {
+            res.status(query.code).send(<ErrorInterface>{
+                message: query.message
+            })
+            return
+        }
+        res.status(200).send({
+            "user": query
+        })
+    }
+
+    /**
+     * * Получение информации о пользователе (уровень "Оператор", "Администратор")
+     */
+    async getUser(req: Request, res: Response) {
+        if (!req.user) {
+            res.status(401).send(<ErrorInterface>{
+                message: "Пользователь не распознан!"
+            })
+            return
+        }
+        const idUser = parseInt(req.params.idUser)
+        if (!idUser) {
+            res.status(400).send(<ErrorInterface> {
+                message: "Идентификатор пользователя не найден!"
+            })
+            return
+        }
+        const query = await this.userService.getUser(req.user, idUser)
+        if (isInnerErrorInterface(query)) {
+            res.status(query.code).send(<ErrorInterface>{
+                message: query.message
+            })
+            return
+        }
+        res.status(200).send({
+            user: query
+        })
+    }
+
 }

@@ -1,11 +1,9 @@
 import { Request, Response, NextFunction } from "express"
 import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 import { verify } from "jsonwebtoken"
-import { UserFetchingModel } from "../services/users"
 import { UserDatabaseModel } from "../dbModels/users"
-import { RoleFetchingModel } from "../services/roles"
-import { RoleDatabaseModel } from "../dbModels/roles"
 import { UserRequestOption } from "../interfaces/users"
+import { UserInfrastructure } from "../infrastructure/User.infra"
 
 export const basicAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers['auth-token']
@@ -40,12 +38,9 @@ export const staffAuthMiddleware = async (req: Request, res: Response, next: Nex
     }
     try {
         const decoded = verify(`${token}`, `${process.env.SECRET_KEY}`);
-        const userService = new UserFetchingModel(
-            new UserDatabaseModel(),
-            new RoleFetchingModel(new RoleDatabaseModel())
-        )
+        const userInfrastructure = new UserInfrastructure(new UserDatabaseModel())
         const userData = {...JSON.parse(JSON.stringify(decoded))}
-        let check = await userService.checkIsUserStaff(<UserRequestOption>userData)
+        let check = await userInfrastructure.checkIsUserStaff(<UserRequestOption>userData)
         if (isInnerErrorInterface(check)) {
             res.status(check.code).send({
                 message: check.message

@@ -6,15 +6,18 @@ import { UserBaseInterface, UserLoginInterface } from "../../interfaces/users"
 import { KnexConnection } from "../../knex/connections"
 import { RoleMockModel } from "../mockModels/roles"
 import { UserMockModel } from "../mockModels/users"
+import { UserInfrastructure } from "../../infrastructure/User.infra"
 
 
 export function UserServiceTests() {
     describe("User Service", () => {
         const userMockModel = new UserMockModel()
         const roleFetchingInstance = new RoleFetchingModel(new RoleMockModel())
+        const userInfrastructure = new UserInfrastructure(userMockModel)
         const userService = new UserFetchingModel(
             userMockModel, 
-            roleFetchingInstance)
+            roleFetchingInstance,
+            userInfrastructure)
 
         describe("Create User", function() {
             const userPayload = userMockModel.userPayload
@@ -149,7 +152,7 @@ export function UserServiceTests() {
 
             it("should fail and return inner error code 403 (forbidden action for user role)", async function() {
                 const trx = await KnexConnection.transaction()
-                const response = await userService.createAction(trx, user.id, visitor, "test description")
+                const response = await userInfrastructure.createAction(trx, user.id, visitor, "test description")
                 await trx.rollback()
 
                 expect(response).to.haveOwnProperty("code").that.equals(403)
@@ -158,7 +161,7 @@ export function UserServiceTests() {
 
             it("should fail and return inner error code 500 (database error while inserting action)", async function() {
                 const trx = await KnexConnection.transaction()
-                const response = await userService.createAction(trx, user.id, cashier, "fail")
+                const response = await userInfrastructure.createAction(trx, user.id, cashier, "fail")
                 await trx.rollback()
 
                 expect(response).to.haveOwnProperty("code").that.equals(500)
@@ -169,7 +172,7 @@ export function UserServiceTests() {
                 const lengthBefore = userMockModel.userActionsList.length
 
                 const trx = await KnexConnection.transaction()
-                const response = await userService.createAction(trx, user.id, admin, 
+                const response = await userInfrastructure.createAction(trx, user.id, admin, 
                     "test successful action creation")
                 await trx.rollback()
 

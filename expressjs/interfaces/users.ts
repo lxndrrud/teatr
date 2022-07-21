@@ -46,3 +46,33 @@ export interface UserRequestOption {
     email: string
     id_role: number
 }
+
+export interface IExtendedUser extends UserInterface{
+    role_title: string
+}
+
+export class UserStrategy {
+    protected user: IExtendedUser
+
+    constructor(userInstance: IExtendedUser) {
+        this.user = userInstance
+    }
+
+    public getPersonalInfo() {
+        return {
+            email: this.user.email.slice(0, 2) + "***" + this.user.email.slice(-5, ),
+            firstname: this.user.firstname,
+            middlename: this.user.middlename,
+            lastname: this.user.lastname,
+        }
+    }
+
+    public getExtendedPersonalInfo() {
+        return {
+            ...this.getPersonalInfo(),
+            id: this.user.id,
+            id_role: this.user.id_role,
+            role_title: this.user.role_title
+        }
+    }
+}

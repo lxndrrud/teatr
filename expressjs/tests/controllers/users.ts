@@ -9,6 +9,22 @@ export function UsersControllerTests() {
             await KnexConnection.migrate.rollback()
             await KnexConnection.migrate.latest()
             await KnexConnection.seed.run()
+
+            const visitorTokenResponse = await request(this.server)
+                .post(this.authLink)
+                .send({
+                    email: "lxndrrud@yandex.ru",
+                    password: "123456"
+                })
+            this.visitorToken = visitorTokenResponse.body.token
+
+            const adminTokenResponse = await request(this.server)
+                .post(this.authLink)
+                .send({
+                    email: "admin@admin.ru",
+                    password: "123456"
+                })
+            this.adminToken = adminTokenResponse.body.token
         })
 
         describe("POST /expressjs/users/login", function() {
@@ -169,6 +185,58 @@ export function UsersControllerTests() {
                 expect(response.statusCode).to.equal(200)
                 expect(response.body).to.haveOwnProperty("token")
             })
+        })
+
+        describe("GET /expressjs/users/1", function() {
+            const link = '/expressjs/users/1'
+            const failLink = '/expressjs/users/kek'
+            it("should have status 403 without token", async function() {
+                const response = await request(this.server)
+                    .get(link)
+
+                expect(response.status).to.equal(403)
+            })
+            it("should have status 304 because visitor token", async function() {
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        'auth-token': this.visitorToken
+                    })
+                
+                expect(response.status).to.equal(403)
+            })
+            it("should have status 400 because with wrong user id", async function() {
+                const response = await request(this.server)
+                    .get(failLink)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+
+                expect(response.status).to.equal(400)
+            })
+
+            it("should be OK", async function() {
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+
+                expect(response.status).to.equal(200)
+                expect(response.body.user).to.haveOwnProperty('email').that.contains("***")
+                expect(response.body.user).to.haveOwnProperty('firstname')
+                expect(response.body.user).to.haveOwnProperty('middlename')
+                expect(response.body.user).to.haveOwnProperty('lastname')
+                expect(response.body.user).to.haveOwnProperty("id").that.equals(1)
+                expect(response.body.user).to.haveOwnProperty('id_role')
+                expect(response.body.user).to.haveOwnProperty("role_title")
+                expect(response.body.user).not.to.haveOwnProperty('password')
+                expect(response.body.user).not.to.haveOwnProperty('token')
+            })
+        })
+
+        describe("GET /expressjs/users/personalArea", function() {
+            it("should be developed!!!")
         })
     })
 }

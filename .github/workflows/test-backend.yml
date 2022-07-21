@@ -1,0 +1,11 @@
+name: docker-compose testing backend with database
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Up the containers
+        run: docker-compose up -d --build
+      - name: Test
+        run: docker exec -it expressjs npm run test

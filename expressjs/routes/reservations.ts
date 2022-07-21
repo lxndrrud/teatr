@@ -5,7 +5,6 @@ import { ReservationDatabaseModel } from "../dbModels/reservations";
 import { RoleFetchingModel } from "../services/roles";
 import { RoleDatabaseModel } from "../dbModels/roles";
 import { SessionDatabaseModel } from "../dbModels/sessions";
-import { UserFetchingModel } from "../services/users";
 import { UserDatabaseModel } from "../dbModels/users";
 import { ReservationInfrastructure } from "../infrastructure/Reservation.infra";
 import { ReservationGuard } from "../guards/Reservation.guard";
@@ -17,6 +16,7 @@ import { SessionCRUDService } from "../services/sessions/SessionCRUD.service";
 import { SessionInfrastructure } from "../infrastructure/Session.infra";
 import { TimestampHelper } from "../utils/timestamp";
 import { CodeGenerator } from "../utils/code";
+import { UserInfrastructure } from "../infrastructure/User.infra";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
@@ -25,9 +25,8 @@ const reservationController = new ReservationController(
             new TimestampHelper()
         ),
         new RoleFetchingModel(new RoleDatabaseModel()),
-        new UserFetchingModel(
-            new UserDatabaseModel(), 
-            new RoleFetchingModel(new RoleDatabaseModel())
+        new UserInfrastructure(
+            new UserDatabaseModel()
         ),
         new ReservationGuard()
     ),
@@ -51,9 +50,8 @@ const reservationController = new ReservationController(
                 new TimestampHelper()
             ),
             new TimestampHelper()),
-        new UserFetchingModel(
-            new UserDatabaseModel(), 
-            new RoleFetchingModel(new RoleDatabaseModel())
+        new UserInfrastructure(
+            new UserDatabaseModel()
         ),
         new ReservationInfrastructure(
             new ReservationDatabaseModel(

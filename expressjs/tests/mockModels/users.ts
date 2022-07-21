@@ -148,4 +148,13 @@ export class UserMockModel implements UserModel {
         if (idRole === 3) return false
         return true
     }
+
+    getUser(idUser: number) {
+        this.usersList.forEach(user => {
+            if (user.id === idUser) {
+                return user
+            }
+        })
+        return undefined
+    }
 }

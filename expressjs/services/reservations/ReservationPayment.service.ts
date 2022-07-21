@@ -1,5 +1,6 @@
 import { ReservationModel } from "../../dbModels/reservations"
 import { IReservationGuard } from "../../guards/Reservation.guard"
+import { IUserInfrastructure } from "../../infrastructure/User.infra"
 import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors"
 import { ReservationConfirmationInterface, ReservationWithoutSlotsInterface } from "../../interfaces/reservations"
 import { UserRequestOption } from "../../interfaces/users"
@@ -22,18 +23,18 @@ export interface IReservationPaymentService {
 export class ReservationPaymentService {
     protected reservationModel
     protected roleService
-    protected userService
+    protected userInfrastructure
     protected reservationGuard
 
     constructor(
             reservationDatabaseInstance: ReservationModel,
             roleServiceInstance: RoleService,
-            userServiceInstance: UserService,
+            userInfrastructureInstance: IUserInfrastructure,
             reservationGuardInstance: IReservationGuard
         ) {
         this.reservationModel = reservationDatabaseInstance
         this.roleService = roleServiceInstance
-        this.userService = userServiceInstance
+        this.userInfrastructure = userInfrastructureInstance
         this.reservationGuard = reservationGuardInstance
     }
 
@@ -90,7 +91,7 @@ export class ReservationPaymentService {
         // Создание записи действия для оператора
         if (userRole.can_see_all_reservations) {
             const actionDescription = `Подтверждение брони Res:${reservation.id}`
-            const response = await this.userService
+            const response = await this.userInfrastructure
                 .createAction(trx, user.id, userRole, actionDescription)
             if (isInnerErrorInterface(response)) {
                 return response
@@ -156,7 +157,7 @@ export class ReservationPaymentService {
         // Создание записи действия для оператора
         if (userRole.can_see_all_reservations) {
             const actionDescription = `Изменение флага оплаты на ${!reservation.is_paid}`
-            const response = await this.userService
+            const response = await this.userInfrastructure
                 .createAction(trx, user.id, userRole, actionDescription)
             if (isInnerErrorInterface(response)) {
                 return response
