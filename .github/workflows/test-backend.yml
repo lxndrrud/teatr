@@ -8,4 +8,4 @@ jobs:
       - name: Up the containers
         run: docker-compose up -d --build
       - name: Test
-        run: docker exec -i expressjs npm run test
+        run: docker exec expressjs npm run test
