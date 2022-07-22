@@ -1,6 +1,6 @@
 import { Knex } from "knex"
 import { KnexConnection } from "../knex/connections"
-import { UserBaseInterface, UserInterface, UserRequestOption } from "../interfaces/users"
+import { IExtendedUser, UserBaseInterface, UserInterface, UserRequestOption } from "../interfaces/users"
 import { hash } from 'bcryptjs';
 import { sign } from 'jsonwebtoken'
 import { DatabaseModel } from "./baseModel";
@@ -71,7 +71,11 @@ export class UserDatabaseModel extends DatabaseModel implements UserModel {
         lastname?: string
         id_role?: number
     }) {
-        return KnexConnection(users)
+        return KnexConnection<IExtendedUser>(users)
+            .select(
+                `${users}.*`, 'r.title as role_title'
+            )
+            .join(`${roles} as r`, 'r.id', `${users}.id_role`)
             .where(builder => {
                 if (payload.id)
                     builder.andWhere(`${users}.id`, payload.id)

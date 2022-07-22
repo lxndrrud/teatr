@@ -23,7 +23,6 @@ export function SessionsControllerTest() {
                     password: "123456"
                 })
             this.token = tokenResponse.body.token
-            return
         })
         describe("GET /expressjs/sessions/", function() {
             const getSessionsLink = `/expressjs/sessions`

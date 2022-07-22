@@ -18,7 +18,7 @@ export function PlaysControllerTests () {
                     password: "123456"
                 })
             this.token = tokenResponse.body.token
-            return
+            console.log(tokenResponse.status, tokenResponse.body)
         })
 
         describe("GET /expressjs/plays/", function() {

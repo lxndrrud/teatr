@@ -18,6 +18,15 @@ export function UsersControllerTests() {
                 })
             this.visitorToken = visitorTokenResponse.body.token
 
+            
+            const cashierTokenResponse = await request(this.server)
+                .post(this.authLink)
+                .send({
+                    email: 'kassir@mail.ru',
+                    password: '123456'
+                })
+            this.cashierToken = cashierTokenResponse.body.token
+
             const adminTokenResponse = await request(this.server)
                 .post(this.authLink)
                 .send({
@@ -187,16 +196,75 @@ export function UsersControllerTests() {
             })
         })
 
-        describe("GET /expressjs/users/1", function() {
-            const link = '/expressjs/users/1'
-            const failLink = '/expressjs/users/kek'
+        describe("GET /expressjs/users/", function() {
+            const link = `/expressjs/users/`
             it("should have status 403 without token", async function() {
                 const response = await request(this.server)
                     .get(link)
 
                 expect(response.status).to.equal(403)
             })
-            it("should have status 304 because visitor token", async function() {
+            it("should have status 403 for visitor", async function() {
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        'auth-token': this.visitorToken
+                    })
+
+                expect(response.status).to.equal(403)
+            })
+            it("should be OK for cashier", async function() {
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        'auth-token': this.cashierToken
+                    })
+                
+                expect(response.status).to.be.equal(200)
+                expect(response.body).to.haveOwnProperty('length').that.is.greaterThan(0)
+                expect(response.body[0]).to.haveOwnProperty("id")
+                expect(response.body[0]).to.haveOwnProperty("id_role")
+                expect(response.body[0]).to.haveOwnProperty("role_title")
+                expect(response.body[0]).to.haveOwnProperty("email").that.contains("***")
+                expect(response.body[0]).to.haveOwnProperty("firstname")
+                expect(response.body[0]).to.haveOwnProperty("middlename")
+                expect(response.body[0]).to.haveOwnProperty("lastname")
+                expect(response.body[0]).to.not.haveOwnProperty("token")
+                expect(response.body[0]).to.not.haveOwnProperty("password")
+            })
+            it("should be OK for admin", async function() {
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+                
+                expect(response.status).to.be.equal(200)
+                expect(response.body).to.haveOwnProperty('length').that.is.greaterThan(0)
+                expect(response.body[0]).to.haveOwnProperty("id")
+                expect(response.body[0]).to.haveOwnProperty("id_role")
+                expect(response.body[0]).to.haveOwnProperty("role_title")
+                expect(response.body[0]).to.haveOwnProperty("email").that.contains("***")
+                expect(response.body[0]).to.haveOwnProperty("firstname")
+                expect(response.body[0]).to.haveOwnProperty("middlename")
+                expect(response.body[0]).to.haveOwnProperty("lastname")
+                expect(response.body[0]).to.not.haveOwnProperty("token")
+                expect(response.body[0]).to.not.haveOwnProperty("password")
+            })
+
+        })
+
+        describe("GET /expressjs/users/:idUser", function() {
+            const link = '/expressjs/users/1'
+            const failLink = '/expressjs/users/kek'
+            const failLinkNotFound = '/expressjs/users/11100'
+            it("should have status 403 without token", async function() {
+                const response = await request(this.server)
+                    .get(link)
+
+                expect(response.status).to.equal(403)
+            })
+            it("should have status 403 because visitor token", async function() {
                 const response = await request(this.server)
                     .get(link)
                     .set({
@@ -214,7 +282,15 @@ export function UsersControllerTests() {
 
                 expect(response.status).to.equal(400)
             })
+            it("should have status 404 because of non-existing id record", async function() {
+                const response = await request(this.server)
+                    .get(failLinkNotFound)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
 
+                expect(response.status).to.equal(404)
+            })
             it("should be OK", async function() {
                 const response = await request(this.server)
                     .get(link)
@@ -236,7 +312,47 @@ export function UsersControllerTests() {
         })
 
         describe("GET /expressjs/users/personalArea", function() {
-            it("should be developed!!!")
+            const link = '/expressjs/users/personalArea'
+            it("should have status 403", async function() {
+                const response = await request(this.server)
+                    .get(link)
+
+                expect(response.status).to.equal(403)
+            })
+
+            it("should be OK for visitor", async function() {
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        'auth-token': this.visitorToken
+                    })
+
+                expect(response.status).to.equal(200)
+                expect(response.body).to.haveOwnProperty("user")
+                expect(response.body.user).to.haveOwnProperty("email").that.contains("***")
+                expect(response.body.user).to.haveOwnProperty("firstname")
+                expect(response.body.user).to.haveOwnProperty("middlename")
+                expect(response.body.user).to.haveOwnProperty("lastname")
+                expect(response.body.user).to.not.haveOwnProperty("password")
+                expect(response.body.user).to.not.haveOwnProperty("token")
+            })
+
+            it("should be OK for admin", async function() {
+                const response = await request(this.server)
+                    .get(link)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+
+                expect(response.status).to.equal(200)
+                expect(response.body).to.haveOwnProperty("user")
+                expect(response.body.user).to.haveOwnProperty("email").that.contains("***")
+                expect(response.body.user).to.haveOwnProperty("firstname")
+                expect(response.body.user).to.haveOwnProperty("middlename")
+                expect(response.body.user).to.haveOwnProperty("lastname")
+                expect(response.body.user).to.not.haveOwnProperty("password")
+                expect(response.body.user).to.not.haveOwnProperty("token")
+            })
         })
     })
 }

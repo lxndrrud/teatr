@@ -17,7 +17,7 @@ const userController = new UserController(
 )
 
 usersRouter.route('/')
-    .get(basicAuthMiddleware, userController.getAllUsers.bind(userController))
+    .get(staffAuthMiddleware, userController.getAllUsers.bind(userController))
     .post(userController.registerUser.bind(userController))
 
 usersRouter.post('/login', userController.loginUser.bind(userController))

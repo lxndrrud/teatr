@@ -11,7 +11,15 @@ export interface UserService {
     createUser(payload: UserRegisterInterface): Promise<InnerErrorInterface | UserInterface>
     loginUser(payload: UserLoginInterface): Promise<string | InnerErrorInterface>
     loginAdmin(payload: UserLoginInterface): Promise<string | InnerErrorInterface>
-    getAll(): Promise<UserInterface[] | InnerErrorInterface>
+    getAll(): Promise<InnerErrorInterface | {
+        id: number;
+        id_role: number;
+        role_title: string;
+        email: string;
+        firstname: string;
+        middlename: string;
+        lastname: string;
+    }[]>
     getPersonalArea(user: UserRequestOption): 
     Promise<{
             email: string;
@@ -48,7 +56,7 @@ export class UserFetchingModel implements UserService {
     async createUser(payload: UserRegisterInterface) {
         try {
             // Проверка на существующего пользователя
-            const existingUserCheck: UserInterface = await this.userModel
+            const existingUserCheck = <IExtendedUser | undefined> await this.userModel
                 .get({ email: payload.email})
             if (existingUserCheck) {
                 return <InnerErrorInterface>{
@@ -94,13 +102,13 @@ export class UserFetchingModel implements UserService {
 
     async loginUser(payload: UserLoginInterface) {
         // Получение пользователя и сравнение введенного пароля с хэшем в базе
-        let user: UserInterface 
+        let user: IExtendedUser | undefined 
         try {
             user = await this.userModel.get({email: payload.email})
         } catch (e) {
             return <InnerErrorInterface> {
                 code: 500,
-                message: "Внутренняя ошибка при поиске пользователя!"
+                message: "Внутренняя ошибка при поиске пользователя: " + e 
             }
         }
         if (!(user && compareSync(payload.password, user.password))) {
@@ -140,7 +148,7 @@ export class UserFetchingModel implements UserService {
      */
     async loginAdmin(payload: UserLoginInterface) {
         // Получение пользователя и сравнение введенного пароля с хэшем в базе
-        let user: UserInterface 
+        let user: IExtendedUser | undefined
         try {
             user = await this.userModel.get({email: payload.email})
         } catch (e) {
@@ -197,15 +205,18 @@ export class UserFetchingModel implements UserService {
         }  
     }
 
+    /**
+     * * Получение списка пользователей
+     */
     async getAll() {
         try {
-            const query: UserInterface[] = await this.userModel.getAll({})
-            return query
+            const query = <IExtendedUser[]> await this.userModel.getAll({})
+            return UserStrategy.getExtendedPersonalList(query)
         } catch (e) {
             console.log(e)
             return <InnerErrorInterface>{
                 code: 500, 
-                message: 'Внутренняя ошибка сервера при получении всех пользователей!'
+                message: 'Внутренняя ошибка сервера при получении всех пользователей'
             }
         }
     }
@@ -220,7 +231,7 @@ export class UserFetchingModel implements UserService {
         } catch (e) {
             return <InnerErrorInterface> {
                 code: 500,
-                message: "Внутренняя ошибка при поиске пользователя: " + e
+                message: "Внутренняя ошибка при поиске пользователя!"
             }
         }
     } 
@@ -240,12 +251,18 @@ export class UserFetchingModel implements UserService {
             }
         }
         try {
-            const user = <IExtendedUser> await this.userModel.getUser(idUser)
+            const user = <IExtendedUser | undefined> await this.userModel.getUser(idUser)
+            if (!user) {
+                return <InnerErrorInterface> {
+                    code: 404,
+                    message: "Пользователь не найден!"
+                }
+            }
             return new UserStrategy(user).getExtendedPersonalInfo()
         } catch (e) {
             return <InnerErrorInterface> {
                 code: 500,
-                message: "Внутренняя ошибка при поиске пользователя: " + e
+                message: "Внутренняя ошибка при поиске пользователя!"
             }
         }
     } 

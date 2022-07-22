@@ -1,4 +1,4 @@
-name: docker-compose testing backend with database
+name: docker-compose integration testing backend with database
 on: push
 jobs:
   test:
@@ -9,3 +9,5 @@ jobs:
         run: docker-compose up -d --build
       - name: Test
         run: docker exec expressjs npm run test
+      - name: Build
+        run: docker exec expressjs npm run build

@@ -58,6 +58,14 @@ export class UserStrategy {
         this.user = userInstance
     }
 
+    public static getExtendedPersonalList(userInstances: IExtendedUser[]) {
+        let resultList = []
+        for (let instance of userInstances) {
+            resultList.push(new UserStrategy(instance).getExtendedPersonalInfo())
+        }
+        return resultList
+    }
+
     public getPersonalInfo() {
         return {
             email: this.user.email.slice(0, 2) + "***" + this.user.email.slice(-5, ),
