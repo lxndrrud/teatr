@@ -1,0 +1,8 @@
+.notRequiredInputBorderColor{ 
+    border-color: black;
+}
+
+.fullWidthButton {
+    width: 100%;
+    min-width: 10rem;
+}

@@ -1,0 +1,13 @@
+.customLink{
+    text-decoration: none;
+    /* color: #457B9D;  */
+    font-size: 24px;
+    color: purple;
+    padding: 0px 5px 5px 5px;
+    border-radius: 10px;
+}
+
+.customLink:hover {
+    text-decoration-line: underline;
+    color: #E63946;
+}

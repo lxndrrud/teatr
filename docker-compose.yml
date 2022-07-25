@@ -52,7 +52,7 @@ services:
       #- 8000:8000
     #networks: 
       #- customnetwork
-
+  
   nextjs:
       build: 
         context: ./nextjs
@@ -84,7 +84,8 @@ services:
     volumes:
         - './expressjs/storage:/var/www/back-storage'
         #- './fastapi/storage:/var/www/back-storage'
-        - './nextjs/storage:/var/www/front-storage'
+        #- './nextjs/storage:/var/www/front-storage'
+        - './frontend/dist/index.html:/var/www/index.html'
         - './nginx:/var/log/nginx'
         - './nginx/conf.d:/etc/nginx/conf.d'
 

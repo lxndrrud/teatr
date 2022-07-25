@@ -1,5 +1,6 @@
 import React from 'react'
 import styles from "./CardImage.module.css"
+//import Image from 'next/image'
 
 const CardImage = ({ filepath, altDescription }) => {
     return (

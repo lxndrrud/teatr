@@ -1,0 +1,19 @@
+.plays {
+    display: flex;
+    max-width: 100%;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+@media (max-width: 1550px) {
+    .plays {
+        width: 100%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}
+

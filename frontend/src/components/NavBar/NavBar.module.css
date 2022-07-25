@@ -1,0 +1,63 @@
+
+/*
+@keyframes pulseAnimation {
+    50% { box-shadow: 1px 1px 40px  blueviolet; }
+    /*  box-shadow: 1px 1px 40px 10px blueviolet; *
+}
+*/
+
+
+.fixedContainer {
+    position: fixed;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    max-width: 250px;
+    min-width: 55px;
+    background-color: #f1e1f5;
+    /* border-right: 1px solid black;*/
+    transition: all 0.6s ease;
+    box-shadow: 1px 1px 40px 10px blueviolet;
+}
+
+/* Стили навбара */
+
+
+.navLinks {
+    font-size: large;
+    display: flex;
+    flex-grow: 2;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    width: 250px;
+    padding: 5%;
+    /* padding-top: 40px; */
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.linksContainer {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    margin-left: 35px;
+}
+
+
+.logoContainer {
+    position: relative;
+    min-height: 200px;
+    width: 200px;
+    border-radius: 120px;
+    margin: 0 auto;
+    border: 1px solid black;
+    padding: 0;
+}
+
+.logoPicture {
+    border-radius: 120px;
+}
+
+.logOutButton {
+    margin: 0;
+}

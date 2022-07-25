@@ -4,7 +4,7 @@ import { useDispatch, useSelector, useStore } from 'react-redux'
 import { getPersonalArea } from '../../store/actions/userAction'
 import { checkLogin } from '../../middlewares/auth'
 import { useRouter } from "next/router"
-import PersonalArea from '../../components/Users/PersonalArea'
+import PersonalArea from '../../components/Users/PersonalAreaItem/PersonalArea'
 
 function PersonalAreaPage() {
     const dispatch = useDispatch()
