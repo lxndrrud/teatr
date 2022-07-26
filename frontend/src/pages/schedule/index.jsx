@@ -5,7 +5,7 @@ import { fetchSessions } from '../../store/actions/sessionAction'
 import { useEffect } from "react"
 import { useDispatch } from "react-redux"
 
-export default function Schedule() {
+export default function SchedulePage() {
     
     const dispatch = useDispatch()
     
@@ -15,11 +15,11 @@ export default function Schedule() {
     
 
     return (
-    <>
-        <MainLayout title="Расписание">
-            <SessionFilter />
-            <SessionList />
-        </MainLayout>
-    </>
+        <div>
+            <MainLayout title="Расписание">
+                <SessionFilter />
+                <SessionList />
+            </MainLayout>
+        </div>
     )
 }

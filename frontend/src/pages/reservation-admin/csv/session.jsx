@@ -1,48 +1,51 @@
-import { useRouter } from "next/router";
+//import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import FilePicker from "../../../components/UI/FilePicker/FilePicker";
 import AdminLayout from "../../../layouts/AdminLayout/AdminLayout";
-import { checkLogin } from "../../../middlewares/auth";
-import { createPlaysCSV, clearSuccessErrorPlay } from "../../../store/actions/playAction"
+import { checkLogin } from "../../../middlewares/authFunctions";
+import { createSessionsCSV, clearSuccessErrorSession } from "../../../store/actions/sessionAction"
 
 export default function SessionCSVUploadingPage() {
     const dispatch = useDispatch()
     const store = useStore()
-    const router = useRouter()
+    //const router = useRouter()
+    const navigate = useNavigate()
+
     let token = useSelector(state => state.user.token)
     let [errorMessage, setErrorMessage] = useState()
     let [successMessage, setSuccessMessage] = useState()
+
     let [selectedFile, setSelectedFile] = useState()
 
     useEffect(() => {
-        if (router.isReady) {
+        //if (router.isReady) {
             if (!checkLogin(store)) {
-                router.push('/reservation-admin/login')
+                navigate('/reservation-admin/login')
                 return
             }
-        }
-    }, [router, store])
+        //}
+    }, [navigate, store])
     const onChangeHook = (file) => {
         setSelectedFile(file)
     }
     const onButtonClick = (e) => {
-        dispatch(createPlaysCSV(token, selectedFile))
+        dispatch(createSessionsCSV(token, selectedFile))
         .then(() => {
-            const error = store.getState().play.error
-            const success = store.getState().play.success
+            const error = store.getState().session.error
+            const success = store.getState().session.success
             if (error) {
                 setErrorMessage(error)
             }
             else if (success) {
                 setSuccessMessage(success)
             }
-            dispatch(clearSuccessErrorPlay())
+            dispatch(clearSuccessErrorSession())
         })
     }
-    
     return (
-        <AdminLayout title="Импорт спектаклей">
+        <AdminLayout title="Импорт сеансов">
             <FilePicker 
                 onClickHook={onButtonClick} 
                 onChangeHook={onChangeHook} 

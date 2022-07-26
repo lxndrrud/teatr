@@ -9,6 +9,15 @@ export class RoleMockModel implements RoleModel {
     constructor() {
         this.rolesList = [
             {
+                id: 4,
+                title: "Администратор",
+                can_access_private: true,
+                can_avoid_max_slots_property: true,
+                can_have_more_than_one_reservation_on_session: true,
+                can_make_reservation_without_confirmation: true,
+                can_see_all_reservations: true
+            },
+            {
                 id: 3,
                 title: "Посетитель",
                 can_access_private: false,

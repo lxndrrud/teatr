@@ -1,5 +1,5 @@
 import styles from './PlayItem.module.css'
-import { ButtonLink } from '../../UI/ButtonLink/ButtonLink'
+import ButtonLink from '../../UI/ButtonLink/ButtonLink'
 import CardImage from '../../UI/Images/CardImage/CardImage'
 import IconSVG from '../../UI/IconSVG/IconSVG'
 

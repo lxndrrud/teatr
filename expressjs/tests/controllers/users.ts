@@ -38,8 +38,12 @@ export function UsersControllerTests() {
 
         describe("POST /expressjs/users/login", function() {
             const loginLink = `/expressjs/users/login`
-            const loginPayload: UserLoginInterface = {
+            const loginAdminPayload: UserLoginInterface = {
                 email: "admin@admin.ru",
+                password: "123456"
+            }
+            const loginVisitorPayload: UserLoginInterface = {
+                email: "lxndrrud@yandex.ru",
                 password: "123456"
             }
             const failLoginPayload: UserLoginInterface = {
@@ -47,13 +51,28 @@ export function UsersControllerTests() {
                 password: '123123123'
             }
 
-            it("should be OK (Valid and right credentials)", async function() {
+            it("should be OK (Valid and right credentials for visitor)", async function() {
                 const response = await request(this.server)
                     .post(loginLink)
-                    .send(loginPayload)
+                    .send(loginVisitorPayload)
 
                 expect(response.status).to.equal(200)
-                expect(response.body).to.haveOwnProperty("token").that.satisfies(() => typeof response.body.token === "string")
+                expect(response.body).to.haveOwnProperty("token")
+                    .that.satisfies(() => typeof response.body.token === "string")
+                expect(response.body).to.not.haveOwnProperty("isAdmin")
+            })
+
+            it("should be OK (Valid and right credentials for admin)", async function() {
+                const response = await request(this.server)
+                    .post(loginLink)
+                    .send(loginAdminPayload)
+
+                expect(response.status).to.equal(200)
+                expect(response.body).to.haveOwnProperty("token")
+                    .that.satisfies(() => typeof response.body.token === "string")
+                expect(response.body).to.haveOwnProperty("isAdmin")
+                    .that.satisfies(() => typeof response.body.isAdmin === 'boolean')
+                    .and.equals(true)
             })
 
             it("should have status 401 WRONG CREDENTIALS", async function() {

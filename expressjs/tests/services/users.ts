@@ -108,7 +108,7 @@ export function UserServiceTests() {
                 expect(response).to.haveOwnProperty("message")
             })
 
-            it("should be OK (successful login)", async function() {
+            it("should be OK (successful visitor login)", async function() {
                 const userPayload = <UserLoginInterface>{ 
                     email: userMockModel.usersList[0].email,
                     password: "123456"
@@ -116,8 +116,22 @@ export function UserServiceTests() {
 
                 const response = await userService.loginUser(userPayload)
 
-                expect(typeof response).to.equal("string")
+                expect(response).to.haveOwnProperty('token')
+                expect(response).to.haveOwnProperty('isAdmin').that.equals(false)
             })
+
+            it("should be OK (successful admin login)", async function() {
+                const userPayload = <UserLoginInterface>{
+                    email: userMockModel.usersList[1].email,
+                    password: "123456"
+                }
+
+                const response = await userService.loginUser(userPayload)
+
+                expect(response).to.haveOwnProperty('token')
+                expect(response).to.haveOwnProperty('isAdmin').that.equals(true)
+            })
+            
         })
 
         describe("Create User Action", function() {

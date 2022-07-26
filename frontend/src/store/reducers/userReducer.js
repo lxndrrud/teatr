@@ -3,6 +3,7 @@ import { ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, LOG_IN, LOG_OU
 
 const defaultState = {
     token: '',
+    isAdmin: null,
     user: null,
     error: null
 }
@@ -10,11 +11,14 @@ const defaultState = {
 const userReducer = (state=defaultState, action) => {
     switch(action.type) {
         case LOG_IN:
-            return {...state, token: action.payload.token}
+            return {...state, 
+                token: action.payload.token, 
+                isAdmin: action.payload.isAdmin ? action.payload.isAdmin : false
+            }
         case LOG_OUT:
-            return {...state, token: defaultState.token}
+            return {...state, token: defaultState.token, isAdmin: defaultState.isAdmin}
         case REGISTER:
-            return {...state, token: action.payload.token}
+            return {...state, token: action.payload.token, isAdmin: false}
         case FETCH_PERSONAL_AREA:
             return {...state, user: action.payload.user }
         case ERROR_USER:

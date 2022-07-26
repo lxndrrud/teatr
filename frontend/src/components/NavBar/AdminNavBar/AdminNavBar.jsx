@@ -8,7 +8,7 @@ import { Button } from "react-bootstrap"
 import { toggleNavbar } from "../../../store/actions/designAction"
 //import Image from 'next/image'
 import styles from "../NavBar.module.css"
-import mainLogo from "../../../storage/index-logo.png"
+import mainLogo from "../../../assets/index-logo.png"
 import { logOut } from "../../../store/actions/userAction"
 import IconSVG from '../../UI/IconSVG/IconSVG'
 import { useNavigate } from 'react-router-dom'
@@ -68,9 +68,13 @@ function AdminNavBar() {
                                         <CustomLink destination="/reservation-admin" text="Главная"  />
                                     </span>
                                     <span>
+                                        <CustomLink destination="/" text="Вернуться" />
+                                    </span>
+                                    <span>
                                         <IconSVG data="M10,17V14H3V10H10V7L15,12L10,17M10,2H19A2,2 0 0,1 21,4V20A2,2 0 0,1 19,22H10A2,2 0 0,1 8,20V18H10V20H19V4H10V6H8V4A2,2 0 0,1 10,2Z" />
                                         <CustomLink destination="/reservation-admin/login" text="Войти"  />
                                     </span>
+                                    
                                 </div>
                             </nav>  
                             
@@ -91,6 +95,9 @@ function AdminNavBar() {
                                         <CustomLink destination="/reservation-admin" text="Главная"  />
                                     </span>
                                     <span>
+                                        <CustomLink destination="/" text="Вернуться" />
+                                    </span>
+                                    <span>
                                         <IconSVG data={"M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"} />
                                         <CustomLink destination="/reservation-admin/csv/session"
                                             text="Загрузка сеансов"  />
@@ -103,6 +110,7 @@ function AdminNavBar() {
                                     <CustomButton type="submit" value="Выйти" 
                                         onClickHook={logOutOnClick}
                                         styleClass={styles.logOutButton}/>
+                                    
                                 </div>
                             </nav>
                         )

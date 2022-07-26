@@ -9,7 +9,10 @@ import { IUserInfrastructure } from "../infrastructure/User.infra";
 
 export interface UserService {
     createUser(payload: UserRegisterInterface): Promise<InnerErrorInterface | UserInterface>
-    loginUser(payload: UserLoginInterface): Promise<string | InnerErrorInterface>
+    loginUser(payload: UserLoginInterface): Promise<InnerErrorInterface | {
+        token: string;
+        isAdmin: boolean;
+    }>
     loginAdmin(payload: UserLoginInterface): Promise<string | InnerErrorInterface>
     getAll(): Promise<InnerErrorInterface | {
         id: number;
@@ -111,11 +114,28 @@ export class UserFetchingModel implements UserService {
                 message: "Внутренняя ошибка при поиске пользователя: " + e 
             }
         }
+
+        // Проверка пароля
         if (!(user && compareSync(payload.password, user.password))) {
             return <InnerErrorInterface>{
                 code: 401,
                 message: 'Пользователь с такими входными данными не найден!'
             }
+        }
+
+        // Получение роли адмиинистратора
+        let adminRole = await this.roleFetchingInstance.getAdminRole()
+        if (isInnerErrorInterface(adminRole)) {
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка сервера при поиске роли!'
+            }
+        }
+
+        // Проверка роли пользователя на соответствие роли администратора
+        let isAdmin = false
+        if (user.id_role === adminRole.id) {
+            isAdmin = true
         }
         // Транзакция: сгенерировать токен для пользователя, сохранить в БД
         const trx = await KnexConnection.transaction()
@@ -132,7 +152,10 @@ export class UserFetchingModel implements UserService {
                     message: 'Внутренняя ошибка сервера при генерации токена!'
                 }
             }
-            return <string> fetchedUser.token
+            return {
+                token: <string> fetchedUser.token,
+                isAdmin
+            }
         } catch (e) {
             console.log(e)
             await trx.rollback()

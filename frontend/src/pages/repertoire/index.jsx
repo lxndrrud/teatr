@@ -4,7 +4,7 @@ import { fetchPlays } from "../../store/actions/playAction"
 import { useDispatch } from "react-redux"
 import { useEffect } from "react"
 
-export default function Repertoire() {
+export default function RepertoirePage() {
     const dispatch = useDispatch()
 
     useEffect(() => {
@@ -12,10 +12,10 @@ export default function Repertoire() {
     }, [dispatch])
 
     return (
-    <>
+    <div>
         <MainLayout title="Репертуар">
             <PlayList />
         </MainLayout>
-    </>
+    </div>
     )
 }

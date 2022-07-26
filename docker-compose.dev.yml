@@ -65,6 +65,18 @@ services:
   #    networks: 
   #      - customnetwork
 
+  frontend:
+      build: 
+        context: ./frontend
+        dockerfile: Dockerfile.dev
+      container_name: frontend
+      volumes:
+        - ./frontend:/usr/src/app
+      ports:
+        - 5173:5173
+      networks: 
+        - customnetwork
+
   reverse-proxy:
     image: nginx:1.20.0
     container_name: nginx
@@ -87,7 +99,7 @@ services:
         #- './nextjs/storage:/var/www/front-storage'
         - './frontend/dist:/var/www/reservations'
         - './nginx:/var/log/nginx'
-        - './nginx/conf.d:/etc/nginx/conf.d'
+        - './nginx/dev/conf.d:/etc/nginx/conf.d'
 
 
 

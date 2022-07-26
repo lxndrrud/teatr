@@ -11,6 +11,10 @@ export default function MainLayout({ children, title }) {
         ? styles.mainContent 
         : `${styles.mainContent} ${styles.mainContentExpanded}`
 
+    useEffect(() => {
+        document.title = "Брони на Оборонной"
+    }, [])
+
     return (
         <div className={styles.layout}>
             <NavBarController />

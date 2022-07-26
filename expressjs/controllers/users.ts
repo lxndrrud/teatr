@@ -49,18 +49,22 @@ export class UserController {
         }
         let requestBody: UserLoginInterface = {...req.body}
     
-        const token = await this.userService.loginUser(requestBody)
+        const info = await this.userService.loginUser(requestBody)
     
-        if (isInnerErrorInterface(token)) {
-            res.status(token.code).send(<InnerErrorInterface>{
-                message: token.message
+        if (isInnerErrorInterface(info)) {
+            res.status(info.code).send(<InnerErrorInterface>{
+                message: info.message
             })
             return
         }
-    
-        res.status(200).send({
-            token: token
-        })
+
+        if (info.isAdmin) {
+            res.status(200).send(info)
+        } else {
+            res.status(200).send({
+                token: info.token
+            })
+        }
     }
 
     /**

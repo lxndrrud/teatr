@@ -29,7 +29,9 @@ export class RoleFetchingModel implements RoleService {
     
     async getAdminRole() {
         try {
-            const query = await this.getRoleByTitle('Администратор')
+            const query = <RoleDatabaseInterface | undefined> await this
+                .getRoleByTitle('Администратор')
+            if (!query) throw "Роль администратора === undefined"
             return query
         } catch(e) {
             console.log(e)
@@ -42,7 +44,8 @@ export class RoleFetchingModel implements RoleService {
 
     async getVisitorRole() {
         try {
-            const query = await this.getRoleByTitle('Посетитель')
+            const query = <RoleDatabaseInterface | undefined> await this.getRoleByTitle('Посетитель')
+            if (!query) throw "Роль посетителя === undefined"
             return query
         } catch(e) {
             console.log(e)
@@ -55,7 +58,8 @@ export class RoleFetchingModel implements RoleService {
 
     async getCashierRole() {
         try {
-            const query = await this.getRoleByTitle('Кассир')
+            const query = <RoleDatabaseInterface | undefined> await this.getRoleByTitle('Кассир')
+            if (!query) throw "Роль кассира === undefined"
             return query
         } catch(e) {
             console.log(e)

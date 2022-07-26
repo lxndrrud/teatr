@@ -22,6 +22,17 @@ export class UserMockModel implements UserModel {
                 id_role: 3
             },
             {
+                id: 2,
+                email: "admin",
+                // 123456
+                password: '$2a$10$.7sVPajSPR/JTa4g8tWToe7O31A0Gz4EnL6TA8BzMaD8IAxXbFqwS',
+                token: "token",
+                firstname: "test firstname 2",
+                middlename: "test middlename 2",
+                lastname: "test lastname 2",
+                id_role: 4
+            },
+            {
                 id: 500,
                 email: "fail token",
                 // 123456

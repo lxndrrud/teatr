@@ -1,10 +1,18 @@
-import { useStore } from "react-redux"
+import { useSelector } from "react-redux"
 import { Navigate } from "react-router-dom"
 
 export function LoginRoute({ children }) {
-    const store = useStore()
-    const token = store.getState().user.token
+    const token = useSelector(state => state.user.token)
     if (!(token && token.length > 0)) {
+        return <Navigate to={'/'} />
+    }
+    return children
+}
+
+export function AdminRoute({ children }) {
+    const token = useSelector(state => state.user.token)
+    const isAdmin = useSelector(state => state.user.isAdmin)
+    if (!(token && token.length > 0 && isAdmin)) {
         return <Navigate to={'/'} />
     }
     return children

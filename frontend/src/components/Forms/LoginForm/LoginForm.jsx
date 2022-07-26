@@ -37,6 +37,8 @@ function LoginForm({ isAdmin=false }) {
                 if (errorFromStore !== null) {
                     setError(errorFromStore)
                     dispatch(errorSetDefault())
+                } else {
+                    navigate('/')
                 }
             })
         } else {
@@ -46,6 +48,8 @@ function LoginForm({ isAdmin=false }) {
                 if (errorFromStore !== null) {
                     setError(errorFromStore)
                     dispatch(errorSetDefault())
+                } else {
+                    navigate("/reservation-admin")
                 }
             })
         }
