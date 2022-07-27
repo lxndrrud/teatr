@@ -13,6 +13,14 @@ import SessionCSVUploadingPage from "./pages/reservation-admin/csv/session"
 import SchedulePage from "./pages/schedule"
 import RepertoirePage from "./pages/repertoire"
 import PlayPage from "./pages/repertoire/[playid]"
+import ConfirmationPage from "./pages/confirm/[reservationid]"
+import SessionReservationPage from "./pages/reserve/[sessionid]"
+import ControlIndexPage from "./pages/control"
+import ReservationDetailPage from "./pages/control/[reservationid]"
+import DeleteReservationPage from "./pages/control/delete/[reservationid]"
+import PaymentReservationPage from "./pages/control/payment/[reservationid]"
+import EditUserInfoPage from "./pages/user/editPersonalInfo"
+import EditUserPasswordPage from "./pages/user/editPassword"
 
 function App() {
   return (
@@ -27,12 +35,64 @@ function App() {
             <Route path="" element={<RepertoirePage />} />
             <Route path=":idPlay" element={<PlayPage />} />
           </Route>
+          <Route path="/control">
+            <Route path="" element={
+              <LoginRoute>
+                <ControlIndexPage />
+              </LoginRoute>
+            } />
+            <Route path=":idReservation" element={
+              <LoginRoute>
+                <ReservationDetailPage />
+              </LoginRoute>
+            } />
+            <Route path="delete" >
+              <Route path=":idReservation" element={
+                <LoginRoute>
+                  <DeleteReservationPage />
+                </LoginRoute>
+              } />
+            </Route>  
+            <Route path="payment" >
+              <Route path=":idReservation" element={
+                <LoginRoute>
+                  <PaymentReservationPage />
+                </LoginRoute>
+              } />
+            </Route>
+          </Route>
+          <Route path="/confirm">
+            <Route path=":idReservation" element={
+              <LoginRoute>
+                <ConfirmationPage />
+              </LoginRoute>
+            } />
+          </Route>
+          <Route path="/reserve">
+            <Route path=":idSession" element={
+              <LoginRoute>
+                <SessionReservationPage />
+              </LoginRoute>
+            } />
+          </Route>
           <Route path='/user' >
             <Route path="personalArea" element={
               <LoginRoute>
                 <PersonalAreaPage />
               </LoginRoute>
             } />
+            <Route path="edit">
+              <Route path="personal" element={
+                <LoginRoute>
+                  <EditUserInfoPage />
+                </LoginRoute>
+              } />
+              <Route path="password" element={
+                <LoginRoute>
+                  <EditUserPasswordPage />
+                </LoginRoute>
+              }/>
+            </Route> 
           </Route>
           <Route path="/reservation-admin" >
             <Route path="" element={

@@ -22,7 +22,7 @@ function ButtonLink ({ destination, text, linkType}) {
     } 
     
     return (
-        <Link href={destination} className={fetchStyle(linkType)}>{text}</Link>
+        <Link to={destination} className={fetchStyle(linkType)}>{text}</Link>
     );
 };
 

@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useStore } from 'react-redux'
-import { checkLogin } from "../../../middlewares/auth"
-import { useRouter } from 'next/router'
+import { checkLogin } from "../../../middlewares/authFunctions"
 import MainLayout from "../../../layouts/MainLayout/MainLayout"
 import DialogForm from "../../../components/Forms/DialogForm/DialogForm"
 import { paymentStatusReservation } from '../../../store/actions/reservationAction'
+import { useNavigate, useParams } from 'react-router-dom'
 
-const PaymentReservationPage = () => {
+function PaymentReservationPage() {
+    const navigate = useNavigate()
     const dispatch = useDispatch()
     const store = useStore()
-    const router = useRouter()
 
-    const idReservation = router.query.reservationid
+    const { idReservation } = useParams()
     let [error, setError] = useState(null)
 
 
     useEffect(() => {
         if(!checkLogin(store)) {
-            if (router.isReady) router.push('/login')
+            navigate('/login')
+            return
         }
-    })
+    }, [store, navigate])
 
     const paymentHook = (e) => {
         e.preventDefault()
@@ -36,9 +37,7 @@ const PaymentReservationPage = () => {
                 dispatch(errorSetDefault())
             }
             else {
-                if (router.isReady) {
-                    router.push('/control')
-                }
+                navigate('/control')
             }
         })
     }

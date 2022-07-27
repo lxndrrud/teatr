@@ -1,11 +1,10 @@
 import React from 'react'
 import styles from "./ReservationDetail.module.css"
-import { ButtonLink } from "../../UI/ButtonLink/ButtonLink"
+import ButtonLink from "../../UI/ButtonLink/ButtonLink"
 import ReservationSlotList from '../../Slots/ReservationSlotList/ReservationSlotList'
-import { useDispatch, useSelector } from 'react-redux'
 import { Table } from 'react-bootstrap'
 import TooltipButton from '../../UI/TooltipButton/TooltipButton'
-import { CustomLink } from '../../UI/CustomLink/CustomLink'
+import CustomLink from '../../UI/CustomLink/CustomLink'
 
 function ReservationDetail({ reservation }) {
     /*

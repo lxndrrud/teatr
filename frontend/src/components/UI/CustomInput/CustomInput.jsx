@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from "./CustomInput.module.css"
 
-const CustomInput = ({ description, inputStyleClass,  ...props }) => {
+function CustomInput({ description, inputStyleClass,  ...props }) {
     let customInputStyleClass = `${styles.customInput}`
     if (inputStyleClass) {
         customInputStyleClass = `${customInputStyleClass} ${inputStyleClass}`

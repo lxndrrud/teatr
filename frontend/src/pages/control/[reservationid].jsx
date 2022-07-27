@@ -1,35 +1,39 @@
 
 import { useEffect } from 'react'
-import { useRouter } from "next/router"
+//import { useRouter } from "next/router"
 import { useSelector, useDispatch, useStore } from 'react-redux'
 import MainLayout from '../../layouts/MainLayout/MainLayout'
 import ReservationDetail from "../../components/Reservations/ReservationDetail/ReservationDetail"
 import { fetchReservation } from '../../store/actions/reservationAction'
-import { checkLogin } from '../../middlewares/auth'
+import { checkLogin } from '../../middlewares/authFunctions'
+import { useNavigate, useParams } from 'react-router-dom'
 
 
-const ReservationDetailPage = () => {
-    const router = useRouter()
+function ReservationDetailPage() {
+    const navigate = useNavigate()
+    //const router = useRouter()
     const dispatch = useDispatch()
     const store = useStore()
+
+    const { idReservation } = useParams()
     let token = useSelector(state => state.user.token)
 
     useEffect(() => {
-        if (router.isReady) {
+        //if (router.isReady) {
             if (!checkLogin(store)) {
-                router.push('/login')
+                navigate('/login')
                 return
             }
-            const { reservationid } = router.query
-            if (reservationid) {
+            //const { reservationid } = router.query
+            if (idReservation) {
                 dispatch(fetchReservation({ 
                     token: token,
-                    id_reservation: reservationid 
+                    id_reservation: idReservation
                 }))
-                .catch(() => router.push('/control'))
+                .catch(() => navigate('/control'))
             }
-        }
-    }, [router, store, dispatch, token])
+        //}
+    }, [navigate, store, dispatch, token])
 
     const reservation = useSelector(state => state.reservation.reservation)
 

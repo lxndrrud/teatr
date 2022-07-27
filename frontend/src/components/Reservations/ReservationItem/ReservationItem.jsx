@@ -1,5 +1,5 @@
 import { Card, Table } from "react-bootstrap"
-import { ButtonLink } from "../../UI/ButtonLink/ButtonLink"
+import ButtonLink from "../../UI/ButtonLink/ButtonLink"
 import styles from "./ReservationItem.module.css"
 
 import React from 'react'

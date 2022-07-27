@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { checkLogin } from "../../../middlewares/authFunctions"
 import CustomButton from '../../UI/CustomButton/CustomButton'
-import { CustomLink } from '../../UI/CustomLink/CustomLink'
+import CustomLink from '../../UI/CustomLink/CustomLink'
 import { Button } from "react-bootstrap"
 import { toggleNavbar } from "../../../store/actions/designAction"
 //import Image from 'next/image'

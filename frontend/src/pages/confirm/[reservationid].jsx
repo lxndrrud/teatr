@@ -3,26 +3,31 @@ import ReservationConfirmationForm
     from "../../components/Forms/ReservationConfirmationForm/ReservationConfirmationForm";
 import { useEffect } from "react";
 import { useSelector, useStore, useDispatch } from "react-redux";
-import { useRouter } from "next/router";
+//import { useRouter } from "next/router";
 import { fetchReservation } from "../../store/actions/reservationAction";
-import { checkLogin } from "../../middlewares/auth";
+import { checkLogin } from "../../middlewares/authFunctions";
+import { useNavigate, useParams } from "react-router-dom";
 
-const ConfirmationPage = () => {
+function ConfirmationPage() {
     const store = useStore()
     const dispatch = useDispatch()
-    const router = useRouter()
+    const navigate = useNavigate()
+    //const router = useRouter()
+
+    const { idReservation }  = useParams()
+    let token = useSelector(state => state.user.token)
 
     useEffect(() => {
-        const token = store.getState().user.token
-        if (router.isReady) {
+        //const token = store.getState().user.token
+        //if (router.isReady) {
             if (!checkLogin(store)) {
-                router.push('/login')
+                navigate('/login')
                 return
             }
             // Задиспатчить получение брони 
-            dispatch(fetchReservation({ token, id_reservation: router.query.reservationid }))
-        }
-    })
+            dispatch(fetchReservation({ token, id_reservation: idReservation }))
+        //}
+    }, [token, store])
 
     return (
         <MainLayout title='Подтверждение брони'>

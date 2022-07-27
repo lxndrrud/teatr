@@ -2,25 +2,26 @@ import React, { useEffect, useState } from 'react'
 import MainLayout from "../../../layouts/MainLayout/MainLayout"
 import DialogForm from '../../../components/Forms/DialogForm/DialogForm'
 import { deleteReservation, errorSetDefault } from "../../../store/actions/reservationAction"
-import { useRouter } from 'next/router'
 import { useDispatch, useSelector, useStore } from "react-redux"
-import { checkLogin } from '../../../middlewares/auth'
+import { checkLogin } from '../../../middlewares/authFunctions'
+import { useNavigate, useParams } from 'react-router-dom'
 
 
-const DeleteReservationPage = () => {
+function DeleteReservationPage() {
+    const navigate = useNavigate()
     const dispatch = useDispatch()
     const store = useStore()
-    const router = useRouter()
 
-    const idReservation = router.query.reservationid
+    const { idReservation }  = useParams()
     let [error, setError] = useState(null)
 
 
     useEffect(() => {
         if(!checkLogin(store)) {
-            if (router.isReady) router.push('/login')
+            navigate('/login')
+            return
         }
-    })
+    }, [])
 
     const deleteHook = (e) => {
         e.preventDefault()
@@ -37,9 +38,7 @@ const DeleteReservationPage = () => {
                 dispatch(errorSetDefault())
             }
             else {
-                if (router.isReady) {
-                    router.push('/control')
-                }
+                navigate('/control')
             }
         })
     }

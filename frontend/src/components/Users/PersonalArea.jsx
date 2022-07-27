@@ -1,7 +1,10 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
 import styles from "./PersonalArea.module.css"
 
-function PersonalArea({ user }) {
+function PersonalArea() {
+  let user = useSelector(state => state.user.user)
+
   return (
     <div className={styles.container} >
       {

@@ -10,11 +10,13 @@ import { useEffect, useState } from 'react'
 import { clearSlots } from '../../store/actions/reservationAction';
 import { checkLogin } from '../../middlewares/authFunctions';
 
-function SessionReservation() {
+function SessionReservationPage() {
     const navigate = useNavigate()
     //const router = useRouter()
     const dispatch = useDispatch()
     const store = useStore()
+
+    const { idSession } = useParams()
     let token = useSelector(state => state.user.token)
   
   
@@ -26,7 +28,6 @@ function SessionReservation() {
             return
         }
         //const { sessionid } = router.query
-        const { idSession } = useParams()
         if (idSession)
             dispatch(fetchSession(token, idSession))
             .then(dispatch(clearSlots()))
@@ -55,4 +56,4 @@ function SessionReservation() {
     );
 };
 
-export default SessionReservation;
+export default SessionReservationPage;

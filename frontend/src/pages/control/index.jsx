@@ -3,33 +3,35 @@ import ReservationFilter from "../../components/Filters/ReservationFilter/Reserv
 import ReservationList from "../../components/Reservations/ReservationList/ReservationList"
 import { useDispatch, useSelector, useStore } from "react-redux"
 import { fetchReservations } from "../../store/actions/reservationAction"
-import { useRouter } from "next/router"
+//import { useRouter } from "next/router"
 import { useEffect } from "react"
-import { checkLogin } from "../../middlewares/auth"
+import { checkLogin } from "../../middlewares/authFunctions"
+import { useNavigate } from "react-router-dom"
 
-export default function ControlIndex() {
+export default function ControlIndexPage() {
     const dispatch = useDispatch()
     const store = useStore()
-    const router = useRouter()
+    const navigate = useNavigate()
+    //const router = useRouter()
+
+    let token = useSelector(state => state.user.token)
+
     useEffect(() => {
-        if (router.isReady) {
-            const token = store.getState().user.token
+        //if (router.isReady) {
             if(!checkLogin(store)) {
-                if (router.isReady) { 
-                    router.push('/login')
-                    return
-                }
+                navigate('/login')
+                return
             }
             dispatch(fetchReservations(token))
-        }
-    })
+        //}
+    }, [dispatch, navigate, token, store])
 
     return (
-        <>
+        <div>
             <MainLayout title="Управление бронями">
                 <ReservationFilter />
                 <ReservationList />
             </MainLayout>
-        </>
+        </div>
     )
 }
