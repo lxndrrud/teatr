@@ -8,26 +8,34 @@ import { SessionCSVService } from "../services/sessions/SessionCSV.service";
 import { FileStreamHelper } from "../utils/fileStreams";
 import { SessionFilterService } from "../services/sessions/SessionFilter.service";
 import { TimestampHelper } from "../utils/timestamp";
+import { KnexConnection } from "../knex/connections";
  
 export const sessionsRouter = Router();
 const sessionController = new SessionController(
     new SessionCRUDService(
+        KnexConnection,
         new SessionDatabaseModel(
+            KnexConnection,
             new TimestampHelper()), 
         new SessionInfrastructure(
             new SessionDatabaseModel(
+                KnexConnection,
                 new TimestampHelper()
             ),
             new TimestampHelper())),
     new SessionCSVService(
+        KnexConnection,
         new FileStreamHelper(), 
         new SessionDatabaseModel(
+            KnexConnection,
             new TimestampHelper())),
     new SessionFilterService(
         new SessionDatabaseModel(
+            KnexConnection,
             new TimestampHelper()), 
         new SessionInfrastructure(
             new SessionDatabaseModel(
+                KnexConnection,
                 new TimestampHelper()),
             new TimestampHelper()),
         new TimestampHelper())

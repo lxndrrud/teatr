@@ -1,6 +1,5 @@
 import { Knex } from "knex";
 import { DatabaseModel } from "./baseModel";
-import { KnexConnection } from "../knex/connections";
 import { roles, users } from "./tables";
 
 export interface RoleModel {
@@ -53,8 +52,8 @@ export interface RoleModel {
  * can_make_reservation_without_confirmation: boolean
  */
 export class RoleDatabaseModel extends DatabaseModel implements RoleModel {
-    constructor() {
-        super(roles)
+    constructor(connectionInstance: Knex<any, unknown[]>) {
+        super(roles, connectionInstance)
     }
 
     getAll(payload: {
@@ -65,7 +64,7 @@ export class RoleDatabaseModel extends DatabaseModel implements RoleModel {
         can_access_private?: boolean,
         can_make_reservation_without_confirmation?: boolean
     }) {
-        return KnexConnection(roles)
+        return this.connection(roles)
             .where(builder => {
                 if (payload.id)
                     builder.andWhere(`${roles}.id`, payload.id)
@@ -127,7 +126,7 @@ export class RoleDatabaseModel extends DatabaseModel implements RoleModel {
         return this.get({})
             /*
             .select(
-                KnexConnection.ref('*').withSchema(roles)
+                this.connection.ref('*').withSchema(roles)
             )
             */
             .where(`${users}.id_role`, idRole)

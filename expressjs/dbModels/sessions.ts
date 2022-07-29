@@ -1,6 +1,5 @@
 import { Knex } from "knex";
 import { DatabaseModel } from "./baseModel";
-import { KnexConnection } from "../knex/connections";
 import { sessions, plays, pricePolicies, slots, seats, rows, auditoriums, reservationsSlots, reservations, playsImages, images } from "./tables";
 import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, SessionDatabaseInterface } 
     from "../interfaces/sessions";
@@ -74,9 +73,10 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
     private timestampHelper
 
     constructor(
+        connectionInstance: Knex<any, unknown[]>,
         timestampHelperInstance: TimestampHelper
     ) {
-        super(sessions)
+        super(sessions, connectionInstance)
         this.timestampHelper = timestampHelperInstance
     }
 
@@ -88,7 +88,7 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
         id_price_policy?: number,
         timestamp?: string,
     }) {
-        return KnexConnection(sessions)
+        return this.connection(sessions)
             .where(builder => {
                 if (payload.id)
                     builder.andWhere(`${sessions}.id`, payload.id)
@@ -147,17 +147,17 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
     }
 
     getUnlockedSessions() {
-        return KnexConnection(`${sessions} as s`)
+        return this.connection(`${sessions} as s`)
             .select(
-                KnexConnection.ref('id').withSchema('s'),
-                KnexConnection.ref('is_locked').withSchema('s'), 
-                KnexConnection.ref('timestamp').withSchema('s'),
-                KnexConnection.ref('max_slots').withSchema('s'), 
-                KnexConnection.ref('id_play').withSchema('s'), 
-                KnexConnection.ref('id_price_policy').withSchema('s'),
-                KnexConnection.ref('title').withSchema('a').as('auditorium_title'), 
-                KnexConnection.ref('title').withSchema('p').as('play_title'),
-                KnexConnection.ref('filepath').withSchema('i').as('poster_filepath'),
+                this.connection.ref('id').withSchema('s'),
+                this.connection.ref('is_locked').withSchema('s'), 
+                this.connection.ref('timestamp').withSchema('s'),
+                this.connection.ref('max_slots').withSchema('s'), 
+                this.connection.ref('id_play').withSchema('s'), 
+                this.connection.ref('id_price_policy').withSchema('s'),
+                this.connection.ref('title').withSchema('a').as('auditorium_title'), 
+                this.connection.ref('title').withSchema('p').as('play_title'),
+                this.connection.ref('filepath').withSchema('i').as('poster_filepath'),
             )
             .join(`${plays} as p`, 'p.id', 's.id_play')
             .join(`${pricePolicies} as pp`, 'pp.id', 's.id_price_policy')
@@ -185,11 +185,11 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
     }
 
     getRowsByPricePolicy(idPricePolicy: number) {
-        return KnexConnection(`${rows} as r`)
+        return this.connection(`${rows} as r`)
             .select(
-                KnexConnection.ref('id').withSchema('r'), 
-                KnexConnection.ref('number').withSchema('r'), 
-                KnexConnection.ref('title').withSchema('r')
+                this.connection.ref('id').withSchema('r'), 
+                this.connection.ref('number').withSchema('r'), 
+                this.connection.ref('title').withSchema('r')
             )
             .where(`${slots}.id_price_policy`, idPricePolicy)
             .join(seats, `${seats}.id_row`, 'r.id')
@@ -198,15 +198,15 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
     }
     
     getSlotsByPricePolicy(idPricePolicy: number) {
-        return KnexConnection(slots)
+        return this.connection(slots)
             .select(
-                KnexConnection.ref('id').withSchema(slots), 
-                KnexConnection.ref('id').withSchema(rows).as('id_row'),
-                KnexConnection.ref('number').withSchema(seats).as('seat_number'), 
-                KnexConnection.ref('number').withSchema(rows).as('row_number'), 
-                KnexConnection.ref('price').withSchema(slots),
-                KnexConnection.ref('title').withSchema('a').as('auditorium_title'),
-                KnexConnection.ref('title').withSchema(rows).as('row_title')
+                this.connection.ref('id').withSchema(slots), 
+                this.connection.ref('id').withSchema(rows).as('id_row'),
+                this.connection.ref('number').withSchema(seats).as('seat_number'), 
+                this.connection.ref('number').withSchema(rows).as('row_number'), 
+                this.connection.ref('price').withSchema(slots),
+                this.connection.ref('title').withSchema('a').as('auditorium_title'),
+                this.connection.ref('title').withSchema(rows).as('row_title')
             )
             .where(`${slots}.id_price_policy`, idPricePolicy)
             .join(seats, `${seats}.id`, `${slots}.id_seat`)
@@ -215,14 +215,14 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
     }
     
     getReservedSlots(idSession: number, idPricePolicy: number){
-        return KnexConnection(slots)
+        return this.connection(slots)
             .select(
-                KnexConnection.ref('id').withSchema(slots), 
-                KnexConnection.ref('number').withSchema(seats).as('seat_number'), 
-                KnexConnection.ref('number').withSchema(rows).as('row_number'), 
-                KnexConnection.ref('price').withSchema(slots),
-                KnexConnection.ref('title').withSchema('a').as('auditorium_title'),
-                KnexConnection.ref('title').withSchema(rows).as('row_title')
+                this.connection.ref('id').withSchema(slots), 
+                this.connection.ref('number').withSchema(seats).as('seat_number'), 
+                this.connection.ref('number').withSchema(rows).as('row_number'), 
+                this.connection.ref('price').withSchema(slots),
+                this.connection.ref('title').withSchema('a').as('auditorium_title'),
+                this.connection.ref('title').withSchema(rows).as('row_title')
             )
             .where(`${slots}.id_price_policy`, idPricePolicy)
             .andWhere('r.id_session', idSession)
@@ -235,9 +235,9 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
     
     
     getSessionFilterTimestamps() {
-        return KnexConnection(`${sessions} as s`)
+        return this.connection(`${sessions} as s`)
             .select(
-                KnexConnection.ref('timestamp').withSchema('s')
+                this.connection.ref('timestamp').withSchema('s')
             )
             .where('s.is_locked', false)
             .orderBy('s.timestamp', 'asc')
@@ -245,9 +245,9 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
     }
     
     getSessionFilterAuditoriums() {
-        return KnexConnection(`${sessions} as s`)
+        return this.connection(`${sessions} as s`)
             .select(
-                KnexConnection.ref('title').withSchema('a')
+                this.connection.ref('title').withSchema('a')
             )
             .where('s.is_locked', false)
             .join(`${pricePolicies} as pp`, 'pp.id', 's.id_price_policy')
@@ -259,9 +259,9 @@ export class SessionDatabaseModel extends DatabaseModel implements SessionModel 
     }
     
     getSessionFilterPlays() {
-        return KnexConnection(`${plays} as p`)
+        return this.connection(`${plays} as p`)
             .select(
-                KnexConnection.ref('title').withSchema('p')
+                this.connection.ref('title').withSchema('p')
             )
             .where('s.is_locked', false)
             .join(`${sessions} as s`, 's.id_play', 'p.id')

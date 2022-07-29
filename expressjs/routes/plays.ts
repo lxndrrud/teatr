@@ -4,11 +4,13 @@ import { PlayFetchingModel } from "../services/plays";
 import { PlayDatabaseModel } from "../dbModels/plays";
 import { basicAuthMiddleware, staffAuthMiddleware } from "../middlewares/auth";
 import { FileStreamHelper } from "../utils/fileStreams";
+import { KnexConnection } from "../knex/connections";
 
 export const playsRouter = Router()
 const playController = new PlayController(
     new PlayFetchingModel(
-        new PlayDatabaseModel(),
+        KnexConnection,
+        new PlayDatabaseModel(KnexConnection),
         new FileStreamHelper())
 )
 

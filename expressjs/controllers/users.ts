@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface, isUserRegisterInterface } 
+import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface, isUserRegisterInterface, IUserChangePassword, IUserPersonalInfo } 
     from "../interfaces/users";
 import { ErrorInterface, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { UserService } from "../services/users";
@@ -68,6 +68,7 @@ export class UserController {
     }
 
     /**
+     * @deprecated
      * * Контроллер логина админа для администраторской части сайта
      */
     async loginAdmin(req: Request, res: Response) {
@@ -159,6 +160,82 @@ export class UserController {
         res.status(200).send({
             user: query
         })
+    }
+
+    /**
+     * * Смена пароля
+     */
+    async changePassword(req: Request, res: Response) {
+        if (!req.user) {
+            res.status(401).send(<ErrorInterface>{
+                message: "Вы не авторизованы!"
+            })
+            return 
+        }
+        
+        let passwordInfo: IUserChangePassword
+        try {
+            passwordInfo = {...req.body}
+        } catch(e) {
+            res.status(400).send(<ErrorInterface> {
+                message: "Тело запроса не распознано!"
+            })
+            return
+        }
+        if (!passwordInfo) {
+            res.status(400).send(<ErrorInterface>{
+                message: "Неверное тело запроса!"
+            })
+            return
+        }
+
+        const result = await this.userService.changePassword(req.user, passwordInfo)
+        if (isInnerErrorInterface(result)) {
+            res.status(result.code).send(<ErrorInterface>{
+                message: result.message
+            })
+            return
+        }
+
+        res.status(200).end()
+    }
+
+    /**
+     * * Изменение личной информации пользователя
+     */
+    async changePersonalInfo(req: Request, res: Response) {
+        if (!req.user) {
+            res.status(401).send(<ErrorInterface>{
+                message: "Вы не авторизованы!"
+            })
+            return 
+        }
+
+        let personalInfo: IUserPersonalInfo
+        try {
+            personalInfo = {...req.body}
+        } catch(e) {
+            res.status(400).send(<ErrorInterface>{
+                message: "Тело запроса не распознано!"
+            })
+            return
+        }
+        if (!personalInfo) {
+            res.status(400).send(<ErrorInterface>{
+                message: "Неверное тело запроса!"
+            })
+            return
+        }
+
+        const result = await this.userService.changePersonalInfo(req.user, personalInfo)
+        if (isInnerErrorInterface(result)) {
+            res.status(result.code).send(<ErrorInterface>{
+                message: result.message
+            })
+            return
+        }
+
+        res.status(200).end()
     }
 
 }

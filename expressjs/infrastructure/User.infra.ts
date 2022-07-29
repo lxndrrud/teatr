@@ -1,7 +1,7 @@
 import { Knex } from "knex";
 import { UserModel } from "../dbModels/users";
 import { InnerErrorInterface } from "../interfaces/errors";
-import { UserInterface, UserRequestOption } from "../interfaces/users";
+import { IExtendedUser, UserInterface, UserRequestOption } from "../interfaces/users";
 import { sign } from 'jsonwebtoken'
 import { UserActionBaseInterface } from "../interfaces/userActions";
 import { RoleDatabaseInterface } from "../interfaces/roles";
@@ -15,6 +15,7 @@ export interface IUserInfrastructure {
         userRole: RoleDatabaseInterface, 
         description: string): 
     Promise<InnerErrorInterface | undefined>
+    getExtendedUser(idUser: number): Promise<IExtendedUser | InnerErrorInterface | undefined>
 }
 
 export class UserInfrastructure implements IUserInfrastructure {
@@ -93,5 +94,17 @@ export class UserInfrastructure implements IUserInfrastructure {
             }
         }
     }
+
+    async getExtendedUser(idUser: number) {
+        try {
+            const user = <IExtendedUser | undefined> await this.userModel.getUser(idUser)
+            return user
+        } catch (e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: "Внутренняя ошибка при поиске пользователя!"
+            }
+        }
+    } 
 
 }

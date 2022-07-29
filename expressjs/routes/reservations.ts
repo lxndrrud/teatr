@@ -17,44 +17,54 @@ import { SessionInfrastructure } from "../infrastructure/Session.infra";
 import { TimestampHelper } from "../utils/timestamp";
 import { CodeGenerator } from "../utils/code";
 import { UserInfrastructure } from "../infrastructure/User.infra";
+import { KnexConnection } from "../knex/connections";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
     new ReservationPaymentService(
+        KnexConnection,
         new ReservationDatabaseModel(
+            KnexConnection,
             new TimestampHelper()
         ),
-        new RoleFetchingModel(new RoleDatabaseModel()),
+        new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
         new UserInfrastructure(
-            new UserDatabaseModel()
+            new UserDatabaseModel(KnexConnection)
         ),
         new ReservationGuard()
     ),
     new ReservationCRUDService(
+        KnexConnection,
         new ReservationDatabaseModel(
+            KnexConnection,
             new TimestampHelper()
         ),
-        new RoleFetchingModel(new RoleDatabaseModel()),
+        new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
         new SessionCRUDService(
+            KnexConnection,
             new SessionDatabaseModel(
+                KnexConnection,
                 new TimestampHelper()
             ),
             new SessionInfrastructure(
                 new SessionDatabaseModel(
+                    KnexConnection,
                     new TimestampHelper()
                 ),
                 new TimestampHelper())
         ),
         new SessionInfrastructure(
             new SessionDatabaseModel(
+                KnexConnection,
                 new TimestampHelper()
             ),
             new TimestampHelper()),
         new UserInfrastructure(
-            new UserDatabaseModel()
+            new UserDatabaseModel(KnexConnection)
         ),
         new ReservationInfrastructure(
             new ReservationDatabaseModel(
+                KnexConnection,
                 new TimestampHelper()
             ), 
             new ReservationGuard(),
@@ -66,11 +76,13 @@ const reservationController = new ReservationController(
     ),
     new ReservationFilterService(
         new ReservationDatabaseModel(
+            KnexConnection,
             new TimestampHelper()
         ),
-        new RoleFetchingModel(new RoleDatabaseModel()),
+        new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
         new ReservationInfrastructure(
             new ReservationDatabaseModel(
+                KnexConnection,
                 new TimestampHelper()
             ), 
             new ReservationGuard(),

@@ -2,9 +2,11 @@ import { Knex } from "knex";
 
 export abstract class DatabaseModel {
     protected tableName: string
+    protected connection
 
-    constructor(tableName: string) {
+    constructor(tableName: string, connectionInstance: Knex<any, unknown[]>) {
         this.tableName = tableName
+        this.connection = connectionInstance
     }
 
     abstract getAll(payload: any): any

@@ -1,10 +1,10 @@
+import { Knex } from "knex"
 import { ReservationModel } from "../../dbModels/reservations"
 import { IReservationGuard } from "../../guards/Reservation.guard"
 import { IUserInfrastructure } from "../../infrastructure/User.infra"
 import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors"
 import { ReservationConfirmationInterface, ReservationWithoutSlotsInterface } from "../../interfaces/reservations"
 import { UserRequestOption } from "../../interfaces/users"
-import { KnexConnection } from "../../knex/connections"
 import { RoleService } from "../roles"
 import { UserService } from "../users"
 
@@ -21,17 +21,20 @@ export interface IReservationPaymentService {
 }
 
 export class ReservationPaymentService {
+    protected connection
     protected reservationModel
     protected roleService
     protected userInfrastructure
     protected reservationGuard
 
     constructor(
-            reservationDatabaseInstance: ReservationModel,
-            roleServiceInstance: RoleService,
-            userInfrastructureInstance: IUserInfrastructure,
-            reservationGuardInstance: IReservationGuard
-        ) {
+        connectionInstance: Knex<any, unknown[]>,
+        reservationDatabaseInstance: ReservationModel,
+        roleServiceInstance: RoleService,
+        userInfrastructureInstance: IUserInfrastructure,
+        reservationGuardInstance: IReservationGuard
+    ) {
+        this.connection = connectionInstance
         this.reservationModel = reservationDatabaseInstance
         this.roleService = roleServiceInstance
         this.userInfrastructure = userInfrastructureInstance
@@ -86,7 +89,7 @@ export class ReservationPaymentService {
         }
 
         // Транзакция: изменение флага подтверждения
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
 
         // Создание записи действия для оператора
         if (userRole.can_see_all_reservations) {
@@ -152,7 +155,7 @@ export class ReservationPaymentService {
         }
 
         // Транзакция: изменение флага оплаты
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
 
         // Создание записи действия для оператора
         if (userRole.can_see_all_reservations) {

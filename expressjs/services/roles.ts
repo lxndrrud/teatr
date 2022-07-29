@@ -1,4 +1,3 @@
-import { Knex } from "knex";
 import { RoleModel } from "../dbModels/roles";
 import { InnerErrorInterface } from "../interfaces/errors";
 import { RoleDatabaseInterface } from "../interfaces/roles";
@@ -17,7 +16,9 @@ export interface RoleService {
 export class RoleFetchingModel implements RoleService {
     protected roleDatabaseInstance
 
-    constructor(roleDatabaseModel: RoleModel) {
+    constructor(
+        roleDatabaseModel: RoleModel
+    ) {
         this.roleDatabaseInstance = roleDatabaseModel
     }
     

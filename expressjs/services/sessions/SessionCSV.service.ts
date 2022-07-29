@@ -5,7 +5,7 @@ import { InnerErrorInterface } from "../../interfaces/errors"
 import { SessionBaseInterface } from "../../interfaces/sessions"
 import { FileStreamHelper } from "../../utils/fileStreams"
 import fs from "fs"
-import { KnexConnection } from "../../knex/connections"
+import { Knex } from "knex"
 
 export interface ISessionCSVService {
     createSessionsCSV(file: UploadedFile): 
@@ -14,13 +14,16 @@ export interface ISessionCSVService {
 
 
 export class SessionCSVService {
+    protected connection
     protected fileStreamHelper
     protected sessionModel
 
     constructor(
+        connectionInstance: Knex<any, unknown[]>,
         fileStreamHelperInstance: FileStreamHelper,
         sessionModelInstance: SessionModel
     ) {
+        this.connection = connectionInstance
         this.fileStreamHelper = fileStreamHelperInstance
         this.sessionModel = sessionModelInstance
     }
@@ -56,7 +59,7 @@ export class SessionCSVService {
             dataArray.push(toPush)
         }
         fs.unlinkSync(file.tempFilePath)
-        let trx = await KnexConnection.transaction()
+        let trx = await this.connection.transaction()
         try {
             await this.sessionModel.insertAll(trx, dataArray)
             await trx.commit()

@@ -4,6 +4,7 @@ import { verify } from "jsonwebtoken"
 import { UserDatabaseModel } from "../dbModels/users"
 import { UserRequestOption } from "../interfaces/users"
 import { UserInfrastructure } from "../infrastructure/User.infra"
+import { KnexConnection } from "../knex/connections"
 
 export const basicAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers['auth-token']
@@ -38,7 +39,7 @@ export const staffAuthMiddleware = async (req: Request, res: Response, next: Nex
     }
     try {
         const decoded = verify(`${token}`, `${process.env.SECRET_KEY}`);
-        const userInfrastructure = new UserInfrastructure(new UserDatabaseModel())
+        const userInfrastructure = new UserInfrastructure(new UserDatabaseModel(KnexConnection))
         const userData = {...JSON.parse(JSON.stringify(decoded))}
         let check = await userInfrastructure.checkIsUserStaff(<UserRequestOption>userData)
         if (isInnerErrorInterface(check)) {

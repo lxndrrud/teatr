@@ -1,3 +1,4 @@
+import { Knex } from "knex"
 import { ReservationModel } from "../../dbModels/reservations"
 import { IReservationGuard } from "../../guards/Reservation.guard"
 import { IReservationInfrastructure } from "../../infrastructure/Reservation.infra"
@@ -7,7 +8,6 @@ import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/err
 import { ReservationBaseInterface, ReservationBaseWithoutConfirmationInterface, ReservationCreateInterface, ReservationDatabaseInterface, ReservationInterface, ReservationWithoutSlotsInterface } from "../../interfaces/reservations"
 import { ReservationsSlotsBaseInterface, SlotInterface } from "../../interfaces/slots"
 import { UserRequestOption } from "../../interfaces/users"
-import { KnexConnection } from "../../knex/connections"
 import { CodeGenerator } from "../../utils/code"
 import { EmailSender } from "../../utils/email"
 import { RoleService } from "../roles"
@@ -33,6 +33,7 @@ export interface IReservationCRUDService {
 
 
 export class ReservationCRUDService implements IReservationCRUDService {
+    protected connection
     protected reservationModel
     protected roleService
     protected sessionCRUDService
@@ -44,6 +45,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
     protected codeGenerator
 
     constructor(
+            connectionInstance: Knex<any, unknown[]>,
             reservationDatabaseInstance: ReservationModel,
             roleServiceInstance: RoleService,
             sessionCRUDServiceInstance: SessionCRUDService,
@@ -53,7 +55,8 @@ export class ReservationCRUDService implements IReservationCRUDService {
             reservationGuardInstance: IReservationGuard,
             emailSenderInstance: EmailSender,
             codeGeneratorInstance: CodeGenerator
-        ) {
+    ) {
+        this.connection = connectionInstance
         this.reservationModel = reservationDatabaseInstance
         this.roleService = roleServiceInstance
         this.sessionCRUDService = sessionCRUDServiceInstance
@@ -195,7 +198,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
         }
 
         // Транзакция: создание брони и забронированных мест
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
 
         let reservation: ReservationDatabaseInterface
 
@@ -345,7 +348,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
         }
 
         // Транзакция: удаление забронированных мест, затем удаление брони
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
 
         // Создание записи действия пользователя
         if (userRole.can_see_all_reservations) {

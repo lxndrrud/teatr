@@ -1,5 +1,4 @@
 import { Knex } from "knex";
-import { KnexConnection } from "../knex/connections";
 import { PlayModel } from "../dbModels/plays";
 import { PlayBaseInterface, PlayInterface, PlayWithPosterInterface } from "../interfaces/plays";
 import { InnerErrorInterface } from "../interfaces/errors";
@@ -23,11 +22,14 @@ export interface PlayService {
 export class PlayFetchingModel implements PlayService {
     protected playDatabaseInstance
     protected fileStreamHelper
+    protected connection
 
     constructor(
+        connectionInstance: Knex<any, unknown[]>,
         playModelInstance: PlayModel,
         fileStreamHelperInstance: FileStreamHelper
     ) {
+        this.connection = connectionInstance
         this.playDatabaseInstance = playModelInstance
         this.fileStreamHelper = fileStreamHelperInstance
     }
@@ -64,7 +66,7 @@ export class PlayFetchingModel implements PlayService {
     }
 
     async createPlay(payload: PlayBaseInterface) {
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
         try {
             const newPlay: PlayInterface = (await this.playDatabaseInstance.insert(trx, payload))[0]
             await trx.commit()
@@ -80,7 +82,7 @@ export class PlayFetchingModel implements PlayService {
     }
 
     async updatePlay(idPlay: number, payload: PlayBaseInterface) {
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
         try {
             const query = await this.playDatabaseInstance.get({ id: idPlay})
             if (!query) {
@@ -102,7 +104,7 @@ export class PlayFetchingModel implements PlayService {
     }
 
     async deletePlay(idPlay: number) {
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
         try {
             const query = await this.playDatabaseInstance.get({ id: idPlay })
             if (!query) {
@@ -140,8 +142,9 @@ export class PlayFetchingModel implements PlayService {
                 description: chunk["Описание"]
             })
         }
-        fs.unlinkSync(file.tempFilePath)
-        let trx = await KnexConnection.transaction()
+        fs.rmSync(file.tempFilePath)
+        //fs.unlinkSync(file.tempFilePath)
+        let trx = await this.connection.transaction()
         try {
             await this.playDatabaseInstance.insertAll(trx, dataArray)
             await trx.commit()

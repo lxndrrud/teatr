@@ -51,6 +51,18 @@ export interface IExtendedUser extends UserInterface{
     role_title: string
 }
 
+export interface IUserChangePassword {
+    oldPassword: string
+    newPassword: string
+    confirmPassword: string
+}
+
+export interface IUserPersonalInfo {
+    firstname: string
+    middlename: string
+    lastname: string
+}
+
 export class UserStrategy {
     protected user: IExtendedUser
 

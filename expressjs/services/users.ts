@@ -1,10 +1,10 @@
-import { KnexConnection } from "../knex/connections";
 import { UserModel } from "../dbModels/users";
 import { hash, compareSync } from 'bcryptjs';
-import { IExtendedUser, UserBaseInterface, UserInterface, UserLoginInterface, UserRegisterInterface, UserRequestOption, UserStrategy } from "../interfaces/users";
+import { IExtendedUser, IUserChangePassword, IUserPersonalInfo, UserBaseInterface, UserInterface, UserLoginInterface, UserRegisterInterface, UserRequestOption, UserStrategy } from "../interfaces/users";
 import { RoleService } from "./roles";
 import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { IUserInfrastructure } from "../infrastructure/User.infra";
+import { Knex } from "knex";
 
 
 export interface UserService {
@@ -39,18 +39,24 @@ export interface UserService {
             middlename: string;
             lastname: string;
         }>
+    changePassword(user: UserRequestOption, passwordInfo: IUserChangePassword): 
+    Promise<InnerErrorInterface | undefined>
+    changePersonalInfo(user: UserRequestOption, personalInfo: IUserPersonalInfo): Promise<InnerErrorInterface | undefined>
 }
 
 export class UserFetchingModel implements UserService {
+    protected connection
     protected userModel
     protected roleFetchingInstance
     protected userInfrastructure
 
     constructor(
+        connectionInstance: Knex<any, unknown[]>,
         userModelInstance: UserModel, 
         roleServiceInstance: RoleService,
         userInfrastructureInstance: IUserInfrastructure
     ) {
+        this.connection = connectionInstance
         this.userModel = userModelInstance
         this.roleFetchingInstance = roleServiceInstance
         this.userInfrastructure = userInfrastructureInstance
@@ -82,7 +88,7 @@ export class UserFetchingModel implements UserService {
         const fetchedRequestBody: UserBaseInterface = {...payload, id_role: visitorRole.id}
 
         // Транзакция: создать пользователя, затем дать ему токен
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
         try {
             fetchedRequestBody.password = await hash(payload.password, 10)
             let user: UserInterface = (await this.userModel.insert(trx, fetchedRequestBody))[0]
@@ -138,7 +144,7 @@ export class UserFetchingModel implements UserService {
             isAdmin = true
         }
         // Транзакция: сгенерировать токен для пользователя, сохранить в БД
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
         try {
             const fetchedUser = await this.userInfrastructure.generateToken(trx, user)
             if (isInnerErrorInterface(fetchedUser)) {
@@ -203,7 +209,7 @@ export class UserFetchingModel implements UserService {
             }
         }
         // Транзакция: сгенерировать токен для пользователя, сохранить в БД
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
         try {
             const fetchedUser = await this.userInfrastructure.generateToken(trx, user)
             if (isInnerErrorInterface(fetchedUser)) {
@@ -248,15 +254,17 @@ export class UserFetchingModel implements UserService {
      * * Личный кабинет
      */
     async getPersonalArea(user: UserRequestOption) {
-        try {
-            const personalInfo = <IExtendedUser> await this.userModel.getUser(user.id)
-            return new UserStrategy(personalInfo).getPersonalInfo() 
-        } catch (e) {
-            return <InnerErrorInterface> {
-                code: 500,
-                message: "Внутренняя ошибка при поиске пользователя!"
-            }
+        const userInfo = await this.userInfrastructure.getExtendedUser(user.id)
+        if (isInnerErrorInterface(userInfo)) {
+            return userInfo
         }
+        if (!userInfo) {
+            return <InnerErrorInterface> {
+                code: 404,
+                message: "Пользователь не найден!"
+            } 
+        }
+        return new UserStrategy(userInfo).getPersonalInfo()
     } 
     
     /**
@@ -273,20 +281,118 @@ export class UserFetchingModel implements UserService {
                 message: "У вас нет доступа для просмотра информации о других пользователях!"
             }
         }
-        try {
-            const user = <IExtendedUser | undefined> await this.userModel.getUser(idUser)
-            if (!user) {
-                return <InnerErrorInterface> {
-                    code: 404,
-                    message: "Пользователь не найден!"
-                }
-            }
-            return new UserStrategy(user).getExtendedPersonalInfo()
-        } catch (e) {
+        const userInfo = await this.userInfrastructure.getExtendedUser(idUser)
+        if (isInnerErrorInterface(userInfo)) {
+            return userInfo
+        }
+        if (!userInfo) {
             return <InnerErrorInterface> {
-                code: 500,
-                message: "Внутренняя ошибка при поиске пользователя!"
+                code: 404,
+                message: "Пользователь не найден!"
             }
         }
-    } 
+        return new UserStrategy(userInfo).getExtendedPersonalInfo()
+    }
+    
+    /**
+     * * Логика изменения пароля 
+     */
+    async changePassword(user: UserRequestOption, passwordInfo: IUserChangePassword ) {
+        // Проверка на совпадение старого пароля с новым
+        if (passwordInfo.oldPassword === passwordInfo.newPassword) {
+            return <InnerErrorInterface>{
+                code: 400, 
+                message: "Старый пароль совпадает с новым!"
+            }
+        }
+
+        // Проверка на совпадение нового пароля с подтверджением
+        if (passwordInfo.newPassword !== passwordInfo.confirmPassword) {
+            return <InnerErrorInterface>{
+                code: 400, 
+                message: "Новый пароль не совпадает с подтверждением!"
+            }
+        }
+
+        // Поиск пользователя в базе по информации из токена
+        const userInfo = await this.userInfrastructure.getExtendedUser(user.id)
+        if (isInnerErrorInterface(userInfo)) {
+            return userInfo
+        }
+        if (!userInfo) {
+            return <InnerErrorInterface> {
+                code: 404,
+                message: "Пользователь не найден!"
+            }
+        }
+
+        // Проверка на совпадение старого пароля с паролем из базы
+        if (!compareSync(passwordInfo.oldPassword, userInfo.password)) {
+            return <InnerErrorInterface>{
+                code: 400,
+                message: "Старый пароль введён неверно!"
+            }
+        }
+
+        // Шифрование нового пароля
+        let newPasswordHash: string
+        try {
+            newPasswordHash = await hash(passwordInfo.newPassword, 10)
+        } catch(e) {
+            console.error(e)
+            return <InnerErrorInterface>{
+                code: 500,
+                message: "Ошибка при хэшировании пароля!"
+            }
+        }
+
+        const trx = await this.connection.transaction()
+        try {
+            await this.userModel.update(trx, user.id, <UserInterface> {
+                password: newPasswordHash
+            })
+            await trx.commit()
+        } catch (e) {
+            console.error(e)
+            await trx.rollback()
+            return <InnerErrorInterface>{
+                code: 500,
+                message: "Внутренняя ошибка при смене пароля!"
+            }
+        }
+    }
+
+    /**
+     * * Логика изменения личной информации
+     */
+    async changePersonalInfo(user: UserRequestOption, personalInfo: IUserPersonalInfo) {
+        // Нахождение пользователя в базе
+        let userInfo = await this.userInfrastructure.getExtendedUser(user.id)
+        if (isInnerErrorInterface(userInfo)) {
+            return userInfo
+        }
+        if (!userInfo) {
+            return <InnerErrorInterface> {
+                code: 404,
+                message: "Пользователь не найден!"
+            }
+        }
+        // Транзакция: изменение личных данных пользователя
+        const trx = await this.connection.transaction()
+        try {
+            await this.userModel.update(trx, user.id, <UserInterface>{
+                firstname: personalInfo.firstname,
+                middlename: personalInfo.middlename,
+                lastname: personalInfo.lastname
+            })
+            await trx.commit()
+        } catch (e) {
+            console.error(e)
+            await trx.rollback()
+            return <InnerErrorInterface>{
+                code: 500,
+                message: 'Внутренняя ошибка при изменении личных данных пользователя!'
+            }
+        }
+    }
 }

@@ -6,13 +6,15 @@ import { UserDatabaseModel } from "../dbModels/users";
 import { RoleFetchingModel } from "../services/roles";
 import { RoleDatabaseModel } from "../dbModels/roles";
 import { UserInfrastructure } from "../infrastructure/User.infra"
+import { KnexConnection } from "../knex/connections";
 
 export const usersRouter = Router()
 const userController = new UserController(
     new UserFetchingModel(
-        new UserDatabaseModel(), 
-        new RoleFetchingModel(new RoleDatabaseModel()),
-        new UserInfrastructure(new UserDatabaseModel())
+        KnexConnection,
+        new UserDatabaseModel(KnexConnection), 
+        new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
+        new UserInfrastructure(new UserDatabaseModel(KnexConnection))
     )
 )
 
@@ -31,3 +33,13 @@ usersRouter.get('/personalArea',
 usersRouter.get('/:idUser', 
     staffAuthMiddleware,
     userController.getUser.bind(userController))
+
+usersRouter.post("/edit/password",
+    basicAuthMiddleware,
+    userController.changePassword.bind(userController)
+)
+
+usersRouter.post("/edit/personal", 
+    basicAuthMiddleware,
+    userController.changePersonalInfo.bind(userController)
+)

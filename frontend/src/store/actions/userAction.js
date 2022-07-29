@@ -1,4 +1,4 @@
-import { LOG_IN, LOG_OUT, REGISTER, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA } from "../types";
+import { LOG_IN, LOG_OUT, REGISTER, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, SUCCESS_USER_SET_DEFAULT } from "../types";
 
 export const register = (email, password, 
 firstname=undefined, middlename=undefined, lastname=undefined) => async dispatch => {
@@ -95,6 +95,12 @@ export const errorSetDefault = () => async dispatch => {
     })
 }
 
+export const successSetDefault = () => async dispatch => {
+    dispatch({
+        type: SUCCESS_USER_SET_DEFAULT
+    })
+}
+
 export const getPersonalArea = (token) => async dispatch => {
     try {
         let response = await fetch('/expressjs/users/personalArea', {
@@ -114,6 +120,65 @@ export const getPersonalArea = (token) => async dispatch => {
         dispatch({
             type: ERROR_USER,
             payload: e 
+        })
+    }
+}
+
+export const changePassword = (token, passwordInfo) => async dispatch => {
+    try {
+        let response = await fetch('/expressjs/users/edit/password', {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'auth-token': token
+            },
+            body: JSON.stringify(passwordInfo)
+        })
+
+        if (response.status === 200) 
+            dispatch({
+                type: CHANGE_PASSWORD,
+                success_message: "Пароль успешно обновлён!"
+            })
+        else {
+            let respBody = await response.json()
+            throw respBody.message
+        }
+
+    } catch(e) {
+        dispatch({
+            type: ERROR_USER,
+            payload: e
+        })
+    }
+}
+
+export const changePersonalInfo = (token, personalInfo) => async dispatch => {
+    try {  
+        const response = await fetch('/expressjs/users/edit/personal', {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'auth-token': token
+            },
+            body: JSON.stringify(personalInfo)
+        })
+        
+        if (response.status === 200) 
+            dispatch({
+                type: CHANGE_PERSONAL_INFO,
+                success_message: "Личная информация обновлена!"
+            })
+        else {
+            let respBody = await response.json()
+            throw respBody.message
+        }
+    } catch(e) {
+        dispatch({
+            type: ERROR_USER,
+            payload: e
         })
     }
 }

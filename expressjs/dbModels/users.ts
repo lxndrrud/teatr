@@ -1,5 +1,4 @@
 import { Knex } from "knex"
-import { KnexConnection } from "../knex/connections"
 import { IExtendedUser, UserBaseInterface, UserInterface, UserRequestOption } from "../interfaces/users"
 import { hash } from 'bcryptjs';
 import { sign } from 'jsonwebtoken'
@@ -57,8 +56,8 @@ export interface UserModel {
  */
 
 export class UserDatabaseModel extends DatabaseModel implements UserModel {
-    constructor() {
-        super(users)
+    constructor(connectionInstance: Knex<any, unknown[]>) {
+        super(users, connectionInstance)
     }
 
     getAll(payload: {
@@ -71,7 +70,7 @@ export class UserDatabaseModel extends DatabaseModel implements UserModel {
         lastname?: string
         id_role?: number
     }) {
-        return KnexConnection<IExtendedUser>(users)
+        return this.connection<IExtendedUser>(users)
             .select(
                 `${users}.*`, 'r.title as role_title'
             )
@@ -145,7 +144,7 @@ export class UserDatabaseModel extends DatabaseModel implements UserModel {
     }
 
     checkIsUserStaff(idUser: number, idRole: number) {
-        return KnexConnection(`${users} as u`)
+        return this.connection(`${users} as u`)
             .select('u.*')
             .join(`${roles} as r`, 'r.id', 'u.id_role')
             .where('u.id', idUser)
@@ -157,7 +156,7 @@ export class UserDatabaseModel extends DatabaseModel implements UserModel {
     }
 
     getUser(idUser: number) {
-        return KnexConnection(`${users} as u`)
+        return this.connection(`${users} as u`)
             .select(
                 'u.*', 'r.title as role_title'
             )

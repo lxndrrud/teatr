@@ -1,9 +1,7 @@
-import { KnexConnection } from "../knex/connections";
 import { Knex } from "knex";
 import { DatabaseModel } from "./baseModel";
 import { PlayBaseInterface, PlayInterface, PlayQueryInterface } from "../interfaces/plays";
-import { images, plays, playsImages } from "./tables";
-import { AnyTxtRecord } from "dns";
+import { images, plays, playsImages, sessions } from "./tables";
 
 export interface PlayModel {
     getAll(payload: PlayQueryInterface): Knex.QueryBuilder | any
@@ -24,13 +22,13 @@ export interface PlayModel {
  * description: string
  */
 export class PlayDatabaseModel extends DatabaseModel implements PlayModel {
-    constructor() {
-        super(plays)
+    constructor(connectionInstance: Knex<any, unknown[]>) {
+        super(plays, connectionInstance)
     }
 
 
     getAll(payload: PlayQueryInterface) {
-        return KnexConnection(`${plays} as p`)
+        return this.connection(`${plays} as p`)
             .where(builder => {
                 if(payload.id) 
                     builder.andWhere('p.id', payload.id)
@@ -75,12 +73,14 @@ export class PlayDatabaseModel extends DatabaseModel implements PlayModel {
     getAllWithPoster(payload: PlayQueryInterface) {
         return this.getAll(payload)
             .select(
-                KnexConnection.ref('*').withSchema('p'),
-                KnexConnection.ref('filepath').withSchema('i').as('poster_filepath')
+                this.connection.ref('*').withSchema('p'),
+                this.connection.ref('filepath').withSchema('i').as('poster_filepath')
             )
             .where('pi.is_poster', true)
+            .andWhere('s.is_locked', false)
             .join(`${playsImages} as pi`, 'pi.id_play', 'p.id')
             .join(`${images} as i`, 'i.id', 'pi.id_image')
+            .join(`${sessions} as s`, 's.id_play', 'p.id')
     }
 
     getSingleWithPoster(payload: PlayQueryInterface) {

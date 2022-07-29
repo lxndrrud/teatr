@@ -1,10 +1,10 @@
+import { Knex } from "knex"
 import { SessionModel } from "../../dbModels/sessions"
 import { ISessionInfrastructure } from "../../infrastructure/Session.infra"
 import { InnerErrorInterface } from "../../interfaces/errors"
 import { RowInterface } from "../../interfaces/rows"
 import { SessionBaseInterface, SessionDatabaseInterface, SessionInterface } from "../../interfaces/sessions"
 import { SlotInterface, SlotIsReservedInterface, SlotWithRowIdInterface } from "../../interfaces/slots"
-import { KnexConnection } from "../../knex/connections"
 
 
 export interface ISessionCRUDService {
@@ -31,19 +31,22 @@ export interface ISessionCRUDService {
 }
 
 export class SessionCRUDService implements ISessionCRUDService {
+    protected connection
     protected sessionModel
     protected sessionInfrastructure
 
     constructor(
+        connectionInstance: Knex<any, unknown[]>,
         sessionModelInstance: SessionModel,
         sessionInfrastructureInstance: ISessionInfrastructure
     ) {
+        this.connection = connectionInstance
         this.sessionModel= sessionModelInstance
         this.sessionInfrastructure = sessionInfrastructureInstance
     }
 
     public async createSession(payload: SessionBaseInterface) {
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
         try {
             const newSession: SessionDatabaseInterface = (await this.sessionModel.insert(trx, payload))[0]
             await trx.commit()
@@ -66,19 +69,19 @@ export class SessionCRUDService implements ISessionCRUDService {
                 }
             }
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return <InnerErrorInterface>{
                 code: 500,
                 message: 'Внутренняя ошибка сервера при поиске записи сеанса: ' + e
             }
         }
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
         try {
             await this.sessionModel.update(trx, idSession, payload)
             await trx.commit()
         }
         catch (e) {
-            console.log(e)
+            console.error(e)
             await trx.rollback()
             return <InnerErrorInterface>{
                 code: 500,
@@ -95,7 +98,7 @@ export class SessionCRUDService implements ISessionCRUDService {
                 message: 'Запись сеанса не найдена!'
             }
         }
-        const trx = await KnexConnection.transaction()
+        const trx = await this.connection.transaction()
         try {
             await this.sessionModel.delete(trx, idSession)
             await trx.commit()
@@ -115,7 +118,7 @@ export class SessionCRUDService implements ISessionCRUDService {
             const fetchedQuery = this.sessionInfrastructure.fixTimestamps(query)
             return fetchedQuery
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return <InnerErrorInterface> {
                 code: 500,
                 message: 'Внутренняя ошибка сервера при поиске сеансов!'
@@ -135,7 +138,7 @@ export class SessionCRUDService implements ISessionCRUDService {
             const fetchedQuery = this.sessionInfrastructure.fixTimestamps([query])
             return fetchedQuery[0]
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return <InnerErrorInterface> {
                 code: 500,
                 message: 'Внутренняя ошибка сервера при поиске сеанса!'
@@ -150,7 +153,7 @@ export class SessionCRUDService implements ISessionCRUDService {
             const fetchedQuery = this.sessionInfrastructure.fixTimestamps(query)
             return fetchedQuery
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return <InnerErrorInterface>{
                 code: 500,
                 message: 'Внутренняя ошибка сервера при поиске сеансов по спектаклю!'

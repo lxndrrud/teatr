@@ -1,11 +1,12 @@
-import { ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, LOG_IN, LOG_OUT, REGISTER } from "../types"
+import { CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, LOG_IN, LOG_OUT, REGISTER, SUCCESS_USER_SET_DEFAULT } from "../types"
 
 
 const defaultState = {
     token: '',
     isAdmin: null,
     user: null,
-    error: null
+    error: null,
+    success: null
 }
 
 const userReducer = (state=defaultState, action) => {
@@ -25,6 +26,12 @@ const userReducer = (state=defaultState, action) => {
             return {...state, error: action.payload}
         case ERROR_USER_SET_DEFAULT:
             return {...state, error: defaultState.error}
+        case CHANGE_PASSWORD: 
+            return {...state, success: action.success_message }
+        case CHANGE_PERSONAL_INFO: 
+            return {...state, success: action.success_message }
+        case SUCCESS_USER_SET_DEFAULT:
+            return {...state, success: defaultState.success }
         default:
             return state
     }

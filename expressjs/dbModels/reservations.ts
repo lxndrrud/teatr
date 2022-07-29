@@ -1,4 +1,3 @@
-import { KnexConnection } from "../knex/connections";
 import { Knex } from "knex";
 import { reservations, rows, seats, slots, auditoriums,
     users, plays, sessions, pricePolicies, reservationsSlots } from "./tables";
@@ -65,9 +64,10 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
     private timestampHelper
 
     constructor(
-        timestampHelperInstance: TimestampHelper
+        connectionInstance: Knex<any, unknown[]>,
+        timestampHelperInstance: TimestampHelper,
     ) {
-        super(reservations)
+        super(reservations, connectionInstance)
         this.timestampHelper = timestampHelperInstance
     }
 
@@ -80,7 +80,7 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
         id_session?: number
         id_user?: number
     }) {
-        return KnexConnection(reservations)
+        return this.connection(reservations)
             .where(builder => {
                 if (payload.id)
                     builder.andWhere(`${reservations}.id`, payload.id)
@@ -142,16 +142,16 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
      * Promise<ReservationWithoutSlotsInterface>
      */
     getAllFullInfo() {
-        return KnexConnection(`${reservations} as r`)
+        return this.connection(`${reservations} as r`)
         .select(
-            KnexConnection.ref('*').withSchema('r'), 
-            KnexConnection.ref('id').withSchema('s').as('id_session'), 
-            KnexConnection.ref('id').withSchema('u').as('id_user'),
-            KnexConnection.ref('id').withSchema('p').as('id_play'),
-            KnexConnection.ref('timestamp').withSchema('s').as('session_timestamp'),
-            KnexConnection.ref('title').withSchema('p').as('play_title'),
-            KnexConnection.ref('title').withSchema('a').as('auditorium_title'),
-            KnexConnection.ref('is_locked').withSchema('s').as('session_is_locked')
+            this.connection.ref('*').withSchema('r'), 
+            this.connection.ref('id').withSchema('s').as('id_session'), 
+            this.connection.ref('id').withSchema('u').as('id_user'),
+            this.connection.ref('id').withSchema('p').as('id_play'),
+            this.connection.ref('timestamp').withSchema('s').as('session_timestamp'),
+            this.connection.ref('title').withSchema('p').as('play_title'),
+            this.connection.ref('title').withSchema('a').as('auditorium_title'),
+            this.connection.ref('is_locked').withSchema('s').as('session_is_locked')
         )
         .join(`${users} as u`, 'u.id', 'r.id_user')
         .join(`${sessions} as s`, 's.id', 'r.id_session')
@@ -184,14 +184,14 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
      * Promise<SlotInterface[]>
      */
     getReservedSlots (idReservation: number)  {
-        return KnexConnection(`${reservationsSlots} as rs`)
+        return this.connection(`${reservationsSlots} as rs`)
             .select(
-                KnexConnection.ref('id').withSchema(slots),
-                KnexConnection.ref('price').withSchema(slots),
-                KnexConnection.ref('number').withSchema(seats).as('seat_number'),
-                KnexConnection.ref('number').withSchema(rows).as('row_number'),
-                KnexConnection.ref('title').withSchema('a').as('auditorium_title'),
-                KnexConnection.ref('title').withSchema(rows).as('row_title')
+                this.connection.ref('id').withSchema(slots),
+                this.connection.ref('price').withSchema(slots),
+                this.connection.ref('number').withSchema(seats).as('seat_number'),
+                this.connection.ref('number').withSchema(rows).as('row_number'),
+                this.connection.ref('title').withSchema('a').as('auditorium_title'),
+                this.connection.ref('title').withSchema(rows).as('row_title')
             )
             .where('rs.id_reservation', idReservation)
             .join(slots, `${slots}.id`, 'rs.id_slot')
@@ -217,9 +217,9 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
 
 
     getTimestampsOptionsForReservationFilter(idUser: number | undefined) {
-        return KnexConnection(`${reservations} as r`)
+        return this.connection(`${reservations} as r`)
             .select(
-                KnexConnection.ref('timestamp').withSchema('s').as('timestamp')
+                this.connection.ref('timestamp').withSchema('s').as('timestamp')
             )
             .andWhere(builder => {
                 if (idUser) 
@@ -232,9 +232,9 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
     }
 
     getAuditoriumsOptionsForReservationFilter(idUser: number | undefined) {
-        return KnexConnection(`${reservations} as r`)
+        return this.connection(`${reservations} as r`)
             .select(
-                KnexConnection.ref('title').withSchema('a')
+                this.connection.ref('title').withSchema('a')
             )
             //.where('s.is_locked', false)
             .andWhere(builder => {
@@ -251,9 +251,9 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
     }
 
     getPlaysOptionsForReservationFilter(idUser: number | undefined) {
-        return KnexConnection(`${reservations} as r`)
+        return this.connection(`${reservations} as r`)
             .select(
-                KnexConnection.ref('title').withSchema('p')
+                this.connection.ref('title').withSchema('p')
             )
             //.where('s.is_locked', false)
             .andWhere(builder => {
