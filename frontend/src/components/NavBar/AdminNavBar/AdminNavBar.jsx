@@ -28,7 +28,7 @@ function AdminNavBar() {
         dispatch(logOut())
         .then(() => {
             setToken('')
-            navigate('/reservation-admin/login')
+            navigate('/login')
         })
     }
     useEffect(() => {

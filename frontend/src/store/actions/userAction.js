@@ -165,7 +165,7 @@ export const changePersonalInfo = (token, personalInfo) => async dispatch => {
             },
             body: JSON.stringify(personalInfo)
         })
-        
+
         if (response.status === 200) 
             dispatch({
                 type: CHANGE_PERSONAL_INFO,
