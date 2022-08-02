@@ -15,16 +15,16 @@ function PersonalArea() {
           <table>
             <tbody>
               <tr>
+                <td>Фамилия: </td>
+                <td>{user.lastname}</td>
+              </tr>
+              <tr>
                 <td>Имя: </td>
                 <td>{user.firstname}</td>
               </tr>
               <tr>
                 <td>Отчество: </td>
                 <td>{user.middlename}</td>
-              </tr>
-              <tr>
-                <td>Фамилия: </td>
-                <td>{user.lastname}</td>
               </tr>
               <tr>
                 <td>Почта: </td>

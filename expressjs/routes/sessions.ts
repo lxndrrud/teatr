@@ -9,6 +9,7 @@ import { FileStreamHelper } from "../utils/fileStreams";
 import { SessionFilterService } from "../services/sessions/SessionFilter.service";
 import { TimestampHelper } from "../utils/timestamp";
 import { KnexConnection } from "../knex/connections";
+import { SlotsEventEmitter } from "../events/SlotsEmitter";
  
 export const sessionsRouter = Router();
 const sessionController = new SessionController(
@@ -38,11 +39,26 @@ const sessionController = new SessionController(
                 KnexConnection,
                 new TimestampHelper()),
             new TimestampHelper()),
-        new TimestampHelper())
+        new TimestampHelper()),
+    SlotsEventEmitter.getInstance(
+        new SessionCRUDService(
+            KnexConnection,
+            new SessionDatabaseModel(
+                KnexConnection,
+                new TimestampHelper()), 
+            new SessionInfrastructure(
+                new SessionDatabaseModel(
+                    KnexConnection,
+                    new TimestampHelper()
+                ),
+                new TimestampHelper())),
+    )
 )
 
 sessionsRouter.get('/play/:idPlay', sessionController.getSessionsByPlay.bind(sessionController))
-sessionsRouter.get('/:idSession/slots', basicAuthMiddleware, sessionController.getSlotsForSessions.bind(sessionController))
+sessionsRouter.get('/:idSession/slots', 
+    //basicAuthMiddleware, 
+    sessionController.getSlotsForSessions.bind(sessionController))
 
 sessionsRouter.get('/filter', sessionController.getFilteredSessions.bind(sessionController))
 sessionsRouter.get('/filter/setup', sessionController.getSessionFilterOptions.bind(sessionController))

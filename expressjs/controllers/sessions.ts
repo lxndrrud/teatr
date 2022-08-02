@@ -6,21 +6,25 @@ import { UploadedFile } from "express-fileupload"
 import { ISessionCRUDService } from "../services/sessions/SessionCRUD.service"
 import { ISessionCSVService } from "../services/sessions/SessionCSV.service"
 import { ISessionFilterService } from "../services/sessions/SessionFilter.service"
+import { ISlotsEventEmitter } from "../events/SlotsEmitter"
 
 
 export class SessionController {
     private sessionCRUDService
     private sessionCSVService
     private sessionFilterService
+    private slotsEventEmitter
 
     constructor(
         sessionCRUDServiceInstance: ISessionCRUDService,
         sessionCSVServiceInstance: ISessionCSVService,
-        sessionFilterService: ISessionFilterService
+        sessionFilterService: ISessionFilterService,
+        slotsEventEmitterInstance: ISlotsEventEmitter
     ) {
         this.sessionCRUDService = sessionCRUDServiceInstance
         this.sessionCSVService = sessionCSVServiceInstance
         this.sessionFilterService = sessionFilterService
+        this.slotsEventEmitter = slotsEventEmitterInstance
     }
 
     async getSessions(req: Request, res: Response) {
@@ -158,9 +162,13 @@ export class SessionController {
     async getSlotsForSessions(req: Request, res: Response) {
         const idSession = parseInt(req.params.idSession)
         if (!idSession) {
-            res.status(400).end()
+            res.status(400).send(<ErrorInterface>{
+                message: 'Идентификатор сеанса не распознан!'
+            })
             return
         }
+        /* Было до event sourcing`а
+
         const result = await this.sessionCRUDService.getSlots(idSession)
     
         if (isInnerErrorInterface(result)) {
@@ -169,8 +177,19 @@ export class SessionController {
             })
             return
         }
-    
         res.status(200).send(result)
+        */
+
+        res.writeHead(200, {
+            "Connection": "keep-alive",
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-control"
+        })
+
+        this.slotsEventEmitter.connectSession(idSession, res)
+        console.log('connected')
+        this.slotsEventEmitter.emitSession(idSession)
+        console.log("emitted")
     }
 
     async getFilteredSessions(req: Request, res: Response) {

@@ -5,6 +5,7 @@ import { RoleService } from "./roles";
 import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { IUserInfrastructure } from "../infrastructure/User.infra";
 import { Knex } from "knex";
+import { IUserGuard } from "../guards/User.guard";
 
 
 export interface UserService {
@@ -49,17 +50,20 @@ export class UserFetchingModel implements UserService {
     protected userModel
     protected roleFetchingInstance
     protected userInfrastructure
+    protected userGuard
 
     constructor(
         connectionInstance: Knex<any, unknown[]>,
         userModelInstance: UserModel, 
         roleServiceInstance: RoleService,
-        userInfrastructureInstance: IUserInfrastructure
+        userInfrastructureInstance: IUserInfrastructure,
+        userGuardInstance: IUserGuard
     ) {
         this.connection = connectionInstance
         this.userModel = userModelInstance
         this.roleFetchingInstance = roleServiceInstance
         this.userInfrastructure = userInfrastructureInstance
+        this.userGuard = userGuardInstance
     }
 
     async createUser(payload: UserRegisterInterface) {
@@ -298,20 +302,9 @@ export class UserFetchingModel implements UserService {
      * * Логика изменения пароля 
      */
     async changePassword(user: UserRequestOption, passwordInfo: IUserChangePassword ) {
-        // Проверка на совпадение старого пароля с новым
-        if (passwordInfo.oldPassword === passwordInfo.newPassword) {
-            return <InnerErrorInterface>{
-                code: 400, 
-                message: "Старый пароль совпадает с новым!"
-            }
-        }
-
-        // Проверка на совпадение нового пароля с подтверджением
-        if (passwordInfo.newPassword !== passwordInfo.confirmPassword) {
-            return <InnerErrorInterface>{
-                code: 400, 
-                message: "Новый пароль не совпадает с подтверждением!"
-            }
+        const validation = this.userGuard.changePasswordValidation(passwordInfo)
+        if (isInnerErrorInterface(validation)) {
+            return validation
         }
 
         // Поиск пользователя в базе по информации из токена
@@ -366,6 +359,10 @@ export class UserFetchingModel implements UserService {
      * * Логика изменения личной информации
      */
     async changePersonalInfo(user: UserRequestOption, personalInfo: IUserPersonalInfo) {
+        // Валидация 
+        personalInfo = this.userGuard.changePersonalInfoProcessing(personalInfo)
+
+
         // Нахождение пользователя в базе
         let userInfo = await this.userInfrastructure.getExtendedUser(user.id)
         if (isInnerErrorInterface(userInfo)) {

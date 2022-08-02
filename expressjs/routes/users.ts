@@ -7,6 +7,7 @@ import { RoleFetchingModel } from "../services/roles";
 import { RoleDatabaseModel } from "../dbModels/roles";
 import { UserInfrastructure } from "../infrastructure/User.infra"
 import { KnexConnection } from "../knex/connections";
+import { UserGuard } from "../guards/User.guard";
 
 export const usersRouter = Router()
 const userController = new UserController(
@@ -14,7 +15,8 @@ const userController = new UserController(
         KnexConnection,
         new UserDatabaseModel(KnexConnection), 
         new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
-        new UserInfrastructure(new UserDatabaseModel(KnexConnection))
+        new UserInfrastructure(new UserDatabaseModel(KnexConnection)),
+        new UserGuard()
     )
 )
 

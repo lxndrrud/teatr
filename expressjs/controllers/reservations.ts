@@ -8,19 +8,23 @@ import { ReservationBaseInterface, ReservationInterface,
 import { IReservationFilterService} from "../services/reservations/ReservationFilter.service"
 import { IReservationCRUDService } from "../services/reservations/ReservationCRUD.service"
 import { IReservationPaymentService } from "../services/reservations/ReservationPayment.service"
+import { ISlotsEventEmitter } from "../events/SlotsEmitter"
 
 export class ReservationController {
     private reservationPaymentService
     private reservationCRUDService
     private reservationFilterService
+    private slotsEventEmitter
     constructor(
         reservationPaymentServiceInstance: IReservationPaymentService, 
         reservationCRUDServiceInstance: IReservationCRUDService,
-        reservationFilterServiceInstance: IReservationFilterService
+        reservationFilterServiceInstance: IReservationFilterService,
+        slotsEventEmitterInstance: ISlotsEventEmitter
     ) {
         this.reservationPaymentService = reservationPaymentServiceInstance
         this.reservationCRUDService = reservationCRUDServiceInstance
         this.reservationFilterService = reservationFilterServiceInstance
+        this.slotsEventEmitter = slotsEventEmitterInstance
     }
 
     /**
@@ -86,6 +90,8 @@ export class ReservationController {
             })
             return
         }
+
+        this.slotsEventEmitter.emitSession(requestBody.id_session)
 
         res.status(201).send(response)
     }

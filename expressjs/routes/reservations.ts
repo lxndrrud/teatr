@@ -18,6 +18,7 @@ import { TimestampHelper } from "../utils/timestamp";
 import { CodeGenerator } from "../utils/code";
 import { UserInfrastructure } from "../infrastructure/User.infra";
 import { KnexConnection } from "../knex/connections";
+import { SlotsEventEmitter } from "../events/SlotsEmitter";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
@@ -89,6 +90,19 @@ const reservationController = new ReservationController(
             new TimestampHelper()
         ),
         new TimestampHelper()
+    ),
+    SlotsEventEmitter.getInstance(
+        new SessionCRUDService(
+            KnexConnection,
+            new SessionDatabaseModel(
+                KnexConnection,
+                new TimestampHelper()), 
+            new SessionInfrastructure(
+                new SessionDatabaseModel(
+                    KnexConnection,
+                    new TimestampHelper()
+                ),
+                new TimestampHelper())),
     )
 )
 

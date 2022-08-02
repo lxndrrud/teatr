@@ -37,8 +37,9 @@ export const fetchSessionsByPlay = (playid) => async dispatch => {
     })
 }
 
-export const fetchSlotsBySession = (token, sessionid) => async dispatch => {
-    const response = await fetch(`/expressjs/sessions/${sessionid}/slots`, {
+/* До event sourcing`а
+export const fetchSlotsBySession = (token, idSession) => async dispatch => {
+    const response = await fetch(`/expressjs/sessions/${idSession}/slots`, {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -50,6 +51,33 @@ export const fetchSlotsBySession = (token, sessionid) => async dispatch => {
         type: FETCH_SLOTS,
         payload: json_
     })
+}
+*/
+
+export const fetchSlotsBySession = (token, idSession) => async dispatch => {
+    try {
+        console.log('kek')
+        const eventSource = new EventSource(`/expressjs/sessions/${idSession}/slots`)
+        console.log(eventSource.readyState)
+        eventSource.onopen = async function(event) {
+            console.log("opened!")
+        }
+        eventSource.onmessage = async function(event) {
+            console.log("kekekke", event.data )
+            dispatch({
+                type: FETCH_SLOTS,
+                payload: event.data
+            })
+        }
+        eventSource.onerror = async function(event) {
+            console.log('errror')
+        }
+        console.log(eventSource.readyState)
+
+    } catch(e) {
+        console.log(e)
+    }
+    
 }
 
 export const fetchSessionFilterOptions = () => async dispatch => {

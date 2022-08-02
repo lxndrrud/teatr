@@ -24,9 +24,25 @@ function ReservationPostForm() {
     let [error, setError] = useState('')
 
     useEffect(() => {
-        if (session.id)
+        if (session.id) {
             dispatch(fetchSlotsBySession(token, session.id))
+            //subscribe()
+        }
     }, [dispatch, token, session])
+
+    async function subscribe() {
+        const eventSource = new EventSource(`/expressjs/sessions/${session.id}/slots`)
+        eventSource.onopen = function(event) {
+            console.log("opened!")
+        }
+        eventSource.onmessage = function(event) {
+            console.log("kekekke", event.data )
+            dispatch({
+                type: FETCH_SLOTS,
+                payload: event.data
+            })
+        }
+    }
 
 
     const postEmailReservation = (e) => {
