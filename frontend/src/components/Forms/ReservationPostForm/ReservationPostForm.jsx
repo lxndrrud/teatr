@@ -1,6 +1,6 @@
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { postReservation, errorSetDefault } from '../../../store/actions/reservationAction'
-import { fetchSlotsBySession } from "../../../store/actions/sessionAction"
+import { fetchSlots, fetchSlotsBySession } from "../../../store/actions/sessionAction"
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import SlotsFieldMainAuditorium from "../../Slots/SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
 import SlotsFieldSmallScene from "../../Slots/SlotsFieldSmallScene/SlotsFieldSmallScene"
@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from "./ReservationPostForm.module.css"
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
+import axios from 'axios'
 
 
 function ReservationPostForm() {
@@ -21,27 +22,30 @@ function ReservationPostForm() {
     let sessionSlots = useSelector(state => state.session.slots)
     let reservationSlots = useSelector(state => state.reservation.slots)
 
-    let [error, setError] = useState('')
+    let [error, setError] = useState(null)
 
     useEffect(() => {
         if (session.id) {
             dispatch(fetchSlotsBySession(token, session.id))
-            //subscribe()
+            subscribe()
         }
     }, [dispatch, token, session])
 
     async function subscribe() {
-        const eventSource = new EventSource(`/expressjs/sessions/${session.id}/slots`)
-        eventSource.onopen = function(event) {
-            console.log("opened!")
+        try {
+            const response = await axios.get(`/expressjs/sessions/${session.id}/slots/polling`, {
+                headers: {
+                    "auth-token": token,
+                }
+            }) 
+            dispatch(fetchSlots(response.data))
+            .then(async () => { await subscribe() })
+        } catch (e) {
+            setTimeout(() => {
+                subscribe()
+            }, 500)
         }
-        eventSource.onmessage = function(event) {
-            console.log("kekekke", event.data )
-            dispatch({
-                type: FETCH_SLOTS,
-                payload: event.data
-            })
-        }
+        
     }
 
 
@@ -79,9 +83,7 @@ function ReservationPostForm() {
                     : null
             }
             {
-                error !== ''
-                ? <ErrorMessage text={error} />
-                : null
+                error && <ErrorMessage text={error} />
             }
             <CustomButton type="submit" value="Подтвердить" onClickHook={postEmailReservation} />
         </>

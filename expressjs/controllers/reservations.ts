@@ -49,8 +49,6 @@ export class ReservationController {
         const query = await this.reservationCRUDService
             .getSingleFullInfo(req.user.id, req.user.id_role, idReservation)
 
-        console.log(query)
-
         if (isInnerErrorInterface(query)) {
             res.status(query.code).send(<ErrorInterface>{
                 message: query.message

@@ -57,8 +57,14 @@ const sessionController = new SessionController(
 
 sessionsRouter.get('/play/:idPlay', sessionController.getSessionsByPlay.bind(sessionController))
 sessionsRouter.get('/:idSession/slots', 
-    //basicAuthMiddleware, 
+    basicAuthMiddleware, 
     sessionController.getSlotsForSessions.bind(sessionController))
+
+sessionsRouter.get(
+    "/:idSession/slots/polling", 
+    basicAuthMiddleware,
+    sessionController.getSlotsLongPolling.bind(sessionController)    
+)
 
 sessionsRouter.get('/filter', sessionController.getFilteredSessions.bind(sessionController))
 sessionsRouter.get('/filter/setup', sessionController.getSessionFilterOptions.bind(sessionController))

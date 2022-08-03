@@ -33,18 +33,18 @@ export class SlotsEventEmitter implements ISlotsEventEmitter {
     }
 
     public connectSession(idSession: number, res: Response) {
-        this.eventEmitter.on(`getSlots-${idSession}`, async (idSession: number) => {
-            try {
-                console.log('on')
-                const result = await this.sessionCRUDService.getSlots(idSession)
+        this.eventEmitter.once(`getSlots-${idSession}`, (idSession: number) => {
+            this.sessionCRUDService.getSlots(idSession)
+            .then(result => {
                 if (isInnerErrorInterface(result)) {
-                    res.end()
+                    res.status(result.code).send(result.message)
                     return
                 }
-                res.write(`data:${result}\n\n`)
-            } catch(e) {
-                console.log(e)
-            }
+                res.status(200).send(result)
+            })
+            .catch(e => { res.status(500).send(<ErrorInterface>{
+                message: e
+            }) })
             
         })
     }
