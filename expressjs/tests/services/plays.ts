@@ -5,13 +5,14 @@ import { PlayFetchingModel } from "../../services/plays"
 import { PlayBaseInterface, PlayQueryInterface, PlayWithPosterInterface } from "../../interfaces/plays"
 import { PlayMockModel } from "../mockModels/plays";
 import { FileStreamHelper } from "../../utils/fileStreams";
+import { KnexConnection } from "../../knex/connections";
 
 
 export function PlayServiceTests() {
     describe("Play Service", () => {
         const playMockModel = new PlayMockModel()
         const fileStreamHelper = new FileStreamHelper()
-        const playService = new PlayFetchingModel(playMockModel, fileStreamHelper)
+        const playService = new PlayFetchingModel(KnexConnection, playMockModel, fileStreamHelper)
 
         describe("Get All With Poster", function() {
             it("should be OK", async function() {

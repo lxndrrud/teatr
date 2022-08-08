@@ -1,5 +1,5 @@
 import { assert, should, expect } from "chai";
-import { agent as request } from "supertest";
+import { agent as request, Response } from "supertest";
 import { UserLoginInterface, UserRegisterInterface } from "../../interfaces/users";
 import { KnexConnection } from "../../knex/connections";
 
@@ -90,6 +90,8 @@ export function UsersControllerTests() {
                 expect(response.status).to.equal(400)
             })
         })
+
+        
 
         describe("POST /expressjs/users/", function() {
             const registerLink = `/expressjs/users/`
@@ -373,5 +375,25 @@ export function UsersControllerTests() {
                 expect(response.body.user).to.not.haveOwnProperty("token")
             })
         })
+
+        describe("POST /expressjs/users/restore/password", function() {
+            const link = '/expressjs/users/restore/password'
+            const okEmail = 'lxndrrud@yandex.ru'
+
+            it("should be OK ", function() {
+                request(this.server)
+                .post(link)
+                .send({
+                    email: okEmail
+                })
+                .then(response => {
+                    setTimeout(() => {
+                        expect(response.status).to.equal(200)
+                    })
+                })
+
+            })
+        })
+        
     })
 }

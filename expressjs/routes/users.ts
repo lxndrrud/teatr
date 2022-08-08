@@ -8,6 +8,9 @@ import { RoleDatabaseModel } from "../dbModels/roles";
 import { UserInfrastructure } from "../infrastructure/User.infra"
 import { KnexConnection } from "../knex/connections";
 import { UserGuard } from "../guards/User.guard";
+import { CodeGenerator } from "../utils/code";
+import { EmailSender } from "../utils/email";
+import { Hasher } from "../utils/hasher";
 
 export const usersRouter = Router()
 const userController = new UserController(
@@ -16,7 +19,10 @@ const userController = new UserController(
         new UserDatabaseModel(KnexConnection), 
         new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
         new UserInfrastructure(new UserDatabaseModel(KnexConnection)),
-        new UserGuard()
+        new UserGuard(),
+        new CodeGenerator(),
+        new EmailSender(),
+        new Hasher()
     )
 )
 
@@ -44,4 +50,8 @@ usersRouter.post("/edit/password",
 usersRouter.post("/edit/personal", 
     basicAuthMiddleware,
     userController.changePersonalInfo.bind(userController)
+)
+
+usersRouter.post('/restore/password', 
+    userController.restorePasswordByEmail.bind(userController)
 )

@@ -13,6 +13,14 @@ export interface IReservationInfrastructure {
 
     calculateReservationTotalCost(slots: SlotInterface[]): number
 
+    generateConfirmationMailMessage(reservationInfo: {
+        id_reservation: number;
+        confirmation_code: string;
+        play_title: string;
+        timestamp: string;
+        auditorium_title: string;
+    }): string
+
     checkUserHasReservedSession(idUser: number, idSession: number): Promise<boolean>
     
 }
@@ -89,6 +97,20 @@ export class ReservationInfrastructure implements IReservationInfrastructure {
             totalCost += slot.price
         }
         return totalCost
+    }
+
+    public generateConfirmationMailMessage(reservationInfo: {
+        id_reservation: number,
+        confirmation_code: string,
+        play_title: string, 
+        timestamp: string, 
+        auditorium_title: string
+    }) {
+        return `Номер вашей брони (понадобится на кассе): ${reservationInfo.id_reservation.toString()}\n` +
+            `Код подтверждения вашей брони: ${reservationInfo.confirmation_code}\n` +
+            `Название представления: ${reservationInfo.play_title}\n` +
+            `Дата и время представления: ${reservationInfo.timestamp}\n` +
+            `Название зала: ${reservationInfo.auditorium_title}\n`
     }
 
     /**

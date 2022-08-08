@@ -7,6 +7,10 @@ import { KnexConnection } from "../../knex/connections"
 import { RoleMockModel } from "../mockModels/roles"
 import { UserMockModel } from "../mockModels/users"
 import { UserInfrastructure } from "../../infrastructure/User.infra"
+import { UserGuard } from "../../guards/User.guard"
+import { CodeGenerator } from "../../utils/code"
+import { EmailSender } from "../../utils/email"
+import { Hasher } from "../../utils/hasher"
 
 
 export function UserServiceTests() {
@@ -15,9 +19,14 @@ export function UserServiceTests() {
         const roleFetchingInstance = new RoleFetchingModel(new RoleMockModel())
         const userInfrastructure = new UserInfrastructure(userMockModel)
         const userService = new UserFetchingModel(
+            KnexConnection,
             userMockModel, 
             roleFetchingInstance,
-            userInfrastructure)
+            userInfrastructure, 
+            new UserGuard(),
+            new CodeGenerator(),
+            new EmailSender(), 
+            new Hasher())
 
         describe("Create User", function() {
             const userPayload = userMockModel.userPayload

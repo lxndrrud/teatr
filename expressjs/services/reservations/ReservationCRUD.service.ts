@@ -265,10 +265,17 @@ export class ReservationCRUDService implements IReservationCRUDService {
 
         // Отправка письма на почту с информацией о сеансе и кодом подтверждения
         if (!userRole.can_make_reservation_without_confirmation)
-            this.emailSender.sendMail(user.email, reservation.confirmation_code,
-                reservation.id, sessionQuery.play_title, sessionQuery.timestamp,
-                sessionQuery.auditorium_title)
-        
+            this.emailSender.send(
+                user.email, 
+                "Бронь в театре на Оборонной", 
+                this.reservationInfrastructure.generateConfirmationMailMessage({
+                    id_reservation: reservation.id, 
+                    confirmation_code: reservation.confirmation_code,
+                    play_title: sessionQuery.play_title, 
+                    timestamp: sessionQuery.timestamp,
+                    auditorium_title: sessionQuery.auditorium_title
+                })
+            )
         return {
             id: reservation.id,
             id_session: sessionQuery.id,

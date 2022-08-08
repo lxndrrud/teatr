@@ -18,7 +18,6 @@ export function PlaysControllerTests () {
                     password: "123456"
                 })
             this.token = tokenResponse.body.token
-            console.log(tokenResponse.status, tokenResponse.body)
         })
 
         describe("GET /expressjs/plays/", function() {
@@ -26,7 +25,7 @@ export function PlaysControllerTests () {
             it("should be status 200 with info", async function() {
                 const response = await request(this.server).get(getPlaysLink)
                 expect(response.status).to.equal(200)
-                expect(response.body.length).to.equal(2)
+                expect(response.body.length).to.be.greaterThan(0)
                 expect(response.body[0]).to.eql({
                     id: 1,
                     title: 'Спектакль 1',

@@ -1,11 +1,13 @@
 import { UserModel } from "../dbModels/users";
-import { hash, compareSync } from 'bcryptjs';
 import { IExtendedUser, IUserChangePassword, IUserPersonalInfo, UserBaseInterface, UserInterface, UserLoginInterface, UserRegisterInterface, UserRequestOption, UserStrategy } from "../interfaces/users";
 import { RoleService } from "./roles";
 import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { IUserInfrastructure } from "../infrastructure/User.infra";
 import { Knex } from "knex";
 import { IUserGuard } from "../guards/User.guard";
+import { CodeGenerator } from "../utils/code";
+import { EmailSender } from "../utils/email";
+import { Hasher } from "../utils/hasher";
 
 
 export interface UserService {
@@ -43,6 +45,7 @@ export interface UserService {
     changePassword(user: UserRequestOption, passwordInfo: IUserChangePassword): 
     Promise<InnerErrorInterface | undefined>
     changePersonalInfo(user: UserRequestOption, personalInfo: IUserPersonalInfo): Promise<InnerErrorInterface | undefined>
+    restorePasswordByEmail(email: string): Promise<InnerErrorInterface | undefined>
 }
 
 export class UserFetchingModel implements UserService {
@@ -51,19 +54,28 @@ export class UserFetchingModel implements UserService {
     protected roleFetchingInstance
     protected userInfrastructure
     protected userGuard
+    protected codeGenerator
+    protected emailSender
+    protected hasher
 
     constructor(
         connectionInstance: Knex<any, unknown[]>,
         userModelInstance: UserModel, 
         roleServiceInstance: RoleService,
         userInfrastructureInstance: IUserInfrastructure,
-        userGuardInstance: IUserGuard
+        userGuardInstance: IUserGuard,
+        codeGeneratorInstance: CodeGenerator,
+        emailSenderInstance: EmailSender,
+        hasherInstance: Hasher
     ) {
         this.connection = connectionInstance
         this.userModel = userModelInstance
         this.roleFetchingInstance = roleServiceInstance
         this.userInfrastructure = userInfrastructureInstance
         this.userGuard = userGuardInstance
+        this.codeGenerator = codeGeneratorInstance
+        this.emailSender = emailSenderInstance
+        this.hasher = hasherInstance
     }
 
     async createUser(payload: UserRegisterInterface) {
@@ -94,7 +106,7 @@ export class UserFetchingModel implements UserService {
         // Транзакция: создать пользователя, затем дать ему токен
         const trx = await this.connection.transaction()
         try {
-            fetchedRequestBody.password = await hash(payload.password, 10)
+            fetchedRequestBody.password = await this.hasher.hash(payload.password)
             let user: UserInterface = (await this.userModel.insert(trx, fetchedRequestBody))[0]
             const withTokenUser = await this.userInfrastructure.generateToken(trx, user)
             if (isInnerErrorInterface(withTokenUser)) {
@@ -126,7 +138,7 @@ export class UserFetchingModel implements UserService {
         }
 
         // Проверка пароля
-        if (!(user && compareSync(payload.password, user.password))) {
+        if (!(user && this.hasher.check(payload.password, user.password))) {
             return <InnerErrorInterface>{
                 code: 401,
                 message: 'Пользователь с такими входными данными не найден!'
@@ -191,7 +203,7 @@ export class UserFetchingModel implements UserService {
             }
         }
         // Проверка пароля
-        if (!(user && compareSync(payload.password, user.password))) {
+        if (!(user && this.hasher.check(payload.password, user.password))) {
             return <InnerErrorInterface>{
                 code: 401,
                 message: 'Пользователь с такими входными данными не найден!'
@@ -320,7 +332,7 @@ export class UserFetchingModel implements UserService {
         }
 
         // Проверка на совпадение старого пароля с паролем из базы
-        if (!compareSync(passwordInfo.oldPassword, userInfo.password)) {
+        if (!this.hasher.check(passwordInfo.oldPassword, userInfo.password)) {
             return <InnerErrorInterface>{
                 code: 400,
                 message: "Старый пароль введён неверно!"
@@ -330,7 +342,7 @@ export class UserFetchingModel implements UserService {
         // Шифрование нового пароля
         let newPasswordHash: string
         try {
-            newPasswordHash = await hash(passwordInfo.newPassword, 10)
+            newPasswordHash = await this.hasher.hash(passwordInfo.newPassword)
         } catch(e) {
             console.error(e)
             return <InnerErrorInterface>{
@@ -389,6 +401,67 @@ export class UserFetchingModel implements UserService {
             return <InnerErrorInterface>{
                 code: 500,
                 message: 'Внутренняя ошибка при изменении личных данных пользователя!'
+            }
+        }
+    }
+
+    /**
+     * * Логика восстановления пароля при помощи почты
+     */
+    async restorePasswordByEmail(email: string) {
+        // Найти пользователя по почте
+        let user: IExtendedUser
+        try {
+            user = <IExtendedUser> await this.userModel.get({ email })
+        } catch(e) {
+            return <InnerErrorInterface>{
+                code: 500, 
+                message: "Внутренняя ошибка при поиске пользователя!"
+            }
+        }
+        // Пользователь не найден
+        if (!user) {
+            return <InnerErrorInterface>{
+                code: 404,
+                message: "Пользователь с указанной почтой не найден!"
+            }
+        }
+        // Проверка роли
+        let visitor = await this.roleFetchingInstance.getVisitorRole()
+        if (isInnerErrorInterface(visitor)) {
+            return <InnerErrorInterface>{
+                code: visitor.code, 
+                message: "Внутренняя ошибка!"
+            }
+        }
+        if (visitor.id !== user.id_role) {
+            return <InnerErrorInterface> {
+                code: 403, 
+                message: "Данная функция вам не доступна! Пожалуйста, обратитесь к администратору-программисту."
+            }
+        }
+        // Сгенерить новый пароль,сохранить его и отправить письмо с паролем на почту
+        const newPassword = this.codeGenerator.generateCode()
+        console.log(newPassword)
+        const trx = await this.connection.transaction()
+        try {
+            const newPasswordHashed = await this.hasher.hash(newPassword)
+            await this.userModel.update(trx, user.id, <UserInterface>{
+                password: newPasswordHashed
+            })
+            await trx.commit()
+            this.emailSender.send(
+                user.email, 
+                `Восстановление пароля на "Брони на Оборонной"`, 
+                this.userInfrastructure.generateRestorePasswordEmailMessage(
+                    newPassword
+                ))
+        } catch( e) {
+            console.error(e)
+            await trx.rollback()
+            return <InnerErrorInterface>{
+                code: 500, 
+                message: 'Внутренняя ошибка во время восстановления пароля!'
             }
         }
     }
