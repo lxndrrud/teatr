@@ -28,7 +28,7 @@ export interface IReservationCRUDService {
     getReservations(user: UserRequestOption): Promise<InnerErrorInterface | ReservationInterface[]>
 
     deleteReservation(user: UserRequestOption, idReservation: number): 
-    Promise<InnerErrorInterface | undefined>
+    Promise<number | InnerErrorInterface>
 }
 
 
@@ -320,6 +320,8 @@ export class ReservationCRUDService implements IReservationCRUDService {
      * * Удаление брони
      */
     async deleteReservation(user: UserRequestOption, idReservation: number) {
+        let idSession: number = 0
+
         // Проверка-получение роли
         let userRole = await this.roleService.getUserRole(user.id, user.id_role)
         
@@ -344,6 +346,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
                 message: 'Запись не найдена!'
             }
         }
+        idSession = reservation.id_session
 
         // Проверка на владельца брони
         const canUserDelete = this.reservationGuard.canUserDelete(reservation, user.id, userRole)
@@ -390,6 +393,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
             await this.reservationModel.deleteReservationsSlots(trx, idReservation)
             await this.reservationModel.delete(trx, idReservation)
             await trx.commit()
+            return idSession
         } catch (e) {
             console.log(e)
             await trx.rollback()

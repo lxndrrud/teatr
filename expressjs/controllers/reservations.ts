@@ -189,14 +189,16 @@ export class ReservationController {
             return
         }
 
-        const response = await this.reservationCRUDService.deleteReservation(req.user, idReservation)
+        const idSession = await this.reservationCRUDService.deleteReservation(req.user, idReservation)
 
-        if (isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
+        if (isInnerErrorInterface(idSession)) {
+            res.status(idSession.code).send(<ErrorInterface>{
+                message: idSession.message
             })
             return
         }
+
+        this.slotsEventEmitter.emitSession(idSession)
 
         res.status(200).end()
     }
