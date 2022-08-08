@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import BaseForm from '../BaseForm/BaseForm'
 import CustomInput from "../../UI/CustomInput/CustomInput"
 import CustomButton from "../../UI/CustomButton/CustomButton"
+import CustomLink from "../../UI/CustomLink/CustomLink"
 import { useDispatch, useStore } from 'react-redux'
 //import { useRouter } from 'next/router'
 import { useNavigate } from 'react-router-dom'
@@ -71,6 +72,10 @@ function LoginForm({ isAdmin=false }) {
                 ? <ErrorMessage text={error} />
                 : null
             }
+            <CustomLink
+                destination="/user/restore/password"
+                text="Восстановить пароль"
+            />
 
             <CustomButton type="submit" value="Подтвердить" 
                 onClickHook={sendPostRequest}

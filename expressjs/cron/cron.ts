@@ -14,11 +14,12 @@ export const processTime = () => {
 export const everyMinute = () => {
     console.log(`1m cron ${moment()}`)
     processReservations()
+    processSessions()
+
 }
 
 export const everyMinuteOnWorkHours = () => {
     console.log(`1m cron work hours ${moment()}`)
-    processSessions()
 }
 
 export const everyDay = () => {

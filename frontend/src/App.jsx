@@ -21,6 +21,7 @@ import DeleteReservationPage from "./pages/control/delete/[reservationid]"
 import PaymentReservationPage from "./pages/control/payment/[reservationid]"
 import EditUserInfoPage from "./pages/user/editPersonalInfo"
 import EditUserPasswordPage from "./pages/user/editPassword"
+import RestorePasswordPage from "./pages/user/restore/restorePassword"
 
 function App() {
   return (
@@ -93,6 +94,9 @@ function App() {
                 </LoginRoute>
               }/>
             </Route> 
+            <Route path="restore">
+              <Route path="password" element={<RestorePasswordPage />} />
+            </Route>
           </Route>
           <Route path="/reservation-admin" >
             <Route path="" element={

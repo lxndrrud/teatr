@@ -6,7 +6,7 @@ import CustomButton from '../../UI/CustomButton/CustomButton'
 import CustomInput from "../../UI/CustomInput/CustomInput"
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { useNavigate } from 'react-router-dom'
-import { changePersonalInfo, errorSetDefault, successSetDefault } from '../../../store/actions/userAction'
+import { changePersonalInfo, errorSetDefault} from '../../../store/actions/userAction'
 
 
 function UserEditPersonalInfoForm() {
@@ -49,7 +49,7 @@ function UserEditPersonalInfoForm() {
             let errorStore = store.getState().user.error
             if (errorStore) setError(errorStore) 
         })
-        .then(dispatch(errorSetDefault()))
+        .then(dispatch(errorSetDefault())) 
         .then(() => {
             if (!error) navigate('/user/personalArea')
         })

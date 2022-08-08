@@ -16,7 +16,7 @@ export default function SchedulePage() {
 
     return (
         <div>
-            <MainLayout title="Расписание">
+            <MainLayout title="Афиша">
                 <SessionFilter />
                 <SessionList />
             </MainLayout>

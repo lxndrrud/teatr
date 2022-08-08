@@ -1,4 +1,4 @@
-import { LOG_IN, LOG_OUT, REGISTER, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, SUCCESS_USER_SET_DEFAULT } from "../types";
+import { LOG_IN, LOG_OUT, REGISTER, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, SUCCESS_USER_SET_DEFAULT, SET_USER_SUCCESS } from "../types";
 
 export const register = (email, password, 
 firstname=undefined, middlename=undefined, lastname=undefined) => async dispatch => {
@@ -176,6 +176,36 @@ export const changePersonalInfo = (token, personalInfo) => async dispatch => {
             throw respBody.message
         }
     } catch(e) {
+        dispatch({
+            type: ERROR_USER,
+            payload: e
+        })
+    }
+}
+
+export const restorePassword = (email) => async dispatch => {
+    try {
+        const response = await fetch('/expressjs/users/restore/password', {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email })
+        })
+
+        if (response.status === 200) {
+            dispatch({
+                type: SET_USER_SUCCESS,
+                success_message: "Временный пароль был отправлен на почту!"
+            })
+        } 
+        else {
+            let respBody = await response.json()
+            throw respBody.message
+        }
+
+    } catch (e) {
         dispatch({
             type: ERROR_USER,
             payload: e
