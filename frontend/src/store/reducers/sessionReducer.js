@@ -1,4 +1,4 @@
-import { CLEAR_SUCCESS_ERROR_SESSION, ERROR_SESSION, FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_BY_PLAY, FETCH_SESSION_FILTER_OPTIONS, FETCH_SLOTS, SUCCESS_SESSION } from "../types"
+import { CLEAR_SUCCESS_ERROR_SESSION, ERROR_SESSION, FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_BY_PLAY, FETCH_SESSION_FILTER_OPTIONS, FETCH_SLOTS,  SUCCESS_SESSION } from "../types"
 
 
 const defaultState = {
@@ -13,6 +13,7 @@ const defaultState = {
     */
     session: {},
     sessions: [],
+    paginatedSessions: [],
     slots: [],
     filterOptions: {},
     loading: false,
@@ -38,9 +39,8 @@ const sessionReducer = (state = defaultState, action) => {
             return {...state, error: action.payload}
         case SUCCESS_SESSION:
             return {...state, success: action.payload}
-        case CLEAR_SUCCESS_ERROR_SESSION: {
+        case CLEAR_SUCCESS_ERROR_SESSION: 
             return {...state, success: defaultState.success, error: defaultState.error}
-        }
         default:
             return state
     }
