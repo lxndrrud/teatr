@@ -1,8 +1,8 @@
 import MainLayout from "../../layouts/MainLayout/MainLayout"
-import PlayList from "../../components/Plays/PlayList/PlayList"
 import { fetchPlays } from "../../store/actions/playAction"
 import { useDispatch } from "react-redux"
 import { useEffect } from "react"
+import PlayPagination from "../../components/Pagination/PlayPagination/PlayPagination"
 
 export default function RepertoirePage() {
     const dispatch = useDispatch()
@@ -14,7 +14,7 @@ export default function RepertoirePage() {
     return (
     <div>
         <MainLayout title="Репертуар">
-            <PlayList />
+            <PlayPagination />
         </MainLayout>
     </div>
     )

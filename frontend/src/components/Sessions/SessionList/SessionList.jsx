@@ -5,7 +5,6 @@ import { useState } from 'react'
 import { useEffect } from 'react'
 
 export default function SessionList({ sessions }) {
-    console.log(sessions)
     /*
     let [items, setItems] = useState([])
     useEffect(() => {
@@ -24,9 +23,16 @@ export default function SessionList({ sessions }) {
 
     return (
         <div className={styles.sessions}>
-            {sessions && sessions.map(session => (
-                <SessionItem session={session} key={session.id} />
-            ))}
+            {sessions && sessions.length > 0 
+                ? 
+                    sessions.map(session => (
+                        <SessionItem session={session} key={session.id} />
+                    ))
+                : 
+                    <div className='flex flex-row justify-center'>
+                        Сеансы, удовлетворяющие Вашим условиям, не найдены...
+                    </div>
+            }
         </div>
     )
 }

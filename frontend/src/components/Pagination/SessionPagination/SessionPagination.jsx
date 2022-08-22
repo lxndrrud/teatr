@@ -9,13 +9,26 @@ function SessionPagination({ itemsPerPage=6 }) {
 
     let [activePage, setActivePage] = useState(1)
     let [currentItems, setCurrentItems] = useState(null)
-    let [lastPage, setLastPage] = useState(Math.ceil(sessions.length / itemsPerPage))
+    let [lastPage, setLastPage] = useState(
+        sessions && sessions.length > 0 
+            ? 
+                Math.ceil(sessions.length / itemsPerPage)
+            : 
+                1)
     useEffect(() => {
+        setLastPage(
+        sessions && sessions.length > 0 
+            ? 
+                Math.ceil(sessions.length / itemsPerPage)
+            : 
+                1)
         if (sessions.length > 0) {
             let copy = sessions.length > itemsPerPage
                 ? sessions.slice((activePage-1) * itemsPerPage, activePage * itemsPerPage)
                 : sessions.slice()
             setCurrentItems(copy)
+        } else {
+            setCurrentItems([])
         }
     }, [sessions, activePage])
     return (

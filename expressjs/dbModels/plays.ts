@@ -81,6 +81,7 @@ export class PlayDatabaseModel extends DatabaseModel implements PlayModel {
             .join(`${playsImages} as pi`, 'pi.id_play', 'p.id')
             .join(`${images} as i`, 'i.id', 'pi.id_image')
             .join(`${sessions} as s`, 's.id_play', 'p.id')
+            .distinct()
     }
 
     getSingleWithPoster(payload: PlayQueryInterface) {
