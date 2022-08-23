@@ -1,21 +1,22 @@
-import styles from "./PlayDetail.module.css"
 import CardImage from "../../UI/Images/CardImage/CardImage"
-import SessionList from "../../Sessions/SessionList/SessionList"
+import SessionPagination from '../../Pagination/SessionPagination/SessionPagination'
+import { useSelector } from "react-redux"
 
 
 
-export default function PlayDetail({ play, sessions, images}) {
+export default function PlayDetail({ images}) {
+    const play = useSelector(state => state.play.play)
 
     return (
-        <div className={styles.container}>
-            <div className={styles.subcontainer}>
+        <div className="flex flex-col w-[100%]">
+            <div className="flex flex-col sm:flex-row w-[100%] justify-start">
                 <CardImage filepath={play.poster_filepath} altDescription={play.title} />
-                <h2 className={styles.playDescription}>{play.description}</h2>
+                <h2 className="ml-0 mt-3 sm:ml-[10%] sm:mt-0">{play.description}</h2>
             </div>
-            <div className={styles.sessionListContainer}>
-                <p className={styles.bold}>Сеансы</p>
-                <SessionList sessions={sessions} />
+            <div className="w-[100%] mt-3">
+                <SessionPagination itemsPerPage={3} />
             </div>
+            
         </div>
     )
     

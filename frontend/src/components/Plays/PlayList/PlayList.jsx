@@ -1,12 +1,9 @@
 import PlayItem from '../PlayItem/PlayItem'
-import styles from './PlayList.module.css'
-//import { useSelector } from 'react-redux'
 
 export default function PlayList({ plays }) {
-    //const plays = useSelector(state => state.play.plays)
 
     return (
-        <div className={styles.plays}>
+        <div className="flex flex-col sm:flex-row flex-wrap justify-center sm:justify-start align-items-center w-[100%]">
             {
             plays && plays.length > 0 
                 ?
@@ -15,7 +12,7 @@ export default function PlayList({ plays }) {
                     ))
                 : 
                     <div>
-                        Спектакли, удовлетворяющие Вашему запросу, не найдены...
+                        Доступные спектакли не найдены...
                     </div>
             }
         </div>

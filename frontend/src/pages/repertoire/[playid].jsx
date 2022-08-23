@@ -19,12 +19,11 @@ export default function PlayPage() {
     }, [dispatch])
 
     const play = useSelector(state => state.play.play)
-    const sessions = useSelector(state => state.session.sessions)    
 
     return (
         <div>
             <MainLayout title={play.title}>
-                <PlayDetail play={play} sessions={sessions}/>
+                <PlayDetail />
             </MainLayout>
         </div>
     )
