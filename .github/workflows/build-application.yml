@@ -1,4 +1,4 @@
-name: docker-compose integration testing backend with database
+name: Building frontend and backend
 on: push
 jobs:
   test:
@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Up the containers
         run: docker-compose up -d --build
-      - name: Test
-        run: docker exec expressjs npm run test
-      - name: Build
+      - name: Build backend
         run: docker exec expressjs npm run build
+      - name: Build frontend
+        run: docker exec frontend npm run build
