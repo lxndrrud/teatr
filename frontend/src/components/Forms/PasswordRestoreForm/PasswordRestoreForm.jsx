@@ -17,14 +17,20 @@ function PasswordRestoreForm() {
     let [error, setError] = useState(null)
     function sendRestoreRequest(e) {
         e.preventDefault()
-
-        dispatch(restorePassword(email))
-        .then(() => {
-            let errorStore = store.getState().user.error
-            if (errorStore) setError(errorStore) 
-        })
-        .then(dispatch(errorSetDefault()))
-        .then(() => { if (!error) navigate('/login')} )
+        if (!email) {
+            setError('Вы не указали почту!')
+        } else {
+            dispatch(restorePassword(email))
+            .then(() => {
+                let errorStore = store.getState().user.error
+                if (errorStore) {
+                    setError(errorStore)
+                    dispatch(errorSetDefault()) 
+                } else {
+                    navigate('/login')
+                }
+            })
+        }
     }
     return (
         <BaseForm>
@@ -36,7 +42,7 @@ function PasswordRestoreForm() {
                 error && <ErrorMessage text={error} />
             }
             <CustomButton 
-                type="submit"
+                
                 value="Подтвердить"
                 onClickHook={sendRestoreRequest}
             />

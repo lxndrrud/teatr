@@ -3,12 +3,10 @@ import { useSelector } from 'react-redux'
 import ReservationItem from '../ReservationItem/ReservationItem'
 import styles from "./ReservationList.module.css"
 
-function ReservationList() {
-    const reservations = useSelector(state => state.reservation.reservations)
-    
+function ReservationList({ reservations }) {
     return (
         <div className={styles.reservationList} >
-            {reservations && reservations.map(reservation => (
+            {reservations && reservations.length > 0 && reservations.map(reservation => (
                     <ReservationItem reservation={reservation} key={reservation.id} />
                 ))
             }

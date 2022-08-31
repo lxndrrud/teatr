@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import Select from '../../UI/Select/Select'
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import CustomInput from "../../UI/CustomInput/CustomInput"
-import styles from "./ReservationFilter.module.css"
 import { useDispatch, useSelector} from 'react-redux'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { fetchFilteredReservations, fetchReservationFilterOptions } from '../../../store/actions/reservationAction'
@@ -101,7 +100,11 @@ function ReservationFilter() {
     */
 
     return (
-        <div className={styles.container}>
+        <div className="mx-auto p-2 bg-[#eeeeee]
+                w-[max-content] sm:w-[50%] lg:w-[1000px] 
+                flex flex-col sm:flex-row flex-wrap
+                justify-center items-center
+                rounded-lg">
             <InputDate onChange={syncDate} />
             <Select onChange={syncAuditoriumTitle}>
                 <option value="None">Все залы</option>
@@ -131,7 +134,7 @@ function ReservationFilter() {
             </Select>
 
             <CustomInput description={'Номер брони'} onChange={syncReservationNumber}
-                type="number" inputStyleClass={styles.inputNumber} min="1" />
+                type="number" inputStyleClass="w-[200px]" min="1" />
 
             {
                 error !== null
@@ -139,7 +142,7 @@ function ReservationFilter() {
                 : null
             }
 
-            <CustomButton type="submit" value="Фильтр" onClickHook={getFilteredReservations} />
+            <CustomButton value="Фильтр" onClickHook={getFilteredReservations} />
         </div>
     )
 }

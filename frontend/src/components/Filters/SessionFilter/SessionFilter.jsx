@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import CustomButton from "../../UI/CustomButton/CustomButton"
 import Select from '../../UI/Select/Select'
-import styles from './SessionFilter.module.css'
 import { fetchFilteredSessions, fetchSessionFilterOptions } from "../../../store/actions/sessionAction"
 import InputDate from '../../UI/InputDate/InputDate'
 
@@ -55,7 +54,10 @@ function SessionFilter() {
             </Select>
     */
     return (
-        <div className={styles.container}>
+        <div className="mx-auto p-2 w-[max-content] sm:w-[50%] lg:w-[900px]
+            bg-[#eeeeee] flex flex-col sm:flex-row
+            justify-center items-center
+            flex-nowrap sm:flex-wrap rounded-lg">
             <InputDate onChange={syncDate} />
             <Select onChange={syncAuditoriumTitle}>
                 <option value="None">Все залы</option>
@@ -74,8 +76,11 @@ function SessionFilter() {
                     </option>
                 ))}   
             </Select>
-            <CustomButton type="submit" value="Фильтр" 
-                onClickHook={getFilteredSessions}  styleClass={styles.filterButton}/>
+            <CustomButton 
+                value="Фильтр" 
+                onClickHook={getFilteredSessions}  
+                styleClass="flex mt-[1%]"
+            />
         </div>
     )
 }

@@ -1,6 +1,7 @@
 .customButton{
     display: flex;
     flex-wrap: nowrap;
+    justify-content: center;
     text-decoration: none;
     color: #F1FAEE;
     font-size: 22px;

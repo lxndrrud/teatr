@@ -1,6 +1,6 @@
 import MainLayout from "../../layouts/MainLayout/MainLayout"
 import ReservationFilter from "../../components/Filters/ReservationFilter/ReservationFilter"
-import ReservationList from "../../components/Reservations/ReservationList/ReservationList"
+import ReservationPagination from "../../components/Pagination/ReservationPagination/ReservationPagination"
 import { useDispatch, useSelector, useStore } from "react-redux"
 import { fetchReservations } from "../../store/actions/reservationAction"
 //import { useRouter } from "next/router"
@@ -30,7 +30,7 @@ export default function ControlIndexPage() {
         <div>
             <MainLayout title="Управление бронями">
                 <ReservationFilter />
-                <ReservationList />
+                <ReservationPagination />
             </MainLayout>
         </div>
     )
