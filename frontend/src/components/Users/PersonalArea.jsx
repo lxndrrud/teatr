@@ -1,12 +1,12 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import styles from "./PersonalArea.module.css"
 
 function PersonalArea() {
   let user = useSelector(state => state.user.user)
 
   return (
-    <div className={styles.container} >
+    <div className="w-[100%] sm:w-[600px] bg-[#eeeeee] p-2 border-2 border-solid
+      flex flex-col justify-center sm:justify-end rounded-lg w" >
       {
         !user
         ? 

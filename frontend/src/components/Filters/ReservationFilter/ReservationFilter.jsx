@@ -100,7 +100,8 @@ function ReservationFilter() {
     */
 
     return (
-        <div className="mx-auto p-2 bg-[#eeeeee]
+        <div className="sm:mx-auto p-2 bg-[#eeeeee]
+                border-2 border-solid
                 w-[max-content] sm:w-[50%] lg:w-[1000px] 
                 flex flex-col sm:flex-row flex-wrap
                 justify-center items-center
