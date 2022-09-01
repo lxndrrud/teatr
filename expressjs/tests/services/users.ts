@@ -1,6 +1,6 @@
 import { expect } from "chai"
 import { RoleFetchingModel } from "../../services/roles"
-import { UserFetchingModel } from "../../services/users"
+import { UserFetchingModel } from "../../services/users/UsersCRUD.service"
 import { RoleDatabaseInterface } from "../../interfaces/roles"
 import { UserBaseInterface, UserLoginInterface } from "../../interfaces/users"
 import { KnexConnection } from "../../knex/connections"

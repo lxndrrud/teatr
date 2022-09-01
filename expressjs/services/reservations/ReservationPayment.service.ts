@@ -6,7 +6,7 @@ import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/err
 import { ReservationConfirmationInterface, ReservationWithoutSlotsInterface } from "../../interfaces/reservations"
 import { UserRequestOption } from "../../interfaces/users"
 import { RoleService } from "../roles"
-import { UserService } from "../users"
+import { IUserCRUDService } from "../users/UsersCRUD.service"
 
 
 export interface IReservationPaymentService {

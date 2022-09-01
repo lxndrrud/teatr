@@ -2,13 +2,20 @@ import { Request, Response } from "express";
 import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface, isUserRegisterInterface, IUserChangePassword, IUserPersonalInfo } 
     from "../interfaces/users";
 import { ErrorInterface, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
-import { UserService } from "../services/users";
+import { IUserCRUDService } from "../services/users/UsersCRUD.service";
+import { IUserCSVService } from "../services/users/UsersCSV.service";
+import { UploadedFile } from "express-fileupload";
 
 export class UserController {
-    private userService
+    private userCRUDService
+    private userCSVService
 
-    constructor(userServiceInstance: UserService) {
-        this.userService = userServiceInstance
+    constructor(
+        userCRUDServiceInstance: IUserCRUDService,
+        userCSVServiceInstance: IUserCSVService
+    ) {
+        this.userCRUDService = userCRUDServiceInstance
+        this.userCSVService = userCSVServiceInstance
     }
 
     /**
@@ -24,7 +31,7 @@ export class UserController {
         }
         let requestBody: UserRegisterInterface = {...req.body}
 
-        const newUser = await this.userService.createUser(requestBody)
+        const newUser = await this.userCRUDService.createUser(requestBody)
 
         if (isInnerErrorInterface(newUser)) {
             res.status(newUser.code).send(<ErrorInterface>{
@@ -49,7 +56,7 @@ export class UserController {
         }
         let requestBody: UserLoginInterface = {...req.body}
     
-        const info = await this.userService.loginUser(requestBody)
+        const info = await this.userCRUDService.loginUser(requestBody)
     
         if (isInnerErrorInterface(info)) {
             res.status(info.code).send(<InnerErrorInterface>{
@@ -81,7 +88,7 @@ export class UserController {
         }
         let requestBody: UserLoginInterface = {...req.body}
     
-        const token = await this.userService.loginAdmin(requestBody)
+        const token = await this.userCRUDService.loginAdmin(requestBody)
     
         if (isInnerErrorInterface(token)) {
             res.status(token.code).send(<InnerErrorInterface>{
@@ -99,7 +106,7 @@ export class UserController {
      * * Получить всех пользователей с БД
      */
     async getAllUsers(req: Request, res: Response) {
-        const query = await this.userService.getAll()
+        const query = await this.userCRUDService.getAll()
 
         if (isInnerErrorInterface(query)) {
             res.status(query.code).send(<ErrorInterface>{
@@ -121,7 +128,7 @@ export class UserController {
             })
             return
         }
-        const query = await this.userService.getPersonalArea(req.user)
+        const query = await this.userCRUDService.getPersonalArea(req.user)
         if (isInnerErrorInterface(query)) {
             res.status(query.code).send(<ErrorInterface>{
                 message: query.message
@@ -150,7 +157,7 @@ export class UserController {
             })
             return
         }
-        const query = await this.userService.getUser(req.user, idUser)
+        const query = await this.userCRUDService.getUser(req.user, idUser)
         if (isInnerErrorInterface(query)) {
             res.status(query.code).send(<ErrorInterface>{
                 message: query.message
@@ -189,7 +196,7 @@ export class UserController {
             return
         }
 
-        const result = await this.userService.changePassword(req.user, passwordInfo)
+        const result = await this.userCRUDService.changePassword(req.user, passwordInfo)
         if (isInnerErrorInterface(result)) {
             res.status(result.code).send(<ErrorInterface>{
                 message: result.message
@@ -227,7 +234,7 @@ export class UserController {
             return
         }
 
-        const result = await this.userService.changePersonalInfo(req.user, personalInfo)
+        const result = await this.userCRUDService.changePersonalInfo(req.user, personalInfo)
         if (isInnerErrorInterface(result)) {
             res.status(result.code).send(<ErrorInterface>{
                 message: result.message
@@ -249,7 +256,7 @@ export class UserController {
             })
             return
         } 
-        const result = await this.userService.restorePasswordByEmail(email)
+        const result = await this.userCRUDService.restorePasswordByEmail(email)
         if (isInnerErrorInterface(result)) {
             res.status(result.code).send(<ErrorInterface>{
                 message: result.message
@@ -257,6 +264,28 @@ export class UserController {
             return
         }
         res.status(200).end()
+    }
+
+    async createUsersCSV(req: Request, res: Response) {
+        if (!req.user) {
+            res.status(401).send({
+                message: 'Вы не авторизованы'
+            })
+            return
+        }
+        if (!req.files) {
+            res.status(400).send(<ErrorInterface>{
+                message: "Запрос без прикрепленного csv-файла!"
+            })
+            return
+        }
+
+        const errors = await this.userCSVService
+            .createUsersCSV(req.user, <UploadedFile> req.files.csv)
+
+        res.status(200).send({
+            errors
+        })
     }
 
 }

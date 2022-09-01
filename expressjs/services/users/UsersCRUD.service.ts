@@ -1,16 +1,16 @@
-import { UserModel } from "../dbModels/users";
-import { IExtendedUser, IUserChangePassword, IUserPersonalInfo, UserBaseInterface, UserInterface, UserLoginInterface, UserRegisterInterface, UserRequestOption, UserStrategy } from "../interfaces/users";
-import { RoleService } from "./roles";
-import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
-import { IUserInfrastructure } from "../infrastructure/User.infra";
+import { UserModel } from "../../dbModels/users";
+import { IExtendedUser, IUserChangePassword, IUserPersonalInfo, UserBaseInterface, UserInterface, UserLoginInterface, UserRegisterInterface, UserRequestOption, UserStrategy } from "../../interfaces/users";
+import { RoleService } from "../roles";
+import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors";
+import { IUserInfrastructure } from "../../infrastructure/User.infra";
 import { Knex } from "knex";
-import { IUserGuard } from "../guards/User.guard";
-import { CodeGenerator } from "../utils/code";
-import { EmailSender } from "../utils/email";
-import { Hasher } from "../utils/hasher";
+import { IUserGuard } from "../../guards/User.guard";
+import { CodeGenerator } from "../../utils/code";
+import { EmailSender } from "../../utils/email";
+import { Hasher } from "../../utils/hasher";
 
 
-export interface UserService {
+export interface IUserCRUDService {
     createUser(payload: UserRegisterInterface): Promise<InnerErrorInterface | UserInterface>
     loginUser(payload: UserLoginInterface): Promise<InnerErrorInterface | {
         token: string;
@@ -48,7 +48,7 @@ export interface UserService {
     restorePasswordByEmail(email: string): Promise<InnerErrorInterface | undefined>
 }
 
-export class UserFetchingModel implements UserService {
+export class UserFetchingModel implements IUserCRUDService {
     protected connection
     protected userModel
     protected roleFetchingInstance

@@ -1,6 +1,6 @@
 import { ReservationController } from "../controllers/reservations";
 import { Router } from "express";
-import { basicAuthMiddleware } from "../middlewares/auth";
+import { AuthMiddleware } from "../middlewares/auth";
 import { ReservationDatabaseModel } from "../dbModels/reservations";
 import { RoleFetchingModel } from "../services/roles";
 import { RoleDatabaseModel } from "../dbModels/roles";
@@ -106,10 +106,18 @@ const reservationController = new ReservationController(
     )
 )
 
+const authMiddleware = new AuthMiddleware(
+    new UserInfrastructure(new UserDatabaseModel(KnexConnection))
+)
+
 
 reservationsRouter.route('/')
-    .get(basicAuthMiddleware, reservationController.getReservations.bind(reservationController))
-    .post(basicAuthMiddleware, reservationController.postReservation.bind(reservationController))
+    .get(
+        authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
+        reservationController.getReservations.bind(reservationController))
+    .post(
+        authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
+        reservationController.postReservation.bind(reservationController))
 /**
  * * Использовал ранее, так как не было проверки роли
  * reservationsRouter.get('/user', basicAuthMiddleware, getUserReservations)
@@ -117,21 +125,25 @@ reservationsRouter.route('/')
 
  reservationsRouter.get(
      '/filter/setup', 
-    basicAuthMiddleware, 
+    authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
     reservationController.getReservationFilterOptions.bind(reservationController))
  reservationsRouter.get(
     '/filter', 
-    basicAuthMiddleware, 
+    authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
     reservationController.getFilteredReservations.bind(reservationController))
 
 reservationsRouter.route('/:idReservation')
-    .get(basicAuthMiddleware, reservationController.getSingleReservation.bind(reservationController))
-    .delete(basicAuthMiddleware, reservationController.deleteReservation.bind(reservationController))
+    .get(
+        authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
+        reservationController.getSingleReservation.bind(reservationController))
+    .delete(
+        authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
+        reservationController.deleteReservation.bind(reservationController))
 reservationsRouter.put(
     '/:idReservation/confirm', 
-    basicAuthMiddleware, 
+    authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
     reservationController.confirmReservation.bind(reservationController))
 reservationsRouter.put(
     '/:idReservation/payment', 
-    basicAuthMiddleware, 
+    authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
     reservationController.paymentForReservation.bind(reservationController))

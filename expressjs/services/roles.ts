@@ -1,5 +1,5 @@
 import { RoleModel } from "../dbModels/roles";
-import { InnerErrorInterface } from "../interfaces/errors";
+import { InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { RoleDatabaseInterface } from "../interfaces/roles";
 
 
@@ -9,7 +9,7 @@ export interface RoleService {
     getVisitorRole(): Promise<RoleDatabaseInterface | InnerErrorInterface>
     getCashierRole(): Promise<RoleDatabaseInterface | InnerErrorInterface>
     getUserRole (idUser: number, idRole: number): Promise<InnerErrorInterface | RoleDatabaseInterface>
-
+    normalizeRole(shortRoleTitle: string): Promise<number | InnerErrorInterface>
 }
 
 
@@ -89,7 +89,38 @@ export class RoleFetchingModel implements RoleService {
                 message: 'Внутренняя ошибка сервера во время поиска роли!'
             }
         }
-        
+    }
+
+    async normalizeRole(shortRoleTitle: string) {
+        // Получить роли
+        const [
+            adminRole,
+            visitorRole,
+            cashierRole
+        ] = await Promise.all([
+            this.getAdminRole(),
+            this.getVisitorRole(),
+            this.getCashierRole()
+        ])
+        if (isInnerErrorInterface(adminRole)) {
+            return adminRole
+        }
+        if (isInnerErrorInterface(visitorRole)) {
+            return visitorRole
+        }
+        if (isInnerErrorInterface(cashierRole)) {
+            return cashierRole
+        }
+        return shortRoleTitle === 'А' 
+                ? adminRole.id
+                : shortRoleTitle === 'К' 
+                    ? cashierRole.id 
+                    : shortRoleTitle === 'П'
+                        ? visitorRole.id
+                        : <InnerErrorInterface> {
+                            code: 500,
+                            message: 'Роль неверно указана'
+                        }
     }
     
 }

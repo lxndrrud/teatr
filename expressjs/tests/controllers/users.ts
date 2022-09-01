@@ -1,4 +1,5 @@
 import { assert, should, expect } from "chai";
+import fs from 'fs'
 import { agent as request, Response } from "supertest";
 import { UserLoginInterface, UserRegisterInterface } from "../../interfaces/users";
 import { KnexConnection } from "../../knex/connections";
@@ -389,11 +390,29 @@ export function UsersControllerTests() {
                 .then(response => {
                     setTimeout(() => {
                         expect(response.status).to.equal(200)
-                    })
+                    }, 2000)
                 })
 
             })
         })
+
+        describe("POST /expressjs/users/csv/create", function() {
+            const link = '/expressjs/users/csv/create'
+
+            it('should be OK', async function() {
+                const response = await request(this.server)
+                    .post(link)
+                    .set({
+                        'auth-token': this.adminToken,
+                        'content-type': 'multipart/form-data'
+                    })
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/users/test_users_create_OK.csv"), 
+                        "test_users.csv")
+                expect(response.body).to.haveOwnProperty('errors').that.haveOwnProperty('length')
+                    .that.equals(0)
+            })
+        }) 
         
     })
 }

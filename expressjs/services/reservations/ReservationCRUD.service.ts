@@ -12,7 +12,7 @@ import { CodeGenerator } from "../../utils/code"
 import { EmailSender } from "../../utils/email"
 import { RoleService } from "../roles"
 import { SessionCRUDService } from "../sessions/SessionCRUD.service"
-import { UserService } from "../users"
+import { IUserCRUDService } from "../users/UsersCRUD.service"
 
 export interface IReservationCRUDService {
     getSingleFullInfo(idUser: number, idRole: number, idReservation: number): 

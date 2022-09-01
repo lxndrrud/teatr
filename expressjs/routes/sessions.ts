@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { SessionController } from "../controllers/sessions";
 import { SessionDatabaseModel } from "../dbModels/sessions";
-import { basicAuthMiddleware, staffAuthMiddleware } from "../middlewares/auth";
+import { AuthMiddleware } from "../middlewares/auth";
 import { SessionCRUDService } from "../services/sessions/SessionCRUD.service";
 import { SessionInfrastructure } from "../infrastructure/Session.infra";
 import { SessionCSVService } from "../services/sessions/SessionCSV.service";
@@ -10,6 +10,8 @@ import { SessionFilterService } from "../services/sessions/SessionFilter.service
 import { TimestampHelper } from "../utils/timestamp";
 import { KnexConnection } from "../knex/connections";
 import { SlotsEventEmitter } from "../events/SlotsEmitter";
+import { UserInfrastructure } from "../infrastructure/User.infra";
+import { UserDatabaseModel } from "../dbModels/users";
  
 export const sessionsRouter = Router();
 const sessionController = new SessionController(
@@ -55,14 +57,18 @@ const sessionController = new SessionController(
     )
 )
 
+const authMiddleware = new AuthMiddleware(
+    new UserInfrastructure(new UserDatabaseModel(KnexConnection))
+)
+
 sessionsRouter.get('/play/:idPlay', sessionController.getSessionsByPlay.bind(sessionController))
 sessionsRouter.get('/:idSession/slots', 
-    basicAuthMiddleware, 
+    authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
     sessionController.getSlotsForSessions.bind(sessionController))
 
 sessionsRouter.get(
     "/:idSession/slots/polling", 
-    basicAuthMiddleware,
+    authMiddleware.basicAuthMiddleware.bind(authMiddleware),
     sessionController.getSlotsLongPolling.bind(sessionController)    
 )
 
@@ -70,16 +76,26 @@ sessionsRouter.get('/filter', sessionController.getFilteredSessions.bind(session
 sessionsRouter.get('/filter/setup', sessionController.getSessionFilterOptions.bind(sessionController))
 
 sessionsRouter.route('/:idSession')
-    .get(basicAuthMiddleware, sessionController.getSingleSession.bind(sessionController))
-    .put(staffAuthMiddleware, sessionController.updateSession.bind(sessionController))
-    .delete(staffAuthMiddleware, sessionController.deleteSession.bind(sessionController))
+    .get(
+        authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
+        sessionController.getSingleSession.bind(sessionController))
+    .put(
+        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        sessionController.updateSession.bind(sessionController))
+    .delete(
+        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        sessionController.deleteSession.bind(sessionController))
 
 sessionsRouter.route('/')
     .get(sessionController.getSessions.bind(sessionController))
-    .post(staffAuthMiddleware, sessionController.postSession.bind(sessionController))
+    .post(
+        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        sessionController.postSession.bind(sessionController))
 
 sessionsRouter.route("/csv")
-    .post(staffAuthMiddleware, sessionController.createSessionsCSV.bind(sessionController))
+    .post(
+        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        sessionController.createSessionsCSV.bind(sessionController))
 
 
 
