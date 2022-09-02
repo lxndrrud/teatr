@@ -100,11 +100,11 @@ function ReservationFilter() {
     */
 
     return (
-        <div className="sm:mx-auto p-2 bg-[#eeeeee]
+        <div className="mx-0 [@media(min-width:500px)]:mx-auto p-2 bg-[#eeeeee]
                 border-2 border-solid
-                w-[max-content] sm:w-[50%] lg:w-[1000px] 
-                flex flex-col sm:flex-row flex-wrap
-                justify-center items-center
+                w-[max-content] lg:w-[1000px] 
+                flex flex-col lg:flex-row flex-wrap
+                justify-start sm:justify-center items-center
                 rounded-lg">
             <InputDate onChange={syncDate} />
             <Select onChange={syncAuditoriumTitle}>

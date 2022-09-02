@@ -1,5 +1,7 @@
 .select {
     display: flex;
+    width: 200px;
+    height: 45px;
     margin-top: 0;
     margin-right: 1.5%;
     background: white;

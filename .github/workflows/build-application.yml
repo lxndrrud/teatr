@@ -5,9 +5,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Up the containers
-        run: docker-compose up -d --build
+      #- name: Up the containers
+        #run: docker-compose up -d --build
       - name: Build backend
-        run: docker exec expressjs npm run build
+        run:  cd expressjs && npm run build
       - name: Build frontend
-        run: docker exec frontend npm run build
+        run: cd frontend && npm run build

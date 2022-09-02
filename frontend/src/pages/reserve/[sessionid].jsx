@@ -25,14 +25,15 @@ function SessionReservationPage() {
         //if(router.isReady) {
         if (!checkLogin(store)) {
             navigate('/login')
-            return
+        } else {
+            //const { sessionid } = router.query
+            if (idSession)
+                dispatch(fetchSession(token, idSession))
+                .then(dispatch(clearSlots()))
+                //.catch(() => router.push('/'))
+                .catch(() => navigate('/'))
         }
-        //const { sessionid } = router.query
-        if (idSession)
-            dispatch(fetchSession(token, idSession))
-            .then(dispatch(clearSlots()))
-            //.catch(() => router.push('/'))
-            .catch(() => navigate('/'))
+        
         //}  
     }, [navigate, dispatch, store, token])
 
