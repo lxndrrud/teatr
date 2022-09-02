@@ -399,6 +399,73 @@ export function UsersControllerTests() {
         describe("POST /expressjs/users/csv/create", function() {
             const link = '/expressjs/users/csv/create'
 
+            it("should fail in every row (3 errors in CSV-file)", async function() {
+                const response = await request(this.server)
+                    .post(link)
+                    .set({
+                        'auth-token': this.adminToken,
+                        'content-type': 'multipart/form-data'
+                    })
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/users/test_users_create_FAIL.csv"), 
+                        "test_users.csv")
+
+                expect(response.body).to.haveOwnProperty('errors').that.haveOwnProperty('length')
+                    .that.equals(3)
+            })
+
+            it("should return 403 status code for visitor", async function() {
+                const response = await request(this.server)
+                    .post(link)
+                    .set({
+                        'auth-token': this.visitorToken,
+                        'content-type': 'multipart/form-data'
+                    })
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/users/test_users_create_OK.csv"), 
+                        "test_users.csv")
+                
+                expect(response.statusCode).to.equal(403)
+            })
+
+            it("should return 403 status code for cashier", async function() {
+                const response = await request(this.server)
+                    .post(link)
+                    .set({
+                        'auth-token': this.cashierToken,
+                        'content-type': 'multipart/form-data'
+                    })
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/users/test_users_create_OK.csv"), 
+                        "test_users.csv")
+                
+                expect(response.statusCode).to.equal(403)
+            })
+
+            it("should fail because it`s sent without file", async function() {
+                const response = await request(this.server)
+                    .post(link)
+                    .set({
+                        'auth-token': this.adminToken,
+                        'content-type': 'multipart/form-data'
+                    })
+
+                expect(response.statusCode).to.equal(400)
+            })
+
+            it('should fail (403 status code) because it`s sent without token', async function() {
+                const response = await request(this.server)
+                    .post(link)
+                    .set({
+                        'content-type': 'multipart/form-data'
+                    })
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/users/test_users_create_OK.csv"), 
+                        "test_users.csv")
+
+                expect(response.statusCode).to.equal(403)
+            })
+
             it('should be OK', async function() {
                 const response = await request(this.server)
                     .post(link)
@@ -412,7 +479,7 @@ export function UsersControllerTests() {
                 expect(response.body).to.haveOwnProperty('errors').that.haveOwnProperty('length')
                     .that.equals(0)
             })
+            
         }) 
-        
     })
 }

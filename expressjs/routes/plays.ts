@@ -35,5 +35,5 @@ playsRouter.route('/:idPlay')
 
 playsRouter.route("/csv")
     .post(
-        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        authMiddleware.adminAuthMiddleware.bind(authMiddleware), 
         playController.createPlaysCSV.bind(playController))

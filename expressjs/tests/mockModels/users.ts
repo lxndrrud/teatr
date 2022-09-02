@@ -160,6 +160,11 @@ export class UserMockModel implements UserModel {
         return true
     }
 
+    checkIsUserAdmin(idUser: number, idRole: number) {
+        if (idRole === 3) return false
+        return true
+    }
+
     getUser(idUser: number) {
         this.usersList.forEach(user => {
             if (user.id === idUser) {

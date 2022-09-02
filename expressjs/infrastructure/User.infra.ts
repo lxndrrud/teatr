@@ -8,6 +8,7 @@ import { RoleDatabaseInterface } from "../interfaces/roles";
 
 export interface IUserInfrastructure {
     checkIsUserStaff(user: UserRequestOption): Promise<boolean | InnerErrorInterface>
+    checkIsUserAdmin(user: UserRequestOption): Promise<boolean | InnerErrorInterface>
     generateToken(trx: Knex.Transaction, user: UserInterface): Promise<any>
     createAction(
         trx: Knex.Transaction, 
@@ -55,15 +56,32 @@ export class UserInfrastructure implements IUserInfrastructure {
     }
 
     /**
-     * * Проверить явялется ли пользователь частью персонала театра
+     * * Проверить, является ли пользователь частью персонала театра
      */
     async checkIsUserStaff(user: UserRequestOption): Promise<boolean | InnerErrorInterface>  {
-        try{ 
+        try { 
             let check = await this.userModel.checkIsUserStaff(user.id, user.id_role)
             return check ? true : false
         } catch (e) {
+            console.log(e)
             return <InnerErrorInterface> {
                 code: 500,
+                message: 'Внутренняя ошибка во время авторизации: ' + e
+            }
+        }
+    }
+
+    /**
+     * * Проверить, является ли пользователь администратором
+     */
+    async checkIsUserAdmin(user: UserRequestOption) {
+        try {
+            let check = await this.userModel.checkIsUserAdmin(user.id, user.id_role)
+            return check ? true : false
+        } catch (e) {
+            console.log(e)
+            return <InnerErrorInterface> {
+                code: 500, 
                 message: 'Внутренняя ошибка во время авторизации: ' + e
             }
         }

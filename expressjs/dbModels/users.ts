@@ -1,7 +1,5 @@
 import { Knex } from "knex"
 import { IExtendedUser, UserBaseInterface, UserInterface, UserRequestOption } from "../interfaces/users"
-import { hash } from 'bcryptjs';
-import { sign } from 'jsonwebtoken'
 import { DatabaseModel } from "./baseModel";
 import { roles, userActions, users } from "./tables";
 import { UserActionBaseInterface } from "../interfaces/userActions";
@@ -40,6 +38,8 @@ export interface UserModel {
     generateToken(trx: Knex.Transaction, idUser: number, token: string): Knex.QueryBuilder | any
 
     checkIsUserStaff(idUser: number, idRole: number): Knex.QueryBuilder | any
+
+    checkIsUserAdmin(idUser: number, idRole: number): Knex.QueryBuilder | any
 
     getUser(idUser: number): Knex.QueryBuilder | any
 }
@@ -152,6 +152,16 @@ export class UserDatabaseModel extends DatabaseModel implements UserModel {
             .andWhere(builder => {
                 builder.whereNot('r.title', 'Посетитель')
             })
+            .first()
+    }
+
+    checkIsUserAdmin(idUser: number, idRole: number) {
+        return this.connection(`${users} as u`)
+            .select('u.*')
+            .join(`${roles} as r`, 'r.id', 'u.id_role')
+            .where('u.id', idUser)
+            .andWhere('u.id_role', idRole)
+            .andWhere('r.title', 'Администратор')
             .first()
     }
 

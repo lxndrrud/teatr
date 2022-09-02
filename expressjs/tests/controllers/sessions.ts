@@ -23,6 +23,22 @@ export function SessionsControllerTest() {
                     password: "123456"
                 })
             this.token = tokenResponse.body.token
+
+            const visitorTokenResponse = await request(this.server)
+                .post(this.authLink)
+                .send({
+                    email: "lxndrrud@yandex.ru",
+                    password: "123456"
+                })
+            this.visitorToken = visitorTokenResponse.body.token
+
+            const cashierTokenResponse = await request(this.server)
+                .post(this.authLink)
+                .send({
+                    email: "kassir@mail.ru",
+                    password: "123456"
+                })
+            this.cashierToken = cashierTokenResponse.body.token
         })
         describe("GET /expressjs/sessions/", function() {
             const getSessionsLink = `/expressjs/sessions`
@@ -306,6 +322,34 @@ export function SessionsControllerTest() {
                         "test_sessions.csv")
 
                 expect(response.statusCode).to.equal(400)
+            })
+
+            it('should return 403 status code for visitor', async function() {
+                const response = await request(this.server)
+                    .post(postSessionsCSVLink)
+                    .set({
+                        'auth-token': this.visitorToken,
+                        'content-type': 'multipart/form-data'
+                    })
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/sessions/test_sessions_OK.csv"), 
+                        "test_sessions.csv")
+
+                expect(response.statusCode).to.equal(403)
+            })
+
+            it('should return 403 status code for cashier', async function () {
+                const response = await request(this.server)
+                    .post(postSessionsCSVLink)
+                    .set({
+                        'auth-token': this.cashierToken,
+                        'content-type': 'multipart/form-data'
+                    })
+                    .attach("csv", 
+                    fs.readFileSync("/usr/src/app/tests/test_files/csv/sessions/test_sessions_OK.csv"), 
+                        "test_sessions.csv")
+
+                expect(response.statusCode).to.equal(403)
             })
 
             it("should fail because request is sent without file", async function() {

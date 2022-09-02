@@ -28,7 +28,7 @@ services:
   expressjs:
     build: 
       context: ./expressjs
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: expressjs
     depends_on:
       - postgres

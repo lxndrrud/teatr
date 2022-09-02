@@ -94,7 +94,7 @@ sessionsRouter.route('/')
 
 sessionsRouter.route("/csv")
     .post(
-        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        authMiddleware.adminAuthMiddleware.bind(authMiddleware), 
         sessionController.createSessionsCSV.bind(sessionController))
 
 
