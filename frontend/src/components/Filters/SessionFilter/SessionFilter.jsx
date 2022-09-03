@@ -61,7 +61,7 @@ function SessionFilter() {
             flex-nowrap sm:flex-wrap rounded-lg">
             <InputDate onChange={syncDate} />
             <Select onChange={syncAuditoriumTitle}>
-                <option value="None">Все залы</option>
+                <option key="0" value="None">Все залы</option>
                 {filterOptions.auditoriums && filterOptions.auditoriums.map(item => (
                     <option key={item.id} value={item.title}>
                         {item.title}
@@ -69,7 +69,7 @@ function SessionFilter() {
                 ))}
             </Select>
             <Select onChange={syncPlayTitle}>
-                <option value="None">Все спектакли</option>
+                <option key="0" value="None">Все спектакли</option>
 
                 {filterOptions.plays && filterOptions.plays.map(item => (
                     <option key={item.id} value={item.title}>

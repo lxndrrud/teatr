@@ -5,8 +5,8 @@ function PersonalArea() {
   let user = useSelector(state => state.user.user)
 
   return (
-    <div className="w-[100%] sm:w-[600px] bg-[#eeeeee] p-2 border-2 border-solid
-      flex flex-col justify-center sm:justify-end rounded-lg w" >
+    <div className="px-0 sm:p-4 w-[max-content] sm:w-[800px] bg-[#eeeeee] p-2 border-2 border-solid
+      flex flex-col whitespace-nowrap justify-center sm:justify-end rounded-lg w" >
       {
         !user
         ? 
@@ -16,7 +16,7 @@ function PersonalArea() {
             <tbody>
               <tr>
                 <td>Фамилия: </td>
-                <td>{user.lastname}</td>
+                <td className='text-'>{user.lastname}</td>
               </tr>
               <tr>
                 <td>Имя: </td>

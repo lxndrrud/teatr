@@ -17,13 +17,16 @@ function PersonalAreaPage() {
 
     return (
         <MainLayout title={'Личный кабинет'}>
-            <div className='w-[max-content] flex flex-col sm:flex-row justify-start items-space'>
-                <CustomLink destination={'/user/edit/personal'} 
-                    text="Редактировать личную информацию" />
-                <CustomLink destination={'/user/edit/password'} 
-                    text="Изменить пароль" />
+            <div className='ml-0 sm:ml-4 w-[100%] sm:w-[60%] flex flex-col sm:flex-row-reverse justify-between'>
+                <div className='w-[max-content] flex flex-col justify-start items-space'>
+                    <CustomLink destination={'/user/edit/personal'} 
+                        text="Изменить данные" />
+                    <CustomLink destination={'/user/edit/password'} 
+                        text="Изменить пароль" />
+                </div>
+                <PersonalArea />
             </div>
-            <PersonalArea />
+            
         </MainLayout>
     )
 }
