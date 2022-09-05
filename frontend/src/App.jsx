@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { AdminRoute, LoginRoute } from "./middlewares/auth"
 import "./styles/globals.css"
+import 'typeface-montserrat'
 
 import Home from "./pages/index"
 import LoginPage from "./pages/login"

@@ -17,8 +17,8 @@ function PersonalAreaPage() {
 
     return (
         <MainLayout title={'Личный кабинет'}>
-            <div className='ml-0 sm:ml-4 w-[100%] sm:w-[60%] flex flex-col sm:flex-row-reverse justify-between'>
-                <div className='w-[max-content] flex flex-col justify-start items-space'>
+            <div className='ml-0 md:ml-4 w-[100%] flex flex-col sm:flex-row-reverse justify-end'>
+                <div className='md:ml-10 w-[max-content] flex flex-col justify-start items-space'>
                     <CustomLink destination={'/user/edit/personal'} 
                         text="Изменить данные" />
                     <CustomLink destination={'/user/edit/password'} 

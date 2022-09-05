@@ -1,23 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import styles from './ButtonLink.module.css'
 
 function ButtonLink ({ destination, text, linkType}) {
     const fetchStyle = (type) => {
-        const red = styles.red,
-            blue = styles.blue,
-            green = styles.green,
-            buttonLink = styles.buttonLink
-        
+        const baseStyle = `p-2 flex flex-nowrap 
+        border-solid rounded-md justify-center`
         switch(type) {
             case "red":
-                return `${buttonLink} ${red}`
-            case "blue":
-                return `${buttonLink} ${blue}`
+                return baseStyle + ' bg-[#c1121f] hover:bg-[#780000] text-[#f1faee]'
+            case "purple":
+                return baseStyle + ' bg-[#ae2876] hover:bg-[#072538] text-[#f1faee]'
             case "green":
-                return `${buttonLink} ${green}`
+                return baseStyle + ' bg-[#4a7110] hover:bg-[#223b1b] text-[#f1faee]'
             default:
-                return `${buttonLink} ${blue}`
+                // on default return blue
+                return baseStyle + ' bg-[#1e3c66] hover:bg-[#072538] text-[#f1faee]'
         }
     } 
     

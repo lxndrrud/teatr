@@ -1,11 +1,8 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
-import styles from './CustomLink.module.css'
+import { Link } from 'react-router-dom';
 
-export default function CustomLink ({destination, text, style}) {
-    let styleString = `${styles.customLink}`
-    if (style) styleString += " " + style 
+export default function CustomLink ({destination, text }) {
     return (
-        <Link to={destination} className={styleString} >{text}</Link>
+        <Link to={destination} className="p-0 m-0 text-[24px] text-[purple] hover:underline" >{text}</Link>
     );
 };

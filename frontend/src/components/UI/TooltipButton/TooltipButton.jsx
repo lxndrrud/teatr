@@ -1,42 +1,20 @@
 import React, { useState } from 'react'
-import { Button } from "react-bootstrap"
-import styles from "./TooltipButton.module.css"
 
 
-function TooltipButton({ tooltipText, buttonText }) {
+function TooltipButton({ tooltipText }) {
     let [isTextHidden, setIsTextHidden] = useState(true)
     let style = isTextHidden 
-        ? `${styles.tooltipText} ${styles.hiddenText}` 
-        : styles.tooltipText
-    /*
-    <OverlayTrigger
-            placement="right"
-            overlay={
-                <Tooltip className={styles.tooltipText}>
-                    <strong>{tooltipText}</strong>
-                </Tooltip>
-            }
-        >
-            // Вставить сюда кнопку 
-    </OverlayTrigger>    
+        ? `hidden` 
+        : 'md:fixed ml-3 px-2 font-[18px] font-normal bg-[#f1faee] rounded-md '
 
-
-    {
-                !isTextHidden 
-                ? <span className={styles.tooltipText}>
-                    <strong>{tooltipText}</strong>
-                </span>
-                : null
-            }
-    */
     return (
-        <span className={styles.container}>
-            <Button variant="secondary" className={styles.tooltipButton} 
+        <span className="flex flex-row">
+            <button className="px-1 py-0 border border-solid border-[#cc6699] rounded-full" 
                 onClick={() => { setIsTextHidden(!isTextHidden) }}>
-                    {buttonText}
-            </Button>
+                    {isTextHidden ? '?' : '!'}
+            </button>
             <span className={style}>
-                <strong>{tooltipText}</strong>
+                {tooltipText}
             </span>
             
         </span>

@@ -15,15 +15,18 @@ services:
     ports:
       - 5432:5432
 
-  adminer:
-    image: adminer
+  pgadmin: 
+    image: dpage/pgadmin4:6.13
     restart: always
     ports:
-      - 8080:8080
+      - 9000:80
     depends_on:
       - postgres
     networks: 
       - customnetwork
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.ru
+      - PGADMIN_DEFAULT_PASSWORD=123456
 
   expressjs:
     build: 

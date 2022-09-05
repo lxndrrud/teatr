@@ -1,24 +1,21 @@
 import React from 'react'
-import styles from './CustomButton.module.css'
 
 function CustomButton({ onClickHook, buttonType, value}) {
     const fetchStyle = (type) => {
-        const red = styles.red,
-        blue = styles.blue,
-        green = styles.green,
-        customButton = styles.customButton
-
-        switch (type) {
+        const baseStyle = `p-2 flex flex-nowrap 
+        border-solid rounded-md justify-center`
+        switch(type) {
             case "red":
-                return `${customButton} ${red}`
+                return baseStyle + ' bg-[#c1121f] hover:bg-[#780000] text-[#f1faee]'
+            case "purple":
+                return baseStyle + ' bg-[#ae2876] hover:bg-[#072538] text-[#f1faee]'
             case "green":
-                return `${customButton} ${green}`
-            case "blue":
-                return `${customButton} ${blue}`
+                return baseStyle + ' bg-[#4a7110] hover:bg-[#223b1b] text-[#f1faee]'
             default:
-                return `${customButton} ${blue}`
+                // on default return purple
+                return baseStyle + ' bg-[#ae2876] hover:bg-[#072538] text-[#f1faee]'
         }
-    }
+    } 
     //<input {... props } onClick={ onClickHook } className={ fetchStyle(buttonType) } />
     return (
         

@@ -25,19 +25,6 @@ services:
     networks: 
       - customnetwork
 
-  pgadmin: 
-    image: dpage/pgadmin4:6.13
-    restart: always
-    ports:
-      - 9000:80
-    depends_on:
-      - postgres
-    networks: 
-      - customnetwork
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.ru
-      - PGADMIN_DEFAULT_PASSWORD=123456
-
   expressjs:
     build: 
       context: ./expressjs
