@@ -56,8 +56,8 @@ function SessionFilter() {
     return (
         <div className="mx-auto p-2 w-[max-content] sm:w-[50%] lg:w-[900px]
             border-2 border-solid
-            bg-[#eeeeee] flex flex-col sm:flex-row
-            justify-center items-center
+            bg-[#eeeeee] flex flex-col lg:flex-row
+            justify-between lg:justify-between items-center
             flex-nowrap sm:flex-wrap rounded-lg">
             <InputDate onChange={syncDate} />
             <Select onChange={syncAuditoriumTitle}>

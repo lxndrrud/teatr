@@ -15,6 +15,10 @@ function SessionPagination({ itemsPerPage=6 }) {
                 Math.ceil(sessions.length / itemsPerPage)
             : 
                 1)
+
+    useEffect(() => {
+        setActivePage(1)
+    }, [sessions])
     useEffect(() => {
         setLastPage(
         sessions && sessions.length > 0 

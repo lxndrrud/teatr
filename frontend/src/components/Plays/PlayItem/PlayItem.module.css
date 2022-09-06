@@ -35,12 +35,6 @@
     font-size: 26px;
 }
 
-.playDescription {
-    font-size: 22px;
-    word-wrap: normal;
-    margin-left: 10px;
-}
-
 
 @media (max-width: 1600px) {
     .playItem {

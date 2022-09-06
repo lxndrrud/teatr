@@ -18,11 +18,14 @@ export default function MainLayout({ children, title }) {
     return (
         <div className={styles.layout}>
             <NavBarController />
-            <main className={mainContentStyle} onClick={() => {
-                if (!isHidden) {
-                    dispatch(toggleNavbar())
-                }
-            }}>
+            <main className={mainContentStyle} 
+                /*onClick={() => {
+                    if (!isHidden) {
+                        dispatch(toggleNavbar())
+                    }
+                    }}
+                */
+            >
                 <h1 className={styles.title}>{title}</h1>
                 { children }
             </main>

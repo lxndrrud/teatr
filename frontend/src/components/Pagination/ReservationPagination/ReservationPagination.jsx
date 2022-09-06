@@ -15,6 +15,9 @@ function ReservationPagination({ itemsPerPage=6 }) {
             : 
                 1)
     useEffect(() => {
+        setActivePage(1)
+    }, [reservations])
+    useEffect(() => {
         setLastPage(
         reservations && reservations.length > 0 
             ? 

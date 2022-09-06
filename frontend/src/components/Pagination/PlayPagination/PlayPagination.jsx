@@ -1,9 +1,8 @@
 import React from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import PaginationButtons from '../PaginationButtons/PaginationButtons'
 import PlayList from '../../Plays/PlayList/PlayList'
-import { useEffect } from 'react'
 
 function PlayPagination({ itemsPerPage=6 }) {
     let plays = useSelector(state => state.play.plays)
@@ -16,6 +15,9 @@ function PlayPagination({ itemsPerPage=6 }) {
         : 
             1)
 
+    useEffect(() => {
+        setActivePage(1)
+    }, [plays])
     useEffect(() => {
         setLastPage(
             plays && plays.length > 0 

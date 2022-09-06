@@ -1,9 +1,8 @@
 import React from 'react'
-import styles from "./CardImage.module.css"
 
 function CardImage({ filepath, altDescription }) {
     return (
-        <img className={styles.cardImage} 
+        <img className="w-[200px] h-[250px] rounded" 
             src={filepath} alt={altDescription} />
     )
 }

@@ -1,5 +1,4 @@
 import React from 'react'
-import styles from "./IconSVG.module.css"
 
 function IconSVG({ data, height="24px", width="24px", viewBox="0 0 24 24", color="#000" }) {
     /*
@@ -7,7 +6,7 @@ function IconSVG({ data, height="24px", width="24px", viewBox="0 0 24 24", color
      viewBox: "0 0 24 24"
     */
     return (
-        <svg style={{height, width}} viewBox={viewBox} className={styles.icon} >
+        <svg style={{height, width}} viewBox={viewBox} className="float-left" >
             <path fill={color} d={data} />
         </svg>
     )
