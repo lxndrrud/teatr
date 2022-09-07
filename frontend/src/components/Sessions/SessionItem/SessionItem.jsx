@@ -11,8 +11,11 @@ export default function SessionItem({ session }) {
             <p className={styles.playTitle}>{session.play_title}</p>
             <div className={styles.rowContainer}>
                 <div className={styles.columnContainer}>
-                    <CardImage filepath={ session.poster_filepath } 
-                        altDescription={`Здесь должен был быть постер спектакля "${session.play_title}"...`} />
+                    <div className="flex justify-center sm:justify-start">
+                        <CardImage filepath={ session.poster_filepath } 
+                            altDescription={`Здесь должен был быть постер спектакля "${session.play_title}"...`} />
+                    </div>
+                    
                 </div>
                 <div className={styles.columnContainer} style={{marginLeft: "10px", 
                                                                 justifyContent: "space-between"}}>

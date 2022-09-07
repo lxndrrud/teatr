@@ -7,7 +7,6 @@ import SlotsFieldSmallScene from "../../Slots/SlotsFieldSmallScene/SlotsFieldSma
 import React, { useEffect, useState } from 'react'
 //import { useRouter } from "next/router"
 import { useNavigate } from 'react-router-dom'
-import styles from "./ReservationPostForm.module.css"
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import axios from 'axios'
 
@@ -52,6 +51,7 @@ function ReservationPostForm() {
     const postEmailReservation = (e) => {
         e.preventDefault()
 
+        console.log("kek")
         // Отправить на backend запрос по почте
         dispatch(postReservation({
             token: token, 

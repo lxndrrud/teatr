@@ -3,8 +3,9 @@ import ReservationItem from '../ReservationItem/ReservationItem'
 
 function ReservationList({ reservations }) {
     return (
-        <div className="[@media(min-width:1250px)]:ml-[2%] w-[98%] flex flex-col [@media(min-width:1250px)]:flex-row 
-                        flex-wrap" >
+        <div className="lg:ml-[2%] w-[98%] 
+                        flex flex-col lg:flex-row 
+                        flex-wrap items-center sm:items-start" >
             {reservations && reservations.length > 0 
                 ? 
                     reservations.map(reservation => (

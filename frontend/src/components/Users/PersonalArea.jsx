@@ -5,8 +5,9 @@ function PersonalArea() {
   let user = useSelector(state => state.user.user)
 
   return (
-    <div className="px-0 sm:p-4 w-[max-content] sm:w-[800px] bg-[#eeeeee] border-2 border-solid
-      flex flex-col whitespace-nowrap justify-center rounded-lg" >
+    <div className="px-0 sm:p-4 w-[max-content] sm:w-[800px] 
+                    bg-[#eeeeee] border-2 border-solid
+                    flex flex-col whitespace-nowrap justify-center rounded-lg" >
       {
         !user
         ? 

@@ -3,10 +3,10 @@ import PlayItem from '../PlayItem/PlayItem'
 export default function PlayList({ plays }) {
 
     return (
-        <div className="[@media(min-width:1600px)]:ml-[5%] w-[95%] 
-                        flex flex-col [@media(min-width:1600px)]:flex-row flex-wrap 
-                        justify-center [@media(min-width:1600px)]:justify-start 
-                        items-center">
+        <div className="lg:ml-[5%] ml-3 sm:ml-0 w-[95%] 
+                        flex flex-col lg:flex-row flex-wrap 
+                        justify-center sm:justify-start 
+                        items-center sm:items-start">
             {
             plays && plays.length > 0 
                 ?

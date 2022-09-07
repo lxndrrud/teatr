@@ -25,7 +25,7 @@ function SlotsFieldMainAuditorium({ rows }) {
             <span className={styles.scene}>Сцена</span>
             <div className={styles.tableContainer}>
                 {parterRows && parterRows.map(row => (
-                    <div key={row.number} className={styles.tableRow}>
+                    <div key={row.id} className={styles.tableRow}>
                         <span className={styles.rowLabel}>{row.title} Ряд #{row.number}</span>
                         {row.seats.map(slot => (
                             <SlotItem key={slot.id} slotObject={slot} />
@@ -43,7 +43,7 @@ function SlotsFieldMainAuditorium({ rows }) {
                     ))}
                 </div>
                 {mainBalconyRows && mainBalconyRows.map(row => (
-                    <div key={row.number} className={styles.tableRow}>
+                    <div key={row.id} className={styles.tableRow}>
                         <span className={styles.rowLabel}>{row.title} Ряд #{row.number}</span>
                         {row.seats.map(slot => (
                             <SlotItem key={slot.id} slotObject={slot} />

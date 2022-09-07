@@ -13,8 +13,8 @@
     max-width: 100%;
     min-width: 10rem;
     height: 2rem;
-    font-family: Helvetica, sans-serif;
-    font-size: 28px;
+    font-family: inherit;
+    font-size: 20px;
     border-radius: 5px;
     border-color:  #E63946;
     border: 2px solid #E63946;
