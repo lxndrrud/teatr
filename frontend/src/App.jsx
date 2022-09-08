@@ -23,6 +23,7 @@ import PaymentReservationPage from "./pages/control/payment/[reservationid]"
 import EditUserInfoPage from "./pages/user/editPersonalInfo"
 import EditUserPasswordPage from "./pages/user/editPassword"
 import RestorePasswordPage from "./pages/user/restore/restorePassword"
+import UserCSVUploadingPage from "./pages/reservation-admin/csv/user"
 
 function App() {
   return (
@@ -124,6 +125,12 @@ function App() {
                   </AdminRoute>
                 } 
               />
+
+              <Route path='user/create' element={
+                  <AdminRoute>
+                    <UserCSVUploadingPage />
+                  </AdminRoute>
+              } />
               
             </Route>
           </Route>

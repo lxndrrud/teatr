@@ -79,6 +79,10 @@ export class UserCSVService implements IUserCSVService {
                 middlename: chunk['Отчество'] ? chunk['Отчество'] : undefined,
                 lastname: chunk['Фамилия'] ? chunk['Фамилия'] : undefined
             }
+
+            // TODO: Проверить в базе по почте
+            // const check = await this.userModel.getUser()
+
             const trx = await this.connection.transaction()
             try {
                 // Создание пользователя

@@ -266,6 +266,9 @@ export class UserController {
         res.status(200).end()
     }
 
+    /**
+     * * Загрузка пользователей через CSV
+     */
     async createUsersCSV(req: Request, res: Response) {
         if (!req.user) {
             res.status(401).send({
@@ -284,6 +287,7 @@ export class UserController {
             .createUsersCSV(req.user, <UploadedFile> req.files.csv)
 
         res.status(200).send({
+            success: "Пользователи успешно загружены!",
             errors
         })
     }

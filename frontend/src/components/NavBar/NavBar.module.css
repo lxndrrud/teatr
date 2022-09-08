@@ -31,6 +31,7 @@
     flex-direction: column;
     width: 250px;
     padding: 5%;
+    font-size: 22px;
     /* padding-top: 40px; */
     justify-content: flex-start;
     align-items: flex-start;
@@ -67,6 +68,9 @@
     .fixedContainer {
         justify-content: center;
         height: max-content;
-        border-radius: 10px;
+        border-bottom-right-radius: 10px;
+        border: 1px solid purple;
+        transition: width linear 1s, height linear 1s, transform linear 1s;
+        box-shadow: none;
     }
 }

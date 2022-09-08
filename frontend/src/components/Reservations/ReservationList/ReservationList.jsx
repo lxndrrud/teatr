@@ -3,7 +3,7 @@ import ReservationItem from '../ReservationItem/ReservationItem'
 
 function ReservationList({ reservations }) {
     return (
-        <div className="lg:ml-[2%] w-[98%] 
+        <div className="lg:ml-[1%] w-[99%] 
                         flex flex-col lg:flex-row 
                         flex-wrap items-center sm:items-start" >
             {reservations && reservations.length > 0 

@@ -1,21 +1,30 @@
 import React from 'react'
-import styles from "./ReservationSlotItem.module.css"
 
 function ReservationSlotItem({ slot }) {
     return (
-        <li className={styles.slotItem} key={slot.id}>
-            <p className={styles.textLabel}>
-                <span className={styles.bold}>Название ряда:</span> {slot.row_title}
-            </p>
-            <p className={styles.textLabel}>
-                <span className={styles.bold}>Номер ряда:</span> {slot.row_number}
-            </p>
-            <p className={styles.textLabel}>
-                <span className={styles.bold}>Номер места:</span> {slot.seat_number}
-            </p>
-            <p className={styles.textLabel}>
-                <span className={styles.bold}>Цена:</span> {slot.price} рублей
-            </p>
+        <li className="p-3 mt-3 mr-2 max-w-[300px] min-w-[100px]
+                        flex flex-col bg-[#f1faee] 
+                        border border-solid border-[black] rounded-md" key={slot.id}>
+            <table className='text-[16px]'>
+                <tbody>
+                    <tr className="border-b-[1px] border-solid">
+                        <td className='font-bold'>Название ряда</td>
+                        <td className="pl-2">{slot.row_title}</td>
+                    </tr>
+                    <tr className="border-b-[1px] border-solid">
+                        <td className='font-bold'>Номер ряда</td>
+                        <td className="pl-2">{slot.row_number}</td>
+                    </tr>
+                    <tr className="border-b-[1px] border-solid">
+                        <td className='font-bold'>Номер места</td>
+                        <td className="pl-2">{slot.seat_number}</td>
+                    </tr>
+                    <tr>
+                        <td className='font-bold'>Цена</td>
+                        <td className="pl-2">{slot.price} рублей</td>
+                    </tr>
+                </tbody>
+            </table>
         </li>
     )
 }

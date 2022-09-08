@@ -17,8 +17,10 @@
     font-size: 20px;
     border-radius: 5px;
     border-color:  #E63946;
-    border: 2px solid #E63946;
-    padding: 5px;
+    border: 1px solid #E63946;
+    padding-left: 4px;
+    padding-top: 3px;
+    padding-bottom: 0px;
 }
 
 .errorMessage {

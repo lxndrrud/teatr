@@ -6,8 +6,10 @@ import CustomLink from '../../UI/CustomLink/CustomLink'
 
 function ReservationDetail({ reservation }) {
     return (
-        <div className="md:mx-auto w-[min-content] md:w-[85%] p-1 md:p-5 flex flex-col md:flex-row flex-wrap justify-between 
-                        bg-[#eeeeee] rounded-md shadow-xl hover:shadow-2xl hover:transition-[box-shadow 0.5s]">
+        <div className="mx-auto mt-3 w-[min-content] md:w-[85%] p-1 md:p-5 
+                        flex flex-col md:flex-row flex-wrap justify-between 
+                        bg-[#eeeeee] rounded-md shadow-xl hover:shadow-2xl 
+                        text-[16px]">
                 <div className="w-[min-content] lg:w-[700px] flex flex-col">
                     <table className='border-separate border-2 border-solid rounded-md'>
                         <tbody>
@@ -71,7 +73,7 @@ function ReservationDetail({ reservation }) {
                     
                 </div>
                 
-                <div className="mt-3 md:mt-0 flex flex-col">
+                <div className="mt-3 2xl:mt-0 flex flex-col">
                     <ReservationSlotList slots={reservation.slots} />
                     <div className="flex flex-col">
                         {

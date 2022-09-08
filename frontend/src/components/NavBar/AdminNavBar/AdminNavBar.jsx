@@ -112,6 +112,13 @@ function AdminNavBar() {
                                         <div className='mr-2'>
                                             <IconSVG data={"M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"} />
                                         </div>
+                                        <CustomLink destination="/reservation-admin/csv/user/create"
+                                            text="Загрузка пользователей"  />
+                                    </div>
+                                    <div className='flex flex-row justify-start'>
+                                        <div className='mr-2'>
+                                            <IconSVG data={"M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"} />
+                                        </div>
                                         <CustomLink destination="/reservation-admin/csv/session"
                                             text="Загрузка сеансов"  />
                                     </div>

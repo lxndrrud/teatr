@@ -9,14 +9,16 @@ export default function PlayDetail({ images}) {
 
     return (
         <div className="flex flex-col w-[100%]">
-            <div className="flex flex-col sm:flex-row w-[100%] justify-start">
+            <div className="w-[100%] mt-3 sm:mt-0
+                            flex flex-col sm:flex-row 
+                            justify-center sm:justify-start 
+                            items-center sm:items-start">
                 <CardImage filepath={play.poster_filepath} altDescription={play.title} />
                 <h2 className="ml-0 mt-3 sm:ml-[10%] sm:mt-0">{play.description}</h2>
             </div>
             <div className="w-[100%] mt-3">
                 <SessionPagination itemsPerPage={3} />
             </div>
-            
         </div>
     )
     

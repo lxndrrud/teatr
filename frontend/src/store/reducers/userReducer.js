@@ -1,4 +1,4 @@
-import { CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, LOG_IN, LOG_OUT, REGISTER, SUCCESS_USER_SET_DEFAULT } from "../types"
+import { CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, CREATE_USERS_CSV, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, LOG_IN, LOG_OUT, REGISTER, SUCCESS_USER_SET_DEFAULT } from "../types"
 
 
 const defaultState = {
@@ -32,6 +32,8 @@ const userReducer = (state=defaultState, action) => {
             return {...state, success: action.success_message }
         case SUCCESS_USER_SET_DEFAULT:
             return {...state, success: defaultState.success }
+        case CREATE_USERS_CSV:
+            return {...state, success: action.success_message, error: action.errors }
         default:
             return state
     }

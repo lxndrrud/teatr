@@ -1,4 +1,4 @@
-import { LOG_IN, LOG_OUT, REGISTER, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, SUCCESS_USER_SET_DEFAULT, SET_USER_SUCCESS } from "../types";
+import { LOG_IN, LOG_OUT, REGISTER, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, SUCCESS_USER_SET_DEFAULT, SET_USER_SUCCESS, CREATE_USERS_CSV } from "../types";
 
 export const register = (email, password, 
 firstname=undefined, middlename=undefined, lastname=undefined) => async dispatch => {
@@ -209,6 +209,34 @@ export const restorePassword = (email) => async dispatch => {
         dispatch({
             type: ERROR_USER,
             payload: e
+        })
+    }
+}
+
+export const createUsersCSV = (token, file) => async dispatch => {
+    const formData = new FormData()
+    formData.append('csv', file)
+    const response = await fetch('/expressjs/users/csv/create', {
+        headers: {
+            //'Content-Type': 'multipart/form-data',
+            'auth-token': token
+        },
+        method: "POST",
+        body: formData
+    })
+
+    if (response.status !== 200 ) {
+        let body = await response.json()
+        dispatch({
+            type: ERROR_USER,
+            payload: body.message
+        })
+    } else {
+        let body = await response.json()
+        dispatch({
+            type: CREATE_USERS_CSV,
+            success_message: body.success,
+            errors: body.errors
         })
     }
 }

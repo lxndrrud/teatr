@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import CustomButton from '../CustomButton/CustomButton'
 import ErrorMessage from '../ErrorMessage/ErrorMessage'
+import ErrorMessageBlock from '../ErrorMessageBlock/ErrorMessageBlock'
 import { useSelector } from "react-redux"
 import styles from "./FilePicker.module.css"
 import SuccessMessage from '../SuccessMessage/SuccessMessage'
@@ -48,13 +49,18 @@ function FilePicker({ onClickHook, onChangeHook, error, success, isMultiple=fals
                 value="Отправить файл" 
                 buttonType={'green'}/>
             {
-                success
-                ?
-                <SuccessMessage text={success} />
-                : (error
+                !error || error.length === 0
                     ?
-                    <ErrorMessage text={error} />
-                    : null)
+                        success
+                            ?
+                                <SuccessMessage text={success} />
+                            : null
+                    : 
+                        typeof error === 'string' 
+                        ?
+                            <ErrorMessage text={error} />
+                        :  
+                            <ErrorMessageBlock textArray={error} />
             }
             
         </div>

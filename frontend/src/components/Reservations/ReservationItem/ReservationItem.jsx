@@ -5,23 +5,26 @@ import IconSVG from "../../UI/IconSVG/IconSVG"
 
 function ReservationItem({ reservation }) {
     return (
-        <Card className="w-[min-content] sm:w-[max-content] lg:w-[33%] flex flex-col rounded
+        <Card className="w-[min-content] sm:w-[max-content] lg:w-[33%] flex flex-col rounded-md
                          border border-solid border-[black] 
                          border-t-[none] 
                          bg-[#eeeeee] mr-[0.3%] mt-[20px] 
-                         shadow-xl hover:shadow-2xl">
+                         shadow-xl hover:shadow-2xl 
+                         text-[16px] sm:text-[auto]">
             {
                 !reservation.session_is_locked
                 ? 
                     <Card.Header className={`border border-solid 
                                             border-[black] 
-                                            py-[2%] pl-[3%] pr-[2%] 
+                                            py-[2%] pl-[3%] pr-[2%]
+                                            rounded-tl-md rounded-tr-md  
                                             text-[#f1faee] bg-[#9239b6]`}>
                         Сеанс еще не состоялся!
                     </Card.Header>
                 :   <Card.Header className={`border border-solid 
                                             border-[black] 
                                             py-[2%] pl-[3%] pr-[2%] 
+                                            rounded-tl-md rounded-tr-md 
                                             text-[#f1faee] bg-[#cc183f]`}>
                         Сеанс состоялся!
                     </Card.Header>

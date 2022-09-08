@@ -1,6 +1,7 @@
 .slotsList {
     display: flexbox;
     flex-direction: column;
+    justify-content: center;
     width: 100%;
 }
 
@@ -19,11 +20,5 @@
     }
     .slotsListLabel {
         margin-top: 0;
-    }
-}
-
-@media (max-width: 1250px) {
-    .slotsListLabel {
-        margin-top: 0.5%;
     }
 }
