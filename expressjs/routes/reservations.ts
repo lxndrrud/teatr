@@ -19,6 +19,9 @@ import { CodeGenerator } from "../utils/code";
 import { UserInfrastructure } from "../infrastructure/User.infra";
 import { KnexConnection } from "../knex/connections";
 import { SlotsEventEmitter } from "../events/SlotsEmitter";
+import { UserRepo } from "../repositories/User.repo";
+import { DatabaseConnection } from "../databaseConnection";
+import { PermissionChecker } from "../infrastructure/PermissionChecker.infra";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
@@ -32,7 +35,9 @@ const reservationController = new ReservationController(
         new UserInfrastructure(
             new UserDatabaseModel(KnexConnection)
         ),
-        new ReservationGuard()
+        new ReservationGuard(new PermissionChecker()),
+        new UserRepo(DatabaseConnection),
+        new PermissionChecker()
     ),
     new ReservationCRUDService(
         KnexConnection,
@@ -68,12 +73,14 @@ const reservationController = new ReservationController(
                 KnexConnection,
                 new TimestampHelper()
             ), 
-            new ReservationGuard(),
+            new ReservationGuard(new PermissionChecker()),
             new TimestampHelper()
         ),
-        new ReservationGuard(),
+        new ReservationGuard(new PermissionChecker()),
         new EmailSender(),
-        new CodeGenerator()
+        new CodeGenerator(),
+        new UserRepo(DatabaseConnection),
+        new PermissionChecker()
     ),
     new ReservationFilterService(
         new ReservationDatabaseModel(
@@ -86,10 +93,12 @@ const reservationController = new ReservationController(
                 KnexConnection,
                 new TimestampHelper()
             ), 
-            new ReservationGuard(),
+            new ReservationGuard(new PermissionChecker()),
             new TimestampHelper()
         ),
-        new TimestampHelper()
+        new TimestampHelper(),
+        new UserRepo(DatabaseConnection),
+        new PermissionChecker()
     ),
     SlotsEventEmitter.getInstance(
         new SessionCRUDService(

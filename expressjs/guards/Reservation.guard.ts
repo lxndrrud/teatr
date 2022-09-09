@@ -1,40 +1,39 @@
+import { User } from "../entities/users"
+import { IPermissionChecker } from "../infrastructure/PermissionChecker.infra"
 import { ReservationWithoutSlotsInterface } from "../interfaces/reservations"
 import { RoleDatabaseInterface } from "../interfaces/roles"
 
 
 export interface IReservationGuard {
-    canUserDelete(
-        reservation: ReservationWithoutSlotsInterface, 
-        idUser: number, 
-        userRole: RoleDatabaseInterface): 
-    boolean
+    canUserDelete(reservation: ReservationWithoutSlotsInterface, user: User): Promise<boolean>
     
-    canUserConfirm(
-            reservation: ReservationWithoutSlotsInterface, 
-            idUser: number, 
-            userRole: RoleDatabaseInterface):
-    boolean
+    canUserConfirm(reservation: ReservationWithoutSlotsInterface, user: User): boolean
 
-        canUserPay(
-            reservation: ReservationWithoutSlotsInterface, 
-            idUser: number, 
-            userRole: RoleDatabaseInterface): 
-    boolean
+    canUserPay(reservation: ReservationWithoutSlotsInterface, user: User): Promise<boolean>
 }
 
 export class ReservationGuard implements IReservationGuard {
-    public canUserDelete(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
-        return (reservation.id_user === idUser && !reservation.session_is_locked)
-        || (userRole.can_see_all_reservations && userRole.can_access_private)
+    private permissionChecker
+
+    constructor(
+        permissionCheckerInstance: IPermissionChecker
+    ) {
+        this.permissionChecker = permissionCheckerInstance
     }
 
-    public canUserConfirm(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
-        return reservation.id_user === idUser && !reservation.session_is_locked 
+    public async canUserDelete(reservation: ReservationWithoutSlotsInterface, user: User) {
+        return (reservation.id_user === user.id && !reservation.session_is_locked)
+        || (await this.permissionChecker.check_CanSeeAllReservations(user) 
+            && await this.permissionChecker.check_CanDeleteAnotherUserReservations(user) )
+    }
+
+    public canUserConfirm(reservation: ReservationWithoutSlotsInterface, user: User) {
+        return reservation.id_user === user.id && !reservation.session_is_locked 
             && !reservation.is_confirmed
     }
 
-    public canUserPay(reservation: ReservationWithoutSlotsInterface, idUser: number, userRole: RoleDatabaseInterface) {
-        return userRole.can_see_all_reservations 
+    public async canUserPay(reservation: ReservationWithoutSlotsInterface, user: User) {
+        return await this.permissionChecker.check_CanSeeAllReservations(user)
             && !reservation.is_paid && !reservation.session_is_locked
     }
 }

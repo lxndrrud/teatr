@@ -1,12 +1,14 @@
 import { Knex } from "knex"
 import { ReservationModel } from "../../dbModels/reservations"
+import { User } from "../../entities/users"
 import { IReservationGuard } from "../../guards/Reservation.guard"
+import { IPermissionChecker } from "../../infrastructure/PermissionChecker.infra"
 import { IUserInfrastructure } from "../../infrastructure/User.infra"
 import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors"
 import { ReservationConfirmationInterface, ReservationWithoutSlotsInterface } from "../../interfaces/reservations"
 import { UserRequestOption } from "../../interfaces/users"
+import { IUserRepo } from "../../repositories/User.repo"
 import { RoleService } from "../roles"
-import { IUserCRUDService } from "../users/UsersCRUD.service"
 
 
 export interface IReservationPaymentService {
@@ -26,19 +28,25 @@ export class ReservationPaymentService {
     protected roleService
     protected userInfrastructure
     protected reservationGuard
+    protected userRepo
+    protected permissionChecker
 
     constructor(
         connectionInstance: Knex<any, unknown[]>,
         reservationDatabaseInstance: ReservationModel,
         roleServiceInstance: RoleService,
         userInfrastructureInstance: IUserInfrastructure,
-        reservationGuardInstance: IReservationGuard
+        reservationGuardInstance: IReservationGuard,
+        userRepoInstance: IUserRepo,
+        permissionCheckerInstance: IPermissionChecker
     ) {
         this.connection = connectionInstance
         this.reservationModel = reservationDatabaseInstance
         this.roleService = roleServiceInstance
         this.userInfrastructure = userInfrastructureInstance
         this.reservationGuard = reservationGuardInstance
+        this.userRepo = userRepoInstance
+        this.permissionChecker = permissionCheckerInstance
     }
 
     /**
@@ -47,11 +55,25 @@ export class ReservationPaymentService {
     async confirmReservation(user: UserRequestOption, idReservation: number, 
         requestBody: ReservationConfirmationInterface) {
         // Получение роли из БД
-        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
-        
-        if (isInnerErrorInterface(userRole)) {
-            return userRole
+        let userDB: User | null
+        try {
+            userDB = await this.userRepo.getUser(user.id)
+            .catch(e => { throw e })
+            
+        } catch(e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
         }
+        if (!userDB) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Пользователь не найден!'
+            }
+        }
+        
+        
 
         // Проверка на наличие записи в базе данных 
         let reservation: ReservationWithoutSlotsInterface | undefined
@@ -72,7 +94,7 @@ export class ReservationPaymentService {
         }
 
         // Проверка на доступность подтверждения
-        const canUserConfirm = this.reservationGuard.canUserConfirm(reservation, user.id, userRole)
+        const canUserConfirm = this.reservationGuard.canUserConfirm(reservation, userDB)
         if (!canUserConfirm) {
             return <InnerErrorInterface>{
                 code: 403,
@@ -92,13 +114,19 @@ export class ReservationPaymentService {
         const trx = await this.connection.transaction()
 
         // Создание записи действия для оператора
-        if (userRole.can_see_all_reservations) {
+        if (await this.permissionChecker.check_CanSeeAllReservations(userDB)) {
             const actionDescription = `Подтверждение брони Res:${reservation.id}`
-            const response = await this.userInfrastructure
-                .createAction(trx, user.id, userRole, actionDescription)
-            if (isInnerErrorInterface(response)) {
-                return response
+            try {
+                await this.userRepo.createUserAction(userDB, actionDescription)
+                .catch(e => { throw e }) 
+            } catch(e) {
+                console.log(e)
+                return <InnerErrorInterface>{
+                    code: 500,
+                    message: 'Внутренняя ошибка сервера!'
+                }
             }
+            
         }
 
         try {
@@ -121,10 +149,22 @@ export class ReservationPaymentService {
      */
     async paymentForReservation(user: UserRequestOption, idReservation: number) {
         // Получение роли из БД
-        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
-        
-        if (isInnerErrorInterface(userRole)) {
-            return userRole
+        let userDB: User | null
+        try {
+            userDB = await this.userRepo.getUser(user.id)
+            .catch(e => { throw e })
+            
+        } catch(e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
+        }
+        if (!userDB) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Пользователь не найден!'
+            }
         }
 
         // Проверка на наличие записи в базе данных 
@@ -146,7 +186,7 @@ export class ReservationPaymentService {
         }
 
         // Проверка прав
-        const canUserPay = this.reservationGuard.canUserPay(reservation, user.id, userRole)
+        const canUserPay = await this.reservationGuard.canUserPay(reservation, userDB)
         if (!canUserPay) {
             return <InnerErrorInterface>{
                 code: 403,
@@ -158,13 +198,19 @@ export class ReservationPaymentService {
         const trx = await this.connection.transaction()
 
         // Создание записи действия для оператора
-        if (userRole.can_see_all_reservations) {
+        if (await this.permissionChecker.check_CanSeeAllReservations(userDB)) {
             const actionDescription = `Изменение флага оплаты на ${!reservation.is_paid}`
-            const response = await this.userInfrastructure
-                .createAction(trx, user.id, userRole, actionDescription)
-            if (isInnerErrorInterface(response)) {
-                return response
+            try {
+                await this.userRepo.createUserAction(userDB, actionDescription)
+                .catch(e => { throw e }) 
+            } catch(e) {
+                console.log(e)
+                return <InnerErrorInterface>{
+                    code: 500,
+                    message: 'Внутренняя ошибка сервера!'
+                }
             }
+            
         }
 
         try {

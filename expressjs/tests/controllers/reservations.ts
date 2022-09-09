@@ -69,6 +69,7 @@ export function ReservationsControllerTest() {
                         "auth-token": this.adminToken
                     })
 
+                console.log(response.body)
                 expect(response.status).to.equal(200)
                 expect(response.body.length).to.equal(2)
             })

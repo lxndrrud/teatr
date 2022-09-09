@@ -3,9 +3,10 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-    return knex.schema.withSchema('public').createTable('roles', tbl => {
+    return knex.schema.withSchema('public').createTable('permissions', tbl => {
         tbl.increments('id').primary()
         tbl.string('title').notNullable()
+        tbl.string('code').unique().notNullable()
     })
 };
 
@@ -14,5 +15,5 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-    return knex.schema.withSchema('public').dropTableIfExists('roles')
+    return knex.schema.withSchema('public').dropTableIfExists('permissions')
 };

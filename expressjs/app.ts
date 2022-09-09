@@ -1,4 +1,5 @@
 import express from 'express';
+import 'reflect-metadata'
 import bodyParser from 'body-parser';
 import fileUpload from 'express-fileupload';
 import { CronJob } from 'cron';
@@ -6,8 +7,11 @@ import { everyDay, everyMinute } from './cron/cron';
 import { prefixRouter } from './routes/prefixRouter';
 import { logger } from './middlewares/logs';
 import { UserRequestOption } from './interfaces/users';
+import { InitConnection } from './databaseConnection';
 
 export const app = express();
+
+InitConnection()
 
 app.use(bodyParser.json())
 app.use(fileUpload({

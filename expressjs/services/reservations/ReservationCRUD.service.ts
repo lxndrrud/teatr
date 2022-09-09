@@ -1,6 +1,8 @@
 import { Knex } from "knex"
 import { ReservationModel } from "../../dbModels/reservations"
+import { User } from "../../entities/users"
 import { IReservationGuard } from "../../guards/Reservation.guard"
+import { IPermissionChecker } from "../../infrastructure/PermissionChecker.infra"
 import { IReservationInfrastructure } from "../../infrastructure/Reservation.infra"
 import { SessionInfrastructure } from "../../infrastructure/Session.infra"
 import { IUserInfrastructure } from "../../infrastructure/User.infra"
@@ -8,6 +10,7 @@ import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/err
 import { ReservationBaseInterface, ReservationBaseWithoutConfirmationInterface, ReservationCreateInterface, ReservationDatabaseInterface, ReservationInterface, ReservationWithoutSlotsInterface } from "../../interfaces/reservations"
 import { ReservationsSlotsBaseInterface, SlotInterface } from "../../interfaces/slots"
 import { UserRequestOption } from "../../interfaces/users"
+import { IUserRepo } from "../../repositories/User.repo"
 import { CodeGenerator } from "../../utils/code"
 import { EmailSender } from "../../utils/email"
 import { RoleService } from "../roles"
@@ -43,6 +46,8 @@ export class ReservationCRUDService implements IReservationCRUDService {
     protected reservationGuard
     protected emailSender
     protected codeGenerator
+    protected userRepo
+    protected permissionChecker
 
     constructor(
             connectionInstance: Knex<any, unknown[]>,
@@ -54,7 +59,9 @@ export class ReservationCRUDService implements IReservationCRUDService {
             reservationInfrastructureInstance: IReservationInfrastructure,
             reservationGuardInstance: IReservationGuard,
             emailSenderInstance: EmailSender,
-            codeGeneratorInstance: CodeGenerator
+            codeGeneratorInstance: CodeGenerator,
+            userRepoInstance: IUserRepo,
+            permissionCheckerInstance: IPermissionChecker 
     ) {
         this.connection = connectionInstance
         this.reservationModel = reservationDatabaseInstance
@@ -66,6 +73,8 @@ export class ReservationCRUDService implements IReservationCRUDService {
         this.reservationGuard = reservationGuardInstance
         this.emailSender = emailSenderInstance
         this.codeGenerator = codeGeneratorInstance
+        this.userRepo = userRepoInstance
+        this.permissionChecker = permissionCheckerInstance
     }
 
     /**
@@ -73,10 +82,22 @@ export class ReservationCRUDService implements IReservationCRUDService {
      */
     async getSingleFullInfo(idUser: number, idRole: number, idReservation: number) {
         // Проверка-получение роли
-        let userRole = await this.roleService
-            .getUserRole(idUser, idRole)
-        if (isInnerErrorInterface(userRole)) {
-            return userRole
+        let userDB: User | null
+        try {
+            userDB = await this.userRepo.getUser(idUser)
+            .catch(e => { throw e })
+            
+        } catch(e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
+        }
+        if (!userDB) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Пользователь не найден!'
+            }
         }
         
         // Проверка наличия записи в базе данных
@@ -91,7 +112,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
 
         // Проверка на возможность доступа к брони и "ложный" 404-ответ 
         //(подразумевается 403)
-        if (!userRole.can_see_all_reservations) {
+        if (!(await this.permissionChecker.check_CanSeeAllReservations(userDB))) {
             if (reservationQuery.id_user !== idUser) {
                 return <InnerErrorInterface>{
                     code: 404,
@@ -102,8 +123,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
         
 
         const result = await this.reservationInfrastructure.fetchReservations(
-                idUser,
-                userRole,
+                userDB,
                 [reservationQuery])
 
         if (isInnerErrorInterface(result)) {
@@ -118,10 +138,31 @@ export class ReservationCRUDService implements IReservationCRUDService {
      */
     async createReservation(user: UserRequestOption, requestBody: ReservationCreateInterface) {
         // Получение роли из БД
-        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
-        
-        if (isInnerErrorInterface(userRole)) {
-            return userRole
+        let userDB: User | null
+        try {
+            userDB = await this.userRepo.getUser(user.id)
+            .catch(e => { throw e })
+            
+        } catch(e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
+        }
+        if (!userDB) {
+            console.log(userDB)
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Пользователь не найден!'
+            }
+        }
+
+        // Проверка может ли пользователь создавать брони
+        if(!(await this.permissionChecker.check_CanReserve(userDB))) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Вам запрещено бронировать места!'
+            }
         }
 
         // Проверка наличия сеанса
@@ -150,14 +191,15 @@ export class ReservationCRUDService implements IReservationCRUDService {
         }
 
         // Проверка на максимум слотов
-        if (!userRole.can_avoid_max_slots_property && requestBody.slots.length > sessionQuery.max_slots) {
+        if (!(await this.permissionChecker.check_CanIgnoreMaxSlotsValue(userDB))  
+                && requestBody.slots.length > sessionQuery.max_slots) {
             return <InnerErrorInterface>{
                 code: 403,
                 message: 'Превышено максимальное количество мест для брони!'
             }
         }
 
-        if (!userRole.can_have_more_than_one_reservation_on_session) {
+        if (!(await this.permissionChecker.check_CanHaveMoreThanOneReservationOnSession(userDB))) {
             // Проверка на наличие брони на сеанс у пользователя
             const checkVisitorReservation = await this.reservationInfrastructure
                 .checkUserHasReservedSession(user.id, requestBody.id_session)
@@ -203,7 +245,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
         let reservation: ReservationDatabaseInterface
 
         let reservationPayload: ReservationBaseInterface | ReservationBaseWithoutConfirmationInterface
-        if (!userRole.can_make_reservation_without_confirmation) {
+        if (!(await this.permissionChecker.check_CanReserveWithoutConfirmation(userDB))) {
             reservationPayload = {
                 id_user: user.id,
                 id_session: sessionQuery.id,
@@ -252,19 +294,25 @@ export class ReservationCRUDService implements IReservationCRUDService {
         }
 
         // Создание записи действия для оператора
-        if (userRole.can_see_all_reservations) {
-            const actionDescription = `Создание брони ${reservation.id}`
-            const response = await this.userInfrastructure
-                .createAction(trx, user.id, userRole, actionDescription)
-            if (isInnerErrorInterface(response)) {
-                return response
+        if (await this.permissionChecker.check_CanSeeAllReservations(userDB)) {
+            const actionDescription = `Подтверждение брони Res:${reservation.id}`
+            try {
+                await this.userRepo.createUserAction(userDB, actionDescription)
+                .catch(e => { throw e }) 
+            } catch(e) {
+                console.log(e)
+                return <InnerErrorInterface>{
+                    code: 500,
+                    message: 'Внутренняя ошибка сервера!'
+                }
             }
+            
         }
 
         await trx.commit()
 
         // Отправка письма на почту с информацией о сеансе и кодом подтверждения
-        if (!userRole.can_make_reservation_without_confirmation)
+        if (!(await this.permissionChecker.check_CanReserveWithoutConfirmation(userDB)))
             this.emailSender.send(
                 user.email, 
                 "Бронь в театре на Оборонной", 
@@ -279,7 +327,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
         return {
             id: reservation.id,
             id_session: sessionQuery.id,
-            need_confirmation: !userRole.can_make_reservation_without_confirmation
+            need_confirmation: !(await this.permissionChecker.check_CanReserveWithoutConfirmation(userDB))
         }
     }
 
@@ -288,23 +336,35 @@ export class ReservationCRUDService implements IReservationCRUDService {
      */
     async getReservations(user: UserRequestOption) {
         // Проверка-получение роли
-        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
-        
-        if (isInnerErrorInterface(userRole)) {
-            return userRole
+        let userDB: User | null
+        try {
+            userDB = await this.userRepo.getUser(user.id)
+            .catch(e => { throw e })
+            
+        } catch(e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
+        }
+        if (!userDB) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Пользователь не найден!'
+            }
         }
 
         try {
             // В зависимости от роли выдать либо все брони, либо только на пользователя
             let reservationsQuery: ReservationWithoutSlotsInterface[]
-            if (!userRole.can_see_all_reservations)
+            if (!(await this.permissionChecker.check_CanSeeAllReservations(userDB)))
                 reservationsQuery = await this.reservationModel.getUserReservations(user.id)
             else
                 reservationsQuery = await this.reservationModel.getAllFullInfo()
             
             // Отредактировать результирующий список
             const result = await this.reservationInfrastructure
-                .fetchReservations(user.id, userRole, reservationsQuery)
+                .fetchReservations(userDB, reservationsQuery)
 
             return result
         } catch (e) {
@@ -323,10 +383,22 @@ export class ReservationCRUDService implements IReservationCRUDService {
         let idSession: number = 0
 
         // Проверка-получение роли
-        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
-        
-        if (isInnerErrorInterface(userRole)) {
-            return userRole
+        let userDB: User | null
+        try {
+            userDB = await this.userRepo.getUser(user.id)
+            .catch(e => { throw e })
+            
+        } catch(e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
+        }
+        if (!userDB) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Пользователь не найден!'
+            }
         }
 
         // Проверка на наличие записи в базе данных 
@@ -349,7 +421,17 @@ export class ReservationCRUDService implements IReservationCRUDService {
         idSession = reservation.id_session
 
         // Проверка на владельца брони
-        const canUserDelete = this.reservationGuard.canUserDelete(reservation, user.id, userRole)
+        let canUserDelete
+        try {
+            canUserDelete = await this.reservationGuard.canUserDelete(reservation, userDB)
+                            .catch(e => { throw e })
+        } catch (e) {
+            console.log(e)
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
+        }
         if (!canUserDelete) {
             return <InnerErrorInterface>{
                 code: 403,
@@ -360,8 +442,8 @@ export class ReservationCRUDService implements IReservationCRUDService {
         // Транзакция: удаление забронированных мест, затем удаление брони
         const trx = await this.connection.transaction()
 
-        // Создание записи действия пользователя
-        if (userRole.can_see_all_reservations) {
+        // Создание записи действия для оператора
+        if (await this.permissionChecker.check_CanSeeAllReservations(userDB)) {
             // Поиск зарезервированных мест
             let slots: SlotInterface[]
             try {
@@ -382,11 +464,17 @@ export class ReservationCRUDService implements IReservationCRUDService {
             ResUser: ${reservation.id_user},
             Session: ${reservation.id_session},
             Slots: ${idsSlots}`
-            const response = await this.userInfrastructure
-                .createAction(trx, user.id, userRole, actionDescription)
-            if (isInnerErrorInterface(response)) {
-                return response
+            try {
+                await this.userRepo.createUserAction(userDB, actionDescription)
+                .catch(e => { throw e }) 
+            } catch(e) {
+                console.log(e)
+                return <InnerErrorInterface>{
+                    code: 500,
+                    message: 'Внутренняя ошибка сервера!'
+                }
             }
+            
         }
 
         try {

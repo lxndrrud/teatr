@@ -1,4 +1,6 @@
 import { ReservationModel } from "../../dbModels/reservations";
+import { User } from "../../entities/users";
+import { IPermissionChecker } from "../../infrastructure/PermissionChecker.infra";
 import { IReservationInfrastructure } from "../../infrastructure/Reservation.infra";
 import { AuditoriumReservationFilterOption } from "../../interfaces/auditoriums";
 import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors";
@@ -6,6 +8,7 @@ import { PlayReservationFilterOptionInterface } from "../../interfaces/plays";
 import { ReservationFilterQueryInterface, ReservationWithoutSlotsInterface, ReservationInterface } from "../../interfaces/reservations";
 import { TimestampReservationFilterOptionDatabaseInterface, TimestampReservationFilterOptionInterface } from "../../interfaces/timestamps";
 import { UserRequestOption } from "../../interfaces/users";
+import { IUserRepo } from "../../repositories/User.repo";
 import { TimestampHelper } from "../../utils/timestamp";
 import { RoleService } from "../roles";
 
@@ -26,17 +29,23 @@ export class ReservationFilterService implements IReservationFilterService {
     protected roleService
     protected reservationInfrastructure
     protected timestampHelper
+    protected userRepo
+    protected permissionChecker
 
     constructor(
         reservationDatabaseInstance: ReservationModel,
         roleServiceInstance: RoleService,
         reservationInfrastructureInstance: IReservationInfrastructure,
-        timestampHelperInstance: TimestampHelper
+        timestampHelperInstance: TimestampHelper,
+        userRepoInstance: IUserRepo,
+        permissionCheckerInstance: IPermissionChecker
     ) {
         this.reservationModel = reservationDatabaseInstance
         this.roleService = roleServiceInstance
         this.reservationInfrastructure = reservationInfrastructureInstance
         this.timestampHelper = timestampHelperInstance
+        this.userRepo = userRepoInstance
+        this.permissionChecker = permissionCheckerInstance
     }
 
     /**
@@ -44,10 +53,22 @@ export class ReservationFilterService implements IReservationFilterService {
      */
     public async getReservationFilterOptions(user: UserRequestOption) {
         // Проверка-получение роли
-        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
-        
-        if (isInnerErrorInterface(userRole)) {
-            return userRole
+        let userDB: User | null
+        try {
+            userDB = await this.userRepo.getUser(user.id)
+            .catch(e => { throw e })
+            
+        } catch(e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
+        }
+        if (!userDB) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Пользователь не найден!'
+            }
         }
 
         // dates, auditoriums, plays but without isLocked, reservationNumber
@@ -56,7 +77,7 @@ export class ReservationFilterService implements IReservationFilterService {
             plays: PlayReservationFilterOptionInterface[]
 
         try {
-            if (userRole.can_see_all_reservations)
+            if (await this.permissionChecker.check_CanSeeAllReservations(userDB))
                 [timestamps, auditoriums, plays] = await Promise.all([
                     this.reservationModel.getTimestampsOptionsForReservationFilter(undefined),
                     this.reservationModel.getAuditoriumsOptionsForReservationFilter(undefined),
@@ -104,17 +125,29 @@ export class ReservationFilterService implements IReservationFilterService {
      */
     public async getFilteredReservations(userQuery: ReservationFilterQueryInterface, user: UserRequestOption) {
         // Проверка-получение роли
-        let userRole = await this.roleService.getUserRole(user.id, user.id_role)
-        
-        if (isInnerErrorInterface(userRole)) {
-            return userRole
+        let userDB: User | null
+        try {
+            userDB = await this.userRepo.getUser(user.id)
+            .catch(e => { throw e })
+            
+        } catch(e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
+        }
+        if (!userDB) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Пользователь не найден!'
+            }
         }
 
         try {
             // В зависимости от роли выдать либо часть всех броней,
             // либо часть пользовательских броней
             let query: ReservationWithoutSlotsInterface[]
-            if (!userRole.can_see_all_reservations)
+            if (!await this.permissionChecker.check_CanSeeAllReservations(userDB))
                 query = await this.reservationModel
                     .getFilteredReservationsForUser(userQuery, user.id)
             else 
@@ -123,7 +156,7 @@ export class ReservationFilterService implements IReservationFilterService {
 
             // Отредактировать результирующий список
             const result = await this.reservationInfrastructure
-                .fetchReservations(user.id, userRole, query)
+                .fetchReservations(userDB, query)
             
             return result
         } catch (e) {

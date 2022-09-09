@@ -1,4 +1,5 @@
 import { ReservationModel } from "../dbModels/reservations"
+import { User } from "../entities/users"
 import { IReservationGuard, ReservationGuard } from "../guards/Reservation.guard"
 import { InnerErrorInterface } from "../interfaces/errors"
 import { ReservationInterface, ReservationWithoutSlotsInterface } from "../interfaces/reservations"
@@ -7,8 +8,7 @@ import { SlotInterface } from "../interfaces/slots"
 import { TimestampHelper } from "../utils/timestamp"
 
 export interface IReservationInfrastructure {
-    fetchReservations(idUser: number, userRole: RoleDatabaseInterface, 
-        reservations: ReservationWithoutSlotsInterface[]): 
+    fetchReservations(user: User, reservations: ReservationWithoutSlotsInterface[]): 
     Promise<ReservationInterface[] | InnerErrorInterface>
 
     calculateReservationTotalCost(slots: SlotInterface[]): number
@@ -43,7 +43,7 @@ export class ReservationInfrastructure implements IReservationInfrastructure {
     /**
      * * Вывести полную информацию о бронях с необходимым редактированием
      */
-    public async fetchReservations(idUser: number, userRole: RoleDatabaseInterface, reservations: ReservationWithoutSlotsInterface[]): Promise<ReservationInterface[] | InnerErrorInterface> {
+    public async fetchReservations(user: User, reservations: ReservationWithoutSlotsInterface[]): Promise<ReservationInterface[] | InnerErrorInterface> {
         let result: ReservationInterface[] = []  
         for (let reservation of reservations) {
             // Редактирование формата timestamp`ов
@@ -67,13 +67,13 @@ export class ReservationInfrastructure implements IReservationInfrastructure {
             }
 
             // Проверка на возможность удаления брони
-            const canUserDelete = this.reservationGuard.canUserDelete(reservation, idUser, userRole)
+            const canUserDelete = await this.reservationGuard.canUserDelete(reservation, user)
 
             // Проверка на возможность подтверждения брони
-            const canUserConfirm = this.reservationGuard.canUserConfirm(reservation, idUser, userRole)
+            const canUserConfirm = this.reservationGuard.canUserConfirm(reservation,  user)
 
             // Проверка на возможность оплаты брони
-            const canUserPay = this.reservationGuard.canUserPay(reservation, idUser, userRole)
+            const canUserPay = await this.reservationGuard.canUserPay(reservation,  user)
             
             result.push(<ReservationInterface>{
                 ...reservation,
