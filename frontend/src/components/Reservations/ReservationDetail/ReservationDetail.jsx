@@ -9,7 +9,7 @@ function ReservationDetail({ reservation }) {
         <div className="mx-auto mt-3 w-[min-content] md:w-[85%] p-1 md:p-5 
                         flex flex-col md:flex-row flex-wrap justify-between 
                         bg-[#eeeeee] rounded-md shadow-xl hover:shadow-2xl 
-                        text-[16px]">
+                        text-[16px] sm:text-[18px]">
                 <div className="w-[min-content] lg:w-[700px] flex flex-col">
                     <table className='border-separate border-2 border-solid rounded-md'>
                         <tbody>
@@ -38,7 +38,7 @@ function ReservationDetail({ reservation }) {
                             </tr>
                             <tr>
                                 <td className="p-1 border-l-[none] border-t-[2px]"><span className="font-bold">Статус подтверждения</span></td>
-                                <td className='flex flex-row border-l-[2px] border-t-[2px]'>
+                                <td className='p-1 flex flex-row border-l-[2px] border-t-[2px]'>
                                     {
                                         reservation.is_confirmed
                                             ? <span className="text-[#4a7140]">Подтверждено</span>
@@ -52,7 +52,7 @@ function ReservationDetail({ reservation }) {
                             </tr>
                             <tr>
                                 <td className="p-1 border-l-[none] border-t-[2px]"><span className="font-bold">Статус оплаты</span></td>
-                                <td className='flex flex-row border-l-[2px] border-t-[2px]'>
+                                <td className='p-1 flex flex-row border-l-[2px] border-t-[2px]'>
                                     {
                                         reservation.is_paid
                                             ? <span className="text-[#4a7140]">Оплачено</span>

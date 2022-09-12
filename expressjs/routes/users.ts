@@ -13,6 +13,8 @@ import { CodeGenerator } from "../utils/code";
 import { EmailSender } from "../utils/email";
 import { Hasher } from "../utils/hasher";
 import { FileStreamHelper } from '../utils/fileStreams';
+import { UserRepo } from "../repositories/User.repo";
+import { DatabaseConnection } from "../databaseConnection";
 
 export const usersRouter = Router()
 const userController = new UserController(
@@ -31,7 +33,8 @@ const userController = new UserController(
         new UserDatabaseModel(KnexConnection), 
         new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
         new FileStreamHelper(),
-        new Hasher()
+        new Hasher(),
+        new UserRepo(DatabaseConnection)
     )
 )
 

@@ -6,7 +6,7 @@ function ErrorMessageBlock ({ textArray }) {
                         flex flex-row justify-self-start">
             <ul>
                 {
-                    textArray && textArray.textArray.length > 0 && textArray.map(textItem => (
+                    textArray && textArray.length > 0 && textArray.map(textItem => (
                         <li>
                             <span className="text-[#e63946]">{textItem}</span>
                         </li>

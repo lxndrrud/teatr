@@ -5,10 +5,10 @@ import IconSVG from "../../UI/IconSVG/IconSVG"
 
 function ReservationItem({ reservation }) {
     return (
-        <Card className="w-[min-content] sm:w-[max-content] lg:w-[33%] flex flex-col rounded-md
+        <Card className="w-[min-content] sm:w-[max-content] lg:w-[30%] flex flex-col rounded-md
                          border border-solid border-[black] 
                          border-t-[none] 
-                         bg-[#eeeeee] mr-[0.3%] mt-[20px] 
+                         bg-[#eeeeee] mr-[2%] mt-[20px] 
                          shadow-xl hover:shadow-2xl 
                          text-[16px] sm:text-[auto]">
             {

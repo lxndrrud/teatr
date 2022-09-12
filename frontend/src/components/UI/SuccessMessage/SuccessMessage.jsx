@@ -1,10 +1,9 @@
 import React from 'react'
-import styles from "./SuccessMessage.module.css"
 
 function SuccessMessage({ text }) {
     return (
-        <div className={styles.container}>
-            <span className={styles.successMessage}>
+        <div className="p-1 w-[max-content] flex flex-row justify-self-start bg-[lightgreen] rounded-md">
+            <span className="text-[green]">
                 {text}
             </span>
         </div>

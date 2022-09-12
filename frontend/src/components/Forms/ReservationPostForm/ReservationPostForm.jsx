@@ -51,7 +51,6 @@ function ReservationPostForm() {
     const postEmailReservation = (e) => {
         e.preventDefault()
 
-        console.log("kek")
         // Отправить на backend запрос по почте
         dispatch(postReservation({
             token: token, 

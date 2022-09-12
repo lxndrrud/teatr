@@ -30,7 +30,8 @@ function UserCSVUploadingPage() {
     const onButtonClick = (e) => {
         dispatch(createUsersCSV(token, selectedFile))
         .then(() => {
-            const error = store.getState().users.error
+            const error = store.getState().user.error
+            const success = store.getState().user.success
             if (error) {
                 setErrorMessage(error)
             } else if (success) {

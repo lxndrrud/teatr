@@ -9,7 +9,7 @@ import IconSVG from '../IconSVG/IconSVG'
 
 function FilePicker({ onClickHook, onChangeHook, error, success, isMultiple=false }) {
     let [filename, setFilename] = useState(null)
-    
+
     const onFileChange = event => {
         // Update the state
         onChangeHook(event.target.files[0])
@@ -52,9 +52,8 @@ function FilePicker({ onClickHook, onChangeHook, error, success, isMultiple=fals
                 !error || error.length === 0
                     ?
                         success
-                            ?
-                                <SuccessMessage text={success} />
-                            : null
+                            &&
+                        <SuccessMessage text={success} />
                     : 
                         typeof error === 'string' 
                         ?

@@ -9,7 +9,7 @@ export default function PlayDetail({ images}) {
 
     return (
         <div className="flex flex-col w-[100%]">
-            <div className="w-[100%] mt-3 sm:mt-0
+            <div className="w-[100%] mt-3 sm:mt-0 sm:ml-8
                             flex flex-col sm:flex-row 
                             justify-center sm:justify-start 
                             items-center sm:items-start">

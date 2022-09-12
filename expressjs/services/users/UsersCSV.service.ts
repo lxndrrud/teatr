@@ -8,6 +8,7 @@ import { UserBaseInterface, UserRequestOption } from "../../interfaces/users";
 import { RoleService } from "../roles";
 import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors";
 import { Hasher } from "../../utils/hasher";
+import { IUserRepo } from "../../repositories/User.repo";
 
 
 
@@ -21,19 +22,22 @@ export class UserCSVService implements IUserCSVService {
     protected roleService
     protected fileStreamHelper
     protected hasher
+    private userRepo
 
     constructor (    
         connectionInstance: Knex<any, unknown[]>,
         userModelInstance: UserModel, 
         roleServiceInstance: RoleService,
         fileStreamHelperInstance: FileStreamHelper,
-        hasherInstance: Hasher
+        hasherInstance: Hasher,
+        userRepoInstance: IUserRepo
     ) {
         this.connection = connectionInstance
         this.userModel = userModelInstance
         this.fileStreamHelper = fileStreamHelperInstance
         this.roleService = roleServiceInstance
         this.hasher = hasherInstance
+        this.userRepo = userRepoInstance
     }
 
     public async createUsersCSV(user: UserRequestOption, file: UploadedFile) {
@@ -80,8 +84,12 @@ export class UserCSVService implements IUserCSVService {
                 lastname: chunk['Фамилия'] ? chunk['Фамилия'] : undefined
             }
 
-            // TODO: Проверить в базе по почте
-            // const check = await this.userModel.getUser()
+            const check = await this.userRepo.getUserByEmail(userInfo.email)
+            if (check) {
+                errors.push(`Строка #${counter}: пользователь с почтой ${check.email} уже существует!`)
+                counter++
+                continue
+            }
 
             const trx = await this.connection.transaction()
             try {
