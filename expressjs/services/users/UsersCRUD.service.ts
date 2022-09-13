@@ -442,7 +442,6 @@ export class UserFetchingModel implements IUserCRUDService {
         }
         // Сгенерить новый пароль,сохранить его и отправить письмо с паролем на почту
         const newPassword = this.codeGenerator.generateCode()
-        console.log(newPassword)
         const trx = await this.connection.transaction()
         try {
             const newPasswordHashed = await this.hasher.hash(newPassword)

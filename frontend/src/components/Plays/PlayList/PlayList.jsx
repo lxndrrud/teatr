@@ -3,7 +3,7 @@ import PlayItem from '../PlayItem/PlayItem'
 export default function PlayList({ plays }) {
 
     return (
-        <div className="lg:ml-[5%] ml-3 sm:ml-0 w-[95%] 
+        <div className="lg:ml-[5%] mx-auto sm:ml-0 w-[95%] 
                         flex flex-col lg:flex-row flex-wrap 
                         justify-center sm:justify-start 
                         items-center sm:items-start">

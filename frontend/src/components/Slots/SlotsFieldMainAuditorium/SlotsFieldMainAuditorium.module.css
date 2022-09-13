@@ -10,7 +10,7 @@
 
 .sceneLabel {
     font-weight: bold;
-    font-size: 30px;
+    font-size: 24px;
     margin-bottom: 5px;
 }
 
@@ -55,7 +55,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 12px;
 }
 
 .tableContainer {

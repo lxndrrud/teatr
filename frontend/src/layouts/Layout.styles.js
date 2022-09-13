@@ -11,5 +11,4 @@ export const mainContentExpandedStyle = `ml-0 sm:ml-[300px]`
 
 export const contentStyle = `flex flex-col min-h-[75vh]`
 
-export const footerStyle = `h-[auto] sm:h-[14vh] mt-3 w-[99%] flex flex-col sm:flex-row justify-self-end  
-border border-solid bg-[#f1e1f5] rounded-md`
+export const footerStyle = `h-[auto] sm:h-[14vh] mt-3 w-[99%]`
