@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne } from'typeorm'
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from'typeorm'
+import { ReservationEmailing } from './reservations_emailings'
+import { User } from './users'
 
 
 @Entity({ name: 'reservations' })
@@ -11,4 +13,11 @@ export class Reservation {
 
     @Column({ name: 'id_session' })
     idSession!: number
+
+    @ManyToOne(() => User, user => user.reservations) 
+    @JoinColumn({ name: 'id_user' })
+    user!: User
+
+    @OneToMany(() => ReservationEmailing, reservEmail => reservEmail.reservation)
+    reservationEmailings!: ReservationEmailing[]
 }

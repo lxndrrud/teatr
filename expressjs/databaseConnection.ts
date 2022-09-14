@@ -7,6 +7,9 @@ import { RolePermission } from "./entities/roles_permissions"
 import { testPermissionChecker } from "./infrastructure/PermissionChecker.infra"
 import { UserAction } from "./entities/user_actions"
 import { Reservation } from "./entities/reservations"
+import { EmailingType } from "./entities/emailing_types"
+import { ReservationEmailing } from "./entities/reservations_emailings"
+import { UserRestoration } from "./entities/users_restorations"
 
 export const DatabaseConnection = new DataSource({
     type: 'postgres',
@@ -15,7 +18,8 @@ export const DatabaseConnection = new DataSource({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
     entities: [
-        User, Role, Permission, RolePermission, UserAction, Reservation
+        User, Role, Permission, RolePermission, UserAction, Reservation,
+        EmailingType, ReservationEmailing, UserRestoration
     ],
     synchronize: false,
     logging: true

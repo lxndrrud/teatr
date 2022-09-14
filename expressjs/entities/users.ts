@@ -1,5 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, OneToOne, JoinColumn } from'typeorm'
+import { Reservation } from './reservations'
 import { Role } from './roles'
+import { UserRestoration } from './users_restorations'
 import { UserAction } from './user_actions'
 
 @Entity({ name: 'users' })
@@ -34,4 +36,10 @@ export class User {
 
     @OneToMany(() => UserAction, (userAction) => userAction.user)
     userActions!: UserAction[]
+
+    @OneToMany(() => UserRestoration, userRestoration => userRestoration.user)
+    userRestorations!: UserRestoration[]
+
+    @OneToMany(() => Reservation, reservation => reservation.user)
+    reservations!: Reservation[]
 }

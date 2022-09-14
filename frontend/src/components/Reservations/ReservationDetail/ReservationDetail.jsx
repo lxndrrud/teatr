@@ -8,8 +8,8 @@ function ReservationDetail({ reservation }) {
     return (
         <div className="mx-auto mt-3 w-[min-content] md:w-[85%] p-1 md:p-5 
                         flex flex-col md:flex-row flex-wrap justify-between 
-                        bg-[#eeeeee] rounded-md shadow-xl hover:shadow-2xl 
-                        text-[16px] sm:text-[18px]">
+                        bg-[#eeeeee] rounded-md shadow-xl
+                        text-[14px] sm:text-[18px]">
                 <div className="w-[min-content] lg:w-[700px] flex flex-col">
                     <table className='border-separate border-2 border-solid rounded-md'>
                         <tbody>

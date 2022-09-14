@@ -22,6 +22,7 @@ import { SlotsEventEmitter } from "../events/SlotsEmitter";
 import { UserRepo } from "../repositories/User.repo";
 import { DatabaseConnection } from "../databaseConnection";
 import { PermissionChecker } from "../infrastructure/PermissionChecker.infra";
+import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
@@ -36,7 +37,7 @@ const reservationController = new ReservationController(
             new UserDatabaseModel(KnexConnection)
         ),
         new ReservationGuard(new PermissionChecker()),
-        new UserRepo(DatabaseConnection),
+        new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
         new PermissionChecker()
     ),
     new ReservationCRUDService(
@@ -79,7 +80,7 @@ const reservationController = new ReservationController(
         new ReservationGuard(new PermissionChecker()),
         new EmailSender(),
         new CodeGenerator(),
-        new UserRepo(DatabaseConnection),
+        new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
         new PermissionChecker()
     ),
     new ReservationFilterService(
@@ -97,7 +98,7 @@ const reservationController = new ReservationController(
             new TimestampHelper()
         ),
         new TimestampHelper(),
-        new UserRepo(DatabaseConnection),
+        new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
         new PermissionChecker()
     ),
     SlotsEventEmitter.getInstance(

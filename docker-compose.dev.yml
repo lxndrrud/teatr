@@ -16,6 +16,7 @@ services:
       - 5432:5432
 
   adminer:
+    container_name: adminer
     image: adminer
     restart: always
     ports:

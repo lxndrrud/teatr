@@ -6,7 +6,7 @@ function PersonalArea() {
 
   return (
     <div className="px-0 sm:p-4 w-[max-content] sm:w-[800px] 
-                    bg-[#eeeeee] border-2 border-solid
+                    bg-[#f1e1f5] shadow-xl
                     flex flex-col whitespace-nowrap justify-center rounded-lg" >
       {
         !user

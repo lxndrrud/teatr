@@ -54,6 +54,10 @@
             id_role: 3,
             id_permission: 6,
         },
+        {
+            id_role: 3,
+            id_permission: 7
+        }
     ]);
 };
   

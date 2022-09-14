@@ -1,5 +1,6 @@
 import { DatabaseConnection } from "../databaseConnection";
 import { User } from "../entities/users";
+import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
 import { UserRepo } from "../repositories/User.repo";
 
 export interface IPermissionChecker {
@@ -59,10 +60,18 @@ export class PermissionChecker implements IPermissionChecker {
 
         return -1 != result
     }
+
+    public async check_CanRestorePasswordByEmail(user: User) {
+        let result = user.role.rolePermissions.findIndex((rolePerm) => {
+            return rolePerm.permission.code === 'ВОССТ_ПАРОЛЬ_ПО_ПОЧТЕ'
+        }) 
+
+        return -1 != result
+    }
 }
 
 export async function testPermissionChecker() {
-    const userRepo = new UserRepo(DatabaseConnection)
+    const userRepo = new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection))
     const checker = new PermissionChecker()
 
     let users = await userRepo.getAllUsers()
@@ -77,5 +86,6 @@ export async function testPermissionChecker() {
         console.log(await checker.check_CanIgnoreMaxSlotsValue(user))
         console.log(await checker.check_CanReserveWithoutConfirmation(user))
         console.log(await checker.check_CanSeeAllReservations(user))
+        console.log(await checker.check_CanRestorePasswordByEmail(user))
     }
 } 

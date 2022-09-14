@@ -15,6 +15,8 @@ import { Hasher } from "../utils/hasher";
 import { FileStreamHelper } from '../utils/fileStreams';
 import { UserRepo } from "../repositories/User.repo";
 import { DatabaseConnection } from "../databaseConnection";
+import { PermissionChecker } from "../infrastructure/PermissionChecker.infra";
+import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
 
 export const usersRouter = Router()
 const userController = new UserController(
@@ -26,7 +28,9 @@ const userController = new UserController(
         new UserGuard(),
         new CodeGenerator(),
         new EmailSender(),
-        new Hasher()
+        new Hasher(),
+        new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
+        new PermissionChecker()
     ),
     new UserCSVService(
         KnexConnection,
@@ -34,7 +38,7 @@ const userController = new UserController(
         new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
         new FileStreamHelper(),
         new Hasher(),
-        new UserRepo(DatabaseConnection)
+        new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
     )
 )
 

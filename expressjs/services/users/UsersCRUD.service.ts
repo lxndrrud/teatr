@@ -8,6 +8,9 @@ import { IUserGuard } from "../../guards/User.guard";
 import { CodeGenerator } from "../../utils/code";
 import { EmailSender } from "../../utils/email";
 import { Hasher } from "../../utils/hasher";
+import { IUserRepo } from "../../repositories/User.repo";
+import { User } from "../../entities/users";
+import { PermissionChecker } from "../../infrastructure/PermissionChecker.infra";
 
 
 export interface IUserCRUDService {
@@ -57,6 +60,8 @@ export class UserFetchingModel implements IUserCRUDService {
     protected codeGenerator
     protected emailSender
     protected hasher
+    protected userRepo
+    protected permissionChecker
 
     constructor(
         connectionInstance: Knex<any, unknown[]>,
@@ -66,7 +71,9 @@ export class UserFetchingModel implements IUserCRUDService {
         userGuardInstance: IUserGuard,
         codeGeneratorInstance: CodeGenerator,
         emailSenderInstance: EmailSender,
-        hasherInstance: Hasher
+        hasherInstance: Hasher,
+        userRepo: IUserRepo,
+        permissionCheckerInstance: PermissionChecker
     ) {
         this.connection = connectionInstance
         this.userModel = userModelInstance
@@ -76,6 +83,8 @@ export class UserFetchingModel implements IUserCRUDService {
         this.codeGenerator = codeGeneratorInstance
         this.emailSender = emailSenderInstance
         this.hasher = hasherInstance
+        this.userRepo = userRepo
+        this.permissionChecker = permissionCheckerInstance
     }
 
     async createUser(payload: UserRegisterInterface) {
@@ -410,49 +419,52 @@ export class UserFetchingModel implements IUserCRUDService {
      */
     async restorePasswordByEmail(email: string) {
         // Найти пользователя по почте
-        let user: IExtendedUser
+        let userDB: User | null
         try {
-            user = <IExtendedUser> await this.userModel.get({ email })
+            userDB = await this.userRepo.getUserByEmail(email)
+            .catch(e => { throw e })
         } catch(e) {
-            return <InnerErrorInterface>{
-                code: 500, 
-                message: "Внутренняя ошибка при поиске пользователя!"
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
             }
         }
         // Пользователь не найден
-        if (!user) {
-            return <InnerErrorInterface>{
-                code: 404,
-                message: "Пользователь с указанной почтой не найден!"
-            }
-        }
-        // Проверка роли
-        let visitor = await this.roleFetchingInstance.getVisitorRole()
-        if (isInnerErrorInterface(visitor)) {
-            return <InnerErrorInterface>{
-                code: visitor.code, 
-                message: "Внутренняя ошибка!"
-            }
-        }
-        if (visitor.id !== user.id_role) {
+        if (!userDB) {
             return <InnerErrorInterface> {
-                code: 403, 
-                message: "Данная функция вам не доступна! Пожалуйста, обратитесь к администратору-программисту."
+                code: 403,
+                message: 'Пользователь не найден!'
             }
         }
-        // Сгенерить новый пароль,сохранить его и отправить письмо с паролем на почту
+        // Проверка разрешения на восстановление
+        if (!(await this.permissionChecker.check_CanRestorePasswordByEmail(userDB))) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Вы не можете пользоваться восстановлением пароля по почте! Пожалуйста, обратитесь к администратору.'
+            }
+        }
+        // Проверка предыдущего восстановления и его таймаута
+        if (!(await this.userRepo.checkCanSendRestorEmail(userDB.id))) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Пока что Вы еще не можете пользоваться восстановлением пароля по почте!'
+            }
+        }
+        // Сгенерить новый пароль,сохранить его, создать запись о восстановлении и отправить письмо с паролем на почту
         const newPassword = this.codeGenerator.generateCode()
         const trx = await this.connection.transaction()
         try {
             const newPasswordHashed = await this.hasher.hash(newPassword)
-            await this.userModel.update(trx, user.id, <UserInterface>{
+            await this.userModel.update(trx, userDB.id, <UserInterface>{
                 password: newPasswordHashed
             })
+            await this.userRepo.createUserRestoration(userDB.id, newPassword)
+                .catch((e) => { throw e })
             await trx.commit()
             this.emailSender.send(
-                user.email, 
+                userDB.email, 
                 `Восстановление пароля на "Брони на Оборонной"`, 
-                this.userInfrastructure.generateRestorePasswordEmailMessage(
+                'Новый пароль: ' + this.userInfrastructure.generateRestorePasswordEmailMessage(
                     newPassword
                 ))
         } catch( e) {

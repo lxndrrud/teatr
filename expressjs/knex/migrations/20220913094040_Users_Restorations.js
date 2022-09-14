@@ -9,6 +9,8 @@ exports.up = function(knex) {
         tbl.integer('id_user').unsigned().notNullable()
         tbl.integer('id_emailing_type').unsigned().notNullable()
 
+        tbl.string('code').notNullable()
+
         tbl.timestamp('time_created').notNullable().defaultTo(knex.fn.now())
 
         tbl.foreign('id_user')
