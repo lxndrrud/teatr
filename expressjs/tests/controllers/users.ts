@@ -377,24 +377,120 @@ export function UsersControllerTests() {
             })
         })
 
-        describe("POST /expressjs/users/restore/password", function() {
-            const link = '/expressjs/users/restore/password'
-            const okEmail = 'lxndrrud@yandex.ru'
-
-            it("should be OK ", function() {
-                request(this.server)
-                .post(link)
-                .send({
-                    email: okEmail
+        describe('Восстановление пароля по почте', function() {
+            describe("POST /expressjs/users/restore/password", function() {
+                const link = '/expressjs/users/restore/password'
+                const okEmail = 'lxndrrud@yandex.ru'
+                const failAdminEmail = `admin@admin.ru`
+                const failCashierEmail = `kassir@mail.ru`
+                const failNonExistEmail = 'non-exist@mail.ru'
+    
+                it('should FAIL because of non-existing user email', async function() {
+                    const response = await request(this.server)
+                        .post(link)
+                        .send({
+                            email: failNonExistEmail
+                        })
+                    
+                    expect(response.statusCode).to.equal(404)
                 })
-                .then(response => {
-                    setTimeout(() => {
+    
+                it('should FAIL because password restoration is not allowed for Cashier Role', function() {
+                    request(this.server)
+                    .post(link)
+                    .send({
+                        email: failCashierEmail
+                    })
+                    .then(response => {
+                        expect(response.status).to.equal(403)
+                    })
+                })
+    
+                it('should FAIL because password restoration is not allowed for Admin Role', function() {
+                    request(this.server)
+                    .post(link)
+                    .send({
+                        email: failAdminEmail
+                    })
+                    .then(response => {
+                        expect(response.status).to.equal(403)
+                    })
+                })
+    
+                it("should be OK ", function() {
+                    request(this.server)
+                    .post(link)
+                    .send({
+                        email: okEmail
+                    })
+                    .then(response => {
                         expect(response.status).to.equal(200)
-                    }, 2000)
+                    })
+    
+                })
+    
+                it("should FAIL because of restoration repeat timeout", function() {
+                    request(this.server)
+                    .post(link)
+                    .send({
+                        email: okEmail
+                    })
+                    .then(response => {
+                        expect(response.status).to.equal(403)
+                    })
+                })            
+            })
+    
+            describe("POST /expressjs/users/restore/password/resendEmail", function() {
+                const link = '/expressjs/users/restore/password/resendEmail'
+                const failResendTimeoutEmail = 'lxndrrud@yandex.ru'
+                const failAdminEmail = `admin@admin.ru`
+                const failCashierEmail = `kassir@mail.ru`
+                const failNonExistEmail = 'non-exist@mail.ru'
+
+                it('should FAIL because Admin is not allowed to restore password', async function() {
+                    const response = await request(this.server)
+                        .post(link)
+                        .send({
+                            email: failAdminEmail
+                        })
+    
+                    expect(response.status).to.equal(403)
                 })
 
+                it('should FAIL because Cashier is not allowed to restore password', async function() {
+                    const response = await request(this.server)
+                        .post(link)
+                        .send({
+                            email: failCashierEmail
+                        })
+    
+                    expect(response.status).to.equal(403)
+                })
+
+                it('should FAIL because of non-existing user', async function() {
+                    const response = await request(this.server)
+                        .post(link)
+                        .send({
+                            email: failNonExistEmail
+                        })
+    
+                    expect(response.status).to.equal(404)
+                })
+    
+                it('should FAIL because of resend timeout', async function() {
+                    const response = await request(this.server)
+                        .post(link)
+                        .send({
+                            email: failResendTimeoutEmail
+                        })
+    
+                    expect(response.status).to.equal(403)
+                }).retries(3)
             })
         })
+
+        
 
         describe("POST /expressjs/users/csv/create", function() {
             const link = '/expressjs/users/csv/create'

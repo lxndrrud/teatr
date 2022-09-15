@@ -17,7 +17,10 @@ export interface IUserInfrastructure {
         description: string): 
     Promise<InnerErrorInterface | undefined>
     getExtendedUser(idUser: number): Promise<IExtendedUser | InnerErrorInterface | undefined>
-    generateRestorePasswordEmailMessage(code: string): string
+    generateRestorePasswordEmailMessage(code: string): {
+        subject: string;
+        message: string;
+    }
 }
 
 export class UserInfrastructure implements IUserInfrastructure {
@@ -127,7 +130,11 @@ export class UserInfrastructure implements IUserInfrastructure {
     } 
 
     public generateRestorePasswordEmailMessage(code: string) {
-        return `Ваш новый пароль: ${code}\nРекомендуем Вам сменить его на постоянный во вкладке Аккаунт.`
+        return {
+            subject: 'Восстановление пароля на "Брони на Оборонной"',
+            message: `Ваш новый пароль: ${code}\nРекомендуем Вам сменить его на постоянный во вкладке Аккаунт.`
+        } 
+            
     }
 
 }

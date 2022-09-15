@@ -6,7 +6,8 @@ exports.up = function(knex) {
     return knex.schema.withSchema('public').createTable('emailing_types', tbl => {
         tbl.increments('id').primary()
         tbl.string('title').notNullable()
-        tbl.bigInteger('interval').unsigned().notNullable()
+        tbl.bigInteger('repeat_interval').unsigned().notNullable()
+        tbl.bigInteger('resend_interval').unsigned().notNullable()
         tbl.boolean('repeatable').notNullable()
     })
 };

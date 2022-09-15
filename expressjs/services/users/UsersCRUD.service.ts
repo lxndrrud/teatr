@@ -49,6 +49,7 @@ export interface IUserCRUDService {
     Promise<InnerErrorInterface | undefined>
     changePersonalInfo(user: UserRequestOption, personalInfo: IUserPersonalInfo): Promise<InnerErrorInterface | undefined>
     restorePasswordByEmail(email: string): Promise<InnerErrorInterface | undefined>
+    resendRestorationEmail(email: string): Promise<InnerErrorInterface | undefined>
 }
 
 export class UserFetchingModel implements IUserCRUDService {
@@ -134,6 +135,9 @@ export class UserFetchingModel implements IUserCRUDService {
         }
     }
 
+    /**
+     * * Логика обычного логина  
+     */
     async loginUser(payload: UserLoginInterface) {
         // Получение пользователя и сравнение введенного пароля с хэшем в базе
         let user: IExtendedUser | undefined 
@@ -432,7 +436,7 @@ export class UserFetchingModel implements IUserCRUDService {
         // Пользователь не найден
         if (!userDB) {
             return <InnerErrorInterface> {
-                code: 403,
+                code: 404,
                 message: 'Пользователь не найден!'
             }
         }
@@ -444,7 +448,7 @@ export class UserFetchingModel implements IUserCRUDService {
             }
         }
         // Проверка предыдущего восстановления и его таймаута
-        if (!(await this.userRepo.checkCanSendRestorEmail(userDB.id))) {
+        if (!(await this.userRepo.checkCanRepeatRestorEmail(userDB.id))) {
             return <InnerErrorInterface> {
                 code: 403,
                 message: 'Пока что Вы еще не можете пользоваться восстановлением пароля по почте!'
@@ -461,12 +465,13 @@ export class UserFetchingModel implements IUserCRUDService {
             await this.userRepo.createUserRestoration(userDB.id, newPassword)
                 .catch((e) => { throw e })
             await trx.commit()
+            const emailInfo = this.userInfrastructure.generateRestorePasswordEmailMessage(newPassword)
             this.emailSender.send(
                 userDB.email, 
-                `Восстановление пароля на "Брони на Оборонной"`, 
-                'Новый пароль: ' + this.userInfrastructure.generateRestorePasswordEmailMessage(
-                    newPassword
-                ))
+                emailInfo.subject, 
+                emailInfo.message
+            )
+            .catch(e => console.error(e))
         } catch( e) {
             console.error(e)
             await trx.rollback()
@@ -475,5 +480,59 @@ export class UserFetchingModel implements IUserCRUDService {
                 message: 'Внутренняя ошибка во время восстановления пароля!'
             }
         }
+    }
+
+    /**
+     * * Логика повторной отправки письма для восстановления пароля по почте
+     */
+    async resendRestorationEmail(email: string) {
+         // Найти пользователя по почте
+        let userDB: User | null
+        try {
+            userDB = await this.userRepo.getUserByEmail(email)
+                .catch(e => { throw e })
+        } catch(e) {
+            return <InnerErrorInterface> {
+                code: 500,
+                message: 'Внутренняя ошибка сервера!'
+            }
+        }
+        // Пользователь не найден
+        if (!userDB) {
+            return <InnerErrorInterface> {
+                code: 404,
+                message: 'Пользователь не найден!'
+            }
+        }
+        // Проверка разрешения на восстановление
+        if (!(await this.permissionChecker.check_CanRestorePasswordByEmail(userDB))) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Вы не можете пользоваться восстановлением пароля по почте! Пожалуйста, обратитесь к администратору.'
+            }
+        }
+        // Получение последнего восстановления пароля по почте
+        const lastRestoration = await this.userRepo.getLastUserRestoration(userDB.id)
+        if (!lastRestoration) {
+            return <InnerErrorInterface> {
+                code: 404,
+                message: "Ваше последнее восстановление пароля не найдено. Попробуйте воспользоваться восстановление на странице входа."
+            }
+        }
+        // Проверка таймаута последней отправки письма на почту
+        if (!(await this.userRepo.checkCanResendRestorEmail(userDB.id))) {
+            return <InnerErrorInterface> {
+                code: 403,
+                message: 'Вы сможете повторно запросить письмо на почту спустя определенный временной интервал.'
+            }
+        }
+        // Сгенерировать письмо и отправить повторно        
+        const emailInfo = this.userInfrastructure.generateRestorePasswordEmailMessage(lastRestoration.code)
+        this.emailSender.send(
+            userDB.email, 
+            emailInfo.subject, 
+            emailInfo.message
+        )
+        .catch(e => console.error(e))
     }
 }

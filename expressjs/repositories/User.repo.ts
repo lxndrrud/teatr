@@ -10,14 +10,17 @@ export interface IUserRepo {
     getUserByEmail(email: string): Promise<User | null>
     getAllUsers(): Promise<User[]>
     createUserAction(user: User, actionDescription: string): Promise<void>
-    checkCanSendRestorEmail(idUser: number): Promise<boolean>
+    checkCanResendRestorEmail(idUser: number): Promise<boolean>
+    checkCanRepeatRestorEmail(idUser: number): Promise<boolean>
     createUserRestoration(idUser: number, code: string): Promise<undefined>
+    getLastUserRestoration(idUser: number): Promise<UserRestoration | null>
 }
 
 export class UserRepo implements IUserRepo {
     private connection
     private userRepo
     private emailingTypeRepo
+    private userRestorationRepo
 
     constructor(
         connectionInstance: DataSource,
@@ -26,6 +29,7 @@ export class UserRepo implements IUserRepo {
         this.connection = connectionInstance
         this.userRepo = this.connection.getRepository(User)
         this.emailingTypeRepo = emailingTypeRepoInstance
+        this.userRestorationRepo = this.connection.getRepository(UserRestoration)
     }
 
     public async getUser(idUser: number) {
@@ -66,7 +70,24 @@ export class UserRepo implements IUserRepo {
         await this.connection.manager.save(newRestoration)
     }
 
-    public async checkCanSendRestorEmail(idUser: number) {
+    public async getLastUserRestoration(idUser: number) {
+        const emailingType = await this.emailingTypeRepo.getUserRestorationType()
+        if (!emailingType) return Promise.reject('Тип рассылки не найден!')
+
+        const lastRestoration = await this.userRestorationRepo.findOne({
+            where: {
+                idUser: idUser,
+                idEmailingType: emailingType.id
+            },
+            relations: {
+                user: true
+            }
+        })
+
+        return lastRestoration
+    }
+
+    public async checkCanRepeatRestorEmail(idUser: number) {
         const user = await this.connection.createQueryBuilder(User, 'user')
             .leftJoinAndSelect('user.userRestorations', 'userRest')
             .leftJoinAndSelect('userRest.emailingType', 'et')
@@ -74,10 +95,26 @@ export class UserRepo implements IUserRepo {
             .getOne()
 
         return !!user 
-            && user.userRestorations.length === 0
+            && (user.userRestorations.length === 0
                 ? true
-                : moment().isSameOrAfter(moment(user?.userRestorations[0].timeCreated)
-                    .add(user?.userRestorations[0].emailingType.interval, 'seconds'))
+                : user.userRestorations[0].emailingType.repeatable 
+                    && moment().isSameOrAfter(moment(user?.userRestorations[0].timeCreated)
+                        .add(user?.userRestorations[0].emailingType.repeatInterval, 'seconds')))
+    }
+
+    public async checkCanResendRestorEmail(idUser: number) {
+        const user = await this.connection.createQueryBuilder(User, 'user')
+            .leftJoinAndSelect('user.userRestorations', 'userRest')
+            .leftJoinAndSelect('userRest.emailingType', 'et')
+            .where('user.id = :idUser', { idUser })
+            .getOne()
+
+        return !!user 
+            && (user.userRestorations.length === 0
+                ? true
+                : user.userRestorations[0].emailingType.repeatable 
+                    && moment().isSameOrAfter(moment(user?.userRestorations[0].timeCreated)
+                        .add(user?.userRestorations[0].emailingType.resendInterval, 'seconds')))
     }
 
     public async createUserAction(user: User, actionDescription: string) {

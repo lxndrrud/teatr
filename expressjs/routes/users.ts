@@ -77,6 +77,10 @@ usersRouter.post('/restore/password',
     userController.restorePasswordByEmail.bind(userController)
 )
 
+usersRouter.post('/restore/password/resendEmail', 
+    userController.resendRestorationEmail.bind(userController)
+)
+
 usersRouter.post('/csv/create',
     authMiddleware.adminAuthMiddleware.bind(authMiddleware),
     userController.createUsersCSV.bind(userController)

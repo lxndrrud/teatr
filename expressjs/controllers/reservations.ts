@@ -139,6 +139,29 @@ export class ReservationController {
     }
 
     /**
+     * * Повторная отправка письма с кодом подвтерждения на почту
+     * TODO: Доделать этот контроллер
+     */
+    async resendConfirmationEmail(req: Request, res: Response) {
+        // Проверка на авторизованность
+        if (!req.user) {
+            res.status(401).send(<ErrorInterface>{
+                message: 'Ошибка авторизации!'
+            })
+            return
+        }
+        // Проверка строки запроса
+        const idReservation = parseInt(req.params.idReservation)
+        if (!idReservation) {
+            res.status(400).send(<ErrorInterface>{
+                message: 'Ошибка в строке запроса!'
+            })
+            return
+        }
+
+    }
+
+    /**
      * * Изменение статуса оплаты
      */
     async paymentForReservation(req: Request, res: Response) {

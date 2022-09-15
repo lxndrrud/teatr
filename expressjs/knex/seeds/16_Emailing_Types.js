@@ -8,12 +8,14 @@
     await knex('emailing_types').insert([
         {
             title: 'Создание брони',
-            interval: 60 * 3,
-            repeatable: true,
+            resend_interval: 60 * 2,
+            repeat_interval: 0,
+            repeatable: false,
         }, 
         {
             title: 'Восстановление пароля',
-            interval: 60 * 60 * 24,
+            resend_interval: 60 * 2,
+            repeat_interval: 60 * 60 * 24,
             repeatable: true
         }
     ]);

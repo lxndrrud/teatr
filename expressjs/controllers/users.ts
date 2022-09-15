@@ -267,6 +267,27 @@ export class UserController {
     }
 
     /**
+     * * Повторно отправить письмо для восста на почту
+     */
+    async resendRestorationEmail(req: Request, res: Response) {
+        const email = req.body.email
+        if (!email) {
+            res.status(400).send(<ErrorInterface>{
+                message: "Не указана почта для восстановления пароля!"
+            })
+            return
+        } 
+        const result = await this.userCRUDService.resendRestorationEmail(email)
+        if (isInnerErrorInterface(result)) {
+            res.status(result.code).send(<ErrorInterface>{
+                message: result.message
+            })
+            return
+        }
+        res.status(200).end()
+    }
+
+    /**
      * * Загрузка пользователей через CSV
      */
     async createUsersCSV(req: Request, res: Response) {

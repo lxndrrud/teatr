@@ -11,8 +11,11 @@ export class EmailingType {
     @Column()
     title!: string
 
-    @Column({ unsigned: true })
-    interval!: number
+    @Column({ name: 'repeat_interval', unsigned: true })
+    repeatInterval!: number
+    
+    @Column({ name: 'resend_interval', unsigned: true })
+    resendInterval!: number
 
     @Column()
     repeatable!: boolean

@@ -11,6 +11,10 @@ import { UserGuard } from "../../guards/User.guard"
 import { CodeGenerator } from "../../utils/code"
 import { EmailSender } from "../../utils/email"
 import { Hasher } from "../../utils/hasher"
+import { UserRepo } from "../../repositories/User.repo"
+import { DatabaseConnection } from "../../databaseConnection"
+import { PermissionChecker } from "../../infrastructure/PermissionChecker.infra"
+import { EmailingTypeRepo } from "../../repositories/EmailingType.repo"
 
 
 export function UserServiceTests() {
@@ -26,7 +30,9 @@ export function UserServiceTests() {
             new UserGuard(),
             new CodeGenerator(),
             new EmailSender(), 
-            new Hasher())
+            new Hasher(),
+            new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
+            new PermissionChecker())
 
         describe("Create User", function() {
             const userPayload = userMockModel.userPayload

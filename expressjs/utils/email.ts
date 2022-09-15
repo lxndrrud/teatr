@@ -20,7 +20,7 @@ export class EmailSender {
         });
     }
 
-    public send(toEmail: string, subject: string, text: string) {
+    public async send(toEmail: string, subject: string, text: string) {
         return this.transporter.sendMail({
             from: `"Театр на Оборонной" <${process.env.MAIL_USER}@yandex.ru>`,
             to: toEmail,
