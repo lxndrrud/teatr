@@ -1,4 +1,5 @@
 import { ReservationModel } from "../../dbModels/reservations";
+import { Reservation } from "../../entities/reservations";
 import { User } from "../../entities/users";
 import { IPermissionChecker } from "../../infrastructure/PermissionChecker.infra";
 import { IReservationInfrastructure } from "../../infrastructure/Reservation.infra";
@@ -8,6 +9,7 @@ import { PlayReservationFilterOptionInterface } from "../../interfaces/plays";
 import { ReservationFilterQueryInterface, ReservationWithoutSlotsInterface, ReservationInterface } from "../../interfaces/reservations";
 import { TimestampReservationFilterOptionDatabaseInterface, TimestampReservationFilterOptionInterface } from "../../interfaces/timestamps";
 import { UserRequestOption } from "../../interfaces/users";
+import { IReservationRepo } from "../../repositories/Reservation.repo";
 import { IUserRepo } from "../../repositories/User.repo";
 import { TimestampHelper } from "../../utils/timestamp";
 import { RoleService } from "../roles";
@@ -31,6 +33,7 @@ export class ReservationFilterService implements IReservationFilterService {
     protected timestampHelper
     protected userRepo
     protected permissionChecker
+    protected reservationRepo
 
     constructor(
         reservationDatabaseInstance: ReservationModel,
@@ -38,7 +41,8 @@ export class ReservationFilterService implements IReservationFilterService {
         reservationInfrastructureInstance: IReservationInfrastructure,
         timestampHelperInstance: TimestampHelper,
         userRepoInstance: IUserRepo,
-        permissionCheckerInstance: IPermissionChecker
+        permissionCheckerInstance: IPermissionChecker,
+        reservationRepoInstance: IReservationRepo
     ) {
         this.reservationModel = reservationDatabaseInstance
         this.roleService = roleServiceInstance
@@ -46,6 +50,7 @@ export class ReservationFilterService implements IReservationFilterService {
         this.timestampHelper = timestampHelperInstance
         this.userRepo = userRepoInstance
         this.permissionChecker = permissionCheckerInstance
+        this.reservationRepo = reservationRepoInstance
     }
 
     /**
@@ -146,12 +151,12 @@ export class ReservationFilterService implements IReservationFilterService {
         try {
             // В зависимости от роли выдать либо часть всех броней,
             // либо часть пользовательских броней
-            let query: ReservationWithoutSlotsInterface[]
-            if (!await this.permissionChecker.check_CanSeeAllReservations(userDB))
-                query = await this.reservationModel
-                    .getFilteredReservationsForUser(userQuery, user.id)
+            let query: Reservation[]
+            if (!(await this.permissionChecker.check_CanSeeAllReservations(userDB)))
+                query = await this.reservationRepo
+                    .getFilteredReservations(userQuery, userDB.id)
             else 
-                query = await this.reservationModel
+                query = await this.reservationRepo
                     .getFilteredReservations(userQuery)
 
             // Отредактировать результирующий список
@@ -160,7 +165,7 @@ export class ReservationFilterService implements IReservationFilterService {
             
             return result
         } catch (e) {
-            console.log(e)
+            console.error(e)
             return <InnerErrorInterface>{
                 code: 500,
                 message: 'Внутренняя ошибка сервера при фильтрации броней!'

@@ -23,22 +23,24 @@ import { UserRepo } from "../repositories/User.repo";
 import { DatabaseConnection } from "../databaseConnection";
 import { PermissionChecker } from "../infrastructure/PermissionChecker.infra";
 import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
+import { ReservationRepo } from "../repositories/Reservation.repo";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
     new ReservationPaymentService(
-        KnexConnection,
-        new ReservationDatabaseModel(
-            KnexConnection,
-            new TimestampHelper()
-        ),
-        new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
-        new UserInfrastructure(
-            new UserDatabaseModel(KnexConnection)
-        ),
         new ReservationGuard(new PermissionChecker()),
         new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
-        new PermissionChecker()
+        new PermissionChecker(),
+        new ReservationRepo(DatabaseConnection, new TimestampHelper()),
+        new ReservationInfrastructure(
+            new ReservationDatabaseModel(
+                KnexConnection,
+                new TimestampHelper()
+            ), 
+            new ReservationGuard(new PermissionChecker()),
+            new TimestampHelper()
+        ),
+        new EmailSender()
     ),
     new ReservationCRUDService(
         KnexConnection,
@@ -81,7 +83,8 @@ const reservationController = new ReservationController(
         new EmailSender(),
         new CodeGenerator(),
         new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
-        new PermissionChecker()
+        new PermissionChecker(),
+        new ReservationRepo(DatabaseConnection, new TimestampHelper())
     ),
     new ReservationFilterService(
         new ReservationDatabaseModel(
@@ -99,7 +102,8 @@ const reservationController = new ReservationController(
         ),
         new TimestampHelper(),
         new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
-        new PermissionChecker()
+        new PermissionChecker(),
+        new ReservationRepo(DatabaseConnection, new TimestampHelper())
     ),
     SlotsEventEmitter.getInstance(
         new SessionCRUDService(

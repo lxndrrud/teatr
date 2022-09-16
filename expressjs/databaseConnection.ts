@@ -10,6 +10,15 @@ import { Reservation } from "./entities/reservations"
 import { EmailingType } from "./entities/emailing_types"
 import { ReservationEmailing } from "./entities/reservations_emailings"
 import { UserRestoration } from "./entities/users_restorations"
+import { Auditorium } from "./entities/auditoriums"
+import { Play } from "./entities/plays"
+import { PricePolicy } from "./entities/price_policies"
+import { ReservationSlot } from "./entities/reservations_slots"
+import { Row } from "./entities/rows"
+import { Seat } from "./entities/seats"
+import { Session } from "./entities/sessions"
+import { Slot } from "./entities/slots"
+
 
 export const DatabaseConnection = new DataSource({
     type: 'postgres',
@@ -19,7 +28,8 @@ export const DatabaseConnection = new DataSource({
     database: process.env.DB_DATABASE,
     entities: [
         User, Role, Permission, RolePermission, UserAction, Reservation,
-        EmailingType, ReservationEmailing, UserRestoration
+        EmailingType, ReservationEmailing, UserRestoration,
+        Auditorium, Play, PricePolicy, ReservationSlot, Row, Seat, Session, Slot
     ],
     synchronize: false,
     logging: true

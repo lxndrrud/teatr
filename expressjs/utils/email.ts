@@ -1,7 +1,11 @@
 import nodemailer from "nodemailer"
 import 'dotenv/config'
 
-export class EmailSender {
+export interface IEmailSender {
+    send(toEmail: string, subject: string, text: string): Promise<void>
+}
+
+export class EmailSender implements IEmailSender {
     private transporter
     private HOST
     private PORT
@@ -21,7 +25,7 @@ export class EmailSender {
     }
 
     public async send(toEmail: string, subject: string, text: string) {
-        return this.transporter.sendMail({
+        this.transporter.sendMail({
             from: `"Театр на Оборонной" <${process.env.MAIL_USER}@yandex.ru>`,
             to: toEmail,
             subject: subject,

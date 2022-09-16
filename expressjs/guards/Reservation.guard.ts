@@ -1,3 +1,5 @@
+import moment from "moment"
+import { Reservation } from "../entities/reservations"
 import { User } from "../entities/users"
 import { IPermissionChecker } from "../infrastructure/PermissionChecker.infra"
 import { ReservationWithoutSlotsInterface } from "../interfaces/reservations"
@@ -5,11 +7,13 @@ import { RoleDatabaseInterface } from "../interfaces/roles"
 
 
 export interface IReservationGuard {
-    canUserDelete(reservation: ReservationWithoutSlotsInterface, user: User): Promise<boolean>
+    canUserDelete(user: User, reservation: Reservation): Promise<boolean>
     
-    canUserConfirm(reservation: ReservationWithoutSlotsInterface, user: User): boolean
+    canUserConfirm(user: User, reservation: Reservation): boolean
 
-    canUserPay(reservation: ReservationWithoutSlotsInterface, user: User): Promise<boolean>
+    canUserPay(user: User, reservation: Reservation): Promise<boolean>
+
+    canResendConfirmationEmail(user: User, reservation: Reservation): boolean
 }
 
 export class ReservationGuard implements IReservationGuard {
@@ -21,19 +25,26 @@ export class ReservationGuard implements IReservationGuard {
         this.permissionChecker = permissionCheckerInstance
     }
 
-    public async canUserDelete(reservation: ReservationWithoutSlotsInterface, user: User) {
-        return (reservation.id_user === user.id && !reservation.session_is_locked)
+    public async canUserDelete( user: User, reservation: Reservation) {
+        return (reservation.user.id === user.id && !reservation.session.isLocked)
         || (await this.permissionChecker.check_CanSeeAllReservations(user) 
             && await this.permissionChecker.check_CanDeleteAnotherUserReservations(user) )
     }
 
-    public canUserConfirm(reservation: ReservationWithoutSlotsInterface, user: User) {
-        return reservation.id_user === user.id && !reservation.session_is_locked 
-            && !reservation.is_confirmed
+    public canUserConfirm(user: User, reservation: Reservation) {
+        return reservation.user.id === user.id && !reservation.session.isLocked 
+            && !reservation.isConfirmed
     }
 
-    public async canUserPay(reservation: ReservationWithoutSlotsInterface, user: User) {
+    public async canUserPay(user: User, reservation: Reservation ) {
         return await this.permissionChecker.check_CanSeeAllReservations(user)
-            && !reservation.is_paid && !reservation.session_is_locked
+            && !reservation.isPaid && !reservation.session.isLocked
+    }
+
+    public canResendConfirmationEmail(user: User, reservation: Reservation) {
+        if (reservation.isConfirmed) return false
+        if (reservation.reservationEmailings.length === 0) return true
+        else return moment().isSameOrAfter(moment(reservation.reservationEmailings[0].timeCreated)
+                .add(reservation.reservationEmailings[0].emailingType.resendInterval))
     }
 }
