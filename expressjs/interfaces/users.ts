@@ -7,6 +7,12 @@ export interface UserBaseInterface {
     lastname?: string
 }
 
+export interface UserBaseVisitorInterface extends Omit<UserBaseInterface, 'id_role'> {}
+export interface UserBaseRoleInterface extends Omit<UserBaseInterface, 'id_role'> {
+    role_title: string
+}
+
+
 export interface UserInterface extends UserBaseInterface {
     id: number
     firstname: string

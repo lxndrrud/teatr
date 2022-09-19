@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface, isUserRegisterInterface, IUserChangePassword, IUserPersonalInfo } 
+import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface, isUserRegisterInterface, IUserChangePassword, IUserPersonalInfo, UserInterface } 
     from "../interfaces/users";
-import { ErrorInterface, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
+import { ErrorInterface, InnerError, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { IUserCRUDService } from "../services/users/UsersCRUD.service";
 import { IUserCSVService } from "../services/users/UsersCSV.service";
 import { UploadedFile } from "express-fileupload";

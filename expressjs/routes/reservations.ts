@@ -24,12 +24,18 @@ import { DatabaseConnection } from "../databaseConnection";
 import { PermissionChecker } from "../infrastructure/PermissionChecker.infra";
 import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
 import { ReservationRepo } from "../repositories/Reservation.repo";
+import { Tokenizer } from "../utils/tokenizer";
+import { Hasher } from "../utils/hasher";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
     new ReservationPaymentService(
         new ReservationGuard(new PermissionChecker()),
-        new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
+        new UserRepo(DatabaseConnection, 
+            new EmailingTypeRepo(DatabaseConnection), 
+            new Hasher(), 
+            new PermissionChecker(), 
+            new Tokenizer()),
         new PermissionChecker(),
         new ReservationRepo(DatabaseConnection, new TimestampHelper()),
         new ReservationInfrastructure(
@@ -82,7 +88,11 @@ const reservationController = new ReservationController(
         new ReservationGuard(new PermissionChecker()),
         new EmailSender(),
         new CodeGenerator(),
-        new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
+        new UserRepo(DatabaseConnection, 
+            new EmailingTypeRepo(DatabaseConnection), 
+            new Hasher(), 
+            new PermissionChecker(), 
+            new Tokenizer()),
         new PermissionChecker(),
         new ReservationRepo(DatabaseConnection, new TimestampHelper())
     ),
@@ -101,7 +111,11 @@ const reservationController = new ReservationController(
             new TimestampHelper()
         ),
         new TimestampHelper(),
-        new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection)),
+        new UserRepo(DatabaseConnection, 
+            new EmailingTypeRepo(DatabaseConnection), 
+            new Hasher(), 
+            new PermissionChecker(), 
+            new Tokenizer()),
         new PermissionChecker(),
         new ReservationRepo(DatabaseConnection, new TimestampHelper())
     ),

@@ -18,6 +18,8 @@ import { Row } from "./entities/rows"
 import { Seat } from "./entities/seats"
 import { Session } from "./entities/sessions"
 import { Slot } from "./entities/slots"
+import { PlayImage } from "./entities/plays_images"
+import { Image } from "./entities/images"
 
 
 export const DatabaseConnection = new DataSource({
@@ -29,7 +31,8 @@ export const DatabaseConnection = new DataSource({
     entities: [
         User, Role, Permission, RolePermission, UserAction, Reservation,
         EmailingType, ReservationEmailing, UserRestoration,
-        Auditorium, Play, PricePolicy, ReservationSlot, Row, Seat, Session, Slot
+        Auditorium, Play, PricePolicy, ReservationSlot, Row, Seat, Session, Slot,
+        Image, PlayImage
     ],
     synchronize: false,
     logging: true

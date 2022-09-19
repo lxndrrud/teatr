@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from'typeorm'
+import { PlayImage } from './plays_images'
 import { Session } from './sessions'
 
 @Entity({ name: 'plays' })
@@ -14,4 +15,7 @@ export class Play {
 
     @OneToMany(() => Session, session => session.play)
     sessions!: Session[]
+
+    @OneToMany(() => PlayImage, playImage => playImage.play)
+    playImages!: PlayImage[] 
 }

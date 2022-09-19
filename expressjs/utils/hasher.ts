@@ -1,7 +1,12 @@
 import bcrypt from 'bcryptjs'
 
 
-export class Hasher {
+export interface IHasher {
+    hash(toHash: string): Promise<string>
+    check(toCompare: string, hash: string): boolean
+}
+
+export class Hasher implements IHasher {
     private hashLib
     constructor() {
         this.hashLib = bcrypt

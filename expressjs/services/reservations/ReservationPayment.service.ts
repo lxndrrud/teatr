@@ -106,7 +106,7 @@ export class ReservationPaymentService {
         if (await this.permissionChecker.check_CanSeeAllReservations(userDB)) {
             const actionDescription = `Подтверждение брони Res:${reservation.id}`
             try {
-                await this.userRepo.createUserAction(userDB, actionDescription)
+                await this.userRepo.createUserAction(userDB.id, actionDescription)
                 .catch(e => { throw e }) 
             } catch(e) {
                 console.error(e)
@@ -138,8 +138,6 @@ export class ReservationPaymentService {
         let userDB: User | null
         try {
             userDB = await this.userRepo.getUser(user.id)
-            .catch(e => { throw e })
-            
         } catch(e) {
             return <InnerErrorInterface> {
                 code: 500,
@@ -220,7 +218,6 @@ export class ReservationPaymentService {
         let userDB: User | null
         try {
             userDB = await this.userRepo.getUser(user.id)
-            .catch(e => { throw e })
         } catch(e) {
             return <InnerErrorInterface> {
                 code: 500,
@@ -261,8 +258,7 @@ export class ReservationPaymentService {
         if (await this.permissionChecker.check_CanSeeAllReservations(userDB)) {
             const actionDescription = `Изменение флага оплаты на ${!reservation.isPaid}`
             try {
-                await this.userRepo.createUserAction(userDB, actionDescription)
-                .catch(e => { throw e }) 
+                await this.userRepo.createUserAction(userDB.id, actionDescription)
             } catch(e) {
                 console.error(e)
                 return <InnerErrorInterface>{
@@ -275,7 +271,6 @@ export class ReservationPaymentService {
         // Изменение флага оплаты и подвтерждения
         try {
             await this.reservationRepo.paymentForReservation(idReservation)
-            .catch(e => { throw e })
         } catch (e) { 
             console.error(e)
             return <InnerErrorInterface>{

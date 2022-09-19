@@ -17,7 +17,6 @@ import { CodeGenerator } from "../../utils/code"
 import { IEmailSender } from "../../utils/email"
 import { RoleService } from "../roles"
 import { SessionCRUDService } from "../sessions/SessionCRUD.service"
-import { IUserCRUDService } from "../users/UsersCRUD.service"
 
 export interface IReservationCRUDService {
     getSingleFullInfo(idUser: number, idRole: number, idReservation: number): 
@@ -293,7 +292,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
         if ((await this.permissionChecker.check_CanSeeAllReservations(userDB))) {
             const actionDescription = `Подтверждение брони Res:${reservation.id}`
             try {
-                await this.userRepo.createUserAction(userDB, actionDescription)
+                await this.userRepo.createUserAction(userDB.id, actionDescription)
                 .catch(e => { throw e }) 
             } catch(e) {
                 console.log(e)
@@ -468,8 +467,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
             Session: ${reservation.session.id},
             Slots: ${idsSlots}`
             try {
-                await this.userRepo.createUserAction(userDB, actionDescription)
-                .catch(e => { throw e }) 
+                await this.userRepo.createUserAction(userDB.id, actionDescription)
             } catch(e) {
                 console.log(e)
                 return <InnerErrorInterface>{

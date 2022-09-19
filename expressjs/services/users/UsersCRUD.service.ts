@@ -1,7 +1,7 @@
 import { UserModel } from "../../dbModels/users";
 import { IExtendedUser, IUserChangePassword, IUserPersonalInfo, UserBaseInterface, UserInterface, UserLoginInterface, UserRegisterInterface, UserRequestOption, UserStrategy } from "../../interfaces/users";
 import { RoleService } from "../roles";
-import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors";
+import { InnerError, InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors";
 import { IUserInfrastructure } from "../../infrastructure/User.infra";
 import { Knex } from "knex";
 import { IUserGuard } from "../../guards/User.guard";
@@ -11,6 +11,7 @@ import { Hasher } from "../../utils/hasher";
 import { IUserRepo } from "../../repositories/User.repo";
 import { User } from "../../entities/users";
 import { PermissionChecker } from "../../infrastructure/PermissionChecker.infra";
+import { IRoleRepo } from "../../repositories/Role.repo";
 
 
 export interface IUserCRUDService {
@@ -63,6 +64,7 @@ export class UserFetchingModel implements IUserCRUDService {
     protected hasher
     protected userRepo
     protected permissionChecker
+    protected roleRepo
 
     constructor(
         connectionInstance: Knex<any, unknown[]>,
@@ -74,7 +76,8 @@ export class UserFetchingModel implements IUserCRUDService {
         emailSenderInstance: EmailSender,
         hasherInstance: Hasher,
         userRepo: IUserRepo,
-        permissionCheckerInstance: PermissionChecker
+        permissionCheckerInstance: PermissionChecker,
+        roleRepoInstance: IRoleRepo
     ) {
         this.connection = connectionInstance
         this.userModel = userModelInstance
@@ -86,6 +89,7 @@ export class UserFetchingModel implements IUserCRUDService {
         this.hasher = hasherInstance
         this.userRepo = userRepo
         this.permissionChecker = permissionCheckerInstance
+        this.roleRepo = roleRepoInstance
     }
 
     async createUser(payload: UserRegisterInterface) {

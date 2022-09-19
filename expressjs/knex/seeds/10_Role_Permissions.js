@@ -31,6 +31,10 @@
             id_permission: 6,
         },
         {
+            id_role: 10034,
+            id_permission: 8,
+        },
+        {
             id_role: 9342,
             id_permission: 1,
         },
@@ -49,6 +53,10 @@
         {
             id_role: 9342,
             id_permission: 6,
+        },
+        {
+            id_role: 9342,
+            id_permission: 8,
         },
         {
             id_role: 3,

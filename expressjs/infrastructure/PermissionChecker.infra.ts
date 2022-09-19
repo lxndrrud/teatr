@@ -2,6 +2,8 @@ import { DatabaseConnection } from "../databaseConnection";
 import { User } from "../entities/users";
 import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
 import { UserRepo } from "../repositories/User.repo";
+import { Hasher } from "../utils/hasher";
+import { Tokenizer } from "../utils/tokenizer";
 
 export interface IPermissionChecker {
     check_CanHaveMoreThanOneReservationOnSession(user: User): Promise<boolean>
@@ -10,6 +12,8 @@ export interface IPermissionChecker {
     check_CanReserveWithoutConfirmation(user: User): Promise<boolean>
     check_CanIgnoreMaxSlotsValue(user: User): Promise<boolean>
     check_CanReserve(user: User): Promise<boolean>
+    check_CanRestorePasswordByEmail(user: User): Promise<boolean>
+    check_CanCreateUserActions(user: User): Promise<boolean>
 }
 
 export class PermissionChecker implements IPermissionChecker {
@@ -68,10 +72,23 @@ export class PermissionChecker implements IPermissionChecker {
 
         return -1 != result
     }
+
+    public async check_CanCreateUserActions(user: User) {
+        let result = user.role.rolePermissions.findIndex((rolePerm) => {
+            return rolePerm.permission.code === 'ЗАПИСЫВАТЬ_ДЕЙСТВИЯ_В_ЖУРНАЛ'
+        }) 
+
+        return -1 != result
+    }
 }
 
 export async function testPermissionChecker() {
-    const userRepo = new UserRepo(DatabaseConnection, new EmailingTypeRepo(DatabaseConnection))
+    const userRepo = new UserRepo(
+        DatabaseConnection, 
+        new EmailingTypeRepo(DatabaseConnection), 
+        new Hasher(), 
+        new PermissionChecker(), 
+        new Tokenizer())
     const checker = new PermissionChecker()
 
     let users = await userRepo.getAllUsers()

@@ -98,10 +98,9 @@ export class UserCSVService implements IUserCSVService {
 
                 // Создание действия для журнала действий работников
                 const message = `Пользователь ${user.email} создает через CSV нового пользователя почта: ${userInfo.email}, роль: ${userInfo.id_role}`
-                await this.userModel.insertAction(trx, {
-                    id_user: user.id,
-                    description: message
-                })
+                await this.userRepo.createUserAction(
+                    user.id,
+                    message)
                 await trx.commit()
             } catch (e) {
                 console.log(e)
