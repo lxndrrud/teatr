@@ -6,7 +6,6 @@ import { UploadedFile } from "express-fileupload";
 import { UserRequestOption } from "../interfaces/users";
 import fs from "fs"
 import csvParser from "csv-parser";
-import { resolve } from "path";
 import { FileStreamHelper } from "../utils/fileStreams";
 
 export interface PlayService {

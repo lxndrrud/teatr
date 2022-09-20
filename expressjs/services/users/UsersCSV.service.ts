@@ -5,9 +5,8 @@ import csvParser from "csv-parser"
 import { UserModel } from "../../dbModels/users";
 import { FileStreamHelper } from "../../utils/fileStreams";
 import { UserBaseInterface, UserRequestOption } from "../../interfaces/users";
-import { RoleService } from "../roles";
-import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors";
-import { Hasher } from "../../utils/hasher";
+import { InnerError, InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors";
+import { IRoleRepo } from '../../repositories/Role.repo'
 import { IUserRepo } from "../../repositories/User.repo";
 
 
@@ -18,25 +17,19 @@ export interface IUserCSVService {
 
 export class UserCSVService implements IUserCSVService {
     protected connection 
-    protected userModel
-    protected roleService
+    protected roleRepo
     protected fileStreamHelper
-    protected hasher
     private userRepo
 
     constructor (    
         connectionInstance: Knex<any, unknown[]>,
-        userModelInstance: UserModel, 
-        roleServiceInstance: RoleService,
+        roleRepoInstance: IRoleRepo,
         fileStreamHelperInstance: FileStreamHelper,
-        hasherInstance: Hasher,
         userRepoInstance: IUserRepo
     ) {
         this.connection = connectionInstance
-        this.userModel = userModelInstance
         this.fileStreamHelper = fileStreamHelperInstance
-        this.roleService = roleServiceInstance
-        this.hasher = hasherInstance
+        this.roleRepo = roleRepoInstance
         this.userRepo = userRepoInstance
     }
 
@@ -48,7 +41,6 @@ export class UserCSVService implements IUserCSVService {
         let counter = 1
         let errors: string[] = []
         for (const chunk of data) {
-            let hashedPassword = ''
             let idRole: number | InnerErrorInterface
             try {
                 if (!chunk['Почта']) {
@@ -61,53 +53,45 @@ export class UserCSVService implements IUserCSVService {
                     throw `В строке #${counter} не указана роль пользователя`
                 }
 
-                // Хэширование пароля
-                hashedPassword = await this.hasher.hash(chunk['Пароль'])
-
                 // Получение идентификатора роли
-                idRole = await this.roleService.normalizeRole(chunk['Роль'])
-                if (isInnerErrorInterface(idRole)) {
-                    throw `В строке #${counter} возникла ошибка с определением роли: ${idRole.message}`
+                const role = await this.roleRepo.getRoleByTitle(chunk['Роль'])
+                if (!role) {
+                    throw new InnerError("Роль не найдена.", 404)
                 }
+                idRole = role.id
             } catch(e) {
                 errors.push(<string> e)
                 counter++
                 continue
             }
 
-            let userInfo: UserBaseInterface = {
+            const userInfo: UserBaseInterface = {
                 email: chunk['Почта'],
-                password: hashedPassword,
+                password: chunk['Пароль'],
                 id_role: idRole,
                 firstname: chunk['Имя'] ? chunk['Имя'] : undefined,
                 middlename: chunk['Отчество'] ? chunk['Отчество'] : undefined,
                 lastname: chunk['Фамилия'] ? chunk['Фамилия'] : undefined
             }
-
+            // Проверка на существование пользователя
             const check = await this.userRepo.getUserByEmail(userInfo.email)
             if (check) {
                 errors.push(`Строка #${counter}: пользователь с почтой ${check.email} уже существует!`)
                 counter++
                 continue
             }
-
-            const trx = await this.connection.transaction()
             try {
                 // Создание пользователя
-                await this.userModel.insert(trx, userInfo)
-
+                await this.userRepo.createUser(userInfo)
                 // Создание действия для журнала действий работников
                 const message = `Пользователь ${user.email} создает через CSV нового пользователя почта: ${userInfo.email}, роль: ${userInfo.id_role}`
                 await this.userRepo.createUserAction(
                     user.id,
                     message)
-                await trx.commit()
-            } catch (e) {
-                console.log(e)
-                errors.push(<string> e)
-                await trx.rollback()
+            } catch (error) {
+                errors.push(<string> error)
             }
-            counter++;
+            counter++
         }
         return errors
     }

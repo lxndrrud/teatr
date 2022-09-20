@@ -1,10 +1,10 @@
-import { InnerErrorInterface } from '../interfaces/errors'
+import { InnerError, InnerErrorInterface } from '../interfaces/errors'
 import { IUserChangePassword, IUserPersonalInfo } from '../interfaces/users'
 
 
 export interface IUserGuard {
     changePersonalInfoProcessing(info: IUserPersonalInfo): IUserPersonalInfo
-    changePasswordValidation(passwordInfo: IUserChangePassword): InnerErrorInterface | undefined
+    changePasswordValidation(passwordInfo: IUserChangePassword): void
 }
 
 export class UserGuard implements IUserGuard {
@@ -15,21 +15,13 @@ export class UserGuard implements IUserGuard {
         return personalInfo
     }
 
-    public changePasswordValidation(passwordInfo: IUserChangePassword): InnerErrorInterface | undefined {
+    public changePasswordValidation(passwordInfo: IUserChangePassword) {
         // Проверка на совпадение старого пароля с новым
-        if (passwordInfo.oldPassword === passwordInfo.newPassword) {
-            return <InnerErrorInterface>{
-                code: 400, 
-                message: "Старый пароль совпадает с новым!"
-            }
-        }
+        if (passwordInfo.oldPassword === passwordInfo.newPassword) 
+            throw new InnerError("Старый пароль совпадает с новым!",400)
 
         // Проверка на совпадение нового пароля с подтверджением
-        if (passwordInfo.newPassword !== passwordInfo.confirmPassword) {
-            return <InnerErrorInterface>{
-                code: 400, 
-                message: "Новый пароль не совпадает с подтверждением!"
-            }
-        }
+        if (passwordInfo.newPassword !== passwordInfo.confirmPassword) 
+            throw new InnerError("Новый пароль не совпадает с подтверждением!", 400)
     }
 }

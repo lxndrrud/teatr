@@ -14,71 +14,56 @@ export interface IPermissionChecker {
     check_CanReserve(user: User): Promise<boolean>
     check_CanRestorePasswordByEmail(user: User): Promise<boolean>
     check_CanCreateUserActions(user: User): Promise<boolean>
+    check_HasAccessToAdmin(user: User): Promise<boolean>
+    check_CanSeeUsersPersonalInfo(user: User): Promise<boolean>
 }
 
 export class PermissionChecker implements IPermissionChecker {
-    public async check_CanHaveMoreThanOneReservationOnSession(user: User) {
+    private check(user: User, permissionCode: string) {
         let result = user.role.rolePermissions.findIndex((rolePerm) => {
-            return rolePerm.permission.code === 'ИМЕТЬ_БОЛЬШЕ_ОДНОЙ_БРОНИ'
+            return rolePerm.permission.code === permissionCode
         })
 
         return -1 !=  result
     }
+    public async check_CanHaveMoreThanOneReservationOnSession(user: User) {
+        return this.check(user, 'ИМЕТЬ_БОЛЬШЕ_ОДНОЙ_БРОНИ')
+    }
 
     public async check_CanSeeAllReservations(user: User) {
-        let result = user.role.rolePermissions.findIndex((rolePerm) => {
-            return rolePerm.permission.code === 'ВИДЕТЬ_ВСЕ_БРОНИ'
-        }) 
-
-        return -1 != result
+        return this.check(user, 'ВИДЕТЬ_ВСЕ_БРОНИ')
     }
 
     public async check_CanDeleteAnotherUserReservations(user: User) {
-        let result = user.role.rolePermissions.findIndex((rolePerm) => {
-            return rolePerm.permission.code === 'УДАЛЯТЬ_ЧУЖИЕ_БРОНИ'
-        }) 
-
-        return -1 != result
+        return this.check(user, 'УДАЛЯТЬ_ЧУЖИЕ_БРОНИ')
     }
 
     public async check_CanReserveWithoutConfirmation(user: User) {
-        let result = user.role.rolePermissions.findIndex((rolePerm) => {
-            return rolePerm.permission.code === 'БРОНЬ_БЕЗ_ПОДТВЕРЖДЕНИЯ'
-        }) 
-
-        return -1 != result
+        return this.check(user, 'БРОНЬ_БЕЗ_ПОДТВЕРЖДЕНИЯ')
     }
     
     public async check_CanIgnoreMaxSlotsValue(user: User) {
-        let result = user.role.rolePermissions.findIndex((rolePerm) => {
-            return rolePerm.permission.code === 'ИГНОР_МАКС_МЕСТ_СЕАНСА'
-        }) 
-
-        return -1 != result
+        return this.check(user, 'ИГНОР_МАКС_МЕСТ_СЕАНСА')
     }
 
     public async check_CanReserve(user: User) {
-        let result = user.role.rolePermissions.findIndex((rolePerm) => {
-            return rolePerm.permission.code === 'СОЗД_БРОНИ'
-        }) 
-
-        return -1 != result
+        return this.check(user, 'СОЗД_БРОНИ')
     }
 
     public async check_CanRestorePasswordByEmail(user: User) {
-        let result = user.role.rolePermissions.findIndex((rolePerm) => {
-            return rolePerm.permission.code === 'ВОССТ_ПАРОЛЬ_ПО_ПОЧТЕ'
-        }) 
-
-        return -1 != result
+        return this.check(user, 'ВОССТ_ПАРОЛЬ_ПО_ПОЧТЕ')
     }
 
     public async check_CanCreateUserActions(user: User) {
-        let result = user.role.rolePermissions.findIndex((rolePerm) => {
-            return rolePerm.permission.code === 'ЗАПИСЫВАТЬ_ДЕЙСТВИЯ_В_ЖУРНАЛ'
-        }) 
+        return this.check(user, 'ЗАПИСЫВАТЬ_ДЕЙСТВИЯ_В_ЖУРНАЛ')
+    }
+    
+    public async check_HasAccessToAdmin(user: User) {
+        return this.check(user, 'ДОСТУП_К_АДМИНКЕ')
+    }
 
-        return -1 != result
+    public async check_CanSeeUsersPersonalInfo(user: User) {
+        return this.check(user, 'ПРОСМОТР_ЛИЧНОЙ_ИНФОРМАЦИИ')
     }
 }
 

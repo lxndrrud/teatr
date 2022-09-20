@@ -6,7 +6,7 @@ import { UserRestoration } from "../entities/users_restorations"
 import { UserAction } from "../entities/user_actions"
 import { IPermissionChecker } from "../infrastructure/PermissionChecker.infra"
 import { InnerError } from "../interfaces/errors"
-import { UserBaseInterface, UserBaseRoleInterface, UserBaseVisitorInterface, UserRequestOption } from "../interfaces/users"
+import { IUserPersonalInfo, UserBaseInterface, UserBaseRoleInterface, UserBaseVisitorInterface, UserRequestOption } from "../interfaces/users"
 import { IHasher } from "../utils/hasher"
 import { ITokenizer } from "../utils/tokenizer"
 import { IEmailingTypeRepo } from "./EmailingType.repo"
@@ -15,6 +15,8 @@ export interface IUserRepo {
     getUser(idUser: number): Promise<User | null>
     getUserByEmail(email: string): Promise<User | null>
     getAllUsers(): Promise<User[]>
+    updatePassword(idUser: number, unhashedPassword: string): Promise<void>
+    updatePersonalInfo(idUser: number, payload: IUserPersonalInfo): Promise<void>
     createUserAction(idUser: number, actionDescription: string): Promise<void>
     checkCanResendRestorEmail(idUser: number): Promise<boolean>
     checkCanRepeatRestorEmail(idUser: number): Promise<boolean>
@@ -69,6 +71,29 @@ export class UserRepo implements IUserRepo {
         })
 
         return await this.userRepo.save(user)
+    }
+
+    public async updatePassword(idUser: number, unhashedPassword: string) {
+        // Получить пользователя
+        const user = await this.getUser(idUser)
+        if (!user) throw new InnerError("Пользователь не найден.", 404)
+        // Захешировать пароль
+        const hashedPassword = await this.hasher.hash(unhashedPassword)
+        // Обновить и сохранить
+        user.password = hashedPassword
+        await this.userRepo.save(user)
+    }
+
+    public async updatePersonalInfo(idUser: number, payload: IUserPersonalInfo) {
+        // Получить пользователя
+        const user = await this.getUser(idUser)
+        if (!user) throw new InnerError("Пользователь не найден.", 404)
+        // Изменить данные
+        user.firstname = payload.firstname
+        user.middlename = payload.middlename
+        user.lastname = payload.lastname
+        // Сохранить
+        await this.userRepo.save(user)
     }
 
     public async createUser(payload: UserBaseInterface) {
@@ -162,9 +187,7 @@ export class UserRepo implements IUserRepo {
     public async createUserAction(idUser: number, actionDescription: string) {
         // Получение пользователя
         const user = await this.getUser(idUser)
-        if (!user) {
-            throw new InnerError('Оператор не определен', 404)
-        }
+        if (!user) throw new InnerError('Оператор не определен', 404)
         // Проверка прав
         if (!(await this.permissionChecker.check_CanCreateUserActions(user)))
             throw new InnerError('Вы не можете записывать действия в журнал.', 403)

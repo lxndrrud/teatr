@@ -19,13 +19,12 @@ import { PermissionChecker } from "../infrastructure/PermissionChecker.infra";
 import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
 import { Tokenizer } from "../utils/tokenizer";
 import { RoleRepo } from "../repositories/Role.repo";
+import { ErrorHandler } from "../utils/ErrorHandler";
 
 export const usersRouter = Router()
 const userController = new UserController(
     new UserFetchingModel(
         KnexConnection,
-        new UserDatabaseModel(KnexConnection), 
-        new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
         new UserInfrastructure(new UserDatabaseModel(KnexConnection)),
         new UserGuard(),
         new CodeGenerator(),
@@ -41,16 +40,15 @@ const userController = new UserController(
     ),
     new UserCSVService(
         KnexConnection,
-        new UserDatabaseModel(KnexConnection), 
-        new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
+        new RoleRepo(DatabaseConnection),
         new FileStreamHelper(),
-        new Hasher(),
         new UserRepo(DatabaseConnection, 
             new EmailingTypeRepo(DatabaseConnection), 
             new Hasher(), 
             new PermissionChecker(), 
             new Tokenizer()),
-    )
+    ),
+    new ErrorHandler()
 )
 
 const authMiddleware = new AuthMiddleware(
@@ -64,8 +62,6 @@ usersRouter.route('/')
 
 usersRouter.post('/login', userController.loginUser.bind(userController))
 
-usersRouter.post('/adminLogin', userController.loginAdmin.bind(userController))
-
 usersRouter.get('/personalArea', 
     authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
     userController.getPersonalArea.bind(userController))
@@ -74,12 +70,12 @@ usersRouter.get('/:idUser',
     authMiddleware.staffAuthMiddleware.bind(authMiddleware),
     userController.getUser.bind(userController))
 
-usersRouter.post("/edit/password",
+usersRouter.put("/edit/password",
     authMiddleware.basicAuthMiddleware.bind(authMiddleware),
     userController.changePassword.bind(userController)
 )
 
-usersRouter.post("/edit/personal", 
+usersRouter.put("/edit/personal", 
     authMiddleware.basicAuthMiddleware.bind(authMiddleware),
     userController.changePersonalInfo.bind(userController)
 )

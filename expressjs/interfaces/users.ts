@@ -1,3 +1,5 @@
+import { User } from "../entities/users"
+
 export interface UserBaseInterface {
     email: string
     password: string
@@ -63,20 +65,31 @@ export interface IUserChangePassword {
     confirmPassword: string
 }
 
+export function isIUserChangePassword(obj: any): obj is IUserChangePassword {
+    return typeof obj.oldPassword === 'string' 
+        && typeof obj.newPassword === 'string' 
+        && typeof obj.confirmPassword === 'string' 
+}
+
 export interface IUserPersonalInfo {
     firstname: string
     middlename: string
     lastname: string
 }
 
+export function isIUserPersonalInfo(obj: any): obj is IUserPersonalInfo {
+    return typeof obj.firstname === 'string' 
+        && typeof obj.middlename === 'string' 
+        && typeof obj.lastname === 'string' 
+}
 export class UserStrategy {
-    protected user: IExtendedUser
+    protected user: User
 
-    constructor(userInstance: IExtendedUser) {
+    constructor(userInstance: User) {
         this.user = userInstance
     }
 
-    public static getExtendedPersonalList(userInstances: IExtendedUser[]) {
+    public static getExtendedPersonalList(userInstances: User[]) {
         let resultList = []
         for (let instance of userInstances) {
             resultList.push(new UserStrategy(instance).getExtendedPersonalInfo())
@@ -97,8 +110,8 @@ export class UserStrategy {
         return {
             ...this.getPersonalInfo(),
             id: this.user.id,
-            id_role: this.user.id_role,
-            role_title: this.user.role_title
+            id_role: this.user.idRole,
+            role_title: this.user.role.title
         }
     }
 }

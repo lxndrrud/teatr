@@ -1,21 +1,26 @@
 import { Request, Response } from "express";
-import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface, isUserRegisterInterface, IUserChangePassword, IUserPersonalInfo, UserInterface } 
+import { UserBaseInterface, UserLoginInterface, UserRegisterInterface, isUserLoginInterface, isUserRegisterInterface, IUserChangePassword, IUserPersonalInfo, UserInterface, isIUserPersonalInfo, isIUserChangePassword} 
     from "../interfaces/users";
 import { ErrorInterface, InnerError, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
 import { IUserCRUDService } from "../services/users/UsersCRUD.service";
 import { IUserCSVService } from "../services/users/UsersCSV.service";
 import { UploadedFile } from "express-fileupload";
+import { User } from "../entities/users";
+import { IErrorHandler } from "../utils/ErrorHandler";
 
 export class UserController {
     private userCRUDService
     private userCSVService
+    private errorHandler
 
     constructor(
         userCRUDServiceInstance: IUserCRUDService,
-        userCSVServiceInstance: IUserCSVService
+        userCSVServiceInstance: IUserCSVService,
+        errorHandlerInstance: IErrorHandler
     ) {
         this.userCRUDService = userCRUDServiceInstance
         this.userCSVService = userCSVServiceInstance
+        this.errorHandler = errorHandlerInstance
     }
 
     /**
@@ -31,16 +36,23 @@ export class UserController {
         }
         let requestBody: UserRegisterInterface = {...req.body}
 
-        const newUser = await this.userCRUDService.createUser(requestBody)
-
-        if (isInnerErrorInterface(newUser)) {
-            res.status(newUser.code).send(<ErrorInterface>{
-                message: newUser.message
-            })
-            return 
+        let newUser: User
+        try {
+            newUser = await this.userCRUDService.createUser(requestBody)
+        } catch(error) {
+            return this.errorHandler.fetchError(res, error)
         }
 
-        res.status(201).send(newUser)
+        res.status(201).send(<UserInterface> {
+            id: newUser.id,
+            id_role: newUser.idRole,
+            firstname: newUser.firstname,
+            middlename: newUser.middlename,
+            lastname: newUser.lastname,
+            token: newUser.token,
+            email: newUser.email,
+            password: ''
+        })
     }
 
     /**
@@ -56,13 +68,11 @@ export class UserController {
         }
         let requestBody: UserLoginInterface = {...req.body}
     
-        const info = await this.userCRUDService.loginUser(requestBody)
-    
-        if (isInnerErrorInterface(info)) {
-            res.status(info.code).send(<InnerErrorInterface>{
-                message: info.message
-            })
-            return
+        let info: { token: string, isAdmin: boolean }
+        try {
+            info = await this.userCRUDService.loginUser(requestBody)
+        } catch (error) {
+            return this.errorHandler.fetchError(res, error)
         }
 
         if (info.isAdmin) {
@@ -75,35 +85,8 @@ export class UserController {
     }
 
     /**
-     * @deprecated
-     * * Контроллер логина админа для администраторской части сайта
-     */
-    async loginAdmin(req: Request, res: Response) {
-         // * Проверка тела запроса
-         if (!isUserLoginInterface(req.body)) {
-            res.status(400).send(<ErrorInterface>{
-                message: 'Неверное тело запроса!'
-            })
-            return
-        }
-        let requestBody: UserLoginInterface = {...req.body}
-    
-        const token = await this.userCRUDService.loginAdmin(requestBody)
-    
-        if (isInnerErrorInterface(token)) {
-            res.status(token.code).send(<InnerErrorInterface>{
-                message: token.message
-            })
-            return
-        }
-    
-        res.status(200).send({
-            token: token
-        })
-    }
-
-    /**
      * * Получить всех пользователей с БД
+     * @unused
      */
     async getAllUsers(req: Request, res: Response) {
         const query = await this.userCRUDService.getAll()
@@ -128,12 +111,17 @@ export class UserController {
             })
             return
         }
-        const query = await this.userCRUDService.getPersonalArea(req.user)
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                message: query.message
-            })
-            return
+
+        let query: {
+            email: string;
+            firstname: string;
+            middlename: string;
+            lastname: string;
+        }
+        try {
+            query = await this.userCRUDService.getPersonalArea(req.user)
+        } catch (error) {
+            return this.errorHandler.fetchError(res, error)
         }
         res.status(200).send({
             "user": query
@@ -157,12 +145,19 @@ export class UserController {
             })
             return
         }
-        const query = await this.userCRUDService.getUser(req.user, idUser)
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                message: query.message
-            })
-            return
+        let query: {
+            id: number;
+            id_role: number;
+            role_title: string;
+            email: string;
+            firstname: string;
+            middlename: string;
+            lastname: string;
+        }
+        try {
+            query = await this.userCRUDService.getUser(req.user, idUser)
+        } catch (error) {
+            return this.errorHandler.fetchError(res, error)
         }
         res.status(200).send({
             user: query
@@ -179,31 +174,18 @@ export class UserController {
             })
             return 
         }
-        
-        let passwordInfo: IUserChangePassword
-        try {
-            passwordInfo = {...req.body}
-        } catch(e) {
+        if (!isIUserChangePassword(req.body)) {
             res.status(400).send(<ErrorInterface> {
                 message: "Тело запроса не распознано!"
             })
             return
         }
-        if (!passwordInfo) {
-            res.status(400).send(<ErrorInterface>{
-                message: "Неверное тело запроса!"
-            })
-            return
+        let passwordInfo: IUserChangePassword ={...req.body}
+        try {
+            await this.userCRUDService.changePassword(req.user, passwordInfo)
+        } catch (error) {
+            return this.errorHandler.fetchError(res, error)
         }
-
-        const result = await this.userCRUDService.changePassword(req.user, passwordInfo)
-        if (isInnerErrorInterface(result)) {
-            res.status(result.code).send(<ErrorInterface>{
-                message: result.message
-            })
-            return
-        }
-
         res.status(200).end()
     }
 
@@ -217,31 +199,24 @@ export class UserController {
             })
             return 
         }
-
-        let personalInfo: IUserPersonalInfo
-        try {
-            personalInfo = {...req.body}
-        } catch(e) {
+        if (!isIUserPersonalInfo(req.body)) {
             res.status(400).send(<ErrorInterface>{
                 message: "Тело запроса не распознано!"
             })
             return
         }
+        let personalInfo: IUserPersonalInfo = {...req.body}
         if (!personalInfo) {
             res.status(400).send(<ErrorInterface>{
                 message: "Неверное тело запроса!"
             })
             return
         }
-
-        const result = await this.userCRUDService.changePersonalInfo(req.user, personalInfo)
-        if (isInnerErrorInterface(result)) {
-            res.status(result.code).send(<ErrorInterface>{
-                message: result.message
-            })
-            return
+        try {
+            await this.userCRUDService.changePersonalInfo(req.user, personalInfo)
+        } catch (error) {
+            return this.errorHandler.fetchError(res, error)
         }
-
         res.status(200).end()
     }
 
@@ -255,19 +230,17 @@ export class UserController {
                 message: "Не указана почта для восстановления пароля!"
             })
             return
-        } 
-        const result = await this.userCRUDService.restorePasswordByEmail(email)
-        if (isInnerErrorInterface(result)) {
-            res.status(result.code).send(<ErrorInterface>{
-                message: result.message
-            })
-            return
+        }
+        try {
+            await this.userCRUDService.restorePasswordByEmail(email)
+        } catch (error) {
+            return this.errorHandler.fetchError(res, error)
         }
         res.status(200).end()
     }
 
     /**
-     * * Повторно отправить письмо для восста на почту
+     * * Повторно отправить письмо для восстановления на почту
      */
     async resendRestorationEmail(req: Request, res: Response) {
         const email = req.body.email
@@ -276,13 +249,11 @@ export class UserController {
                 message: "Не указана почта для восстановления пароля!"
             })
             return
-        } 
-        const result = await this.userCRUDService.resendRestorationEmail(email)
-        if (isInnerErrorInterface(result)) {
-            res.status(result.code).send(<ErrorInterface>{
-                message: result.message
-            })
-            return
+        }
+        try {
+            await this.userCRUDService.resendRestorationEmail(email)
+        } catch (error) {
+            return this.errorHandler.fetchError(res, error)
         }
         res.status(200).end()
     }
@@ -303,10 +274,13 @@ export class UserController {
             })
             return
         }
-
-        const errors = await this.userCSVService
-            .createUsersCSV(req.user, <UploadedFile> req.files.csv)
-
+        let errors: string[]
+        try {
+            errors = await this.userCSVService
+                .createUsersCSV(req.user, <UploadedFile> req.files.csv)
+        } catch (error) {
+            return this.errorHandler.fetchError(res, error)
+        }
         res.status(200).send({
             success: "Пользователи успешно загружены!",
             errors

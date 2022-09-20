@@ -1,7 +1,7 @@
 import { assert, should, expect } from "chai";
 import fs from 'fs'
 import { agent as request, Response } from "supertest";
-import { UserLoginInterface, UserRegisterInterface } from "../../interfaces/users";
+import { IUserChangePassword, IUserPersonalInfo, UserLoginInterface, UserRegisterInterface } from "../../interfaces/users";
 import { KnexConnection } from "../../knex/connections";
 
 export function UsersControllerTests() {
@@ -136,7 +136,7 @@ export function UsersControllerTests() {
                 expect(response.body).to.haveOwnProperty("email")
                     .that.satisfies(() => typeof response.body.email === "string")
                 expect(response.body).to.haveOwnProperty("password")
-                    .that.satisfies(() => typeof response.body.password === "string")
+                    .that.satisfies(() => typeof response.body.password === "string").that.equals('')
             })
 
             it("should be OK (Full payload)", async function() {
@@ -160,7 +160,7 @@ export function UsersControllerTests() {
                     expect(response.body).to.haveOwnProperty("email")
                         .that.satisfies(() => typeof response.body.email === "string")
                     expect(response.body).to.haveOwnProperty("password")
-                        .that.satisfies(() => typeof response.body.password === "string")
+                        .that.satisfies(() => typeof response.body.password === "string").that.equals('')
             })
 
             it("should have status 400 BAD REQUEST (Wrong payload)", async function() {
@@ -180,7 +180,7 @@ export function UsersControllerTests() {
             })
         })
 
-        describe("POST /expressjs/users/adminLogin", function() {
+        describe.skip("POST /expressjs/users/adminLogin", function() {
             const adminLoginLink = `/expressjs/users/adminLogin`
             const loginPayload: UserLoginInterface = {
                 email: "admin@admin.ru",
@@ -321,13 +321,20 @@ export function UsersControllerTests() {
                     })
 
                 expect(response.status).to.equal(200)
-                expect(response.body.user).to.haveOwnProperty('email').that.contains("***")
+                expect(response.body.user).to.haveOwnProperty('email').that.contains("***").and
+                    .satisfies(() => typeof response.body.user.email === 'string')
                 expect(response.body.user).to.haveOwnProperty('firstname')
+                    .that.satisfies(() => typeof response.body.user.firstname === 'string')
                 expect(response.body.user).to.haveOwnProperty('middlename')
+                    .that.satisfies(() => typeof response.body.user.middlename === 'string')
                 expect(response.body.user).to.haveOwnProperty('lastname')
+                    .that.satisfies(() => typeof response.body.user.lastname === 'string')
                 expect(response.body.user).to.haveOwnProperty("id").that.equals(1)
+                    .that.satisfies(() => typeof response.body.user.id === 'number')
                 expect(response.body.user).to.haveOwnProperty('id_role')
+                    .that.satisfies(() => typeof response.body.user.id_role === 'number')
                 expect(response.body.user).to.haveOwnProperty("role_title")
+                    .that.satisfies(() => typeof response.body.user.role_title === 'string')
                 expect(response.body.user).not.to.haveOwnProperty('password')
                 expect(response.body.user).not.to.haveOwnProperty('token')
             })
@@ -375,6 +382,173 @@ export function UsersControllerTests() {
                 expect(response.body.user).to.not.haveOwnProperty("password")
                 expect(response.body.user).to.not.haveOwnProperty("token")
             })
+        })
+
+        describe("PUT /expressjs/users/edit/password", function() {
+            const link = '/expressjs/users/edit/password'
+            const failPayload = {
+                new: 'new',
+                old: '123456'
+            }
+            const okPayload = <IUserChangePassword> {
+                newPassword: 'kek',
+                oldPassword: '123456',
+                confirmPassword: "kek"
+            }
+            const failPayload_WrongOldPassword = <IUserChangePassword> {
+                newPassword: 'kek',
+                oldPassword: 'wrong!',
+                confirmPassword: "kek"
+            }
+            const failPayload_WrongConfirmation = <IUserChangePassword> {
+                newPassword: 'kek',
+                oldPassword: '123456',
+                confirmPassword: "wrong!"
+            }
+            const failPayload_SameNewPassword = <IUserChangePassword> {
+                newPassword: 'kek',
+                oldPassword: '123456',
+                confirmPassword: "wrong!"
+            }
+
+            it("should fail because without token", async function () {
+                const response = await request(this.server)
+                    .put(link)
+                    .send(okPayload)
+                expect(response.statusCode).to.equal(403)
+            })
+
+            it("should fail because of wrong payload", async function () {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+                    .send(failPayload)
+                expect(response.statusCode).to.equal(400)
+            })
+
+            it('should fail because of wrong old password', async function() {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+                    .send(failPayload_WrongOldPassword)
+                expect(response.statusCode).to.equal(400)
+            })
+
+            it('should fail because confirmation and new password are not equal', async function() {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+                    .send(failPayload_WrongConfirmation)
+                expect(response.statusCode).to.equal(400)
+            })
+
+            it('should fail because old password and new password are equal', async function() {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+                    .send(failPayload_SameNewPassword)
+                expect(response.statusCode).to.equal(400)
+            })
+
+            it('should be OK for Admin', async function() {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+                    .send(okPayload)
+                expect(response.statusCode).to.equal(200)
+            })
+
+            it('should be OK for Cashier', async function() {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.cashierToken
+                    })
+                    .send(okPayload)
+                expect(response.statusCode).to.equal(200)
+            })
+
+            it('should be OK for Visitor', async function() {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.visitorToken
+                    })
+                    .send(okPayload)
+                expect(response.statusCode).to.equal(200)
+            })
+        })
+
+        describe("PUT /expressjs/users/edit/personal", function() {
+            const link = '/expressjs/users/edit/personal'
+            const failPayload = {
+                first: 'kek',
+                middle: 'kek',
+                last: 'kek'
+            }
+            const okPayload = <IUserPersonalInfo> {
+                firstname: 'kek',
+                middlename: 'kek',
+                lastname: 'kek'
+            }
+
+            it("should fail because without token", async function() {
+                const response = await request(this.server)
+                    .put(link)
+                    .send(okPayload)
+                expect(response.statusCode).to.equal(403)
+            })
+
+            it("should fail because of wrong payload", async function() {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+                    .send(failPayload)
+                expect(response.statusCode).to.equal(400)
+            })
+
+            it('should be OK for Admin', async function () {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.adminToken
+                    })
+                    .send(okPayload)
+                expect(response.statusCode).to.equal(200)
+            })
+
+            it('should be OK for Cashier', async function () {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.cashierToken
+                    })
+                    .send(okPayload)
+                expect(response.statusCode).to.equal(200)
+            })
+
+            it('should be OK for Visitor', async function () {
+                const response = await request(this.server)
+                    .put(link)
+                    .set({
+                        'auth-token': this.visitorToken
+                    })
+                    .send(okPayload)
+                expect(response.statusCode).to.equal(200)
+            })
+
         })
 
         describe('Восстановление пароля по почте', function() {
@@ -490,8 +664,6 @@ export function UsersControllerTests() {
             })
         })
 
-        
-
         describe("POST /expressjs/users/csv/create", function() {
             const link = '/expressjs/users/csv/create'
 
@@ -572,6 +744,7 @@ export function UsersControllerTests() {
                     .attach("csv", 
                     fs.readFileSync("/usr/src/app/tests/test_files/csv/users/test_users_create_OK.csv"), 
                         "test_users.csv")
+
                 expect(response.body).to.haveOwnProperty('errors').that.haveOwnProperty('length')
                     .that.equals(0)
             })

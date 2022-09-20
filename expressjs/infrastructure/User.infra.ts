@@ -34,6 +34,7 @@ export class UserInfrastructure implements IUserInfrastructure {
 
     /**
      * * Генерация и запись токена в базу
+     * @deprecated
      */
     async generateToken (trx: Knex.Transaction, user: UserInterface) {
         const userRequestOption: UserRequestOption = {
@@ -60,6 +61,7 @@ export class UserInfrastructure implements IUserInfrastructure {
 
     /**
      * * Проверить, является ли пользователь частью персонала театра
+     * @deprecated
      */
     async checkIsUserStaff(user: UserRequestOption): Promise<boolean | InnerErrorInterface>  {
         try { 
@@ -76,6 +78,7 @@ export class UserInfrastructure implements IUserInfrastructure {
 
     /**
      * * Проверить, является ли пользователь администратором
+     * @deprecated
      */
     async checkIsUserAdmin(user: UserRequestOption) {
         try {
@@ -92,6 +95,7 @@ export class UserInfrastructure implements IUserInfrastructure {
 
     /**
      * * Создать действие пользователя для ведения журнала активности операторов и админов 
+     * @deprecated
      */
     async createAction(trx: Knex.Transaction, idUser: number, userRole: RoleDatabaseInterface, description: string) {
         if (!userRole.can_see_all_reservations) {
@@ -117,6 +121,10 @@ export class UserInfrastructure implements IUserInfrastructure {
         }
     }
 
+    /**
+     * * Получить расширенную информацию о пользователе
+     * @deprecated
+     */
     async getExtendedUser(idUser: number) {
         try {
             const user = <IExtendedUser | undefined> await this.userModel.getUser(idUser)
@@ -129,12 +137,14 @@ export class UserInfrastructure implements IUserInfrastructure {
         }
     } 
 
+    /**
+     * * Сгенерировать письмо для восстановления пароля
+     */
     public generateRestorePasswordEmailMessage(code: string) {
         return {
             subject: 'Восстановление пароля на "Брони на Оборонной"',
             message: `Ваш новый пароль: ${code}\nРекомендуем Вам сменить его на постоянный во вкладке Аккаунт.`
         } 
-            
     }
 
 }
