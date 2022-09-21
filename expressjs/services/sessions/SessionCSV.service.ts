@@ -1,31 +1,26 @@
 import csvParser from "csv-parser"
 import { UploadedFile } from "express-fileupload"
-import { SessionModel } from "../../dbModels/sessions"
-import { InnerErrorInterface } from "../../interfaces/errors"
+import { InnerError, InnerErrorInterface } from "../../interfaces/errors"
 import { SessionBaseInterface } from "../../interfaces/sessions"
 import { FileStreamHelper } from "../../utils/fileStreams"
 import fs from "fs"
-import { Knex } from "knex"
+import { ISessionRepo } from "../../repositories/Session.repo"
 
 export interface ISessionCSVService {
-    createSessionsCSV(file: UploadedFile): 
-    Promise<InnerErrorInterface | undefined>
+    createSessionsCSV(file: UploadedFile): Promise<void>
 }
 
 
-export class SessionCSVService {
-    protected connection
+export class SessionCSVService implements ISessionCSVService {
     protected fileStreamHelper
-    protected sessionModel
+    protected sessionRepo
 
     constructor(
-        connectionInstance: Knex<any, unknown[]>,
         fileStreamHelperInstance: FileStreamHelper,
-        sessionModelInstance: SessionModel
+        sessionRepoInstance: ISessionRepo
     ) {
-        this.connection = connectionInstance
         this.fileStreamHelper = fileStreamHelperInstance
-        this.sessionModel = sessionModelInstance
+        this.sessionRepo = sessionRepoInstance
     }
 
     public async createSessionsCSV(file: UploadedFile) {
@@ -33,22 +28,14 @@ export class SessionCSVService {
         const data = await this.fileStreamHelper
             .readData(fs.createReadStream(file.tempFilePath).pipe(csvParser()))
         for (const chunk of data) {
-            if (!chunk["Номер строки"]) return <InnerErrorInterface> {
-                code: 400,
-                message: `Не указан номер строки в файле!`
-            }   
-            else if (!chunk["Спектакль" ]) return <InnerErrorInterface> {
-                code: 400,
-                message: `В строке ${chunk["Номер строки"]} не указан идентификатор спектакля!`
-            }
-            else if (!chunk["Ценовая политика"]) return <InnerErrorInterface> {
-                code: 400,
-                message: `В строке ${chunk["Номер строки"]} не указан идентификатор ценовой политики!`
-            }
-            else if (!chunk["Максимум мест"]) return <InnerErrorInterface> {
-                code: 400,
-                message: `В строке ${chunk["Номер строки"]} не указан максимум мест для брони!`
-            }
+            if (!chunk["Номер строки"]) 
+                throw new InnerError(`Не указан номер строки в файле!`, 400)
+            else if (!chunk["Спектакль" ]) 
+                throw new InnerError(`В строке ${chunk["Номер строки"]} не указан идентификатор спектакля!`, 400)
+            else if (!chunk["Ценовая политика"]) 
+                throw new InnerError(`В строке ${chunk["Номер строки"]} не указан идентификатор ценовой политики!`, 400)
+            else if (!chunk["Максимум мест"]) 
+                throw new InnerError(`В строке ${chunk["Номер строки"]} не указан максимум мест для брони!`, 400)
             let toPush = <SessionBaseInterface> {
                 id_play: parseInt(chunk["Спектакль"]) ,
                 id_price_policy: parseInt(chunk["Ценовая политика"]),
@@ -59,17 +46,6 @@ export class SessionCSVService {
             dataArray.push(toPush)
         }
         fs.unlinkSync(file.tempFilePath)
-        let trx = await this.connection.transaction()
-        try {
-            await this.sessionModel.insertAll(trx, dataArray)
-            await trx.commit()
-        } catch(e) {
-            console.error(e)
-            await trx.rollback()
-            return <InnerErrorInterface>{
-                code: 500,
-                message: 'Внутренняя ошибка при вставке записей: ' + e
-            }
-        }
+        await this.sessionRepo.createSessions(dataArray)
     }
 }

@@ -102,7 +102,7 @@ export const fetchSessionFilterOptions = () => async dispatch => {
 
 export const fetchFilteredSessions = (date, auditoriumTitle, playTitle) => async dispatch => {
     const response = await fetch('/expressjs/sessions/filter?' + new URLSearchParams({
-            'date': date,
+            'dateFrom': date,
             'auditorium_title': auditoriumTitle,
             'play_title': playTitle
         }), 

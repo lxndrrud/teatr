@@ -1,9 +1,7 @@
 import { Router } from "express";
 import { SessionController } from "../controllers/sessions";
-import { SessionDatabaseModel } from "../dbModels/sessions";
 import { AuthMiddleware } from "../middlewares/auth";
 import { SessionCRUDService } from "../services/sessions/SessionCRUD.service";
-import { SessionInfrastructure } from "../infrastructure/Session.infra";
 import { SessionCSVService } from "../services/sessions/SessionCSV.service";
 import { FileStreamHelper } from "../utils/fileStreams";
 import { SessionFilterService } from "../services/sessions/SessionFilter.service";
@@ -12,52 +10,59 @@ import { KnexConnection } from "../knex/connections";
 import { SlotsEventEmitter } from "../events/SlotsEmitter";
 import { UserInfrastructure } from "../infrastructure/User.infra";
 import { UserDatabaseModel } from "../dbModels/users";
+import { ErrorHandler } from "../utils/ErrorHandler";
+import { SessionRepo } from "../repositories/Session.repo";
+import { DatabaseConnection } from "../databaseConnection";
+import { SessionPreparator } from "../infrastructure/SessionPreparator.infra";
+import { SessionFilterPreparator } from "../infrastructure/SessionFilterPreparator.infra";
+import { SlotPreparator } from "../infrastructure/SlotPreparator.infra";
+import { UserRepo } from "../repositories/User.repo";
+import { PermissionChecker } from "../infrastructure/PermissionChecker.infra";
+import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
+import { Hasher } from "../utils/hasher";
+import { Tokenizer } from "../utils/tokenizer";
  
 export const sessionsRouter = Router();
 const sessionController = new SessionController(
     new SessionCRUDService(
-        KnexConnection,
-        new SessionDatabaseModel(
-            KnexConnection,
-            new TimestampHelper()), 
-        new SessionInfrastructure(
-            new SessionDatabaseModel(
-                KnexConnection,
-                new TimestampHelper()
-            ),
-            new TimestampHelper())),
+        new SessionRepo(DatabaseConnection),
+        new SessionPreparator(
+            new TimestampHelper()
+        ),
+        new SlotPreparator()
+    ),
     new SessionCSVService(
-        KnexConnection,
-        new FileStreamHelper(), 
-        new SessionDatabaseModel(
-            KnexConnection,
-            new TimestampHelper())),
+        new FileStreamHelper(),
+        new SessionRepo(DatabaseConnection)
+    ),
     new SessionFilterService(
-        new SessionDatabaseModel(
-            KnexConnection,
-            new TimestampHelper()), 
-        new SessionInfrastructure(
-            new SessionDatabaseModel(
-                KnexConnection,
-                new TimestampHelper()),
-            new TimestampHelper()),
-        new TimestampHelper()),
+        new SessionRepo(DatabaseConnection),
+        new SessionPreparator(
+            new TimestampHelper()
+        ),
+        new TimestampHelper(),
+        new SessionFilterPreparator()
+    ),
     SlotsEventEmitter.getInstance(
         new SessionCRUDService(
-            KnexConnection,
-            new SessionDatabaseModel(
-                KnexConnection,
-                new TimestampHelper()), 
-            new SessionInfrastructure(
-                new SessionDatabaseModel(
-                    KnexConnection,
-                    new TimestampHelper()
-                ),
-                new TimestampHelper())),
-    )
+            new SessionRepo(DatabaseConnection),
+            new SessionPreparator(
+                new TimestampHelper()
+            ),
+            new SlotPreparator()
+        ),
+        new ErrorHandler()
+    ), 
+    new ErrorHandler()
 )
 
 const authMiddleware = new AuthMiddleware(
+    new UserRepo(DatabaseConnection, 
+        new EmailingTypeRepo(DatabaseConnection), 
+        new Hasher(), 
+        new PermissionChecker(), 
+        new Tokenizer()),
+    new PermissionChecker(),
     new UserInfrastructure(new UserDatabaseModel(KnexConnection))
 )
 

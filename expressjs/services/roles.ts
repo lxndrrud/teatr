@@ -13,6 +13,9 @@ export interface RoleService {
 }
 
 
+/**
+ * @deprecated
+ */
 export class RoleFetchingModel implements RoleService {
     protected roleDatabaseInstance
 

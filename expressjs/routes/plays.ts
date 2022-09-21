@@ -7,6 +7,12 @@ import { FileStreamHelper } from "../utils/fileStreams";
 import { KnexConnection } from "../knex/connections";
 import { UserInfrastructure } from "../infrastructure/User.infra";
 import { UserDatabaseModel } from "../dbModels/users";
+import { UserRepo } from "../repositories/User.repo";
+import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
+import { DatabaseConnection } from "../databaseConnection";
+import { Hasher } from "../utils/hasher";
+import { PermissionChecker } from "../infrastructure/PermissionChecker.infra";
+import { Tokenizer } from "../utils/tokenizer";
 
 export const playsRouter = Router()
 const playController = new PlayController(
@@ -16,6 +22,12 @@ const playController = new PlayController(
         new FileStreamHelper())
 )
 const authMiddleware = new AuthMiddleware(
+    new UserRepo(DatabaseConnection, 
+        new EmailingTypeRepo(DatabaseConnection), 
+        new Hasher(), 
+        new PermissionChecker(), 
+        new Tokenizer()),
+    new PermissionChecker(),
     new UserInfrastructure(new UserDatabaseModel(KnexConnection))
 )
 

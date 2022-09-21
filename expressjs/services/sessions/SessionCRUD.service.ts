@@ -1,29 +1,25 @@
-import { Knex } from "knex"
-import { SessionModel } from "../../dbModels/sessions"
-import { ISessionInfrastructure } from "../../infrastructure/Session.infra"
-import { InnerErrorInterface } from "../../interfaces/errors"
-import { RowInterface } from "../../interfaces/rows"
-import { SessionBaseInterface, SessionDatabaseInterface, SessionInterface } from "../../interfaces/sessions"
-import { SlotInterface, SlotIsReservedInterface, SlotWithRowIdInterface } from "../../interfaces/slots"
+import { ISessionPreparator } from "../../infrastructure/SessionPreparator.infra"
+import { ISlotPreparator } from "../../infrastructure/SlotPreparator.infra"
+import { InnerError } from "../../interfaces/errors"
+import { SessionBaseInterface, SessionInterface } from "../../interfaces/sessions"
+import { SlotIsReservedInterface} from "../../interfaces/slots"
+import { ISessionRepo } from "../../repositories/Session.repo"
 
 
 export interface ISessionCRUDService {
-    createSession(payload: SessionBaseInterface): 
-    Promise<SessionDatabaseInterface | InnerErrorInterface>
+    createSession(payload: SessionBaseInterface): Promise<void>
 
-    updateSession(idSession: number, payload: SessionBaseInterface): 
-    Promise<InnerErrorInterface | undefined>
+    updateSession(idSession: number, payload: SessionBaseInterface): Promise<void>
 
-    deleteSession(idSession: number): Promise<InnerErrorInterface | undefined>
+    deleteSession(idSession: number): Promise<void>
 
-    getUnlockedSessions(): Promise<SessionInterface[] | InnerErrorInterface>
+    getUnlockedSessions(): Promise<SessionInterface[]>
 
-    getSingleUnlockedSession(idSession: number): Promise<InnerErrorInterface | SessionInterface>
+    getSingleUnlockedSession(idSession: number): Promise<SessionInterface>
 
-    getSessionsByPlay(idPlay: number): Promise<SessionInterface[] | InnerErrorInterface>
+    getSessionsByPlay(idPlay: number): Promise<SessionInterface[]>
 
-    getSlots(idSession: number): 
-    Promise<InnerErrorInterface | {
+    getSlots(idSession: number): Promise<{
         number: number;
         title: string;
         seats: SlotIsReservedInterface[];
@@ -31,235 +27,56 @@ export interface ISessionCRUDService {
 }
 
 export class SessionCRUDService implements ISessionCRUDService {
-    protected connection
-    protected sessionModel
-    protected sessionInfrastructure
+    protected sessionRepo
+    protected sessionPreparator
+    protected slotPreparator
 
     constructor(
-        connectionInstance: Knex<any, unknown[]>,
-        sessionModelInstance: SessionModel,
-        sessionInfrastructureInstance: ISessionInfrastructure
+        sessionRepoInstance: ISessionRepo,
+        sessionPreparatorInstance: ISessionPreparator,
+        slotPreparatorInstance: ISlotPreparator
     ) {
-        this.connection = connectionInstance
-        this.sessionModel= sessionModelInstance
-        this.sessionInfrastructure = sessionInfrastructureInstance
+        this.sessionRepo = sessionRepoInstance
+        this.sessionPreparator = sessionPreparatorInstance
+        this.slotPreparator = slotPreparatorInstance
     }
 
     public async createSession(payload: SessionBaseInterface) {
-        const trx = await this.connection.transaction()
-        try {
-            const newSession: SessionDatabaseInterface = (await this.sessionModel.insert(trx, payload))[0]
-            await trx.commit()
-            return newSession
-        } catch(e) {
-            await trx.rollback()
-            return <InnerErrorInterface>{
-                code: 500,
-                message: "Внутреннняя ошибка сервера при создании сеанса!"
-            }
-        }
+        await this.sessionRepo.createSession(payload)
     }
     public async updateSession(idSession: number, payload: SessionBaseInterface) {
-        try {
-            const query = await this.sessionModel.get({ id: idSession })
-            if (!query) { 
-                return <InnerErrorInterface>{
-                    code: 404,
-                    message: 'Запись сеанса не найдена!'
-                }
-            }
-        } catch (e) {
-            console.error(e)
-            return <InnerErrorInterface>{
-                code: 500,
-                message: 'Внутренняя ошибка сервера при поиске записи сеанса: ' + e
-            }
-        }
-        const trx = await this.connection.transaction()
-        try {
-            await this.sessionModel.update(trx, idSession, payload)
-            await trx.commit()
-        }
-        catch (e) {
-            console.error(e)
-            await trx.rollback()
-            return <InnerErrorInterface>{
-                code: 500,
-                message: 'Внутренняя ошибка сервера при обновлении сеанса: ' + e
-            }
-        }
+        await this.sessionRepo.updateSession(idSession, payload)
     }
 
     public async deleteSession(idSession: number) {
-        const query = await this.sessionModel.get({id: idSession})
-        if (!query) {
-            return <InnerErrorInterface>{
-                code: 404,
-                message: 'Запись сеанса не найдена!'
-            }
-        }
-        const trx = await this.connection.transaction()
-        try {
-            await this.sessionModel.delete(trx, idSession)
-            await trx.commit()
-        }
-        catch (e) {
-            await trx.rollback()
-            return <InnerErrorInterface>{
-                code: 500,
-                message: 'Внутреняя ошибка сервера при удалении сеанса!'
-            }
-        }
+        await this.sessionRepo.deleteSession(idSession)
     }
 
     public async getUnlockedSessions() {
-        try {
-            const query: SessionInterface[] = await this.sessionModel.getUnlockedSessions()
-            const fetchedQuery = this.sessionInfrastructure.fixTimestamps(query)
-            return fetchedQuery
-        } catch (e) {
-            console.error(e)
-            return <InnerErrorInterface> {
-                code: 500,
-                message: 'Внутренняя ошибка сервера при поиске сеансов!'
-            }
-        }
+        const sessions =  await this.sessionRepo.getUnlockedSessions()
+        return this.sessionPreparator.fetchSessions(sessions)
     }
 
     public async getSingleUnlockedSession(idSession: number) {
-        try {
-            const query: SessionInterface | undefined = await this.sessionModel.getSingleUnlockedSession(idSession)
-            if (!query) {
-                return <InnerErrorInterface>{
-                    code: 404,
-                    message: 'Сеанс не найден!'
-                }
-            }
-            const fetchedQuery = this.sessionInfrastructure.fixTimestamps([query])
-            return fetchedQuery[0]
-        } catch (e) {
-            console.error(e)
-            return <InnerErrorInterface> {
-                code: 500,
-                message: 'Внутренняя ошибка сервера при поиске сеанса!'
-            }
-        }
+        const session = await this.sessionRepo.getUnlockedSession(idSession)
+        if (!session) throw new InnerError("Сеанс не найден.", 404)
+        return this.sessionPreparator.fetchSession(session)
     }
 
     public async getSessionsByPlay(idPlay: number) {
-        try {
-            const query: SessionInterface[] = await this.sessionModel
-                .getSessionsByPlay(idPlay)
-            const fetchedQuery = this.sessionInfrastructure.fixTimestamps(query)
-            return fetchedQuery
-        } catch (e) {
-            console.error(e)
-            return <InnerErrorInterface>{
-                code: 500,
-                message: 'Внутренняя ошибка сервера при поиске сеансов по спектаклю!'
-            }
-        }
+        const sessions = await this.sessionRepo.getUnlockedSessionsByPlay(idPlay)
+        return this.sessionPreparator.fetchSessions(sessions) 
     }
 
     public async getSlots(idSession: number) {
-        let session: SessionInterface | undefined
-        try {
-            session = await this.sessionModel.get({id: idSession})
-        } catch (e) {
-            return <InnerErrorInterface>{
-                code: 500,
-                message: 'Внутренняя ошибка сервера при нахождении сеанса!'
-            }
-        }
-        if (!session) {
-            return <InnerErrorInterface>{
-                code: 404,
-                message: 'Запись сеанса не найдена!'
-            }
-        }
+        const session = await this.sessionRepo.getUnlockedSession(idSession)
+        if (!session) throw new InnerError('Сеанс не найден.', 404)
 
-        const idPricePolicy = session.id_price_policy
-    
-        let rowsQuery: RowInterface[],
-            slotsQuery: SlotWithRowIdInterface[],
-            reservedSlotsQuery: SlotInterface[]
-
-        try {
-            [rowsQuery, slotsQuery, reservedSlotsQuery] = await Promise.all([
-                this.sessionModel.getRowsByPricePolicy(idPricePolicy),
-                this.sessionModel.getSlotsByPricePolicy(idPricePolicy),
-                this.sessionModel.getReservedSlots(idSession, idPricePolicy)
-            ])
-        } catch (e) {
-            return <InnerErrorInterface>{
-                code: 500,
-                message: 'Внутренняя ошибка сервера при поиске слотов!'
-            }
-        }
-        
-    
-        let result: { 
-            id: number,
-            number: number,
-            title: string,
-            seats: SlotIsReservedInterface[] 
-        }[] = []
-    
-        for (let row of rowsQuery) {
-            const rowSlots = slotsQuery.filter((slot) => slot.id_row == row.id)
-            const reservedSlotsMap = reservedSlotsQuery.map(reservedSlot => reservedSlot.id)
-            let slots: SlotIsReservedInterface[] = []
-            for (let slot of rowSlots) {
-                if (reservedSlotsMap.includes(slot.id)) {
-                    const item: SlotIsReservedInterface = {
-                        id: slot.id,
-                        seat_number: slot.seat_number,
-                        row_number: slot.row_number,
-                        price: slot.price,
-                        auditorium_title: slot.auditorium_title,
-                        row_title: slot.row_title,
-                        is_reserved: true
-                    }
-                    slots.push(item)
-                }
-                else {
-                    const item: SlotIsReservedInterface = {
-                        id: slot.id,
-                        seat_number: slot.seat_number,
-                        row_number: slot.row_number,
-                        price: slot.price,
-                        auditorium_title: slot.auditorium_title,
-                        row_title: slot.row_title,
-                        is_reserved: false
-                    }
-                    slots.push(item)
-                }
-            }
-            result.push({
-                id: row.id,
-                number: row.number,
-                title: row.title,
-                seats: slots
-            })
-        }
-        result.sort((a: {  id: number, number: number, title: string, seats: SlotIsReservedInterface[] }, 
-            b: {  id: number, number: number, title: string, seats: SlotIsReservedInterface[] }) => {
-                if (a.id > b.id ) return 1
-                else if (a.id < b.id ) return -1
-                else return 0
-        })
-        const resultList: { 
-            number: number,
-            title: string,
-            seats: SlotIsReservedInterface[] 
-        }[] = []
-        result.forEach(item => {
-            resultList.push({
-                number: item.number,
-                title: item.title,
-                seats: item.seats
-            })
-        })
-        return resultList
+        const [rows, slots, reservedSlots] = await Promise.all([
+            this.sessionRepo.getRowsByPricePolicy(session.idPricePolicy),
+            this.sessionRepo.getSlotsByPricePolicy(session.idPricePolicy),
+            this.sessionRepo.getReservedSlots(session.id, session.idPricePolicy)
+        ])
+        return this.slotPreparator.fetchSlotsForSession(rows, slots, reservedSlots)
     }
 }

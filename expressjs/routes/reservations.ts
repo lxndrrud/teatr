@@ -26,6 +26,10 @@ import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
 import { ReservationRepo } from "../repositories/Reservation.repo";
 import { Tokenizer } from "../utils/tokenizer";
 import { Hasher } from "../utils/hasher";
+import { SessionRepo } from "../repositories/Session.repo";
+import { SessionPreparator } from "../infrastructure/SessionPreparator.infra";
+import { SlotPreparator } from "../infrastructure/SlotPreparator.infra";
+import { ErrorHandler } from "../utils/ErrorHandler";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
@@ -56,17 +60,11 @@ const reservationController = new ReservationController(
         ),
         new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
         new SessionCRUDService(
-            KnexConnection,
-            new SessionDatabaseModel(
-                KnexConnection,
+            new SessionRepo(DatabaseConnection),
+            new SessionPreparator(
                 new TimestampHelper()
             ),
-            new SessionInfrastructure(
-                new SessionDatabaseModel(
-                    KnexConnection,
-                    new TimestampHelper()
-                ),
-                new TimestampHelper())
+            new SlotPreparator()
         ),
         new SessionInfrastructure(
             new SessionDatabaseModel(
@@ -121,20 +119,23 @@ const reservationController = new ReservationController(
     ),
     SlotsEventEmitter.getInstance(
         new SessionCRUDService(
-            KnexConnection,
-            new SessionDatabaseModel(
-                KnexConnection,
-                new TimestampHelper()), 
-            new SessionInfrastructure(
-                new SessionDatabaseModel(
-                    KnexConnection,
-                    new TimestampHelper()
-                ),
-                new TimestampHelper())),
+            new SessionRepo(DatabaseConnection),
+            new SessionPreparator(
+                new TimestampHelper()
+            ),
+            new SlotPreparator()
+        ),
+        new ErrorHandler()
     )
 )
 
 const authMiddleware = new AuthMiddleware(
+    new UserRepo(DatabaseConnection, 
+        new EmailingTypeRepo(DatabaseConnection), 
+        new Hasher(), 
+        new PermissionChecker(), 
+        new Tokenizer()),
+    new PermissionChecker(),
     new UserInfrastructure(new UserDatabaseModel(KnexConnection))
 )
 

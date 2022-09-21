@@ -25,6 +25,7 @@ export class SessionInfrastructure implements ISessionInfrastructure {
     }
 
     public fixTimestamps(query: SessionInterface[]) {
+        const resultList: SessionInterface[] = []
         for (let session of query) {
             session.timestamp = this.timestampHelper.extendedTimestamp(session.timestamp)
         }

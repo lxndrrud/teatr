@@ -255,10 +255,6 @@ export function SessionsControllerTest() {
 
                 expect(response.status).to.equal(200)
 
-                expect(response.body).to.haveOwnProperty("dates")
-                expect(response.body.dates[0]).to.to.haveOwnProperty("date")
-                expect(response.body.dates[0]).to.to.haveOwnProperty("extended_date")
-
                 expect(response.body).to.haveOwnProperty("auditoriums")
                 expect(response.body.auditoriums[0]).to.haveOwnProperty("title")
 
@@ -272,7 +268,8 @@ export function SessionsControllerTest() {
         describe("GET /expressjs/sessions/filter/", function() {
             const getFilteredSessionsLink = `/expressjs/sessions/filter/`
             const filterQueryPayload: SessionFilterQueryInterface = {
-                date: '',
+                dateFrom: '',
+                dateTo: '',
                 play_title: 'Спектакль 1',
                 auditorium_title: 'Главный зал'
             } 

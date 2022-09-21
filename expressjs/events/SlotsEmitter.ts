@@ -1,8 +1,7 @@
 import { Response } from "express"
 import { EventEmitter } from "stream"
-import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors";
-import { SlotIsReservedInterface } from "../interfaces/slots"
 import { ISessionCRUDService } from "../services/sessions/SessionCRUD.service";
+import { IErrorHandler } from "../utils/ErrorHandler";
 
 export interface ISlotsEventEmitter {
     connectSession(idSession: number, res: Response): void
@@ -14,21 +13,26 @@ export class SlotsEventEmitter implements ISlotsEventEmitter {
     static instance: SlotsEventEmitter
     protected eventEmitter
     protected sessionCRUDService
+    protected errorHandler
 
     constructor(
-        sessionCRUDServiceInstance: ISessionCRUDService
+        sessionCRUDServiceInstance: ISessionCRUDService,
+        errorHandlerInstance: IErrorHandler
     ) {
         this.eventEmitter = new EventEmitter()
         SlotsEventEmitter.instance = this
         this.sessionCRUDService = sessionCRUDServiceInstance
+        this.errorHandler = errorHandlerInstance
     }
 
     public static getInstance(
-        sessionCRUDServiceInstance: ISessionCRUDService
+        sessionCRUDServiceInstance: ISessionCRUDService,
+        errorHandlerInstance: IErrorHandler
     ) {
         if (SlotsEventEmitter.instance) return SlotsEventEmitter.instance
         else return new SlotsEventEmitter(
-            sessionCRUDServiceInstance
+            sessionCRUDServiceInstance,
+            errorHandlerInstance
         )
     }
 
@@ -36,16 +40,9 @@ export class SlotsEventEmitter implements ISlotsEventEmitter {
         this.eventEmitter.once(`getSlots-${idSession}`, (idSession: number) => {
             this.sessionCRUDService.getSlots(idSession)
             .then(result => {
-                if (isInnerErrorInterface(result)) {
-                    res.status(result.code).send(result.message)
-                    return
-                }
                 res.status(200).send(result)
             })
-            .catch(e => { res.status(500).send(<ErrorInterface>{
-                message: e
-            }) })
-            
+            .catch(error => this.errorHandler.fetchError(res, error))
         })
     }
 

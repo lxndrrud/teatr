@@ -23,7 +23,8 @@ export interface SessionInterface extends SessionDatabaseInterface {
 }
 
 export interface SessionFilterQueryInterface {
-    date: string | undefined
+    dateFrom: string | undefined
+    dateTo: string | undefined
     auditorium_title: string | undefined
     play_title: string | undefined
 }

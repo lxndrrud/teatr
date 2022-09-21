@@ -7,6 +7,7 @@ import { ISessionCRUDService } from "../services/sessions/SessionCRUD.service"
 import { ISessionCSVService } from "../services/sessions/SessionCSV.service"
 import { ISessionFilterService } from "../services/sessions/SessionFilter.service"
 import { ISlotsEventEmitter } from "../events/SlotsEmitter"
+import { IErrorHandler } from "../utils/ErrorHandler"
 
 
 export class SessionController {
@@ -14,28 +15,29 @@ export class SessionController {
     private sessionCSVService
     private sessionFilterService
     private slotsEventEmitter
+    private errorHandler
 
     constructor(
         sessionCRUDServiceInstance: ISessionCRUDService,
         sessionCSVServiceInstance: ISessionCSVService,
         sessionFilterService: ISessionFilterService,
-        slotsEventEmitterInstance: ISlotsEventEmitter
+        slotsEventEmitterInstance: ISlotsEventEmitter,
+        errorHandlerInstance: IErrorHandler
     ) {
         this.sessionCRUDService = sessionCRUDServiceInstance
         this.sessionCSVService = sessionCSVServiceInstance
         this.sessionFilterService = sessionFilterService
         this.slotsEventEmitter = slotsEventEmitterInstance
+        this.errorHandler = errorHandlerInstance
     }
 
     async getSessions(req: Request, res: Response) {
-        const query = await this.sessionCRUDService.getUnlockedSessions()
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                message: query.message
-            })
-            return
+        try {
+            const query = await this.sessionCRUDService.getUnlockedSessions()
+            res.status(200).send(query)
+        } catch(error) {
+            this.errorHandler.fetchError(res, error)
         }
-        res.status(200).send(query)
     }
 
     async getSingleSession(req: Request, res: Response) {
@@ -44,14 +46,12 @@ export class SessionController {
             res.status(400).end()
             return 
         }
-        const query = await this.sessionCRUDService.getSingleUnlockedSession(idSession)
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                message: query.message
-            })
-            return
+        try {
+            const query = await this.sessionCRUDService.getSingleUnlockedSession(idSession)
+            res.status(200).send(query)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-        res.status(200).send(query)
     }
 
     async postSession(req: Request, res: Response) {
@@ -62,16 +62,12 @@ export class SessionController {
             return
         }
         const payload: SessionBaseInterface = {...req.body}
-        const newSession = await this.sessionCRUDService.createSession(payload)
-        if (isInnerErrorInterface(newSession)) {
-            res.status(newSession.code).send(<ErrorInterface>{
-                message: newSession.message
-            })
-            return
+        try {
+            await this.sessionCRUDService.createSession(payload)
+            res.status(201).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-        res.status(201).send({
-            id: newSession.id
-        })
     }
 
     async createSessionsCSV(req: Request, res: Response) {
@@ -81,15 +77,12 @@ export class SessionController {
             })
             return
         }
-        const response = await this.sessionCSVService.createSessionsCSV(<UploadedFile> req.files.csv)
-        if (isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            await this.sessionCSVService.createSessionsCSV(<UploadedFile> req.files.csv)
+            res.status(201).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-        
-        res.status(201).end()
     }
 
     async updateSession(req: Request, res: Response) {
@@ -107,15 +100,12 @@ export class SessionController {
             return
         }
         const payload: SessionBaseInterface = {...req.body}
-        
-        const response = await this.sessionCRUDService.updateSession(idSession, payload)
-        if (isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            await this.sessionCRUDService.updateSession(idSession, payload)
+            res.status(200).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-        res.status(200).end()
     }
 
     async deleteSession(req: Request, res: Response) {
@@ -126,16 +116,12 @@ export class SessionController {
             })
             return
         }
-        const response = await this.sessionCRUDService.deleteSession(idSession)
-    
-        if (isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            await this.sessionCRUDService.deleteSession(idSession)
+            res.status(200).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-    
-        res.status(200).end()
     }
 
     async getSessionsByPlay(req: Request, res: Response) {
@@ -146,17 +132,12 @@ export class SessionController {
             })
             return 
         }
-        
-        const query = await this.sessionCRUDService.getSessionsByPlay(idPlay)
-    
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                message: query.message
-            })
-            return
+        try {
+            const query = await this.sessionCRUDService.getSessionsByPlay(idPlay)
+            res.status(200).send(query)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-    
-        res.status(200).send(query)
     }
 
     async getSlotsLongPolling(req: Request, res: Response) {
@@ -178,16 +159,12 @@ export class SessionController {
             })
             return
         }
-
-        const result = await this.sessionCRUDService.getSlots(idSession)
-    
-        if (isInnerErrorInterface(result)) {
-            res.status(result.code).send(<ErrorInterface>{
-                message: result.message
-            })
-            return
+        try {
+            const result = await this.sessionCRUDService.getSlots(idSession)
+            res.status(200).send(result)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-        res.status(200).send(result)
     }
 
     async getFilteredSessions(req: Request, res: Response) {
@@ -199,30 +176,21 @@ export class SessionController {
         }
         const userQuery: SessionFilterQueryInterface = {...req.query}
     
-        const query = await this.sessionFilterService.getFilteredSessions(userQuery)
-    
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                code: query.code,
-                message: query.message
-            })
-            return
+        try {
+            const query = await this.sessionFilterService.getFilteredSessions(userQuery)
+            res.status(200).send(query)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-    
-        res.status(200).send(query)
     }
 
     async getSessionFilterOptions(req: Request, res: Response) {
-        const query = await this.sessionFilterService.getSessionFilterOptions()
-    
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                message: query.message
-            })
-            return
+        try {
+            const query = await this.sessionFilterService.getSessionFilterOptions()
+            res.status(200).send(query)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-    
-        res.status(200).send(query)
     }
 
 }

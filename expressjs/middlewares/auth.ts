@@ -3,14 +3,22 @@ import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 import { verify } from "jsonwebtoken"
 import { UserRequestOption } from "../interfaces/users"
 import { IUserInfrastructure } from "../infrastructure/User.infra"
+import { IUserRepo } from "../repositories/User.repo"
+import { IPermissionChecker } from "../infrastructure/PermissionChecker.infra"
 
 export class AuthMiddleware {
+    private userRepo
+    private permissionChecker
     private userInfrastructure
 
     constructor(
+        userRepoInstance: IUserRepo,
+        permissionCheckerInstance: IPermissionChecker,
         userInfrastructureInstance: IUserInfrastructure
     ) {
-        this.userInfrastructure = userInfrastructureInstance 
+        this.userRepo = userRepoInstance
+        this.permissionChecker = permissionCheckerInstance
+        this.userInfrastructure = userInfrastructureInstance
     }
 
     public basicAuthMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -46,7 +54,7 @@ export class AuthMiddleware {
         }
         try {
             const decoded = verify(`${token}`, `${process.env.SECRET_KEY}`);
-            const userData = {...JSON.parse(JSON.stringify(decoded))}
+            const userData = <UserRequestOption> {...JSON.parse(JSON.stringify(decoded))}
             let check = await this.userInfrastructure.checkIsUserStaff(<UserRequestOption>userData)
             if (isInnerErrorInterface(check)) {
                 res.status(check.code).send({
@@ -82,28 +90,26 @@ export class AuthMiddleware {
         }
         try {
             const decoded = verify(`${token}`, `${process.env.SECRET_KEY}`);
-            const userData = {...JSON.parse(JSON.stringify(decoded))}
-            let check = await this.userInfrastructure.checkIsUserAdmin(<UserRequestOption>userData)
-            if (isInnerErrorInterface(check)) {
-                res.status(check.code).send({
-                    message: check.message
-                })
-                return
-            }
-            if (!check) {
+            const userData = <UserRequestOption> {...JSON.parse(JSON.stringify(decoded))}
+            const user = await this.userRepo.getUser(userData.id)
+            if (!user) {
                 res.status(403).send({
                     message: "Неверные данные пользователя!"
                 })
                 return
             }
+            if (!(await this.permissionChecker.check_HasAccessToAdmin(user))) {
+                res.status(403).send({
+                    message: "Доступ запрещен!"
+                })
+                return
+            }
             req.user = userData
             next()
-        } catch (e) {
-            const error: ErrorInterface = {
+        } catch (error) {
+            res.status(401).send(<ErrorInterface> {
                 message: 'Неверный токен!'
-            }
-            res.status(401).send(error)
-            return
+            })
         }
     }
 }

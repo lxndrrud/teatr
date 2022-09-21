@@ -52,6 +52,12 @@ const userController = new UserController(
 )
 
 const authMiddleware = new AuthMiddleware(
+    new UserRepo(DatabaseConnection, 
+        new EmailingTypeRepo(DatabaseConnection), 
+        new Hasher(), 
+        new PermissionChecker(), 
+        new Tokenizer()),
+    new PermissionChecker(),
     new UserInfrastructure(new UserDatabaseModel(KnexConnection))
 )
 
