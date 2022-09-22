@@ -43,7 +43,7 @@ export interface ReservationBaseInterface {
 }
 
 export interface ReservationBaseWithoutConfirmationInterface extends ReservationBaseInterface {
-    is_confirmed: true
+    is_confirmed?: true
 }
 
 /**
@@ -79,7 +79,8 @@ export interface ReservationInterface extends ReservationWithoutSlotsInterface {
 }
 
 export interface ReservationFilterQueryInterface {
-    date: string
+    dateFrom: string
+    dateTo: string
     auditorium_title: string
     play_title: string
     is_locked: string,

@@ -54,18 +54,18 @@ export class SessionCRUDService implements ISessionCRUDService {
 
     public async getUnlockedSessions() {
         const sessions =  await this.sessionRepo.getUnlockedSessions()
-        return this.sessionPreparator.fetchSessions(sessions)
+        return sessions.map(session => this.sessionPreparator.prepareSession(session))
     }
 
     public async getSingleUnlockedSession(idSession: number) {
         const session = await this.sessionRepo.getUnlockedSession(idSession)
         if (!session) throw new InnerError("Сеанс не найден.", 404)
-        return this.sessionPreparator.fetchSession(session)
+        return this.sessionPreparator.prepareSession(session)
     }
 
     public async getSessionsByPlay(idPlay: number) {
         const sessions = await this.sessionRepo.getUnlockedSessionsByPlay(idPlay)
-        return this.sessionPreparator.fetchSessions(sessions) 
+        return sessions.map(session => this.sessionPreparator.prepareSession(session)) 
     }
 
     public async getSlots(idSession: number) {
@@ -77,6 +77,6 @@ export class SessionCRUDService implements ISessionCRUDService {
             this.sessionRepo.getSlotsByPricePolicy(session.idPricePolicy),
             this.sessionRepo.getReservedSlots(session.id, session.idPricePolicy)
         ])
-        return this.slotPreparator.fetchSlotsForSession(rows, slots, reservedSlots)
+        return this.slotPreparator.prepareSlotsForSession(rows, slots, reservedSlots)
     }
 }

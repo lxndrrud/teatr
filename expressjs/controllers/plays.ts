@@ -1,27 +1,33 @@
 import { KnexConnection }from "../knex/connections"
 import { Request, Response } from "express"
-import { PlayFetchingModel, PlayService } from "../services/plays"
+import { IPlayService } from "../services/plays/PlayService"
 import { PlayDatabaseModel } from "../dbModels/plays"
 import { isPlayBaseInterface, PlayBaseInterface, PlayInterface } from "../interfaces/plays"
 import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
 import csv from "csv-parser"
 import { UploadedFile } from "express-fileupload"
+import { IErrorHandler } from "../utils/ErrorHandler"
 
 export class PlayController {
     private playService
-    constructor(playService: PlayService) {
-        this.playService = playService
+    private errorHandler
+
+    constructor(
+        playServiceInstance: IPlayService,
+        errorHandlerInstance: IErrorHandler
+    ) {
+        this.playService = playServiceInstance
+        this.errorHandler = errorHandlerInstance
     }
 
     async getPlays(req: Request, res: Response ) {
-        const query = await this.playService.getAll()
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                message: query.message
-            })
-            return 
+        try {
+            const query = await this.playService.getAll()
+            res.status(200).send(query)
+
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-        res.status(200).send(query)
     }
 
     async createPlay(req: Request, res: Response) {
@@ -33,38 +39,36 @@ export class PlayController {
             return
         }
         const payload: PlayBaseInterface = {...req.body}
-    
         // Создание записи спектакля
-        const newPlay = await this.playService.createPlay(payload)
-    
-        if (isInnerErrorInterface(newPlay)) {
-            res.status(newPlay.code).send(<ErrorInterface>{
-                message: newPlay.message
-            })
-            return
+        try {
+            await this.playService.createPlay(payload)
+            res.status(201).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-        
-        res.status(201).send({
-            id: newPlay.id
-        })
     }
 
     async getSinglePlay(req: Request, res: Response) {
         // Проверка строки запроса
         if (!req.params.idPlay) {
-            res.status(400).end()
+            res.status(400).send(<ErrorInterface> {
+                message: 'Не указан идентификатор спектакля'
+            })
             return 
         }
         const idPlay = parseInt(req.params.idPlay)
-        
-        const query = await this.playService.getSinglePlay(idPlay)
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                message: query.message
+        if (!idPlay) {
+            res.status(400).send(<ErrorInterface> {
+                message: 'Неверный идентификатор спектакля!'
             })
             return
         }
-        res.status(200).send(query)
+        try {
+            const query = await this.playService.getSinglePlay(idPlay)
+            res.status(200).send(query)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
+        }
     }
 
     async deletePlay(req: Request, res: Response) {
@@ -76,17 +80,18 @@ export class PlayController {
             return
         }
         const idPlay = parseInt(req.params.idPlay)
-    
-        const response = await this.playService.deletePlay(idPlay)
-    
-        if(isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
+        if (!idPlay) {
+            res.status(400).send(<ErrorInterface> {
+                message: 'Неверный идентификатор спектакля!'
             })
             return
         }
-    
-        res.sendStatus(200).end()
+        try {
+            await this.playService.deletePlay(idPlay)
+            res.sendStatus(200).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
+        }
     }
 
     async updatePlay(req: Request, res: Response) {
@@ -96,7 +101,12 @@ export class PlayController {
             return
         }
         const idPlay = parseInt(req.params.idPlay)
-    
+        if (!idPlay) {
+            res.status(400).send(<ErrorInterface> {
+                message: 'Неверный идентификатор спектакля!'
+            })
+            return
+        }
         // Проверка тела запроса
         if (!isPlayBaseInterface(req.body)) {
             res.status(400).send({
@@ -105,18 +115,13 @@ export class PlayController {
             return
         }
         const payload: PlayBaseInterface = {...req.body}
-    
         // Обновление спектакля
-        const response = await this.playService.updatePlay(idPlay, payload)
-    
-        if(isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            await this.playService.updatePlay(idPlay, payload)
+            res.sendStatus(200).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-    
-        res.sendStatus(200).end()
     }
 
     /**
@@ -137,16 +142,12 @@ export class PlayController {
             return
         }
         */
-        
-        const response = await this.playService
-            .createPlaysCSV(<UploadedFile>req.files.csv)
-        if (isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            await this.playService.createPlaysCSV(<UploadedFile>req.files.csv)
+            res.status(201).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)            
         }
-        res.status(201).end()
     }
 }
 

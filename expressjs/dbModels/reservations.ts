@@ -268,13 +268,13 @@ export class ReservationDatabaseModel extends DatabaseModel implements Reservati
     getFilteredReservations(userQuery: ReservationFilterQueryInterface) {
         return this.getAllFullInfo()
             .andWhere(builder => {
-                if (userQuery.date !== undefined && userQuery.date !== 'undefined') {
+                if (userQuery.dateFrom !== undefined && userQuery.dateFrom !== 'undefined') {
                     builder.andWhere(innerBuilder => {
                         innerBuilder
-                            .andWhere('s.timestamp', '>=', `${userQuery.date}T00:00:00`)
+                            .andWhere('s.timestamp', '>=', `${userQuery.dateFrom}T00:00:00`)
                         innerBuilder
                             .andWhere('s.timestamp', '<', 
-                                this.timestampHelper.getNextDayOfTimestamp(`${userQuery.date}`))
+                                this.timestampHelper.getNextDayOfTimestamp(`${userQuery.dateFrom}`))
                     })
                 }
                 if (userQuery.auditorium_title !== undefined && userQuery.auditorium_title !== 'undefined') {

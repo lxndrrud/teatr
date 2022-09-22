@@ -8,6 +8,7 @@ import { InnerError } from "../interfaces/errors"
 import { SessionBaseInterface, SessionFilterQueryInterface } from "../interfaces/sessions"
 
 export interface ISessionRepo {
+    getSession(idSession: number): Promise<Session | null>
     getUnlockedSessions(): Promise<Session[]>
     getUnlockedSession(idSession: number): Promise<Session | null>
     getUnlockedSessionsByPlay(idPlay: number): Promise<Session[]>

@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 import { Play } from "../entities/plays";
+import { InnerError } from "../interfaces/errors";
 import { PlayBaseInterface } from "../interfaces/plays";
 
 export interface IPlayRepo {
@@ -8,6 +9,7 @@ export interface IPlayRepo {
     getAll(): Promise<Play[]>
     createPlay(payload: PlayBaseInterface): Promise<void>
     createPlays(payload: PlayBaseInterface[]): Promise<void>
+    updatePlay(idPlay: number, payload: PlayBaseInterface): Promise<void>
     deletePlay(idPlay: number): Promise<void>
 }
 
@@ -24,9 +26,10 @@ export class PlayRepo implements IPlayRepo {
 
     private playQuery() {
         return this.connection.createQueryBuilder(Play, 'p')
+            .innerJoinAndSelect('p.sessions', 's')
             .innerJoinAndSelect('p.playImages', 'pi')
             .innerJoinAndSelect('pi.image', 'i')
-            .innerJoinAndSelect('p.sessions', 's')
+            .where('pi.isPoster = :isPoster', { isPoster: true })
             .distinct()
     }
 
@@ -38,7 +41,7 @@ export class PlayRepo implements IPlayRepo {
 
     public async getSingle(idPlay: number) {
         return this.playQuery()
-            .where('p.id = :idPlay', { idPlay })
+            .andWhere('p.id = :idPlay', { idPlay })
             .getOne()
     }
 
@@ -66,14 +69,20 @@ export class PlayRepo implements IPlayRepo {
         await this.playRepo.save(plays)
     }
 
-    public async deletePlay(idPlay: number) {
-        const play = await this.playRepo.findOne({
-            where: {
-                id: idPlay
-            }
-        })
+    public async updatePlay(idPlay: number, payload: PlayBaseInterface) {
+        const play = await this.getSingle(idPlay)
+        if (!play) throw new InnerError('Спектакль не найден.', 404)
 
-        if (!play) throw 'Спектакль не найден!'
+        play.description = payload.description
+        play.title = payload.title
+
+        await this.playRepo.save(play)
+    }
+
+    public async deletePlay(idPlay: number) {
+        const play = await this.getSingle(idPlay)
+        if (!play) throw new InnerError('Спектакль не найден!', 404)
+
         await this.playRepo.remove(play)
     }
 }

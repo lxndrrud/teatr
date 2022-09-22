@@ -47,6 +47,6 @@ export class SessionFilterService implements ISessionFilterService {
 
     public async getFilteredSessions(userQueryPayload: SessionFilterQueryInterface) {
         const sessions = await this.sessionRepo.getFilteredSessions(userQueryPayload)
-        return this.sessionPreparator.fetchSessions(sessions)
+        return sessions.map(session => this.sessionPreparator.prepareSession(session))
     }
 }

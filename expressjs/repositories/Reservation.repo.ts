@@ -1,7 +1,11 @@
 import { Brackets, DataSource, RemoveOptions } from "typeorm"; 
+import { Auditorium } from "../entities/auditoriums";
+import { Play } from "../entities/plays";
 import { Reservation } from "../entities/reservations";
-import { ReservationFilterQueryInterface } from "../interfaces/reservations";
-import { TimestampHelper } from "../utils/timestamp";
+import { ReservationSlot } from "../entities/reservations_slots";
+import { Slot } from "../entities/slots";
+import { ReservationBaseInterface, ReservationFilterQueryInterface } from "../interfaces/reservations";
+import { ReservationSlotDependency } from "../interfaces/slots";
 
 
 export interface IReservationRepo {
@@ -9,24 +13,26 @@ export interface IReservationRepo {
     getReservations(): Promise<Reservation[]>
     getReservationsForUser(idUser: number): Promise<Reservation[]>
     getReservation(idReservation: number): Promise<Reservation | null>
+    getReservedSlots(idReservation: number): Promise<Slot[]>
     paymentForReservation(idReservation: number): Promise<void>
     confirmReservation(idReservation: number): Promise<void>
+    createReservation(reservationPayload: ReservationBaseInterface, isReservationConfirmed: boolean, 
+        slotsPayload: ReservationSlotDependency[]): Promise<Reservation>
     deleteReservation(idReservation: number): Promise<void>
     getFilteredReservations(userQuery: ReservationFilterQueryInterface, idUser?: number | undefined): Promise<Reservation[]>
+    getPlaysOptionsForReservationFilter(idUser?: number | undefined): Promise<Play[]>
+    getAuditoriumsOptionsForReservationFilter(idUser?: number | undefined): Promise<Auditorium[]>
 } 
 
 export class ReservationRepo implements IReservationRepo {
     private connection
     private reservationRepo
-    private timestampHelper
 
     constructor(
         connectionInstance: DataSource,
-        timestampHelperInstance: TimestampHelper
     ) {
         this.connection = connectionInstance
         this.reservationRepo = this.connection.getRepository(Reservation)
-        this.timestampHelper = timestampHelperInstance
     }
 
     private reservationQuery() {
@@ -65,17 +71,23 @@ export class ReservationRepo implements IReservationRepo {
         return reservation
     }
 
+    public async getReservedSlots(idReservation: number) {
+        return this.connection.createQueryBuilder(Slot, 'slot')
+            .innerJoinAndSelect('slot.seat', 'seat')
+            .innerJoinAndSelect('seat.row', 'row')
+            .innerJoinAndSelect('row.auditorium', 'a')
+            .innerJoinAndSelect('slot.reservationSlots', 'rs')
+            .where('rs.idReservation = :idReservation', { idReservation })
+            .getMany()
+    }
+
     public async getFilteredReservations(userQuery: ReservationFilterQueryInterface, idUser?: number) {
         const reservations = await this.reservationQuery()
             .andWhere( new Brackets(builder => {
-                if (userQuery.date !== undefined && userQuery.date !== 'undefined') {
-                    builder.andWhere(new Brackets(innerBuilder => {
-                        innerBuilder
-                            .andWhere(`s.timestamp >= :dateFrom`, {dateFrom: `${userQuery.date}T00:00:00` })
-                        innerBuilder
-                            .andWhere(`s.timestamp < :dateTo`, { dateTo: this.timestampHelper.getNextDayOfTimestamp(userQuery.date)})
-                    }))
-                }
+                if (userQuery.dateFrom !== undefined && userQuery.dateFrom !== 'undefined') 
+                    builder.andWhere(`s.timestamp >= :dateFrom`, { dateFrom: `${userQuery.dateFrom}T00:00:00` })
+                if (userQuery.dateTo !== undefined && userQuery.dateTo !== 'undefined') 
+                    builder.andWhere(`s.timestamp <= :dateTo`, { dateTo: `${userQuery.dateTo}T00:00:00` })
                 if (userQuery.auditorium_title !== undefined && userQuery.auditorium_title !== 'undefined') 
                     builder.andWhere(`a.title = :auditoriumTitle `, { auditoriumTitle: userQuery.auditorium_title})
                 if (userQuery.play_title !== undefined && userQuery.play_title !== 'undefined') 
@@ -123,6 +135,24 @@ export class ReservationRepo implements IReservationRepo {
         await this.reservationRepo.save(reservation)
     }
 
+    public async createReservation(reservationPayload: ReservationBaseInterface, isReservationConfirmed: boolean, 
+        slotsPayload: ReservationSlotDependency[]) {
+        const newReservation = new Reservation()
+        newReservation.idSession = reservationPayload.id_user
+        newReservation.idSession = reservationPayload.id_session
+        newReservation.confirmationCode = reservationPayload.confirmation_code
+        newReservation.isConfirmed = isReservationConfirmed
+
+        const slotsList = slotsPayload.map(slotPayload => {
+            const newReservationSlot = new ReservationSlot()
+            newReservationSlot.reservation = newReservation
+            newReservationSlot.idSlot = slotPayload.id
+            return newReservationSlot
+        })
+        newReservation.reservationSlots = slotsList
+        return await this.reservationRepo.save(newReservation)
+    }
+
     public async deleteReservation(idReservation: number) {
         const reservation = await this.reservationRepo.findOneOrFail({
             where: {
@@ -135,5 +165,33 @@ export class ReservationRepo implements IReservationRepo {
         })
 
         await this.reservationRepo.remove(reservation)
+    }
+
+    public async getPlaysOptionsForReservationFilter(idUser?: number) {
+        return this.connection.createQueryBuilder(Play, 'p')
+            .select([ 'p.title' ])
+            .innerJoin('p.sessions', 's')
+            .innerJoin('s.reservations', 'r')
+            .where(new Brackets(builder => {
+                if (idUser) builder.where('r.idUser = :idUser', { idUser })
+            }))
+            .distinct()
+            .getMany()
+    }
+
+    public async getAuditoriumsOptionsForReservationFilter(idUser?: number) {
+        return this.connection.createQueryBuilder(Auditorium, 'a')
+            .select([ 'a.title' ])
+            .innerJoin('a.rows', 'row')
+            .innerJoin('row.seats', 'seat')
+            .innerJoin('seat.slots', 'slot')
+            .innerJoin('slot.pricePolicy', 'pp')
+            .innerJoin('pp.sessions', 's')
+            .innerJoin('s.reservations', 'r')
+            .where(new Brackets(builder => {
+                if (idUser) builder.where('r.idUser = :idUser', { idUser })
+            }))
+            .distinct()
+            .getMany()
     }
 }

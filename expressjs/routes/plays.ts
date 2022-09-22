@@ -1,7 +1,6 @@
 import { PlayController } from "../controllers/plays";
 import { Router } from "express";
-import { PlayFetchingModel } from "../services/plays";
-import { PlayDatabaseModel } from "../dbModels/plays";
+import { PlayService } from "../services/plays/PlayService";
 import { AuthMiddleware } from "../middlewares/auth";
 import { FileStreamHelper } from "../utils/fileStreams";
 import { KnexConnection } from "../knex/connections";
@@ -13,13 +12,18 @@ import { DatabaseConnection } from "../databaseConnection";
 import { Hasher } from "../utils/hasher";
 import { PermissionChecker } from "../infrastructure/PermissionChecker.infra";
 import { Tokenizer } from "../utils/tokenizer";
+import { PlayRepo } from "../repositories/Play.repo";
+import { PlayPreparator } from "../infrastructure/PlayPreparator.infra";
+import { ErrorHandler } from "../utils/ErrorHandler";
 
 export const playsRouter = Router()
 const playController = new PlayController(
-    new PlayFetchingModel(
-        KnexConnection,
-        new PlayDatabaseModel(KnexConnection),
-        new FileStreamHelper())
+    new PlayService(
+        new PlayRepo(DatabaseConnection),
+        new FileStreamHelper(),
+        new PlayPreparator()
+    ),
+    new ErrorHandler()
 )
 const authMiddleware = new AuthMiddleware(
     new UserRepo(DatabaseConnection, 

@@ -1,30 +1,35 @@
 // * Библиотеки
 import { Request, Response } from "express"
 // * Интерфейсы
-import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
-import { ReservationBaseInterface, ReservationInterface, 
-    ReservationCreateInterface, ReservationDatabaseInterface, ReservationConfirmationInterface, isReservationCreateInterface, isReservationConfirmationInterface, ReservationWithoutSlotsInterface, ReservationBaseWithoutConfirmationInterface, isReservationFilterQueryInterface, ReservationFilterQueryInterface} from "../interfaces/reservations"
+import { ErrorInterface } from "../interfaces/errors"
+import { 
+    ReservationCreateInterface, ReservationConfirmationInterface, isReservationCreateInterface, isReservationConfirmationInterface,
+    isReservationFilterQueryInterface, ReservationFilterQueryInterface} from "../interfaces/reservations"
 // * Утилиты
 import { IReservationFilterService} from "../services/reservations/ReservationFilter.service"
 import { IReservationCRUDService } from "../services/reservations/ReservationCRUD.service"
 import { IReservationPaymentService } from "../services/reservations/ReservationPayment.service"
 import { ISlotsEventEmitter } from "../events/SlotsEmitter"
+import { IErrorHandler } from "../utils/ErrorHandler"
 
 export class ReservationController {
     private reservationPaymentService
     private reservationCRUDService
     private reservationFilterService
     private slotsEventEmitter
+    private errorHandler
     constructor(
         reservationPaymentServiceInstance: IReservationPaymentService, 
         reservationCRUDServiceInstance: IReservationCRUDService,
         reservationFilterServiceInstance: IReservationFilterService,
-        slotsEventEmitterInstance: ISlotsEventEmitter
+        slotsEventEmitterInstance: ISlotsEventEmitter,
+        errorHandlerInstance: IErrorHandler
     ) {
         this.reservationPaymentService = reservationPaymentServiceInstance
         this.reservationCRUDService = reservationCRUDServiceInstance
         this.reservationFilterService = reservationFilterServiceInstance
         this.slotsEventEmitter = slotsEventEmitterInstance
+        this.errorHandler = errorHandlerInstance
     }
 
     /**
@@ -36,7 +41,6 @@ export class ReservationController {
             res.status(401).end()
             return
         }
-
         // Проверка строки запроса
         const idReservation = parseInt(req.params.idReservation)
         if (!idReservation) {
@@ -45,18 +49,13 @@ export class ReservationController {
             })
             return
         }
-
-        const query = await this.reservationCRUDService
-            .getSingleFullInfo(req.user.id, req.user.id_role, idReservation)
-
-        if (isInnerErrorInterface(query)) {
-            res.status(query.code).send(<ErrorInterface>{
-                message: query.message
-            })
-            return
+        try {
+            const query = await this.reservationCRUDService
+                .getSingleFullInfo(req.user.id, req.user.id_role, idReservation)
+            res.status(200).send(query)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-
-        res.status(200).send(query)
     }
 
     /**
@@ -68,7 +67,6 @@ export class ReservationController {
             res.status(401).end()
             return
         }
-
         //  Проверка тела запроса на соответствие интерфейсу
         let requestBody: ReservationCreateInterface
         if (!isReservationCreateInterface(req.body)) {
@@ -79,19 +77,13 @@ export class ReservationController {
             return
         }
         requestBody = { ...req.body }
-
-        const response = await this.reservationCRUDService.createReservation(req.user, requestBody)
-
-        if (isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            const response = await this.reservationCRUDService.createReservation(req.user, requestBody)
+            this.slotsEventEmitter.emitSession(requestBody.id_session)
+            res.status(201).send(response)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-
-        this.slotsEventEmitter.emitSession(requestBody.id_session)
-
-        res.status(201).send(response)
     }
 
     /**
@@ -105,7 +97,6 @@ export class ReservationController {
             })
             return
         }
-
         // Проверка строки запроса
         const idReservation = parseInt(req.params.idReservation)
         if (!idReservation) {
@@ -114,7 +105,6 @@ export class ReservationController {
             })
             return
         }
-
         // Проверка тела запроса
         let requestBody: ReservationConfirmationInterface
         if (!isReservationConfirmationInterface(req.body)) {
@@ -124,18 +114,12 @@ export class ReservationController {
             return
         }
         requestBody = {...req.body}
-
-        const response = await this.reservationPaymentService
-            .confirmReservation(req.user, idReservation, requestBody)
-
-        if (isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            await this.reservationPaymentService.confirmReservation(req.user, idReservation, requestBody)
+            res.status(200).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-
-        res.status(200).end()
     }
 
     /**
@@ -172,7 +156,6 @@ export class ReservationController {
             })
             return
         }
-
         // Проверка строки запроса
         const idReservation = parseInt(req.params.idReservation)
         if (!idReservation) {
@@ -181,18 +164,12 @@ export class ReservationController {
             })
             return
         }
-
-        const response = await this.reservationPaymentService
-            .paymentForReservation(req.user, idReservation)
-
-        if (isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            await this.reservationPaymentService.paymentForReservation(req.user, idReservation)
+            res.status(200).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-
-        res.status(200).end()
     }
 
     /**
@@ -204,26 +181,19 @@ export class ReservationController {
             res.status(401).end()
             return
         }
-
         // Проверка строки запроса
         const idReservation = parseInt(req.params.idReservation)
         if (!idReservation) {
             res.status(400).end()
             return
         }
-
-        const idSession = await this.reservationCRUDService.deleteReservation(req.user, idReservation)
-
-        if (isInnerErrorInterface(idSession)) {
-            res.status(idSession.code).send(<ErrorInterface>{
-                message: idSession.message
-            })
-            return
+        try {
+            const idSession = await this.reservationCRUDService.deleteReservation(req.user, idReservation)
+            this.slotsEventEmitter.emitSession(idSession)
+            res.status(200).end()
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-
-        this.slotsEventEmitter.emitSession(idSession)
-
-        res.status(200).end()
     }
 
     /**
@@ -237,17 +207,12 @@ export class ReservationController {
             })
             return
         }
-
-        const response = await this.reservationCRUDService.getReservations(req.user)
-
-        if(isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            const response = await this.reservationCRUDService.getReservations(req.user)
+            res.status(200).send(response)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-
-        res.status(200).send(response)
     }
 
     /**
@@ -261,17 +226,12 @@ export class ReservationController {
             })
             return
         }
-
-        const response = await this.reservationFilterService.getReservationFilterOptions(req.user)
-
-        if (isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            const response = await this.reservationFilterService.getReservationFilterOptions(req.user)
+            res.status(200).send(response)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-
-        res.status(200).send(response)
     }
 
     /**
@@ -285,7 +245,6 @@ export class ReservationController {
             })
             return
         }
-
         // Проверка строки запроса
         if (!isReservationFilterQueryInterface(req.query)) {
             res.status(400).send(<ErrorInterface>{
@@ -294,16 +253,11 @@ export class ReservationController {
             return
         }
         const userQuery: ReservationFilterQueryInterface = {...req.query}
-
-        const response = await this.reservationFilterService.getFilteredReservations(userQuery, req.user)
-
-        if (isInnerErrorInterface(response)) {
-            res.status(response.code).send(<ErrorInterface>{
-                message: response.message
-            })
-            return
+        try {
+            const response = await this.reservationFilterService.getFilteredReservations(userQuery, req.user)
+            res.status(200).send(response)
+        } catch (error) {
+            this.errorHandler.fetchError(res, error)
         }
-
-        res.status(200).send(response)
     }
 }

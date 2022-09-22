@@ -1,20 +1,21 @@
+import { ReservationSlot } from "../entities/reservations_slots";
 import { Row } from "../entities/rows";
 import { Slot } from "../entities/slots";
-import { SlotIsReservedInterface } from "../interfaces/slots";
+import { SlotInterface, SlotIsReservedInterface } from "../interfaces/slots";
 
 
 export interface ISlotPreparator {
-    fetchSlotsForSession(rows: Row[], slots: Slot[], reservedSlots: Slot[]): {
+    prepareSlotsForSession(rows: Row[], slots: Slot[], reservedSlots: Slot[]): {
         number: number;
         title: string;
         seats: SlotIsReservedInterface[];
     }[]
+
+    prepareSlotInterface(slot: Slot): SlotInterface
 }
 
 export class SlotPreparator implements ISlotPreparator {
-
-
-    public fetchSlotsForSession(rows: Row[], slots: Slot[], reservedSlots: Slot[]) {
+    public prepareSlotsForSession(rows: Row[], slots: Slot[], reservedSlots: Slot[]) {
         let result: { 
             id: number,
             number: number,
@@ -78,5 +79,16 @@ export class SlotPreparator implements ISlotPreparator {
             })
         })
         return resultList
+    }
+
+    prepareSlotInterface(slot: Slot) {
+        return <SlotInterface>{
+            id: slot.id,
+            price: slot.price,
+            seat_number: slot.seat.number,
+            row_number: slot.seat.row.number,
+            row_title: slot.seat.row.title,
+            auditorium_title: slot.seat.row.auditorium.title
+        }
     }
 }

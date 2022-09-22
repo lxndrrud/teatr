@@ -129,6 +129,7 @@ export class ReservationInfrastructure implements IReservationInfrastructure {
 
     /**
      * * Проверка наличия у пользователя броней на сеанс
+     * @deprecated
      */
     public async checkUserHasReservedSession (idUser: number, idSession: number): Promise<boolean> {
         const query = await this.reservationModel.getAll({

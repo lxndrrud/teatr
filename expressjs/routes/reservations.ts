@@ -30,6 +30,8 @@ import { SessionRepo } from "../repositories/Session.repo";
 import { SessionPreparator } from "../infrastructure/SessionPreparator.infra";
 import { SlotPreparator } from "../infrastructure/SlotPreparator.infra";
 import { ErrorHandler } from "../utils/ErrorHandler";
+import { ReservationPreparator } from "../infrastructure/ReservationPreparator.infra";
+import { ReservationFilterPreparator } from "../infrastructure/ReservationFilterPreparator.infra";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
@@ -41,7 +43,7 @@ const reservationController = new ReservationController(
             new PermissionChecker(), 
             new Tokenizer()),
         new PermissionChecker(),
-        new ReservationRepo(DatabaseConnection, new TimestampHelper()),
+        new ReservationRepo(DatabaseConnection),
         new ReservationInfrastructure(
             new ReservationDatabaseModel(
                 KnexConnection,
@@ -53,28 +55,13 @@ const reservationController = new ReservationController(
         new EmailSender()
     ),
     new ReservationCRUDService(
-        KnexConnection,
-        new ReservationDatabaseModel(
-            KnexConnection,
-            new TimestampHelper()
-        ),
-        new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
-        new SessionCRUDService(
-            new SessionRepo(DatabaseConnection),
-            new SessionPreparator(
-                new TimestampHelper()
-            ),
-            new SlotPreparator()
-        ),
+        new SessionRepo(DatabaseConnection),
         new SessionInfrastructure(
             new SessionDatabaseModel(
                 KnexConnection,
                 new TimestampHelper()
             ),
             new TimestampHelper()),
-        new UserInfrastructure(
-            new UserDatabaseModel(KnexConnection)
-        ),
         new ReservationInfrastructure(
             new ReservationDatabaseModel(
                 KnexConnection,
@@ -92,30 +79,26 @@ const reservationController = new ReservationController(
             new PermissionChecker(), 
             new Tokenizer()),
         new PermissionChecker(),
-        new ReservationRepo(DatabaseConnection, new TimestampHelper())
+        new ReservationRepo(DatabaseConnection),
+        new ReservationPreparator(
+            new ReservationGuard(new PermissionChecker()),
+            new TimestampHelper(),
+            new SlotPreparator())
     ),
     new ReservationFilterService(
-        new ReservationDatabaseModel(
-            KnexConnection,
-            new TimestampHelper()
-        ),
-        new RoleFetchingModel(new RoleDatabaseModel(KnexConnection)),
-        new ReservationInfrastructure(
-            new ReservationDatabaseModel(
-                KnexConnection,
-                new TimestampHelper()
-            ), 
-            new ReservationGuard(new PermissionChecker()),
-            new TimestampHelper()
-        ),
-        new TimestampHelper(),
+        new ReservationRepo(DatabaseConnection),
         new UserRepo(DatabaseConnection, 
             new EmailingTypeRepo(DatabaseConnection), 
             new Hasher(), 
             new PermissionChecker(), 
             new Tokenizer()),
+        new ReservationPreparator(
+            new ReservationGuard(new PermissionChecker()),
+            new TimestampHelper(),
+            new SlotPreparator()),
+        new ReservationFilterPreparator(),
+        new TimestampHelper(),
         new PermissionChecker(),
-        new ReservationRepo(DatabaseConnection, new TimestampHelper())
     ),
     SlotsEventEmitter.getInstance(
         new SessionCRUDService(
@@ -126,7 +109,8 @@ const reservationController = new ReservationController(
             new SlotPreparator()
         ),
         new ErrorHandler()
-    )
+    ),
+    new ErrorHandler()
 )
 
 const authMiddleware = new AuthMiddleware(

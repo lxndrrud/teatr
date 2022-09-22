@@ -1,11 +1,7 @@
-import { Knex } from "knex"
-import { ReservationModel } from "../../dbModels/reservations"
-import { Reservation } from "../../entities/reservations"
-import { User } from "../../entities/users"
 import { IReservationGuard } from "../../guards/Reservation.guard"
 import { IPermissionChecker } from "../../infrastructure/PermissionChecker.infra"
 import { IReservationInfrastructure } from "../../infrastructure/Reservation.infra"
-import { InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors"
+import { InnerError, InnerErrorInterface } from "../../interfaces/errors"
 import { ReservationConfirmationInterface, ReservationWithoutSlotsInterface } from "../../interfaces/reservations"
 import { UserRequestOption } from "../../interfaces/users"
 import { IReservationRepo } from "../../repositories/Reservation.repo"
@@ -14,14 +10,11 @@ import { IEmailSender } from "../../utils/email"
 
 
 export interface IReservationPaymentService {
-    confirmReservation(
-        user: UserRequestOption, 
-        idReservation: number, 
-        requestBody: ReservationConfirmationInterface): 
-    Promise<InnerErrorInterface | undefined>
+    confirmReservation(user: UserRequestOption, idReservation: number, requestBody: ReservationConfirmationInterface): Promise<void>
 
-    paymentForReservation(user: UserRequestOption, idReservation: number): 
-    Promise<InnerErrorInterface | undefined>
+    resendConfirmationEmail(user: UserRequestOption, idReservation: number): Promise<void>
+
+    paymentForReservation(user: UserRequestOption, idReservation: number): Promise<void>
 }
 
 export class ReservationPaymentService {
@@ -54,80 +47,25 @@ export class ReservationPaymentService {
     async confirmReservation(user: UserRequestOption, idReservation: number, 
         requestBody: ReservationConfirmationInterface) {
         // Получение роли из БД
-        let userDB: User | null
-        try {
-            userDB = await this.userRepo.getUser(user.id)
-            .catch(e => { throw e })
-            
-        } catch(e) {
-            return <InnerErrorInterface> {
-                code: 500,
-                message: 'Внутренняя ошибка сервера!'
-            }
-        }
-        if (!userDB) {
-            return <InnerErrorInterface> {
-                code: 403,
-                message: 'Пользователь не найден!'
-            }
-        }
+        const userDB = await this.userRepo.getUser(user.id)
+        if (!userDB) throw new InnerError('Пользователь не распознан.', 403) 
         // Проверка на наличие записи в базе данных 
-        let reservation: Reservation | null
-        try {
-            reservation = await this.reservationRepo.getReservation(idReservation)
-        } catch(e) {
-            return <InnerErrorInterface> {
-                code: 500,
-                message: 'Внутренняя ошибка сервера с подключением!'
-            }
-        }
-        if (!reservation) {
-            return <InnerErrorInterface>{
-                code: 404,
-                message: 'Запись не найдена!'
-            }
-        }
+        const reservation = await this.reservationRepo.getReservation(idReservation)
+        if (!reservation) throw new InnerError('Бронь не найдена.', 404)
         // Проверка на доступность подтверждения
         const canUserConfirm = this.reservationGuard.canUserConfirm(userDB, reservation)
-        if (!canUserConfirm) {
-            return <InnerErrorInterface>{
-                code: 403,
-                message: 'Пользователю данная операция не доступна!' 
-            }
-        }
+        if (!canUserConfirm) throw new InnerError('Пользователю данная операция не доступна!' , 403)
         // Проверка на валидность кода подтверждения
-        if (reservation.confirmationCode !== requestBody.confirmation_code) {
-            return <InnerErrorInterface>{
-                code: 409,
-                message: 'Неправильный код подтверждения!'
-            }
-        }
+        if (reservation.confirmationCode !== requestBody.confirmation_code) 
+            throw new InnerError('Неправильный код подтверждения!', 409)
         // Создание записи действия для оператора
-        if (await this.permissionChecker.check_CanSeeAllReservations(userDB)) {
+        if ((await this.permissionChecker.check_CanSeeAllReservations(userDB)) 
+            && (await this.permissionChecker.check_CanCreateUserActions(userDB))) {
             const actionDescription = `Подтверждение брони Res:${reservation.id}`
-            try {
-                await this.userRepo.createUserAction(userDB.id, actionDescription)
-                .catch(e => { throw e }) 
-            } catch(e) {
-                console.error(e)
-                return <InnerErrorInterface>{
-                    code: 500,
-                    message: 'Внутренняя ошибка сервера!'
-                }
-            }
-            
+            await this.userRepo.createUserAction(userDB.id, actionDescription)
         }
         // Изменение флага подтверждения
-        try {
-            await this.reservationRepo.confirmReservation(idReservation)
-            .catch(e => { throw e })
-        } catch (e) { 
-            console.error(e)
-            return <InnerErrorInterface>{
-                code: 500,
-                message: 'Ошибка в изменении записи!'
-            }
-        }
+        await this.reservationRepo.confirmReservation(idReservation)
     }
 
     /**
@@ -135,67 +73,22 @@ export class ReservationPaymentService {
      */
     async resendConfirmationEmail(user: UserRequestOption, idReservation: number) {
         // Получение роли из БД
-        let userDB: User | null
-        try {
-            userDB = await this.userRepo.getUser(user.id)
-        } catch(e) {
-            return <InnerErrorInterface> {
-                code: 500,
-                message: 'Внутренняя ошибка сервера!'
-            }
-        }
-        if (!userDB) {
-            return <InnerErrorInterface> {
-                code: 403,
-                message: 'Пользователь не найден!'
-            }
-        }
+        const userDB = await this.userRepo.getUser(user.id)
+        if (!userDB) throw new InnerError('Пользователь не распознан.', 403) 
         // Проверка на наличие записи в базе данных 
-        let reservation: Reservation | null
-        try {
-            reservation = await this.reservationRepo.getReservation(idReservation)
-        } catch(e) {
-            return <InnerErrorInterface> {
-                code: 500,
-                message: 'Внутренняя ошибка сервера с подключением!'
-            }
-        }
-        if (!reservation) {
-            return <InnerErrorInterface>{
-                code: 404,
-                message: 'Запись не найдена!'
-            }
-        }
+        const reservation = await this.reservationRepo.getReservation(idReservation)
+        if (!reservation) throw new InnerError('Бронь не найдена.', 404)
         // Проверка совпадает ли id владельца с id пользователя, который запрашивает подтверждение
-        if (user.id !== reservation.user.id) 
-            return <InnerErrorInterface> {
-                code: 403,
-                message: 'Вы не можете запросить повторную отправку письма с подтверждением для этой брони!'
-            }
+        if (user.id !== reservation.user.id)
+            throw new InnerError('Вы не можете запросить повторную отправку письма с подтверждением для этой брони!', 403) 
         // Отправка письма на почту с информацией о сеансе и кодом подтверждения
-        let check_CanReserveWithoutConfirmation: boolean
-        try {
-            check_CanReserveWithoutConfirmation = await this.permissionChecker.check_CanReserveWithoutConfirmation(userDB)
-        } catch(e) {
-            console.error(e)
-            return <InnerErrorInterface> {
-                code: 500,
-                message: 'Внутренняя ошибка сервера'
-            }
-        }
-        if (check_CanReserveWithoutConfirmation)
-            return <InnerErrorInterface> {
-                code: 500,
-                message: 'Вы можете бронировать без подтверждения. Пожалуйста, обратитесь за помощью в службу поддержки.'
-            }
+        if ((await this.permissionChecker.check_CanReserveWithoutConfirmation(userDB))) 
+            throw new InnerError('Вы можете бронировать без подтверждения. Пожалуйста, обратитесь за помощью в службу поддержки.', 
+                500)
         // Проверка данных для подтверждения (флаг подвтержденности и тайм-аут брони)
-        if (!(this.reservationGuard.canResendConfirmationEmail(userDB, reservation))) {
-            return <InnerErrorInterface> {
-                code: 403, 
-                message: 'Вы не можете запросить повторную отправку письма с подвтерждением, пока не истёк тайм-аут.'
-            }
-        }
-        // Сгенерировать письмо и отправить
+        if (!(this.reservationGuard.canResendConfirmationEmail(userDB, reservation)))
+            throw new InnerError('Вы не можете запросить повторную отправку письма с подтверждением, пока не истёк тайм-аут.', 403)
+        // Сгенерировать письмо
         const emailInfo = this.reservationInfrastructure.generateConfirmationMailMessage({
             id_reservation: reservation.id, 
             confirmation_code: reservation.confirmationCode,
@@ -203,6 +96,7 @@ export class ReservationPaymentService {
             timestamp: reservation.session.timestamp,
             auditorium_title: reservation.reservationSlots[0].slot.seat.row.auditorium.title
         })
+        // Отправить письмо
         this.emailSender.send(
             user.email, 
             emailInfo.subject, 
@@ -215,68 +109,21 @@ export class ReservationPaymentService {
      */
     async paymentForReservation(user: UserRequestOption, idReservation: number) {
         // Получение роли из БД
-        let userDB: User | null
-        try {
-            userDB = await this.userRepo.getUser(user.id)
-        } catch(e) {
-            return <InnerErrorInterface> {
-                code: 500,
-                message: 'Внутренняя ошибка сервера!'
-            }
-        }
-        if (!userDB) {
-            return <InnerErrorInterface> {
-                code: 403,
-                message: 'Пользователь не найден!'
-            }
-        }
+        const userDB = await this.userRepo.getUser(user.id)
+        if (!userDB) throw new InnerError('Пользователь не распознан.', 403) 
         // Проверка на наличие записи в базе данных 
-        let reservation: Reservation | null
-        try {
-            reservation = await this.reservationRepo.getReservation(idReservation)
-        } catch(e) {
-            return <InnerErrorInterface> {
-                code: 500,
-                message: 'Внутренняя ошибка сервера с подключением!'
-            }
-        }
-        if (!reservation) {
-            return <InnerErrorInterface>{
-                code: 404,
-                message: 'Запись не найдена!'
-            }
-        }
+        const reservation = await this.reservationRepo.getReservation(idReservation)
+        if (!reservation) throw new InnerError('Бронь не найдена.', 404)
         // Проверка прав
-        const canUserPay = await this.reservationGuard.canUserPay(userDB, reservation)
-        if (!canUserPay) {
-            return <InnerErrorInterface>{
-                code: 403,
-                message: 'У пользователя недостаточно прав для совершения этой операции!'
-            }
-        }
+        if (!(await this.reservationGuard.canUserPay(userDB, reservation))) 
+            throw new InnerError('У пользователя недостаточно прав для совершения этой операции!', 403)
         // Создание записи действия для оператора
-        if (await this.permissionChecker.check_CanSeeAllReservations(userDB)) {
+        if ((await this.permissionChecker.check_CanSeeAllReservations(userDB)) 
+            && (await this.permissionChecker.check_CanCreateUserActions(userDB))) {
             const actionDescription = `Изменение флага оплаты на ${!reservation.isPaid}`
-            try {
-                await this.userRepo.createUserAction(userDB.id, actionDescription)
-            } catch(e) {
-                console.error(e)
-                return <InnerErrorInterface>{
-                    code: 500,
-                    message: 'Внутренняя ошибка сервера!'
-                }
-            }
-            
+            await this.userRepo.createUserAction(userDB.id, actionDescription)
         }
         // Изменение флага оплаты и подвтерждения
-        try {
-            await this.reservationRepo.paymentForReservation(idReservation)
-        } catch (e) { 
-            console.error(e)
-            return <InnerErrorInterface>{
-                code: 500,
-                message: 'Ошибка в изменении записи!'
-            }
-        }
+        await this.reservationRepo.paymentForReservation(idReservation)
     }
 }

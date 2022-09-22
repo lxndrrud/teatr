@@ -50,6 +50,7 @@ export function PlaysControllerTests () {
                 })
             })
         })
+        
         describe("GET /expressjs/plays/1", function() {
             const getPlayLink = `/expressjs/plays/1`
             const failGetPlayLink = `/expressjs/plays/114`
@@ -66,9 +67,6 @@ export function PlaysControllerTests () {
             it("should be status 404", async function() {
                 const response = await request(this.server).get(failGetPlayLink)
                 expect(response.status).to.equal(404)
-                expect(response.body).to.eql({ 
-                    message: 'Спектакль не найден!' 
-                })
             })
         })
 
@@ -87,9 +85,6 @@ export function PlaysControllerTests () {
                     .send(postPayload)
                 
                 expect(response.status).to.equal(201)
-                expect(response.body).to.eql({
-                    id: 3
-                })
             })
 
             it("should fail because of payload", async function () {

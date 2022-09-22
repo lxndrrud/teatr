@@ -6,7 +6,7 @@ import { ReservationConfirmationInterface, ReservationCreateInterface, Reservati
 import { KnexConnection } from "../../knex/connections";
 
 export function ReservationsControllerTest() {
-    describe("Reservations Controller", function() {
+    describe.only("Reservations Controller", function() {
         before(async function() {
             await KnexConnection.migrate.rollback()
             await KnexConnection.migrate.latest()
@@ -565,21 +565,24 @@ export function ReservationsControllerTest() {
         describe("GET /expressjs/reservations/filter/", function() {
             const filterLink = `/expressjs/reservations/filter/`
             const dateFilterPayload: ReservationFilterQueryInterface = {
-                date: '2022-06-22',
+                dateFrom: '2022-06-22',
+                dateTo: '2022-06-23',
                 auditorium_title: "undefined",
                 play_title: "undefined",
                 is_locked: "false",
                 id_reservation: "undefined",
             }
             const auditoriumFilterPayload: ReservationFilterQueryInterface = {
-                date: "undefined",
+                dateFrom: "undefined",
+                dateTo: "undefined",
                 auditorium_title: "Главный зал",
                 play_title: "undefined",
                 is_locked: "false",
                 id_reservation: "undefined",
             }
             const playFilterPayload: ReservationFilterQueryInterface = {
-                date: "undefined",
+                dateFrom: "undefined",
+                dateTo: "undefined",
                 auditorium_title: "undefined",
                 play_title: "Спектакль 2",
                 is_locked: "false",
