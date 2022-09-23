@@ -22,6 +22,16 @@
             id_session: 3,
             id_user: 2
         },
+
+        {
+            id: 123,
+            is_paid: true,
+            is_confirmed: true,
+            //code: '123456',
+            confirmation_code: '123456',
+            id_session: 2,
+            id_user: 3
+        },
     ]);
 };
   

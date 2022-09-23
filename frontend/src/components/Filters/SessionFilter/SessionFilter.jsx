@@ -7,7 +7,8 @@ import InputDate from '../../UI/InputDate/InputDate'
 
 function SessionFilter() {
     const dispatch = useDispatch()
-    let [date, setDate] = useState('')
+    let [dateFrom, setDateFrom] = useState('')
+    let [dateTo, setDateTo] = useState('')
     let [auditoriumTitle, setAuditoriumTitle] = useState('')
     let [playTitle, setPlayTitle] = useState('')
     useEffect(() => {
@@ -16,20 +17,24 @@ function SessionFilter() {
     const getFilteredSessions = (e) => {
         e.preventDefault()
 
-        dispatch(fetchFilteredSessions(date, auditoriumTitle, playTitle))
+        dispatch(fetchFilteredSessions(dateFrom, dateTo, auditoriumTitle, playTitle))
     } 
 
     /*
-    const syncDate = (e) => {
-        if (e.target.value === 'None') setDate('')
-        else setDate(e.target.value)
+    const syncdateFrom = (e) => {
+        if (e.target.value === 'None') setDateFrom('')
+        else setDateFrom(e.target.value)
     }
     */
-    const syncDate = (e) => {
-        if (!e.target.value) setDate()
-        else setDate(e.target.value)
+    const syncDateFrom = (e) => {
+        if (!e.target.value) setDateFrom()
+        else setDateFrom(e.target.value)
     }
-    
+
+    const syncDateTo = (e) => {
+        if (!e.target.value) setDateTo()
+        else setDateTo(e.target.value)
+    }
 
     const syncAuditoriumTitle = (e) => {
         if (e.target.value === 'None') setAuditoriumTitle()
@@ -44,43 +49,52 @@ function SessionFilter() {
     const filterOptions = useSelector(state => state.session.filterOptions)
 
     /*
-    <Select onChange={syncDate}>
+    <Select onChange={syncdateFrom}>
                 <option value="None">Все даты</option>
-                {filterOptions.dates && filterOptions.dates.map(item => (
-                  <option value={item.date}>
-                    {item.extended_date}
+                {filterOptions.dateFroms && filterOptions.dateFroms.map(item => (
+                  <option value={item.dateFrom}>
+                    {item.extended_dateFrom}
                   </option>  
                 ))}
             </Select>
     */
     return (
         <div className="mx-auto p-2 w-[max-content] sm:w-[50%] lg:w-[900px]
-            bg-[#f1e1f5] shadow-xl flex flex-col lg:flex-row
+            bg-[#f1e1f5] shadow-xl flex flex-col
             justify-between lg:justify-between items-center
             flex-nowrap sm:flex-wrap rounded-lg">
-            <InputDate onChange={syncDate} />
-            <Select onChange={syncAuditoriumTitle}>
-                <option key="0" value="None">Все залы</option>
-                {filterOptions.auditoriums && filterOptions.auditoriums.map(item => (
-                    <option key={item.id} value={item.title}>
-                        {item.title}
-                    </option>
-                ))}
-            </Select>
-            <Select onChange={syncPlayTitle}>
-                <option key="0" value="None">Все спектакли</option>
+            
+            <div className='grid grid-cols-2 gap-y-2 gap-x-3'>
+                <InputDate onChange={syncDateFrom} description='От даты' />
+                    <InputDate onChange={syncDateTo} description='До даты' />
+                
+                    <Select onChange={syncAuditoriumTitle}>
+                        <option key="0" value="None">Все залы</option>
+                        {filterOptions.auditoriums && filterOptions.auditoriums.map(item => (
+                            <option key={item.id} value={item.title}>
+                                {item.title}
+                            </option>
+                        ))}
+                    </Select>
+                    <Select onChange={syncPlayTitle}>
+                        <option key="0" value="None">Все спектакли</option>
 
-                {filterOptions.plays && filterOptions.plays.map(item => (
-                    <option key={item.id} value={item.title}>
-                        {item.title}
-                    </option>
-                ))}   
-            </Select>
-            <CustomButton 
-                value="Фильтр" 
-                onClickHook={getFilteredSessions}  
-                styleClass="flex mt-[1%]"
-            />
+                        {filterOptions.plays && filterOptions.plays.map(item => (
+                            <option key={item.id} value={item.title}>
+                                {item.title}
+                            </option>
+                        ))}   
+                    </Select>
+                </div>
+            
+            <div className='mt-2'>
+                <CustomButton 
+                    value="Фильтр" 
+                    onClickHook={getFilteredSessions}  
+                    styleClass="flex mt-[1%]"
+                />
+            </div>
+            
         </div>
     )
 }

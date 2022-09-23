@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { toggleNavbar } from "../../store/actions/designAction"
 import { footerStyle, layoutStyle, mainContentExpandedStyle, mainContentStyle, titleStyle, contentStyle } from '../Layout.styles'
 import Footer from '../../components/Footer/Footer'
+import Header from '../../components/Header/Header'
 
 export default function MainLayout({ children, title }) {
     const dispatch = useDispatch()
@@ -18,6 +19,7 @@ export default function MainLayout({ children, title }) {
 
     return (
         <div>
+            {/*<Header title={title} />*/}
             <div className={layoutStyle}>
                 <NavBarController />
                 <main className={mainContent} 

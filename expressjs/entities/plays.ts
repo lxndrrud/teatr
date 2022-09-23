@@ -13,6 +13,9 @@ export class Play {
     @Column()
     description!: string
 
+    @Column({ type: 'text', nullable: true })
+    crew!: string | null
+
     @OneToMany(() => Session, session => session.play)
     sessions!: Session[]
 

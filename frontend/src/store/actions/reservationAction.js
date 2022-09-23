@@ -245,9 +245,10 @@ export const fetchReservationFilterOptions = (token) => async dispatch => {
     }
 }
 
-export const fetchFilteredReservations = (token, date, auditoriumTitle, playTitle, isLocked, idReservation) => async dispatch => {
+export const fetchFilteredReservations = (token, dateFrom, dateTo, auditoriumTitle, playTitle, isLocked, idReservation) => async dispatch => {
     const response = await fetch('/expressjs/reservations/filter?' + new URLSearchParams({
-        'dateFrom': date,
+        'dateFrom': dateFrom,
+        'dateTo': dateTo,
         'auditorium_title': auditoriumTitle,
         'play_title': playTitle,
         'is_locked': isLocked,

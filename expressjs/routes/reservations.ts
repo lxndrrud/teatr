@@ -56,7 +56,8 @@ const reservationController = new ReservationController(
         new ReservationPreparator(
             new ReservationGuard(new PermissionChecker()),
             new TimestampHelper(),
-            new SlotPreparator())
+            new SlotPreparator(),
+            new ReservationInfrastructure())
     ),
     new ReservationFilterService(
         new ReservationRepo(DatabaseConnection),
@@ -68,7 +69,8 @@ const reservationController = new ReservationController(
         new ReservationPreparator(
             new ReservationGuard(new PermissionChecker()),
             new TimestampHelper(),
-            new SlotPreparator()),
+            new SlotPreparator(),
+            new ReservationInfrastructure()),
         new ReservationFilterPreparator(),
         new TimestampHelper(),
         new PermissionChecker(),
@@ -93,7 +95,6 @@ const authMiddleware = new AuthMiddleware(
         new PermissionChecker(), 
         new Tokenizer()),
     new PermissionChecker(),
-    new UserInfrastructure()
 )
 
 

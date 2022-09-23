@@ -1,5 +1,5 @@
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { postReservation, errorSetDefault } from '../../../store/actions/reservationAction'
+import { postReservation, errorSetDefault, clearSlots } from '../../../store/actions/reservationAction'
 import { fetchSlots, fetchSlotsBySession } from "../../../store/actions/sessionAction"
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import SlotsFieldMainAuditorium from "../../Slots/SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
@@ -24,6 +24,7 @@ function ReservationPostForm() {
     let [error, setError] = useState(null)
 
     useEffect(() => {
+        dispatch(clearSlots())
         if (session.id) {
             dispatch(fetchSlotsBySession(token, session.id))
             subscribe()

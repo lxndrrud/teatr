@@ -10,7 +10,8 @@ export class PlayPreparator implements IPlayPreparator {
         return <PlayWithPosterInterface> {
             id: play.id,
             title: play.title,
-            description: play.description,
+            description: play.description.split('@'),
+            crew: play.crew && play.crew?.split('@'),
             poster_filepath: play.playImages[0].image.filepath
         }
     }

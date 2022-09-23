@@ -12,7 +12,8 @@ function ReservationFilter() {
     const token = useSelector(state => state.user.token)
 
     // Состояния фильтра
-    let [date, setDate] = useState()
+    let [dateFrom, setDateFrom] = useState()
+    let [dateTo, setDateTo] = useState()
     let [auditoriumTitle, setAuditoriumTitle] = useState()
     let [playTitle, setPlayTitle] = useState()
     let [reservationNumber, setReservationNumber] = useState()
@@ -31,9 +32,13 @@ function ReservationFilter() {
     }
     */
 
-    const syncDate = (e) => {
-        if (!e.target.value) setDate()
-        else setDate(e.target.value)
+    const syncDateFrom = (e) => {
+        if (!e.target.value) setDateFrom()
+        else setDateFrom(e.target.value)
+    }
+    const syncDateTo = (e) => {
+        if (!e.target.value) setDateTo()
+        else setDateTo(e.target.value)
     }
     const syncAuditoriumTitle = (e) => {
         if (e.target.value === 'None') setAuditoriumTitle()
@@ -83,7 +88,7 @@ function ReservationFilter() {
     const getFilteredReservations = (e) => {
         e.preventDefault()
         
-        dispatch(fetchFilteredReservations(token, date, auditoriumTitle, playTitle, 
+        dispatch(fetchFilteredReservations(token, dateFrom, dateTo, auditoriumTitle, playTitle, 
             showLocked, reservationNumber))
     }
 
@@ -102,48 +107,58 @@ function ReservationFilter() {
     return (
         <div className="mx-auto p-2 bg-[#f1e1f5]
                 bg-[#f1e1f5] shadow-xl
+                flex flex-col flex-wrap
                 w-[max-content] lg:w-[1000px] 
-                flex flex-col lg:flex-row flex-wrap
                 justify-center items-center
                 rounded-lg">
-            <InputDate onChange={syncDate} />
-            <Select onChange={syncAuditoriumTitle}>
-                <option value="None">Все залы</option>
 
-                {reservationFilterOptions.auditoriums && reservationFilterOptions.auditoriums
-                    .map(item => (
+            <div className='lg:ml-[75px] w-[90%] flex flex-col justify-between
+                lg:grid lg:grid-cols-3 lg:gap-y-2 lg:gap-x-1 align-center'>
+                <InputDate onChange={syncDateFrom} description={'От даты'} />
+                <InputDate onChange={syncDateTo} description={'До даты'}/>
+                <CustomInput description={'Номер брони'} onChange={syncReservationNumber}
+                    type="number" inputStyleClass="w-[200px]" min="1" />
+                <Select onChange={syncAuditoriumTitle}>
+                    <option value="None">Все залы</option>
+
+                    {reservationFilterOptions.auditoriums && reservationFilterOptions.auditoriums
+                        .map(item => (
+                            <option value={item.title} key={item.id}>
+                                {item.title}
+                            </option>
+                    ))}
+                </Select>
+
+                <Select onChange={syncPlayTitle}>
+                    <option value="None">Все спектакли</option>
+
+                    {reservationFilterOptions.plays && reservationFilterOptions.plays.map(item => (
                         <option value={item.title} key={item.id}>
                             {item.title}
                         </option>
-                ))}
-            </Select>
+                    ))}   
+                </Select>
 
-            <Select onChange={syncPlayTitle}>
-                <option value="None">Все спектакли</option>
+                <Select onChange={syncShowLocked} >
+                    <option value="None">Все брони</option>
+                    <option value="true">Закрытые</option>
+                    <option value="false">Открытые</option>
+                </Select>
+            
 
-                {reservationFilterOptions.plays && reservationFilterOptions.plays.map(item => (
-                    <option value={item.title} key={item.id}>
-                        {item.title}
-                    </option>
-                ))}   
-            </Select>
+                
+                {
+                    error !== null
+                    ? <ErrorMessage text={error} />
+                    : null
+                }
+                
 
-            <Select onChange={syncShowLocked} >
-                <option value="None">Все брони</option>
-                <option value="true">Закрытые</option>
-                <option value="false">Открытые</option>
-            </Select>
-
-            <CustomInput description={'Номер брони'} onChange={syncReservationNumber}
-                type="number" inputStyleClass="w-[200px]" min="1" />
-
-            {
-                error !== null
-                ? <ErrorMessage text={error} />
-                : null
-            }
-
-            <CustomButton value="Фильтр" onClickHook={getFilteredReservations} />
+            </div>
+            <div className='lg:ml-[90px] mt-2 w-[200px]'>
+                <CustomButton value="Фильтр" onClickHook={getFilteredReservations} />
+            </div>
+        
         </div>
     )
 }

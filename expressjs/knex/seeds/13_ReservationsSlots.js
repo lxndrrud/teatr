@@ -18,6 +18,18 @@
             id_slot: 3,
             id_reservation: 2
         },
+        {
+            id_slot: 123,
+            id_reservation: 123
+        },
+        {
+            id_slot: 124,
+            id_reservation: 123
+        },
+        {
+            id_slot: 125,
+            id_reservation: 123
+        },
     ]);
 };
   

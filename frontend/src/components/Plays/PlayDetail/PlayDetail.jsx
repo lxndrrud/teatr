@@ -1,6 +1,6 @@
-import CardImage from "../../UI/Images/CardImage/CardImage"
 import SessionPagination from '../../Pagination/SessionPagination/SessionPagination'
 import { useSelector } from "react-redux"
+import DetailImage from "../../UI/Images/DetailImage/DetailImage"
 
 
 
@@ -8,15 +8,31 @@ export default function PlayDetail({ images}) {
     const play = useSelector(state => state.play.play)
 
     return (
-        <div className="flex flex-col w-[100%]">
-            <div className="w-[100%] mt-3 sm:mt-0 sm:ml-8
-                            flex flex-col sm:flex-row 
-                            justify-center sm:justify-start 
-                            items-center sm:items-start">
-                <CardImage filepath={play.poster_filepath} altDescription={play.title} />
-                <h2 className="ml-0 mt-3 sm:ml-[10%] sm:mt-0">{play.description}</h2>
+        <div className="flex flex-col w-[100%] lg:w-[90%]">
+            <div className="w-[100%] my-3 sm:mt-0
+                            flex flex-col lg:flex-row 
+                            justify-center align-center lg:justify-start 
+                            items-center lg:items-start">
+                <DetailImage filepath={play.poster_filepath} altDescription={play.title} />
+                <table className="m-4 p-1 ">   
+                    {
+                        play.crew && play.crew.map(crewPerson => (
+                            <tr>
+                                <td className="text-[slategrey]">{crewPerson.split(' - ')[0]}</td>
+                                <td className="pl-2">{crewPerson.split(' - ')[1]}</td>
+                            </tr>
+                        ))
+                    }
+                </table>
             </div>
-            <div className="w-[100%] mt-3">
+            <div className="w-[90%] sm:w-[100%] mx-auto mt-3 sm:mx-0">
+                {
+                    play.description && play.description.map(paragraph => (
+                        <h2 className="mt-2 text-justify">{paragraph}</h2>
+                    ))
+                }
+            </div>
+            <div className="w-[100%] mt-3 lg:ml-[75px]">
                 <SessionPagination itemsPerPage={3} />
             </div>
         </div>

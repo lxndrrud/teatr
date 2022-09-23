@@ -62,7 +62,6 @@ const authMiddleware = new AuthMiddleware(
         new PermissionChecker(), 
         new Tokenizer()),
     new PermissionChecker(),
-    new UserInfrastructure()
 )
 
 sessionsRouter.get('/play/:idPlay', sessionController.getSessionsByPlay.bind(sessionController))

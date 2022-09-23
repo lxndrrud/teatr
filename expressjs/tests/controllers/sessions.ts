@@ -111,14 +111,14 @@ export function SessionsControllerTest() {
                 expect(response.status).to.equal(200)
                 expect(response.body).to.eql({
                     id: 3,
-                    is_locked: false,
-                    timestamp: 'пятница, 21 октября 2022 г., 7:30',
-                    max_slots: 5,
                     id_play: 2,
                     id_price_policy: 2,
+                    max_slots: 5,
+                    is_locked: false,
+                    timestamp: 'пятница, 21 октября 2022 г., 7:30',
+                    play_title: 'Моя прекрасная леди',
                     auditorium_title: 'Малая сцена',
-                    play_title: 'Спектакль 2',
-                    poster_filepath: '/expressjs/storage/photos/photo2.jpg'
+                    poster_filepath: '/expressjs/storage/photos/ledi.jpg'
                 })
             })
 
@@ -222,7 +222,7 @@ export function SessionsControllerTest() {
 
         })
 
-        describe("DELETE /expressjs/sessions/2", function() {
+        describe("DELETE /expressjs/sessions/4", function() {
             const deleteSessionLink = `/expressjs/sessions/4`
             const failDeleteSessionLink = `/expressjs/sessions/114`
             it("should be OK", async function() {
@@ -270,7 +270,7 @@ export function SessionsControllerTest() {
             const filterQueryPayload: SessionFilterQueryInterface = {
                 dateFrom: '',
                 dateTo: '',
-                play_title: 'Спектакль 1',
+                play_title: 'Антракт',
                 auditorium_title: 'Главный зал'
             } 
             const failFilterQueryPayload = {

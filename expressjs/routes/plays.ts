@@ -30,7 +30,6 @@ const authMiddleware = new AuthMiddleware(
         new PermissionChecker(), 
         new Tokenizer()),
     new PermissionChecker(),
-    new UserInfrastructure()
 )
 
 playsRouter.route('/')

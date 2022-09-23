@@ -101,7 +101,7 @@ export class ReservationRepo implements IReservationRepo {
                 if (userQuery.dateFrom !== undefined && userQuery.dateFrom !== 'undefined') 
                     builder.andWhere(`s.timestamp >= :dateFrom`, { dateFrom: `${userQuery.dateFrom}T00:00:00` })
                 if (userQuery.dateTo !== undefined && userQuery.dateTo !== 'undefined') 
-                    builder.andWhere(`s.timestamp <= :dateTo`, { dateTo: `${userQuery.dateTo}T00:00:00` })
+                    builder.andWhere(`s.timestamp <= :dateTo`, { dateTo: `${userQuery.dateTo}T23:59:00` })
                 if (userQuery.auditorium_title !== undefined && userQuery.auditorium_title !== 'undefined') 
                     builder.andWhere(`a.title = :auditoriumTitle `, { auditoriumTitle: userQuery.auditorium_title})
                 if (userQuery.play_title !== undefined && userQuery.play_title !== 'undefined') 

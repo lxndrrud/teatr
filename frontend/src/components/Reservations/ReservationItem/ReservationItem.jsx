@@ -2,8 +2,10 @@ import { Card } from "react-bootstrap"
 import ButtonLink from "../../UI/ButtonLink/ButtonLink"
 import React from 'react'
 import IconSVG from "../../UI/IconSVG/IconSVG"
+import CustomLink from "../../UI/CustomLink/CustomLink"
 
 function ReservationItem({ reservation }) {
+    const playLink = `/repertoire/${reservation.id_play}`
     return (
         <Card className="w-[min-content] sm:w-[max-content] lg:w-[30%] flex flex-col rounded-md
                          border border-solid border-[black] 
@@ -53,7 +55,9 @@ function ReservationItem({ reservation }) {
                                 <strong>Название спектакля</strong>
                             </div>
                         </td>
-                        <td className="pt-[5px] pr-[5px]">{reservation.play_title}</td>
+                        <td className="pt-[5px] pr-[5px]">
+                            <CustomLink text={reservation.play_title} destination={playLink} />
+                        </td>
                     </tr>
                     <tr className="border-b-[1px] border-solid">
                         <td className="pt-[5px] pr-[5px]">

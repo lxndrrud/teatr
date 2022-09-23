@@ -1,6 +1,7 @@
 export interface PlayBaseInterface {
     title: string
     description: string
+    crew?: string
 }
 
 export function isPlayBaseInterface (obj: any): obj is PlayBaseInterface {
@@ -18,7 +19,10 @@ export interface PlayQueryInterface extends Omit<PlayInterface, 'id'|'title'|'de
     description?: string
 }
 
-export interface PlayWithPosterInterface extends PlayInterface {
+export interface PlayWithPosterInterface {
+    title: string
+    description: string[]
+    crew?: string[]
     poster_filepath: string
 }
 

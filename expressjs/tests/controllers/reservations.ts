@@ -59,7 +59,7 @@ export function ReservationsControllerTest() {
                     })
 
                 expect(response.status).to.equal(200)
-                expect(response.body.length).to.equal(2)
+                expect(response.body.length).to.equal(3)
             })
 
             it("should be OK for Admin", async function() {
@@ -69,9 +69,8 @@ export function ReservationsControllerTest() {
                         "auth-token": this.adminToken
                     })
 
-                console.log(response.body)
                 expect(response.status).to.equal(200)
-                expect(response.body.length).to.equal(2)
+                expect(response.body.length).to.equal(3)
             })
 
             it("should have status FORBIDDEN 403", async function() {
@@ -510,7 +509,6 @@ export function ReservationsControllerTest() {
                     .set({
                         "auth-token": this.adminToken
                     })
-                
                 expect(response.status).to.equal(200)
                 
                 expect(response.body).to.haveOwnProperty("auditoriums")
@@ -519,7 +517,7 @@ export function ReservationsControllerTest() {
                 expect(response.body.auditoriums).to.haveOwnProperty("length").that.equals(1)
                 expect(typeof response.body.auditoriums[0].title).that.equals("string")
 
-                expect(response.body.plays).to.haveOwnProperty("length").that.equals(1)
+                expect(response.body.plays).to.haveOwnProperty("length").that.equals(2)
                 expect(typeof response.body.plays[0].title).that.equals("string")
             })
 
@@ -538,7 +536,7 @@ export function ReservationsControllerTest() {
                 expect(response.body.auditoriums).to.haveOwnProperty("length").that.equals(1)
                 expect(typeof response.body.auditoriums[0].title).that.equals("string")
 
-                expect(response.body.plays).to.haveOwnProperty("length").that.equals(1)
+                expect(response.body.plays).to.haveOwnProperty("length").that.equals(2)
                 expect(typeof response.body.plays[0].title).that.equals("string")
             })
             
@@ -553,8 +551,8 @@ export function ReservationsControllerTest() {
         describe("GET /expressjs/reservations/filter/", function() {
             const filterLink = `/expressjs/reservations/filter/`
             const dateFilterPayload: ReservationFilterQueryInterface = {
-                dateFrom: '2022-10-22',
-                dateTo: '2022-10-23',
+                dateFrom: '2022-10-20',
+                dateTo: '2022-10-20',
                 auditorium_title: "undefined",
                 play_title: "undefined",
                 is_locked: "false",
@@ -572,7 +570,7 @@ export function ReservationsControllerTest() {
                 dateFrom: "undefined",
                 dateTo: "undefined",
                 auditorium_title: "undefined",
-                play_title: "Спектакль 2",
+                play_title: "Антракт",
                 is_locked: "false",
                 id_reservation: "undefined",
             }
@@ -585,12 +583,11 @@ export function ReservationsControllerTest() {
                         "auth-token": this.adminToken
                     })
 
-                console.log(response.statusCode, response.body)
                 expect(response.status).to.equal(200)
-                expect(response.body.length).to.equal(2)
+                expect(response.body.length).to.equal(1)
                 expect(response.body[0]).to.haveOwnProperty("session_timestamp")
                 expect(response.body[0]).to.haveOwnProperty("auditorium_title")
-                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Спектакль 2")
+                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Антракт")
             })
 
             it("should be OK (Admin user gets reservations for date payload)", async function() {
@@ -600,12 +597,11 @@ export function ReservationsControllerTest() {
                     .set({
                         "auth-token": this.adminToken
                     })
-
                 expect(response.status).to.equal(200)
-                expect(response.body.length).to.equal(2)
+                expect(response.body.length).to.equal(1)
                 expect(response.body[0]).to.haveOwnProperty("session_timestamp")
                 expect(response.body[0]).to.haveOwnProperty("auditorium_title")
-                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Спектакль 2")
+                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Антракт")
             })
 
             it("should be OK (Admin user gets reservations for auditorium payload)", async function() {
@@ -617,10 +613,10 @@ export function ReservationsControllerTest() {
                     })
 
                 expect(response.status).to.equal(200)
-                expect(response.body.length).to.equal(2)
+                expect(response.body.length).to.equal(3)
                 expect(response.body[0]).to.haveOwnProperty("session_timestamp")
                 expect(response.body[0]).to.haveOwnProperty("auditorium_title")
-                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Спектакль 2")
+                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Антракт")
             })
 
             it("should be OK (Cashier gets reservations for play payload)", async function() {
@@ -632,10 +628,10 @@ export function ReservationsControllerTest() {
                     })
 
                 expect(response.status).to.equal(200)
-                expect(response.body.length).to.equal(2)
+                expect(response.body.length).to.equal(1)
                 expect(response.body[0]).to.haveOwnProperty("session_timestamp")
                 expect(response.body[0]).to.haveOwnProperty("auditorium_title")
-                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Спектакль 2")
+                expect(response.body[0]).to.haveOwnProperty("play_title").that.equals("Антракт")
             })
 
             it("should be OK (Visitor gets empty list)", async function() {

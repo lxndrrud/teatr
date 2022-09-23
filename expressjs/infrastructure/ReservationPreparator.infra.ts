@@ -3,6 +3,7 @@ import { User } from "../entities/users";
 import { IReservationGuard } from "../guards/Reservation.guard";
 import { ReservationInterface } from "../interfaces/reservations";
 import { TimestampHelper } from "../utils/timestamp";
+import { IReservationInfrastructure } from "./Reservation.infra";
 import { ISlotPreparator } from "./SlotPreparator.infra";
 
 
@@ -14,15 +15,18 @@ export class ReservationPreparator implements IReservationPreparator {
     private reservationGuard
     private timestampHelper
     private slotPreparator
+    private reservationInfrastructure
 
     constructor(
         reservationGuardInstance: IReservationGuard,
         timestampHelperInstance: TimestampHelper,
-        slotPreparatorInstance: ISlotPreparator
+        slotPreparatorInstance: ISlotPreparator,
+        reservationInfrastructureInstance: IReservationInfrastructure
     ) {
         this.reservationGuard = reservationGuardInstance
         this.timestampHelper = timestampHelperInstance
         this.slotPreparator = slotPreparatorInstance
+        this.reservationInfrastructure = reservationInfrastructureInstance
     }
     
     /**
@@ -35,6 +39,10 @@ export class ReservationPreparator implements IReservationPreparator {
         const canUserConfirm = this.reservationGuard.canUserConfirm(user, reservation)
         // Проверка на возможность оплаты брони
         const canUserPay = await this.reservationGuard.canUserPay(user, reservation)
+        // Получить слоты для подсчета стоимости брони и обработки
+        const slots = reservation.reservationSlots.map(resSlot => resSlot.slot)
+        // Обработать слоты
+        const slotsInterfaces = slots.map(slot => this.slotPreparator.prepareSlotInterface(slot))
         const result = <ReservationInterface>  {
             id: reservation.id,
             id_play: reservation.session.play.id,
@@ -42,6 +50,7 @@ export class ReservationPreparator implements IReservationPreparator {
             id_user: reservation.user.id,
             is_confirmed: reservation.isConfirmed,
             is_paid: reservation.isPaid,
+            total_cost: this.reservationInfrastructure.calculateReservationTotalCost(slots),
             play_title: reservation.session.play.title,
             auditorium_title: reservation.reservationSlots[0].slot.seat.row.auditorium.title,
             session_timestamp:  this.timestampHelper
@@ -54,9 +63,7 @@ export class ReservationPreparator implements IReservationPreparator {
             can_user_confirm: canUserConfirm,
             can_user_pay: canUserPay,
         } 
-        // Обработать слоты
-        let slots = reservation.reservationSlots.map(resSlot => this.slotPreparator.prepareSlotInterface(resSlot.slot))
-        result.slots = slots
+        result.slots = slotsInterfaces
         return result
     }
 }

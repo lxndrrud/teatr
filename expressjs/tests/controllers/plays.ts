@@ -42,12 +42,11 @@ export function PlaysControllerTests () {
                 const response = await request(this.server).get(getPlaysLink)
                 expect(response.status).to.equal(200)
                 expect(response.body.length).to.be.greaterThan(0)
-                expect(response.body[0]).to.eql({
-                    id: 1,
-                    title: 'Спектакль 1',
-                    description: 'Тестовый спектакль 1',
-                    poster_filepath: '/expressjs/storage/photos/photo1.jpg'
-                })
+                expect(response.body[0]).to.haveOwnProperty('id')
+                expect(response.body[0]).to.haveOwnProperty('crew')
+                expect(response.body[0]).to.haveOwnProperty('title')
+                expect(response.body[0]).to.haveOwnProperty('description')
+                expect(response.body[0]).to.haveOwnProperty('poster_filepath')
             })
         })
         
@@ -57,12 +56,11 @@ export function PlaysControllerTests () {
             it("should be status 200 with info", async function() {
                 const response = await request(this.server).get(getPlayLink)
                 expect(response.status).to.equal(200)
-                expect(response.body).to.eql({
-                    id: 1,
-                    title: 'Спектакль 1',
-                    description: 'Тестовый спектакль 1',
-                    poster_filepath: '/expressjs/storage/photos/photo1.jpg'
-                })
+                expect(response.body).to.haveOwnProperty('id')
+                expect(response.body).to.haveOwnProperty('crew')
+                expect(response.body).to.haveOwnProperty('title')
+                expect(response.body).to.haveOwnProperty('description')
+                expect(response.body).to.haveOwnProperty('poster_filepath')
             })
             it("should be status 404", async function() {
                 const response = await request(this.server).get(failGetPlayLink)

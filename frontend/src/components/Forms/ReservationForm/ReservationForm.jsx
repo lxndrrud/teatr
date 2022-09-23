@@ -1,10 +1,12 @@
 import ReservationPostForm from "../ReservationPostForm/ReservationPostForm"
 import { useSelector } from "react-redux"
+import CustomLink from "../../UI/CustomLink/CustomLink"
 
 
 function ReservationForm() {
     let play = useSelector(state => state.play.play)
     let session = useSelector(state => state.session.session)
+    const playLink = `/repertoire/${play.id}`
 
     return (
         <>
@@ -13,7 +15,9 @@ function ReservationForm() {
                     <tbody>
                         <tr>
                             <td className="p-1 border-t-[none] border-l-[none]">Спектакль</td>
-                            <td className="p-1 border-t-[none] border-l-[2px]">{play.title}</td>
+                            <td className="p-1 border-t-[none] border-l-[2px]">
+                                <CustomLink text={play.title} destination={playLink} />
+                            </td>
                         </tr>
                         <tr>
                             <td className="p-1 border-t-[2px] border-l-[none]">Дата и время</td>

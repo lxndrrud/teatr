@@ -2,9 +2,9 @@ import { Request, Response, NextFunction } from "express"
 import { ErrorInterface } from "../interfaces/errors"
 import { verify } from "jsonwebtoken"
 import { UserRequestOption } from "../interfaces/users"
-import { IUserInfrastructure } from "../infrastructure/User.infra"
 import { IUserRepo } from "../repositories/User.repo"
 import { IPermissionChecker } from "../infrastructure/PermissionChecker.infra"
+import 'dotenv/config'
 
 export class AuthMiddleware {
     private userRepo
@@ -13,7 +13,6 @@ export class AuthMiddleware {
     constructor(
         userRepoInstance: IUserRepo,
         permissionCheckerInstance: IPermissionChecker,
-        userInfrastructureInstance: IUserInfrastructure
     ) {
         this.userRepo = userRepoInstance
         this.permissionChecker = permissionCheckerInstance
@@ -33,10 +32,9 @@ export class AuthMiddleware {
             req.user = {...JSON.parse(JSON.stringify(decoded))}
             next()
         } catch (e) {
-            const error: ErrorInterface = {
+            res.status(401).send(<ErrorInterface> {
                 message: 'Неверный токен!'
-            }
-            res.status(401).send(error)
+            })
             return
         }
     }

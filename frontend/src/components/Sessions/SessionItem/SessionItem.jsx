@@ -1,14 +1,18 @@
 import ButtonLink from "../../UI/ButtonLink/ButtonLink"
+import CustomLink from "../../UI/CustomLink/CustomLink"
 import IconSVG from "../../UI/IconSVG/IconSVG"
 import CardImage from "../../UI/Images/CardImage/CardImage"
 import styles from './SessionItem.module.css'
 
 export default function SessionItem({ session }) {
     const destinationURL = `/reserve/${session.id}`
+    const playUrl = `/repertoire/${session.id_play}`
     
     return (
         <div className={styles.sessionItem} >
-            <p className={styles.playTitle}>{session.play_title}</p>
+            <p className={styles.playTitle}>
+                <CustomLink text={session.play_title} destination={playUrl} />
+            </p>
             <div className={styles.rowContainer}>
                 <div className={styles.columnContainer}>
                     <div className="flex justify-center sm:justify-start">

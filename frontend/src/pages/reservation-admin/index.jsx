@@ -19,7 +19,6 @@ function AdminIndex() {
     }, [navigate, store])
     return (
         <AdminLayout title={"Главная страница администрирования"} >
-            <h3>o_0</h3>
         </AdminLayout>
     )
 }

@@ -35,7 +35,7 @@ export const DatabaseConnection = new DataSource({
         Image, PlayImage
     ],
     synchronize: false,
-    logging: true
+    logging: false
 }) 
 
 export async function InitConnection() {
