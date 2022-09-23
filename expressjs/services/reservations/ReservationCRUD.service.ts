@@ -51,7 +51,7 @@ export class ReservationCRUDService implements IReservationCRUDService {
             userRepoInstance: IUserRepo,
             permissionCheckerInstance: IPermissionChecker,
             reservationRepoInstance: IReservationRepo,
-            reservationPreparatorInstance: IReservationPreparator
+            reservationPreparatorInstance: IReservationPreparator,
     ) {
         this.sessionRepo = sessionRepoInstance
         this.sessionInfrastructure = sessionInfrastructure
@@ -111,15 +111,15 @@ export class ReservationCRUDService implements IReservationCRUDService {
         // Проверка прав на создание больше одной брони на сеанс
         if (!(await this.permissionChecker.check_CanHaveMoreThanOneReservationOnSession(userDB))) {
             // Проверка на наличие брони на сеанс у пользователя
-            const checkVisitorReservation = await this.reservationInfrastructure
-                .checkUserHasReservedSession(user.id, requestBody.id_session)
+            const checkVisitorReservation = await this.reservationRepo
+                .checkHasUserReservedSession(user.id, requestBody.id_session)
+            console.log(userDB.role.title, checkVisitorReservation)
             if (checkVisitorReservation)
                 throw new InnerError("Пользователь уже имеет брони на данный сеанс!", 403)
         }
         // Проверка на коллизию выбранных слотов и уже забронированных мест
         const reservedSlotsQuery = await this.sessionRepo
             .getReservedSlots(sessionQuery.id, sessionQuery.idPricePolicy)
-        console.log(reservedSlotsQuery, requestBody.slots)
         reservedSlotsQuery.forEach(reservedSlot => {
             requestBody.slots.forEach(chosenSlot => {
                 if (reservedSlot.id === chosenSlot.id) {
@@ -127,7 +127,6 @@ export class ReservationCRUDService implements IReservationCRUDService {
                 }
             })
         })
-        
         // Получение разрешения на бронирование без подтверждения
         const check_CanReserveWithoutConfirmation = await this.permissionChecker.check_CanReserveWithoutConfirmation(userDB)
         // Создание брони

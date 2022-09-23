@@ -6,7 +6,7 @@ import { ReservationConfirmationInterface, ReservationCreateInterface, Reservati
 import { KnexConnection } from "../../knex/connections";
 
 export function ReservationsControllerTest() {
-    describe.only("Reservations Controller", function() {
+    describe("Reservations Controller", function() {
         before(async function() {
             await KnexConnection.migrate.rollback()
             await KnexConnection.migrate.latest()
@@ -497,11 +497,9 @@ export function ReservationsControllerTest() {
 
                 expect(response.status).to.equal(200)
 
-                expect(response.body).to.haveOwnProperty("dates")
                 expect(response.body).to.haveOwnProperty("auditoriums")
                 expect(response.body).to.haveOwnProperty("plays")
 
-                expect(response.body.dates).to.haveOwnProperty("length").that.equals(0)
                 expect(response.body.auditoriums).to.haveOwnProperty("length").that.equals(0)
                 expect(response.body.plays).to.haveOwnProperty("length").that.equals(0)
             })
@@ -515,13 +513,8 @@ export function ReservationsControllerTest() {
                 
                 expect(response.status).to.equal(200)
                 
-                expect(response.body).to.haveOwnProperty("dates")
                 expect(response.body).to.haveOwnProperty("auditoriums")
                 expect(response.body).to.haveOwnProperty("plays")
-
-                expect(response.body.dates).to.haveOwnProperty("length").that.equals(1)
-                expect(typeof response.body.dates[0].date).to.equal("string")
-                expect(typeof response.body.dates[0].extended_date).to.equal("string")
 
                 expect(response.body.auditoriums).to.haveOwnProperty("length").that.equals(1)
                 expect(typeof response.body.auditoriums[0].title).that.equals("string")
@@ -539,13 +532,8 @@ export function ReservationsControllerTest() {
                 
                 expect(response.status).to.equal(200)
 
-                expect(response.body).to.haveOwnProperty("dates")
                 expect(response.body).to.haveOwnProperty("auditoriums")
                 expect(response.body).to.haveOwnProperty("plays")
-
-                expect(response.body.dates).to.haveOwnProperty("length").that.equals(1)
-                expect(typeof response.body.dates[0].date).to.equal("string")
-                expect(typeof response.body.dates[0].extended_date).to.equal("string")
 
                 expect(response.body.auditoriums).to.haveOwnProperty("length").that.equals(1)
                 expect(typeof response.body.auditoriums[0].title).that.equals("string")
@@ -565,8 +553,8 @@ export function ReservationsControllerTest() {
         describe("GET /expressjs/reservations/filter/", function() {
             const filterLink = `/expressjs/reservations/filter/`
             const dateFilterPayload: ReservationFilterQueryInterface = {
-                dateFrom: '2022-06-22',
-                dateTo: '2022-06-23',
+                dateFrom: '2022-10-22',
+                dateTo: '2022-10-23',
                 auditorium_title: "undefined",
                 play_title: "undefined",
                 is_locked: "false",
@@ -597,6 +585,7 @@ export function ReservationsControllerTest() {
                         "auth-token": this.adminToken
                     })
 
+                console.log(response.statusCode, response.body)
                 expect(response.status).to.equal(200)
                 expect(response.body.length).to.equal(2)
                 expect(response.body[0]).to.haveOwnProperty("session_timestamp")

@@ -9,19 +9,27 @@ import { ReservationSlotDependency } from "../interfaces/slots";
 
 
 export interface IReservationRepo {
+    // Reservations
     getReservations(): Promise<Reservation[]>
     getReservations(): Promise<Reservation[]>
     getReservationsForUser(idUser: number): Promise<Reservation[]>
     getReservation(idReservation: number): Promise<Reservation | null>
     getReservedSlots(idReservation: number): Promise<Slot[]>
+
+    // Filter
+    getFilteredReservations(userQuery: ReservationFilterQueryInterface, idUser?: number | undefined): Promise<Reservation[]>
+    getPlaysOptionsForReservationFilter(idUser?: number | undefined): Promise<Play[]>
+    getAuditoriumsOptionsForReservationFilter(idUser?: number | undefined): Promise<Auditorium[]>
+
+    // CUD operations
     paymentForReservation(idReservation: number): Promise<void>
     confirmReservation(idReservation: number): Promise<void>
     createReservation(reservationPayload: ReservationBaseInterface, isReservationConfirmed: boolean, 
         slotsPayload: ReservationSlotDependency[]): Promise<Reservation>
     deleteReservation(idReservation: number): Promise<void>
-    getFilteredReservations(userQuery: ReservationFilterQueryInterface, idUser?: number | undefined): Promise<Reservation[]>
-    getPlaysOptionsForReservationFilter(idUser?: number | undefined): Promise<Play[]>
-    getAuditoriumsOptionsForReservationFilter(idUser?: number | undefined): Promise<Auditorium[]>
+    
+    // logic checks
+    checkHasUserReservedSession(idUser: number, idSession: number): Promise<boolean>
 } 
 
 export class ReservationRepo implements IReservationRepo {
@@ -48,7 +56,8 @@ export class ReservationRepo implements IReservationRepo {
             .innerJoinAndSelect('slot.pricePolicy', 'pp')
             .leftJoinAndSelect('r.reservationEmailings', 're')
             .leftJoinAndSelect('re.emailingType', 'et')
-
+            .distinct()
+            .orderBy("r.createdAt", "ASC")
     } 
     
     public async getReservations() {
@@ -78,6 +87,7 @@ export class ReservationRepo implements IReservationRepo {
             .innerJoinAndSelect('row.auditorium', 'a')
             .innerJoinAndSelect('slot.reservationSlots', 'rs')
             .where('rs.idReservation = :idReservation', { idReservation })
+            .distinct()
             .getMany()
     }
 
@@ -138,19 +148,22 @@ export class ReservationRepo implements IReservationRepo {
     public async createReservation(reservationPayload: ReservationBaseInterface, isReservationConfirmed: boolean, 
         slotsPayload: ReservationSlotDependency[]) {
         const newReservation = new Reservation()
-        newReservation.idSession = reservationPayload.id_user
+        newReservation.idUser = reservationPayload.id_user
         newReservation.idSession = reservationPayload.id_session
         newReservation.confirmationCode = reservationPayload.confirmation_code
         newReservation.isConfirmed = isReservationConfirmed
 
-        const slotsList = slotsPayload.map(slotPayload => {
-            const newReservationSlot = new ReservationSlot()
-            newReservationSlot.reservation = newReservation
-            newReservationSlot.idSlot = slotPayload.id
-            return newReservationSlot
+        return await this.connection.transaction(async trx => {
+            const reservationInserted = await trx.save(newReservation)
+            const slotsList = slotsPayload.map(slotPayload => {
+                const newReservationSlot = new ReservationSlot()
+                newReservationSlot.idReservation = reservationInserted.id
+                newReservationSlot.idSlot = slotPayload.id
+                return newReservationSlot
+            })
+            await trx.save(slotsList)
+            return reservationInserted
         })
-        newReservation.reservationSlots = slotsList
-        return await this.reservationRepo.save(newReservation)
     }
 
     public async deleteReservation(idReservation: number) {
@@ -164,7 +177,11 @@ export class ReservationRepo implements IReservationRepo {
             }
         })
 
-        await this.reservationRepo.remove(reservation)
+        await this.connection.transaction(async trx => {
+            await trx.remove(reservation.reservationEmailings)
+            await trx.remove(reservation.reservationSlots)
+            await trx.remove(reservation)
+        })
     }
 
     public async getPlaysOptionsForReservationFilter(idUser?: number) {
@@ -193,5 +210,14 @@ export class ReservationRepo implements IReservationRepo {
             }))
             .distinct()
             .getMany()
+    }
+
+    public async checkHasUserReservedSession(idUser: number, idSession: number) {
+        const check = await this.reservationRepo.count({
+            where: {
+                idSession, idUser
+            }
+        })
+        return check > 0 ? true : false 
     }
 }

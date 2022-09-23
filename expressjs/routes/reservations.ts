@@ -2,8 +2,6 @@ import { ReservationController } from "../controllers/reservations";
 import { Router } from "express";
 import { AuthMiddleware } from "../middlewares/auth";
 import { ReservationDatabaseModel } from "../dbModels/reservations";
-import { RoleFetchingModel } from "../services/roles";
-import { RoleDatabaseModel } from "../dbModels/roles";
 import { SessionDatabaseModel } from "../dbModels/sessions";
 import { UserDatabaseModel } from "../dbModels/users";
 import { ReservationInfrastructure } from "../infrastructure/Reservation.infra";

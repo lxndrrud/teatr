@@ -16,9 +16,14 @@ export function ControllersTests() {
         this.server = app.listen(8083, () => {
             console.log(`⚡️[test-server]: Test Server is running at https://localhost:8083`)
         })
+        return
     })
-    after(function() {
+    after(async function() {
+        await KnexConnection.migrate.rollback()
+        await KnexConnection.migrate.latest()
+        await KnexConnection.seed.run()
         this.server.close()
+        return
     })
     describe("Controllers", function() {
         PlaysControllerTests()

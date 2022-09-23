@@ -112,7 +112,7 @@ export function SessionsControllerTest() {
                 expect(response.body).to.eql({
                     id: 3,
                     is_locked: false,
-                    timestamp: 'вторник, 21 июня 2022 г., 7:30',
+                    timestamp: 'пятница, 21 октября 2022 г., 7:30',
                     max_slots: 5,
                     id_play: 2,
                     id_price_policy: 2,

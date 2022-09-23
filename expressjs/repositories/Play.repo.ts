@@ -30,6 +30,8 @@ export class PlayRepo implements IPlayRepo {
             .innerJoinAndSelect('p.playImages', 'pi')
             .innerJoinAndSelect('pi.image', 'i')
             .where('pi.isPoster = :isPoster', { isPoster: true })
+            .andWhere('s.isLocked = :isLocked', { isLocked: false })
+            .orderBy('s.timestamp', "ASC")
             .distinct()
     }
 

@@ -89,7 +89,9 @@ export interface ReservationFilterQueryInterface {
 
 export function isReservationFilterQueryInterface(obj: any): obj is ReservationFilterQueryInterface {
     return obj
-        && (obj.date && typeof obj.date === 'string' || obj.date === 'undefined') 
+        && (obj.dateFrom && typeof obj.dateFrom === 'string' || obj.dateFrom === 'undefined') 
+
+        && (obj.dateTo && typeof obj.dateTo === 'string' || obj.dateTo === 'undefined') 
             //|| typeof obj.date === 'undefined' || obj.date === 'undefined')
         && (obj.auditorium_title && typeof obj.auditorium_title === 'string'
             || obj.auditorium_title === 'undefined') 
