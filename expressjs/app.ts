@@ -3,13 +3,19 @@ import 'reflect-metadata'
 import bodyParser from 'body-parser';
 import fileUpload from 'express-fileupload';
 import { CronJob } from 'cron';
-import { everyDay, everyMinute } from './cron/cron';
+import { CronProcessor } from './cron/cron';
 import { prefixRouter } from './routes/prefixRouter';
 import { logger } from './middlewares/logs';
 import { UserRequestOption } from './interfaces/users';
-import { InitConnection } from './databaseConnection';
+import { DatabaseConnection, InitConnection } from './databaseConnection';
+import { SessionRepo } from './repositories/Session.repo';
+import { ReservationRepo } from './repositories/Reservation.repo';
 
 export const app = express();
+const cronProcessor = new CronProcessor(
+    new SessionRepo(DatabaseConnection),
+    new ReservationRepo(DatabaseConnection)
+)
 
 InitConnection()
 
@@ -31,13 +37,12 @@ declare global {
 }
 
 //export const cronProcess = new CronJob('* * * * *', processTime)
-export const everyMinuteCron = new CronJob('* * * * *', everyMinute)
+export const everyMinuteCron = new CronJob('* * * * *', cronProcessor.eveyMinuteTask.bind(cronProcessor))
 //export const everyMinuteWorkHoursCron = new CronJob('* 9-17 * * *', everyMinuteOnWorkHours)
-export const everyDayCron = new CronJob("0 0 * * *", everyDay)
+//export const everyDayCron = new CronJob("0 0 * * *", everyDay)
 
 app.on('shutdown', () => {
     //cronProcess.stop()
     everyMinuteCron.stop()
     //everyMinuteWorkHoursCron.stop()
-    everyDayCron.stop()
 })

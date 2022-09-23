@@ -1,4 +1,3 @@
-import { ReservationSlot } from "../entities/reservations_slots";
 import { Row } from "../entities/rows";
 import { Slot } from "../entities/slots";
 import { SlotInterface, SlotIsReservedInterface } from "../interfaces/slots";

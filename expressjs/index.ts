@@ -1,4 +1,4 @@
-import { app, everyDayCron, everyMinuteCron } from "./app"
+import { app, everyMinuteCron } from "./app"
 import 'dotenv/config'
 const PORT = 8081;
 
@@ -8,5 +8,4 @@ app.listen(PORT, () => {
     //cronProcess.start()
     everyMinuteCron.start()
     //everyMinuteWorkHoursCron.start()
-    everyDayCron.start()
 });

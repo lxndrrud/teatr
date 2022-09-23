@@ -2,10 +2,9 @@ import { UploadedFile } from "express-fileupload";
 import { Knex } from "knex";
 import fs from 'fs'
 import csvParser from "csv-parser"
-import { UserModel } from "../../dbModels/users";
 import { FileStreamHelper } from "../../utils/fileStreams";
 import { UserBaseInterface, UserRequestOption } from "../../interfaces/users";
-import { InnerError, InnerErrorInterface, isInnerErrorInterface } from "../../interfaces/errors";
+import { InnerError } from "../../interfaces/errors";
 import { IRoleRepo } from '../../repositories/Role.repo'
 import { IUserRepo } from "../../repositories/User.repo";
 
@@ -41,7 +40,7 @@ export class UserCSVService implements IUserCSVService {
         let counter = 1
         let errors: string[] = []
         for (const chunk of data) {
-            let idRole: number | InnerErrorInterface
+            let idRole: number
             try {
                 if (!chunk['Почта']) {
                     throw `В строке #${counter} не указана почта пользователя`

@@ -1,7 +1,48 @@
 import moment from "moment"
-import { SessionDatabaseInterface } from "../interfaces/sessions"
-import { KnexConnection } from "../knex/connections"
-import {reservations, reservationsSlots, sessions} from "../dbModels/tables"
+import { ISessionRepo } from "../repositories/Session.repo"
+import { IReservationRepo } from "../repositories/Reservation.repo"
+
+export interface ICronProcessor {
+    eveyMinuteTask(): void
+}
+
+export class CronProcessor implements ICronProcessor {
+    private sessionRepo
+    private reservationsRepo
+
+    constructor(
+        sessionRepoInstance: ISessionRepo,
+        reservationRepoInstance: IReservationRepo
+    ) {
+        this.sessionRepo = sessionRepoInstance
+        this.reservationsRepo = reservationRepoInstance
+    }
+
+    public eveyMinuteTask() {
+        console.log('1m cron task')
+        this.processSessions()
+        this.processReservations()
+    }
+
+    private async processSessions() {
+        try {
+            await this.sessionRepo.lockSessions(moment().subtract(15, 'minutes')
+                .format('YYYY-MM-DDThh:mm:ss').toString())
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    private async processReservations() {
+        try {
+            await this.reservationsRepo.deleteReservationsCron(moment().subtract(15, 'minutes')
+                .format('YYYY-MM-DDThh:mm:ss').toString())
+        } catch (error) {
+             console.log(error)           
+        }
+    }
+}
+
 
 /*
 export const processTime = () => {
@@ -9,7 +50,6 @@ export const processTime = () => {
     processSessions()
     processReservations()
 }
-*/
 
 export const everyMinute = () => {
     console.log(`1m cron ${moment()}`)
@@ -108,7 +148,7 @@ const processReservations = async () => {
 /**
  * Неоплаченные брони, которые создались менее чем за 30 минут до начала сеанса
  * будут висеть на сайте, хотя должны быть удалены
- */
+ *-/
 const deleteIntersectionReservations = async () => {
     const query = await KnexConnection(`${reservations} as r`)
         .select("r.id")
@@ -136,3 +176,4 @@ const deleteIntersectionReservations = async () => {
         
     }
 }
+*/

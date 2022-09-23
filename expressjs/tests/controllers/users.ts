@@ -235,15 +235,15 @@ export function UsersControllerTests() {
 
                 expect(response.status).to.equal(403)
             })
-            it("should be OK for cashier", async function() {
+            it("should have status 403 for cashier because has`nt got access", async function() {
                 const response = await request(this.server)
                     .get(link)
                     .set({
                         'auth-token': this.cashierToken
                     })
                 
-                expect(response.status).to.be.equal(200)
-                expect(response.body).to.haveOwnProperty('length').that.is.greaterThan(0)
+                expect(response.status).to.be.equal(403)
+                /*expect(response.body).to.haveOwnProperty('length').that.is.greaterThan(0)
                 expect(response.body[0]).to.haveOwnProperty("id")
                 expect(response.body[0]).to.haveOwnProperty("id_role")
                 expect(response.body[0]).to.haveOwnProperty("role_title")
@@ -252,7 +252,7 @@ export function UsersControllerTests() {
                 expect(response.body[0]).to.haveOwnProperty("middlename")
                 expect(response.body[0]).to.haveOwnProperty("lastname")
                 expect(response.body[0]).to.not.haveOwnProperty("token")
-                expect(response.body[0]).to.not.haveOwnProperty("password")
+                expect(response.body[0]).to.not.haveOwnProperty("password")*/
             })
             it("should be OK for admin", async function() {
                 const response = await request(this.server)

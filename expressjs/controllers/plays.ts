@@ -1,10 +1,7 @@
-import { KnexConnection }from "../knex/connections"
 import { Request, Response } from "express"
 import { IPlayService } from "../services/plays/PlayService"
-import { PlayDatabaseModel } from "../dbModels/plays"
-import { isPlayBaseInterface, PlayBaseInterface, PlayInterface } from "../interfaces/plays"
-import { ErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
-import csv from "csv-parser"
+import { isPlayBaseInterface, PlayBaseInterface } from "../interfaces/plays"
+import { ErrorInterface } from "../interfaces/errors"
 import { UploadedFile } from "express-fileupload"
 import { IErrorHandler } from "../utils/ErrorHandler"
 

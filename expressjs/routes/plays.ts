@@ -3,9 +3,7 @@ import { Router } from "express";
 import { PlayService } from "../services/plays/PlayService";
 import { AuthMiddleware } from "../middlewares/auth";
 import { FileStreamHelper } from "../utils/fileStreams";
-import { KnexConnection } from "../knex/connections";
 import { UserInfrastructure } from "../infrastructure/User.infra";
-import { UserDatabaseModel } from "../dbModels/users";
 import { UserRepo } from "../repositories/User.repo";
 import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
 import { DatabaseConnection } from "../databaseConnection";
@@ -32,21 +30,21 @@ const authMiddleware = new AuthMiddleware(
         new PermissionChecker(), 
         new Tokenizer()),
     new PermissionChecker(),
-    new UserInfrastructure(new UserDatabaseModel(KnexConnection))
+    new UserInfrastructure()
 )
 
 playsRouter.route('/')
     .get(playController.getPlays.bind(playController))
     .post(
-        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        authMiddleware.adminAuthMiddleware.bind(authMiddleware), 
         playController.createPlay.bind(playController))
 playsRouter.route('/:idPlay')
     .get(playController.getSinglePlay.bind(playController))
     .put(
-        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        authMiddleware.adminAuthMiddleware.bind(authMiddleware), 
         playController.updatePlay.bind(playController))
     .delete(
-        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        authMiddleware.adminAuthMiddleware.bind(authMiddleware), 
         playController.deletePlay.bind(playController))
 
 playsRouter.route("/csv")

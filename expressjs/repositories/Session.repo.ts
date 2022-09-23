@@ -25,6 +25,9 @@ export interface ISessionRepo {
     createSessions(payload: SessionBaseInterface[]): Promise<void>
     updateSession(idSession: number, payload: SessionBaseInterface): Promise<void>
     deleteSession(idSession: number): Promise<void>
+
+    // Крон
+    lockSessions(lockTimestamp: string): Promise<void>
 }
 
 
@@ -192,5 +195,23 @@ export class SessionRepo implements ISessionRepo {
             .where('slot.idPricePolicy = :idPricePolicy', { idPricePolicy })
             .distinct()
             .getMany()
+    }
+
+    /**
+     * Закрыть незакрытые сеансы, до которых осталось менее lockTimestamp
+     * Предполагается использование только в кроне
+     */
+    public async lockSessions(lockTimestamp: string) {
+        const sessions = await this.connection.createQueryBuilder(Session, 's')
+            .where('s.isLocked = :isLocked', { isLocked: false })
+            .andWhere('s.timestamp <= :lockTimestamp', { lockTimestamp })
+            .getMany()
+
+        if (sessions.length > 0) {
+            await this.connection.transaction(async trx => {
+                sessions.forEach(session => { session.isLocked = true })
+                await trx.save(sessions)
+            }) 
+        }
     }
 }

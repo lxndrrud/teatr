@@ -18,5 +18,5 @@ prefixRouter.use('/reservations', reservationsRouter)
 prefixRouter.use('/users', usersRouter)
 
 prefixRouter.get('/', (req: Request, res: Response) => res.send({
-    "message": 'Express + TypeScript Server'
+    "message": 'Theatre Reservation Server'
 }));

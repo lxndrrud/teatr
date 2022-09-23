@@ -9,7 +9,6 @@ import { TimestampHelper } from "../utils/timestamp";
 import { KnexConnection } from "../knex/connections";
 import { SlotsEventEmitter } from "../events/SlotsEmitter";
 import { UserInfrastructure } from "../infrastructure/User.infra";
-import { UserDatabaseModel } from "../dbModels/users";
 import { ErrorHandler } from "../utils/ErrorHandler";
 import { SessionRepo } from "../repositories/Session.repo";
 import { DatabaseConnection } from "../databaseConnection";
@@ -63,7 +62,7 @@ const authMiddleware = new AuthMiddleware(
         new PermissionChecker(), 
         new Tokenizer()),
     new PermissionChecker(),
-    new UserInfrastructure(new UserDatabaseModel(KnexConnection))
+    new UserInfrastructure()
 )
 
 sessionsRouter.get('/play/:idPlay', sessionController.getSessionsByPlay.bind(sessionController))
@@ -85,16 +84,16 @@ sessionsRouter.route('/:idSession')
         authMiddleware.basicAuthMiddleware.bind(authMiddleware), 
         sessionController.getSingleSession.bind(sessionController))
     .put(
-        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        authMiddleware.adminAuthMiddleware.bind(authMiddleware), 
         sessionController.updateSession.bind(sessionController))
     .delete(
-        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        authMiddleware.adminAuthMiddleware.bind(authMiddleware), 
         sessionController.deleteSession.bind(sessionController))
 
 sessionsRouter.route('/')
     .get(sessionController.getSessions.bind(sessionController))
     .post(
-        authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+        authMiddleware.adminAuthMiddleware.bind(authMiddleware), 
         sessionController.postSession.bind(sessionController))
 
 sessionsRouter.route("/csv")

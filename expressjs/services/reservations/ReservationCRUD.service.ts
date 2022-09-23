@@ -3,8 +3,6 @@ import { IReservationGuard } from "../../guards/Reservation.guard"
 import { IPermissionChecker } from "../../infrastructure/PermissionChecker.infra"
 import { IReservationInfrastructure } from "../../infrastructure/Reservation.infra"
 import { IReservationPreparator } from "../../infrastructure/ReservationPreparator.infra"
-import { SessionInfrastructure } from "../../infrastructure/Session.infra"
-import { IUserInfrastructure } from "../../infrastructure/User.infra"
 import { InnerError } from "../../interfaces/errors"
 import { ReservationBaseInterface, ReservationCreateInterface, ReservationInterface } from "../../interfaces/reservations"
 import { UserRequestOption } from "../../interfaces/users"
@@ -31,7 +29,6 @@ export interface IReservationCRUDService {
 
 export class ReservationCRUDService implements IReservationCRUDService {
     protected sessionRepo
-    protected sessionInfrastructure
     protected reservationInfrastructure
     protected reservationGuard
     protected emailSender
@@ -43,7 +40,6 @@ export class ReservationCRUDService implements IReservationCRUDService {
 
     constructor(
             sessionRepoInstance: ISessionRepo,
-            sessionInfrastructure: SessionInfrastructure,
             reservationInfrastructureInstance: IReservationInfrastructure,
             reservationGuardInstance: IReservationGuard,
             emailSenderInstance: IEmailSender,
@@ -54,7 +50,6 @@ export class ReservationCRUDService implements IReservationCRUDService {
             reservationPreparatorInstance: IReservationPreparator,
     ) {
         this.sessionRepo = sessionRepoInstance
-        this.sessionInfrastructure = sessionInfrastructure
         this.reservationInfrastructure = reservationInfrastructureInstance
         this.reservationGuard = reservationGuardInstance
         this.emailSender = emailSenderInstance

@@ -3,9 +3,6 @@ import { Router } from "express";
 import { AuthMiddleware } from "../middlewares/auth";
 import { UserFetchingModel } from "../services/users/UsersCRUD.service";
 import { UserCSVService } from '../services/users/UsersCSV.service'
-import { UserDatabaseModel } from "../dbModels/users";
-import { RoleFetchingModel } from "../services/roles";
-import { RoleDatabaseModel } from "../dbModels/roles";
 import { UserInfrastructure } from "../infrastructure/User.infra"
 import { KnexConnection } from "../knex/connections";
 import { UserGuard } from "../guards/User.guard";
@@ -25,7 +22,7 @@ export const usersRouter = Router()
 const userController = new UserController(
     new UserFetchingModel(
         KnexConnection,
-        new UserInfrastructure(new UserDatabaseModel(KnexConnection)),
+        new UserInfrastructure(),
         new UserGuard(),
         new CodeGenerator(),
         new EmailSender(),
@@ -58,11 +55,11 @@ const authMiddleware = new AuthMiddleware(
         new PermissionChecker(), 
         new Tokenizer()),
     new PermissionChecker(),
-    new UserInfrastructure(new UserDatabaseModel(KnexConnection))
+    new UserInfrastructure()
 )
 
 usersRouter.route('/')
-    .get(authMiddleware.staffAuthMiddleware.bind(authMiddleware), 
+    .get(authMiddleware.adminAuthMiddleware.bind(authMiddleware), 
         userController.getAllUsers.bind(userController))
     .post(userController.registerUser.bind(userController))
 
@@ -73,7 +70,7 @@ usersRouter.get('/personalArea',
     userController.getPersonalArea.bind(userController))
 
 usersRouter.get('/:idUser', 
-    authMiddleware.staffAuthMiddleware.bind(authMiddleware),
+    authMiddleware.adminAuthMiddleware.bind(authMiddleware),
     userController.getUser.bind(userController))
 
 usersRouter.put("/edit/password",

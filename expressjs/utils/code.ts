@@ -1,3 +1,7 @@
+export interface ICodeGenerator {
+    generateCode(): string
+}
+
 export class CodeGenerator {
     private randomInt() {
         return Math.floor(Math.random() * 9);

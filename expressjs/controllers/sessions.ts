@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
-import { SessionBaseInterface, SessionInterface, SessionFilterQueryInterface, isSessionBaseInterface, isSessionFilterQueryInterface } 
+import { SessionBaseInterface,  SessionFilterQueryInterface, isSessionBaseInterface, isSessionFilterQueryInterface } 
     from "../interfaces/sessions"
-import { ErrorInterface, InnerErrorInterface, isInnerErrorInterface } from "../interfaces/errors"
+import { ErrorInterface } from "../interfaces/errors"
 import { UploadedFile } from "express-fileupload"
 import { ISessionCRUDService } from "../services/sessions/SessionCRUD.service"
 import { ISessionCSVService } from "../services/sessions/SessionCSV.service"

@@ -1,9 +1,6 @@
 import { ReservationController } from "../controllers/reservations";
 import { Router } from "express";
 import { AuthMiddleware } from "../middlewares/auth";
-import { ReservationDatabaseModel } from "../dbModels/reservations";
-import { SessionDatabaseModel } from "../dbModels/sessions";
-import { UserDatabaseModel } from "../dbModels/users";
 import { ReservationInfrastructure } from "../infrastructure/Reservation.infra";
 import { ReservationGuard } from "../guards/Reservation.guard";
 import { ReservationFilterService } from "../services/reservations/ReservationFilter.service";
@@ -11,11 +8,9 @@ import { ReservationCRUDService } from "../services/reservations/ReservationCRUD
 import { ReservationPaymentService } from "../services/reservations/ReservationPayment.service";
 import { EmailSender } from "../utils/email";
 import { SessionCRUDService } from "../services/sessions/SessionCRUD.service";
-import { SessionInfrastructure } from "../infrastructure/Session.infra";
 import { TimestampHelper } from "../utils/timestamp";
 import { CodeGenerator } from "../utils/code";
 import { UserInfrastructure } from "../infrastructure/User.infra";
-import { KnexConnection } from "../knex/connections";
 import { SlotsEventEmitter } from "../events/SlotsEmitter";
 import { UserRepo } from "../repositories/User.repo";
 import { DatabaseConnection } from "../databaseConnection";
@@ -42,32 +37,12 @@ const reservationController = new ReservationController(
             new Tokenizer()),
         new PermissionChecker(),
         new ReservationRepo(DatabaseConnection),
-        new ReservationInfrastructure(
-            new ReservationDatabaseModel(
-                KnexConnection,
-                new TimestampHelper()
-            ), 
-            new ReservationGuard(new PermissionChecker()),
-            new TimestampHelper()
-        ),
+        new ReservationInfrastructure(),
         new EmailSender()
     ),
     new ReservationCRUDService(
         new SessionRepo(DatabaseConnection),
-        new SessionInfrastructure(
-            new SessionDatabaseModel(
-                KnexConnection,
-                new TimestampHelper()
-            ),
-            new TimestampHelper()),
-        new ReservationInfrastructure(
-            new ReservationDatabaseModel(
-                KnexConnection,
-                new TimestampHelper()
-            ), 
-            new ReservationGuard(new PermissionChecker()),
-            new TimestampHelper()
-        ),
+        new ReservationInfrastructure(),
         new ReservationGuard(new PermissionChecker()),
         new EmailSender(),
         new CodeGenerator(),
@@ -118,7 +93,7 @@ const authMiddleware = new AuthMiddleware(
         new PermissionChecker(), 
         new Tokenizer()),
     new PermissionChecker(),
-    new UserInfrastructure(new UserDatabaseModel(KnexConnection))
+    new UserInfrastructure()
 )
 
 

@@ -4,6 +4,7 @@ import { Play } from "../entities/plays";
 import { Reservation } from "../entities/reservations";
 import { ReservationSlot } from "../entities/reservations_slots";
 import { Slot } from "../entities/slots";
+import { InnerError } from "../interfaces/errors";
 import { ReservationBaseInterface, ReservationFilterQueryInterface } from "../interfaces/reservations";
 import { ReservationSlotDependency } from "../interfaces/slots";
 
@@ -30,6 +31,9 @@ export interface IReservationRepo {
     
     // logic checks
     checkHasUserReservedSession(idUser: number, idSession: number): Promise<boolean>
+
+    // cron 
+    deleteReservationsCron(reservationDeleteTimestamp: string): Promise<void>
 } 
 
 export class ReservationRepo implements IReservationRepo {
@@ -121,11 +125,12 @@ export class ReservationRepo implements IReservationRepo {
     }
 
     public async paymentForReservation(idReservation: number) {
-        const reservation = await this.reservationRepo.findOneOrFail({
+        const reservation = await this.reservationRepo.findOne({
             where: {
                 id: idReservation
             }
         })
+        if (!reservation) throw new InnerError('Бронь не найдена!', 404)
 
         reservation.isConfirmed = true
         reservation.isPaid = true
@@ -134,11 +139,12 @@ export class ReservationRepo implements IReservationRepo {
     }
 
     public async confirmReservation(idReservation: number) {
-        const reservation = await this.reservationRepo.findOneOrFail({
+        const reservation = await this.reservationRepo.findOne({
             where: {
                 id: idReservation
             }
         })
+        if (!reservation) throw new InnerError('Бронь не найдена!', 404)
 
         reservation.isConfirmed = true
 
@@ -167,7 +173,7 @@ export class ReservationRepo implements IReservationRepo {
     }
 
     public async deleteReservation(idReservation: number) {
-        const reservation = await this.reservationRepo.findOneOrFail({
+        const reservation = await this.reservationRepo.findOne({
             where: {
                 id: idReservation
             },
@@ -176,6 +182,7 @@ export class ReservationRepo implements IReservationRepo {
                 reservationSlots: true
             }
         })
+        if (!reservation) throw new InnerError('Бронь не найдена', 404)
 
         await this.connection.transaction(async trx => {
             await trx.remove(reservation.reservationEmailings)
@@ -219,5 +226,23 @@ export class ReservationRepo implements IReservationRepo {
             }
         })
         return check > 0 ? true : false 
+    }
+
+    public async deleteReservationsCron(reservationDeleteTimestamp: string) {
+        const reservations = await this.connection.createQueryBuilder(Reservation, 'r')
+            .innerJoinAndSelect('r.session', 's')
+            .where(new Brackets(builder => {
+                builder.where('r.createdAt >= :resDelTimestamp', { resDelTimestamp: reservationDeleteTimestamp })
+                builder.andWhere('r.isConfirmed = :isConfirmedFalse', { isConfirmedFalse: false })
+            }))
+            .orWhere(new Brackets(builder => {
+                builder.where('s.isLocked = :isLockedTrue', { isLockedTrue: true })
+                builder.andWhere('r.isPaid = :isPaidFalse', { isPaidFalse: false })
+            }))
+            .getMany()
+
+        for (const reservation of reservations) {
+            await this.deleteReservation(reservation.id)
+        }
     }
 }
