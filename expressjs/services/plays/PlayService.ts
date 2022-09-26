@@ -6,6 +6,7 @@ import csvParser from "csv-parser";
 import { IFileStreamHelper } from "../../utils/fileStreams";
 import { IPlayRepo} from '../../repositories/Play.repo'
 import { IPlayPreparator } from "../../infrastructure/PlayPreparator.infra";
+import { IPlayRedisRepo } from '../../redisRepositories/Play.redis'
 
 export interface IPlayService {
     getAll(): Promise<PlayWithPosterInterface[]>
@@ -18,17 +19,20 @@ export interface IPlayService {
 
 export class PlayService implements IPlayService {
     private playRepo 
+    private playRedisRepo
     private fileStreamHelper
     private playPreparator
 
     constructor(
         playRepoInstance: IPlayRepo,
+        playRedisRepoInstance: IPlayRedisRepo,
         fileStreamHelperInstance: IFileStreamHelper,
         playPreparatorInstance: IPlayPreparator
     ) {
         this.playRepo = playRepoInstance
         this.fileStreamHelper = fileStreamHelperInstance
         this.playPreparator = playPreparatorInstance
+        this.playRedisRepo = playRedisRepoInstance
     }
 
     public async getAll() {
@@ -37,9 +41,15 @@ export class PlayService implements IPlayService {
     }
 
     public async getSinglePlay(idPlay: number) {
+        const playCache = await this.playRedisRepo.getPlay(idPlay)
+        if (playCache) {
+            return playCache
+        }
         const play = await this.playRepo.getSingle(idPlay)
         if (!play) throw new InnerError('Спектакль не найден.', 404)
-        return this.playPreparator.preparePlayWithPoster(play)
+        const preparedPlay = this.playPreparator.preparePlayWithPoster(play)
+        await this.playRedisRepo.setPlay(idPlay, preparedPlay)
+        return preparedPlay
     }
 
     public async createPlay(payload: PlayBaseInterface) {

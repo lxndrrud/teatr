@@ -1,6 +1,8 @@
 import moment from "moment"
 import { ISessionRepo } from "../repositories/Session.repo"
 import { IReservationRepo } from "../repositories/Reservation.repo"
+import { ISessionRedisRepo } from "../redisRepositories/Session.redis"
+import { ISessionFilterRedisRepo } from "../redisRepositories/SessionFilter.redis"
 
 export interface ICronProcessor {
     eveyMinuteTask(): void
@@ -8,13 +10,19 @@ export interface ICronProcessor {
 
 export class CronProcessor implements ICronProcessor {
     private sessionRepo
+    private sessionRedisRepo
+    private sessionFilterRedisRepo
     private reservationsRepo
 
     constructor(
         sessionRepoInstance: ISessionRepo,
+        sessionRedisRepoInstance: ISessionRedisRepo,
+        sessionFilterRedisRepoInstance: ISessionFilterRedisRepo,
         reservationRepoInstance: IReservationRepo
     ) {
         this.sessionRepo = sessionRepoInstance
+        this.sessionRedisRepo = sessionRedisRepoInstance
+        this.sessionFilterRedisRepo = sessionFilterRedisRepoInstance
         this.reservationsRepo = reservationRepoInstance
     }
 
@@ -26,8 +34,12 @@ export class CronProcessor implements ICronProcessor {
 
     private async processSessions() {
         try {
-            await this.sessionRepo.lockSessions(moment().subtract(15, 'minutes')
+            const sessionIDs = await this.sessionRepo.lockSessions(moment().subtract(15, 'minutes')
                 .format('YYYY-MM-DDThh:mm:ss').toString())
+            for (const idSession of sessionIDs) {
+                await this.sessionRedisRepo.clearSession(idSession)
+                await this.sessionFilterRedisRepo.clearFilteredSession(idSession)
+            }
         } catch (error) {
             console.log(error)
         }

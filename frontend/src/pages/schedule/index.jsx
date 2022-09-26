@@ -5,13 +5,18 @@ import SessionFilter from "../../components/Filters/SessionFilter/SessionFilter"
 import { fetchSessions } from '../../store/actions/sessionAction'
 import { useEffect } from "react"
 import { useDispatch } from "react-redux"
+import { setIsLoading } from "../../store/actions/designAction"
 
 export default function SchedulePage() {
     
     const dispatch = useDispatch()
     
     useEffect(() => {
-        dispatch(fetchSessions())
+        dispatch(setIsLoading(true))
+            .then(dispatch(fetchSessions()))
+            .then(dispatch(setIsLoading(false)))
+            //.catch(dispatch(setIsLoading(false)))
+       
     }, [dispatch])
     
 

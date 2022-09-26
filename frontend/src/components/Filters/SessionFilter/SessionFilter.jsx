@@ -4,6 +4,7 @@ import CustomButton from "../../UI/CustomButton/CustomButton"
 import Select from '../../UI/Select/Select'
 import { fetchFilteredSessions, fetchSessionFilterOptions } from "../../../store/actions/sessionAction"
 import InputDate from '../../UI/InputDate/InputDate'
+import { setIsLoading } from '../../../store/actions/designAction'
 
 function SessionFilter() {
     const dispatch = useDispatch()
@@ -17,7 +18,9 @@ function SessionFilter() {
     const getFilteredSessions = (e) => {
         e.preventDefault()
 
-        dispatch(fetchFilteredSessions(dateFrom, dateTo, auditoriumTitle, playTitle))
+        dispatch(setIsLoading(true))
+            .then(dispatch(fetchFilteredSessions(dateFrom, dateTo, auditoriumTitle, playTitle)))
+            .then(dispatch(setIsLoading(false)))
     } 
 
     /*

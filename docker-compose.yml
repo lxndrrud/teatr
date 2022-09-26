@@ -15,6 +15,20 @@ services:
     ports:
       - 5432:5432
 
+  cacher:
+    container_name: cacher
+    image: redis:7.0.5-alpine
+    command: redis-server --requirepass $${REDIS_PASSWORD} --save 60 1 --loglevel warning
+    restart: always
+    ports:
+      - 6379:6379
+    depends_on:
+      - postgres
+    networks: 
+      - customnetwork
+    environment:
+      - REDIS_PASSWORD=redis_password
+
   pgadmin: 
     container_name: pgadmin
     image: dpage/pgadmin4:6.13

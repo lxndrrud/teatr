@@ -3,6 +3,8 @@ import { ISlotPreparator } from "../../infrastructure/SlotPreparator.infra"
 import { InnerError } from "../../interfaces/errors"
 import { SessionBaseInterface, SessionInterface } from "../../interfaces/sessions"
 import { SlotIsReservedInterface} from "../../interfaces/slots"
+import { ISessionRedisRepo } from "../../redisRepositories/Session.redis"
+import { ISessionFilterRedisRepo } from "../../redisRepositories/SessionFilter.redis"
 import { ISessionRepo } from "../../repositories/Session.repo"
 
 
@@ -30,25 +32,36 @@ export class SessionCRUDService implements ISessionCRUDService {
     protected sessionRepo
     protected sessionPreparator
     protected slotPreparator
+    protected sessionRedisRepo
+    protected sessionFilterRedisRepo
 
     constructor(
         sessionRepoInstance: ISessionRepo,
+        sessionRedisRepoInstance: ISessionRedisRepo,
+        sessionFilterRedisRepoInstance: ISessionFilterRedisRepo,
         sessionPreparatorInstance: ISessionPreparator,
-        slotPreparatorInstance: ISlotPreparator
+        slotPreparatorInstance: ISlotPreparator,
     ) {
         this.sessionRepo = sessionRepoInstance
         this.sessionPreparator = sessionPreparatorInstance
         this.slotPreparator = slotPreparatorInstance
+        this.sessionRedisRepo = sessionRedisRepoInstance
+        this.sessionFilterRedisRepo= sessionFilterRedisRepoInstance
     }
 
     public async createSession(payload: SessionBaseInterface) {
         await this.sessionRepo.createSession(payload)
     }
+    
     public async updateSession(idSession: number, payload: SessionBaseInterface) {
+        await this.sessionRedisRepo.clearSession(idSession)
+        await this.sessionFilterRedisRepo.clearFilteredSession(idSession)
         await this.sessionRepo.updateSession(idSession, payload)
     }
 
     public async deleteSession(idSession: number) {
+        await this.sessionRedisRepo.clearSession(idSession)
+        await this.sessionFilterRedisRepo.clearFilteredSession(idSession)
         await this.sessionRepo.deleteSession(idSession)
     }
 

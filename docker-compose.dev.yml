@@ -15,6 +15,20 @@ services:
     ports:
       - 5432:5432
 
+  cacher:
+    container_name: cacher
+    command: ["redis-server", "/etc/redis/redis.conf"]
+    image: redis:7.0.5-alpine
+    restart: always
+    ports:
+      - 6379:6379
+    depends_on:
+      - postgres
+    networks: 
+      - customnetwork
+    volumes:
+      - ./redis/redis.conf:/etc/redis/redis.conf
+
   adminer:
     container_name: adminer
     image: adminer

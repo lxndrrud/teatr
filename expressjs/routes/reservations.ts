@@ -10,7 +10,6 @@ import { EmailSender } from "../utils/email";
 import { SessionCRUDService } from "../services/sessions/SessionCRUD.service";
 import { TimestampHelper } from "../utils/timestamp";
 import { CodeGenerator } from "../utils/code";
-import { UserInfrastructure } from "../infrastructure/User.infra";
 import { SlotsEventEmitter } from "../events/SlotsEmitter";
 import { UserRepo } from "../repositories/User.repo";
 import { DatabaseConnection } from "../databaseConnection";
@@ -25,6 +24,9 @@ import { SlotPreparator } from "../infrastructure/SlotPreparator.infra";
 import { ErrorHandler } from "../utils/ErrorHandler";
 import { ReservationPreparator } from "../infrastructure/ReservationPreparator.infra";
 import { ReservationFilterPreparator } from "../infrastructure/ReservationFilterPreparator.infra";
+import { SessionRedisRepo } from "../redisRepositories/Session.redis";
+import { RedisConnection } from "../redisConnection";
+import { SessionFilterRedisRepo } from "../redisRepositories/SessionFilter.redis";
 
 export const reservationsRouter = Router()
 const reservationController = new ReservationController(
@@ -78,6 +80,8 @@ const reservationController = new ReservationController(
     SlotsEventEmitter.getInstance(
         new SessionCRUDService(
             new SessionRepo(DatabaseConnection),
+            new SessionRedisRepo(RedisConnection),
+            new SessionFilterRedisRepo(RedisConnection),
             new SessionPreparator(
                 new TimestampHelper()
             ),

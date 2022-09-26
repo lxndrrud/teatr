@@ -6,9 +6,7 @@ import { SessionCSVService } from "../services/sessions/SessionCSV.service";
 import { FileStreamHelper } from "../utils/fileStreams";
 import { SessionFilterService } from "../services/sessions/SessionFilter.service";
 import { TimestampHelper } from "../utils/timestamp";
-import { KnexConnection } from "../knex/connections";
 import { SlotsEventEmitter } from "../events/SlotsEmitter";
-import { UserInfrastructure } from "../infrastructure/User.infra";
 import { ErrorHandler } from "../utils/ErrorHandler";
 import { SessionRepo } from "../repositories/Session.repo";
 import { DatabaseConnection } from "../databaseConnection";
@@ -20,11 +18,16 @@ import { PermissionChecker } from "../infrastructure/PermissionChecker.infra";
 import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
 import { Hasher } from "../utils/hasher";
 import { Tokenizer } from "../utils/tokenizer";
+import { SessionRedisRepo } from "../redisRepositories/Session.redis";
+import { RedisConnection } from "../redisConnection";
+import { SessionFilterRedisRepo } from "../redisRepositories/SessionFilter.redis";
  
 export const sessionsRouter = Router();
 const sessionController = new SessionController(
     new SessionCRUDService(
         new SessionRepo(DatabaseConnection),
+        new SessionRedisRepo(RedisConnection),
+        new SessionFilterRedisRepo(RedisConnection),
         new SessionPreparator(
             new TimestampHelper()
         ),
@@ -36,6 +39,7 @@ const sessionController = new SessionController(
     ),
     new SessionFilterService(
         new SessionRepo(DatabaseConnection),
+        new SessionFilterRedisRepo(RedisConnection),
         new SessionPreparator(
             new TimestampHelper()
         ),
@@ -45,6 +49,8 @@ const sessionController = new SessionController(
     SlotsEventEmitter.getInstance(
         new SessionCRUDService(
             new SessionRepo(DatabaseConnection),
+            new SessionRedisRepo(RedisConnection),
+            new SessionFilterRedisRepo(RedisConnection),
             new SessionPreparator(
                 new TimestampHelper()
             ),

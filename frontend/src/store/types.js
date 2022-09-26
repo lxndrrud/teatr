@@ -50,3 +50,4 @@ export const CREATE_USERS_CSV = 'CREATE_USERS_CSV'
 
 // Design Reducer
 export const TOGGLE_NAVBAR = "TOGGLE_NAVBAR"
+export const SET_IS_LOADING = "SET_IS_LOADING"

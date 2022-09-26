@@ -27,7 +27,7 @@ export interface ISessionRepo {
     deleteSession(idSession: number): Promise<void>
 
     // Крон
-    lockSessions(lockTimestamp: string): Promise<void>
+    lockSessions(lockTimestamp: string): Promise<number[]>
 }
 
 
@@ -206,6 +206,7 @@ export class SessionRepo implements ISessionRepo {
             .where('s.isLocked = :isLocked', { isLocked: false })
             .andWhere('s.timestamp <= :lockTimestamp', { lockTimestamp })
             .getMany()
+        const idsArr = sessions.map(session => session.id)
 
         if (sessions.length > 0) {
             await this.connection.transaction(async trx => {
@@ -213,5 +214,6 @@ export class SessionRepo implements ISessionRepo {
                 await trx.save(sessions)
             }) 
         }
+        return idsArr
     }
 }

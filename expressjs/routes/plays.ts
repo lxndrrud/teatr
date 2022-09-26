@@ -3,7 +3,6 @@ import { Router } from "express";
 import { PlayService } from "../services/plays/PlayService";
 import { AuthMiddleware } from "../middlewares/auth";
 import { FileStreamHelper } from "../utils/fileStreams";
-import { UserInfrastructure } from "../infrastructure/User.infra";
 import { UserRepo } from "../repositories/User.repo";
 import { EmailingTypeRepo } from "../repositories/EmailingType.repo";
 import { DatabaseConnection } from "../databaseConnection";
@@ -13,11 +12,14 @@ import { Tokenizer } from "../utils/tokenizer";
 import { PlayRepo } from "../repositories/Play.repo";
 import { PlayPreparator } from "../infrastructure/PlayPreparator.infra";
 import { ErrorHandler } from "../utils/ErrorHandler";
+import { PlayRedisRepo } from "../redisRepositories/Play.redis";
+import { RedisConnection } from "../redisConnection";
 
 export const playsRouter = Router()
 const playController = new PlayController(
     new PlayService(
         new PlayRepo(DatabaseConnection),
+        new PlayRedisRepo(RedisConnection),
         new FileStreamHelper(),
         new PlayPreparator()
     ),
