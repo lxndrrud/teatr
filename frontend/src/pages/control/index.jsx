@@ -3,27 +3,24 @@ import ReservationFilter from "../../components/Filters/ReservationFilter/Reserv
 import ReservationPagination from "../../components/Pagination/ReservationPagination/ReservationPagination"
 import { useDispatch, useSelector, useStore } from "react-redux"
 import { fetchReservations } from "../../store/actions/reservationAction"
-//import { useRouter } from "next/router"
 import { useEffect } from "react"
 import { checkLogin } from "../../middlewares/authFunctions"
 import { useNavigate } from "react-router-dom"
+import { usePreloader } from "../../hooks/usePreloader"
 
 export default function ControlIndexPage() {
     const dispatch = useDispatch()
     const store = useStore()
     const navigate = useNavigate()
-    //const router = useRouter()
 
     let token = useSelector(state => state.user.token)
 
     useEffect(() => {
-        //if (router.isReady) {
-            if(!checkLogin(store)) {
-                navigate('/login')
-                return
-            }
-            dispatch(fetchReservations(token))
-        //}
+        if(!checkLogin(store)) {
+            navigate('/login')
+            return
+        }
+        usePreloader(dispatch, fetchReservations(token))
     }, [dispatch, navigate, token, store])
 
     return (

@@ -3,19 +3,18 @@ import PlayDetail from "../../components/Plays/PlayDetail/PlayDetail"
 import { fetchPlay } from "../../store/actions/playAction"
 import { fetchSessionsByPlay } from "../../store/actions/sessionAction"
 import { useDispatch, useSelector } from 'react-redux'
-//import { useRouter } from "next/router"
 import { useParams } from "react-router-dom"
 import { useEffect } from "react"
+import { usePreloader } from "../../hooks/usePreloader"
+import Preloader from "../../components/UI/Preloader/Preloader"
 
 export default function PlayPage() {
     const dispatch = useDispatch()
-    //const router = useRouter()
     const { idPlay } = useParams()
+    let isLoading = useSelector(state => state.design.isLoading)
     useEffect(() => {
-        //if (router.isReady) {
-            dispatch(fetchPlay(idPlay))
-            dispatch(fetchSessionsByPlay(idPlay))
-        //}
+        usePreloader(dispatch, fetchPlay(idPlay))
+        usePreloader(dispatch, fetchSessionsByPlay(idPlay))
     }, [dispatch])
 
     const play = useSelector(state => state.play.play)
@@ -23,7 +22,13 @@ export default function PlayPage() {
     return (
         <div>
             <MainLayout title={play.title}>
-                <PlayDetail />
+                {
+                    isLoading
+                    ? 
+                        <Preloader />
+                    : 
+                        <PlayDetail />
+                }
             </MainLayout>
         </div>
     )

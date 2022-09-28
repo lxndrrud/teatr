@@ -14,15 +14,18 @@ export default function PlayDetail({ images}) {
                             justify-center align-center lg:justify-start 
                             items-center lg:items-start">
                 <DetailImage filepath={play.poster_filepath} altDescription={play.title} />
-                <table className="m-4 p-1 ">   
-                    {
-                        play.crew && play.crew.map(crewPerson => (
-                            <tr>
-                                <td className="text-[slategrey]">{crewPerson.split(' - ')[0]}</td>
-                                <td className="pl-2">{crewPerson.split(' - ')[1]}</td>
-                            </tr>
-                        ))
-                    }
+                <table className="m-4 p-1 [@media(max-width:640px)]:text-[15px]"> 
+                    <tbody>
+                        {
+                            play.crew && play.crew.map(crewPerson => (
+                                <tr>
+                                    <td className="text-[slategrey]">{crewPerson.split(' - ')[0]}</td>
+                                    <td className="pl-2">{crewPerson.split(' - ')[1]}</td>
+                                </tr>
+                            ))
+                        }
+                    </tbody>  
+                   
                 </table>
             </div>
             <div className="w-[90%] sm:w-[100%] mx-auto mt-3 sm:mx-0">

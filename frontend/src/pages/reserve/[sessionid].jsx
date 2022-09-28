@@ -9,6 +9,8 @@ import { useDispatch, useSelector, useStore} from 'react-redux'
 import { useEffect, useState } from 'react'
 import { clearSlots } from '../../store/actions/reservationAction';
 import { checkLogin } from '../../middlewares/authFunctions';
+import { usePreloader } from '../../hooks/usePreloader';
+import Preloader from '../../components/UI/Preloader/Preloader';
 
 function SessionReservationPage() {
     const navigate = useNavigate()
@@ -18,6 +20,7 @@ function SessionReservationPage() {
 
     const { idSession } = useParams()
     let token = useSelector(state => state.user.token)
+    let isLoading = useSelector(state => state.design.isLoading)
   
   
 
@@ -41,7 +44,7 @@ function SessionReservationPage() {
 
     useEffect( () => {
         if (sessionFromStore.id_play)
-          dispatch(fetchPlay(sessionFromStore.id_play))
+            usePreloader(dispatch, fetchPlay(sessionFromStore.id_play))
     }, [sessionFromStore, dispatch])
 
     const playFromStore = useSelector(state => state.play.play)
@@ -50,9 +53,15 @@ function SessionReservationPage() {
     
     return (
         <>
-          <MainLayout title="Оформление брони">
-            <ReservationForm session={ sessionFromStore } play={ playFromStore }/>
-          </MainLayout>
+            <MainLayout title="Оформление брони">
+                {
+                    isLoading
+                    ?
+                        <Preloader />
+                    :
+                        <ReservationForm session={ sessionFromStore } play={ playFromStore }/>
+                }
+            </MainLayout>
         </>
     );
 };

@@ -62,7 +62,6 @@ function LoginForm({ isAdmin=false }) {
                 <img src={masksPicture} alt=""  className='w-[300px]'/>
             </div>
             <div className='mt-5 mb-3 '>
-                
                 <CustomInput type="email" name="email" value={email} 
                     onChange={(e) => setEmail(e.target.value)} 
                     description="Почта" 

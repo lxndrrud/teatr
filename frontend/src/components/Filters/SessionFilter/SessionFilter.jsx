@@ -4,7 +4,7 @@ import CustomButton from "../../UI/CustomButton/CustomButton"
 import Select from '../../UI/Select/Select'
 import { fetchFilteredSessions, fetchSessionFilterOptions } from "../../../store/actions/sessionAction"
 import InputDate from '../../UI/InputDate/InputDate'
-import { setIsLoading } from '../../../store/actions/designAction'
+import { usePreloader } from '../../../hooks/usePreloader'
 
 function SessionFilter() {
     const dispatch = useDispatch()
@@ -18,9 +18,7 @@ function SessionFilter() {
     const getFilteredSessions = (e) => {
         e.preventDefault()
 
-        dispatch(setIsLoading(true))
-            .then(dispatch(fetchFilteredSessions(dateFrom, dateTo, auditoriumTitle, playTitle)))
-            .then(dispatch(setIsLoading(false)))
+        usePreloader(dispatch, fetchFilteredSessions(dateFrom, dateTo, auditoriumTitle, playTitle))
     } 
 
     /*
@@ -67,7 +65,8 @@ function SessionFilter() {
             justify-between lg:justify-between items-center
             flex-nowrap sm:flex-wrap rounded-lg">
             
-            <div className='grid grid-cols-2 gap-y-2 gap-x-3'>
+            <div className='flex flex-col justify-between
+                lg:grid lg:grid-cols-2 lg:gap-y-2 lg:gap-x-3'>
                 <InputDate onChange={syncDateFrom} description='От даты' />
                     <InputDate onChange={syncDateTo} description='До даты' />
                 

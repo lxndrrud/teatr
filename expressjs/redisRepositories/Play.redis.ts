@@ -24,7 +24,6 @@ export class PlayRedisRepo implements IPlayRedisRepo {
     public async getPlay(idPlay: number) {
         const playString = await this.connection.get(`play-${idPlay}`)
         if (!playString) return null
-        console.log(playString)
         return <PlayWithPosterInterface> JSON.parse(playString)
     }
 

@@ -59,37 +59,42 @@ function RegisterForm() {
     }
     return (
         <BaseForm styleClass={styles.registerForm}>
-            <CustomInput type="email" name="email" value={email} 
-                onChange={syncEmail} 
-                description="Почта" 
-                required />
-
-            <CustomInput type="password" name="password" value={password} 
-                onChange={syncPassword} 
-                description="Пароль" 
-                required />
-
-            <CustomInput type="text" name="firstname" value={firstname} 
-                onChange={syncFirstname} 
-                description="Имя (необязательно)"
-                inputStyleClass={styles.notRequiredInputBorderColor} />
-
-            <CustomInput type="text" name="middlename" value={middlename} 
-                onChange={syncMiddlename} 
-                description="Отчество (необязательно)"
-                inputStyleClass={styles.notRequiredInputBorderColor}  />
-
-            <CustomInput type="text" name="lastname" value={lastname} 
-                onChange={syncLastname} 
-                description="Фамилия (необязательно)" 
-                inputStyleClass={styles.notRequiredInputBorderColor}  />
-            
+            <div>
+                <CustomInput type="email" name="email" value={email} 
+                    onChange={syncEmail} 
+                    description="Почта" 
+                    required />
+            </div>
+            <div className='mt-3'>
+                <CustomInput type="password" name="password" value={password} 
+                    onChange={syncPassword} 
+                    description="Пароль" 
+                    required />
+            </div>
+            <div className='mt-3'>
+                <CustomInput type="text" name="firstname" value={firstname} 
+                    onChange={syncFirstname} 
+                    description="Имя (необязательно)"
+                    inputStyleClass={styles.notRequiredInputBorderColor} />
+            </div>
+            <div className='mt-3'>
+                <CustomInput type="text" name="middlename" value={middlename} 
+                    onChange={syncMiddlename} 
+                    description="Отчество (необязательно)"
+                    inputStyleClass={styles.notRequiredInputBorderColor}  />
+            </div>
+            <div className='mt-3 mb-3'>
+                <CustomInput type="text" name="lastname" value={lastname} 
+                    onChange={syncLastname} 
+                    description="Фамилия (необязательно)" 
+                    inputStyleClass={styles.notRequiredInputBorderColor}  />
+            </div>
             {
                 error !== '' 
                 ? <ErrorMessage text={error} />
                 : null
             }
-
+            <div className='mb-3'></div>
             <CustomButton type="submit" value="Подтвердить" 
                 onClickHook={sendPostRequest}
                 styleClass={styles.fullWidthButton} />

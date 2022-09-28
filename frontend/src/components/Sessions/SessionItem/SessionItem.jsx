@@ -10,7 +10,7 @@ export default function SessionItem({ session }) {
     
     return (
         <div className={styles.sessionItem} >
-            <p className={styles.playTitle}>
+            <p className="text-[22px] font-bold text-center sm:text-start">
                 <CustomLink text={session.play_title} destination={playUrl} />
             </p>
             <div className={styles.rowContainer}>

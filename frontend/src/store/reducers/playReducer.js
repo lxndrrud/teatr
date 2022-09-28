@@ -2,16 +2,8 @@ import { CLEAR_SUCCESS_ERROR_PLAY, ERROR_PLAY, FETCH_PLAY, FETCH_PLAYS, SUCCESS_
 
 
 const defaultState = {
-    play: {
-        id: 0,
-        title: '',
-        description: ''
-    },
-    plays: [{
-        id: 0,
-        title: '',
-        description: ''
-    }],
+    play: {},
+    plays: [],
     loading: false,
     error: null,
     success: null,

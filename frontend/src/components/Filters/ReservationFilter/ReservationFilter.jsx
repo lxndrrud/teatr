@@ -6,6 +6,8 @@ import { useDispatch, useSelector} from 'react-redux'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { fetchFilteredReservations, fetchReservationFilterOptions } from '../../../store/actions/reservationAction'
 import InputDate from '../../UI/InputDate/InputDate'
+import { setIsLoading } from '../../../store/actions/designAction'
+import { usePreloader } from '../../../hooks/usePreloader'
 
 function ReservationFilter() {
     const dispatch = useDispatch()
@@ -87,8 +89,8 @@ function ReservationFilter() {
 
     const getFilteredReservations = (e) => {
         e.preventDefault()
-        
-        dispatch(fetchFilteredReservations(token, dateFrom, dateTo, auditoriumTitle, playTitle, 
+
+        usePreloader(dispatch, fetchFilteredReservations(token, dateFrom, dateTo, auditoriumTitle, playTitle, 
             showLocked, reservationNumber))
     }
 

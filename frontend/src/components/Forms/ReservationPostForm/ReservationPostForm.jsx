@@ -4,8 +4,8 @@ import { fetchSlots, fetchSlotsBySession } from "../../../store/actions/sessionA
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import SlotsFieldMainAuditorium from "../../Slots/SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
 import SlotsFieldSmallScene from "../../Slots/SlotsFieldSmallScene/SlotsFieldSmallScene"
+import Preloader from '../../UI/Preloader/Preloader'
 import React, { useEffect, useState } from 'react'
-//import { useRouter } from "next/router"
 import { useNavigate } from 'react-router-dom'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import axios from 'axios'
@@ -16,6 +16,7 @@ function ReservationPostForm() {
     const navigate = useNavigate() 
     const store = useStore()
 
+    let isLoading = useSelector(state => state.design.isLoading)
     let token = useSelector(state => state.user.token)
     let session = useSelector(state => state.session.session)
     let sessionSlots = useSelector(state => state.session.slots)
@@ -39,7 +40,7 @@ function ReservationPostForm() {
                 }
             }) 
             dispatch(fetchSlots(response.data))
-            .then(async () => { await subscribe() })
+                .then(async () => { await subscribe() })
         } catch (e) {
             setTimeout(() => {
                 subscribe()
@@ -76,11 +77,18 @@ function ReservationPostForm() {
 
     return (
         <>
-            { session.auditorium_title === 'Главный зал' 
-                ? <SlotsFieldMainAuditorium rows={sessionSlots} />
-                : session.auditorium_title === 'Малая сцена'
-                    ? <SlotsFieldSmallScene rows={sessionSlots} />
-                    : null
+        
+            { 
+                isLoading
+                ?
+                    <Preloader />
+
+                :
+                    (session.auditorium_title === 'Главный зал' 
+                        ? <SlotsFieldMainAuditorium rows={sessionSlots} />
+                        : session.auditorium_title === 'Малая сцена'
+                            ? <SlotsFieldSmallScene rows={sessionSlots} />
+                            : null)
             }
             {
                 error && <ErrorMessage text={error} />

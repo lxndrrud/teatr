@@ -1,5 +1,6 @@
 import { app } from "../../app";
 import { KnexConnection } from "../../knex/connections";
+import { RedisConnection } from '../../redisConnection'
 import { PlaysControllerTests } from "./plays";
 import { ReservationsControllerTest } from "./reservations";
 import { SessionsControllerTest } from "./sessions";
@@ -7,6 +8,7 @@ import { UsersControllerTests } from "./users";
 
 export function ControllersTests() {
     before(async function() {
+        await RedisConnection.flushdb()
         await KnexConnection.migrate.rollback()
         await KnexConnection.migrate.latest()
         await KnexConnection.seed.run()
@@ -19,6 +21,7 @@ export function ControllersTests() {
         return
     })
     after(async function() {
+        await RedisConnection.flushdb()
         await KnexConnection.migrate.rollback()
         await KnexConnection.migrate.latest()
         await KnexConnection.seed.run()
