@@ -1,7 +1,9 @@
 import React from 'react'
+import axios from 'axios'
 import { useState } from 'react'
 import { useDispatch, useStore } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from 'react-query'
 import { errorSetDefault, restorePassword } from '../../../store/actions/userAction'
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import CustomInput from '../../UI/CustomInput/CustomInput'
@@ -12,7 +14,14 @@ function PasswordRestoreForm() {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const store = useStore()
+    const resendMutation = useMutation(email => {
+        return axios.post('/expressjs/users/restore/password/resendEmail', { email })
+    }, {
+        onSuccess: () => alert('Сообщение отправлено!'),
+        onError: () => alert('Ошибка!')
+    })
 
+    let [sentEmail, setSentEmail] = useState(false)
     let [email, setEmail] = useState('')
     let [error, setError] = useState(null)
     function sendRestoreRequest(e) {
@@ -27,10 +36,15 @@ function PasswordRestoreForm() {
                     setError(errorStore)
                     dispatch(errorSetDefault()) 
                 } else {
-                    navigate('/login')
+                    setSentEmail(true)
                 }
             })
         }
+    }
+    function resendPasswordOnEmail(e) {
+        e.preventDefault()
+        resendMutation.mutate(email)
+        console.log(resendMutation)
     }
     return (
         <BaseForm>
@@ -41,8 +55,12 @@ function PasswordRestoreForm() {
             {
                 error && <ErrorMessage text={error} />
             }
+            <CustomButton
+                value='Отправить на почту заново'
+                onClickHook={resendPasswordOnEmail}
+                disabled={!sentEmail}
+            />
             <CustomButton 
-                
                 value="Подтвердить"
                 onClickHook={sendRestoreRequest}
             />

@@ -1,12 +1,11 @@
 import moment from "moment"
 import { DataSource } from "typeorm"
-import { Role } from "../entities/roles"
 import { User } from "../entities/users"
 import { UserRestoration } from "../entities/users_restorations"
 import { UserAction } from "../entities/user_actions"
 import { IPermissionChecker } from "../infrastructure/PermissionChecker.infra"
 import { InnerError } from "../interfaces/errors"
-import { IUserPersonalInfo, UserBaseInterface, UserBaseRoleInterface, UserBaseVisitorInterface, UserRequestOption } from "../interfaces/users"
+import { IUserPersonalInfo, UserBaseInterface, UserRequestOption } from "../interfaces/users"
 import { IHasher } from "../utils/hasher"
 import { ITokenizer } from "../utils/tokenizer"
 import { IEmailingTypeRepo } from "./EmailingType.repo"
@@ -24,6 +23,7 @@ export interface IUserRepo {
     getLastUserRestoration(idUser: number): Promise<UserRestoration | null>
     createUser(payload: UserBaseInterface): Promise<User>
     generateToken(idUser: number): Promise<User>
+    getTimeLeftForResendLastRestoration(idUser: number): Promise<number>
 }
 
 export class UserRepo implements IUserRepo {
@@ -175,13 +175,22 @@ export class UserRepo implements IUserRepo {
             .leftJoinAndSelect('userRest.emailingType', 'et')
             .where('user.id = :idUser', { idUser })
             .getOne()
-
         return !!user 
             && (user.userRestorations.length === 0
-                ? true
-                : user.userRestorations[0].emailingType.repeatable 
-                    && moment().isSameOrAfter(moment(user?.userRestorations[0].timeCreated)
+                ? false
+                : moment().isSameOrAfter(moment(user?.userRestorations[0].timeCreated)
                         .add(user?.userRestorations[0].emailingType.resendInterval, 'seconds')))
+    }
+
+    public async getTimeLeftForResendLastRestoration(idUser: number) {
+        const query = await this.connection.createQueryBuilder(UserRestoration, 'ur')
+            .innerJoinAndSelect('ur.user', 'user')
+            .innerJoinAndSelect('ur.emailingType', 'et')
+            .orderBy('ur.timeCreated', 'DESC')
+            .where('user.id = :idUser', { idUser })
+            .getOne()
+        if (!query) throw new InnerError('Восстановление не найдено!', 404)
+        return moment(query.timeCreated).add(query.emailingType.resendInterval, 'seconds').diff(moment())
     }
 
     public async createUserAction(idUser: number, actionDescription: string) {

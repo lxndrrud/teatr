@@ -220,7 +220,7 @@ export class UserFetchingModel implements IUserCRUDService {
         // Получение последнего восстановления пароля по почте
         const lastRestoration = await this.userRepo.getLastUserRestoration(user.id)
         if (!lastRestoration) 
-            throw new InnerError("Ваше последнее восстановление пароля не найдено. Попробуйте воспользоваться восстановление на странице входа.", 
+            throw new InnerError("Ваше последнее восстановление пароля не найдено. Попробуйте воспользоваться восстановлением.", 
                 404)
         // Проверка таймаута последней отправки письма на почту
         if (!(await this.userRepo.checkCanResendRestorEmail(user.id))) 

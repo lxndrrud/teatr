@@ -1,6 +1,6 @@
 import React from 'react'
 
-function CustomButton({ onClickHook, buttonType, value}) {
+function CustomButton({ onClickHook, buttonType, value, disabled }) {
     const fetchStyle = (type) => {
         const baseStyle = `p-2 flex flex-nowrap 
         border-solid rounded-md justify-center`
@@ -19,7 +19,7 @@ function CustomButton({ onClickHook, buttonType, value}) {
     //<input {... props } onClick={ onClickHook } className={ fetchStyle(buttonType) } />
     return (
         
-        <button onClick={ onClickHook } className={ fetchStyle(buttonType) }>
+        <button onClick={ onClickHook } className={ fetchStyle(buttonType) } disabled={disabled}>
             {value}
         </button>
     )

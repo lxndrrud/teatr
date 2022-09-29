@@ -36,32 +36,53 @@ export class PlayService implements IPlayService {
     }
 
     public async getAll() {
+        // Проверка хэша
+        const playsCache = await this.playRedisRepo.getUnlockedPlays()
+        if (playsCache) return playsCache
+        // Получение с базы данных
         const plays = await this.playRepo.getAll()
-        return plays.map(play => this.playPreparator.preparePlayWithPoster(play))
+        // Приведение к нужному типу
+        const preparedPlays = plays.map(play => this.playPreparator.preparePlayWithPoster(play))
+        // Сохранение в кэш
+        await this.playRedisRepo.setUnlockedPlays(preparedPlays)
+        return preparedPlays 
     }
 
     public async getSinglePlay(idPlay: number) {
-        const playCache = await this.playRedisRepo.getPlay(idPlay)
-        if (playCache) {
-            return playCache
-        }
+        // Проверка хэша
+        const playCache = await this.playRedisRepo.getUnlockedPlay(idPlay)
+        if (playCache) return playCache
+        // Получение с базы данных
         const play = await this.playRepo.getSingle(idPlay)
         if (!play) throw new InnerError('Спектакль не найден.', 404)
         const preparedPlay = this.playPreparator.preparePlayWithPoster(play)
-        await this.playRedisRepo.setPlay(idPlay, preparedPlay)
+        // Сохранение в кэш
+        await this.playRedisRepo.setUnlockedPlay(idPlay, preparedPlay)
         return preparedPlay
     }
 
     public async createPlay(payload: PlayBaseInterface) {
-        await this.playRepo.createPlay(payload)
+        await Promise.all([
+            // Очистка хэша
+            this.playRedisRepo.clearUnlockedPlays(),
+            this.playRepo.createPlay(payload)
+        ])
     }
 
     public async updatePlay(idPlay: number, payload: PlayBaseInterface) {
-        await this.playRepo.updatePlay(idPlay, payload)
+        await Promise.all([
+            this.playRedisRepo.clearUnlockedPlays(),
+            this.playRedisRepo.clearUnlockedPlay(idPlay),
+            this.playRepo.updatePlay(idPlay, payload)
+        ])
     }
 
     public async deletePlay(idPlay: number) {
-        await this.playRepo.deletePlay(idPlay)
+        await Promise.all([
+            this.playRedisRepo.clearUnlockedPlays(),
+            this.playRedisRepo.clearUnlockedPlay(idPlay),
+            await this.playRepo.deletePlay(idPlay)
+        ])
     }
 
     public async createPlaysCSV(file: UploadedFile) {
@@ -80,6 +101,9 @@ export class PlayService implements IPlayService {
         }
         fs.rmSync(file.tempFilePath)
         //fs.unlinkSync(file.tempFilePath)
-        await this.playRepo.createPlays(dataArray)
+        await Promise.all([
+            this.playRedisRepo.clearUnlockedPlays(),
+            this.playRepo.createPlays(dataArray)
+        ])
     }
 }
