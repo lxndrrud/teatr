@@ -1,3 +1,5 @@
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import axios from 'axios'
 import { LOG_IN, LOG_OUT, REGISTER, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, SUCCESS_USER_SET_DEFAULT, SET_USER_SUCCESS, CREATE_USERS_CSV } from "../types";
 
 export const register = (email, password, 
@@ -240,3 +242,13 @@ export const createUsersCSV = (token, file) => async dispatch => {
         })
     }
 }
+
+export const resendRestoreEmail = createAsyncThunk('users/restore/password/resendEmail', 
+    async ({ email }, thunkApi ) => {
+        try {
+            const response = await axios.post('/expressjs/users/restore/password/resendEmail', { email })
+            return response.data
+        } catch (error) {
+            return thunkApi.rejectWithValue(e?.response?.data || 'Произошла непредвиденная ошибка')
+        }
+})
