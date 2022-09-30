@@ -46,6 +46,7 @@ function PasswordRestoreForm() {
         e.preventDefault()
         //resendMutation.mutate(email)
         const response = await dispatch(resendRestoreEmail({ email }))
+        if (response.error) setError(response.error.message)
     }
     /**
      * 

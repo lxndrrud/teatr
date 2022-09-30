@@ -249,6 +249,6 @@ export const resendRestoreEmail = createAsyncThunk('users/restore/password/resen
             const response = await axios.post('/expressjs/users/restore/password/resendEmail', { email })
             return response.data
         } catch (error) {
-            return thunkApi.rejectWithValue(e?.response?.data || 'Произошла непредвиденная ошибка')
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
         }
 })
