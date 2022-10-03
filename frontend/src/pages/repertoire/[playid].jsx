@@ -11,24 +11,18 @@ import Preloader from "../../components/UI/Preloader/Preloader"
 export default function PlayPage() {
     const dispatch = useDispatch()
     const { idPlay } = useParams()
-    let isLoading = useSelector(state => state.design.isLoading)
+    //let { isLoading } = useSelector(state => state.design)
     useEffect(() => {
-        usePreloader(dispatch, fetchPlay(idPlay))
-        usePreloader(dispatch, fetchSessionsByPlay(idPlay))
+        dispatch(fetchPlay({ idPlay }))
+        dispatch(fetchSessionsByPlay(idPlay))
     }, [dispatch])
 
-    const play = useSelector(state => state.play.play)
+    const { play } = useSelector(state => state.play)
 
     return (
         <div>
             <MainLayout title={play.title}>
-                {
-                    isLoading
-                    ? 
-                        <Preloader />
-                    : 
-                        <PlayDetail />
-                }
+                <PlayDetail />
             </MainLayout>
         </div>
     )

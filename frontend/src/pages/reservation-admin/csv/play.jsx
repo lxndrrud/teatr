@@ -5,7 +5,9 @@ import { useNavigate } from "react-router-dom";
 import FilePicker from "../../../components/UI/FilePicker/FilePicker";
 import AdminLayout from "../../../layouts/AdminLayout/AdminLayout";
 import { checkLogin } from "../../../middlewares/authFunctions";
-import { createPlaysCSV, clearSuccessErrorPlay } from "../../../store/actions/playAction"
+import { createPlaysCSV } from "../../../store/actions/playAction"
+import Swal from 'sweetalert2'
+import { playReducer } from "../../../store/reducers/playReducer";
 
 export default function PlayCSVUploadingPage() {
     const dispatch = useDispatch()
@@ -29,7 +31,19 @@ export default function PlayCSVUploadingPage() {
         setSelectedFile(file)
     }
     const onButtonClick = (e) => {
-        dispatch(createPlaysCSV(token, selectedFile))
+        dispatch(createPlaysCSV({ token, file: selectedFile }))
+        const { error } = useSelector(state => state.play)
+        if (!error) {
+            Swal.fire({
+                title: 'Спектакли успешно загружены!',
+                icon: 'success',
+                timer: 2000
+            })
+        } else {
+            setErrorMessage(error)
+        }
+        dispatch(playReducer.actions.clearError())
+        /*
         .then(() => {
             const error = store.getState().play.error
             const success = store.getState().play.success
@@ -41,6 +55,7 @@ export default function PlayCSVUploadingPage() {
             }
             dispatch(clearSuccessErrorPlay())
         })
+        */
     }
     
     return (

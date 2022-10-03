@@ -1,12 +1,13 @@
 import SessionPagination from '../../Pagination/SessionPagination/SessionPagination'
 import { useSelector } from "react-redux"
 import DetailImage from "../../UI/Images/DetailImage/DetailImage"
+import Preloader from '../../UI/Preloader/Preloader'
 
 
 
 export default function PlayDetail({ images}) {
-    const play = useSelector(state => state.play.play)
-
+    const { play, isLoading } = useSelector(state => state.play)
+    if (isLoading) return <Preloader />
     return (
         <div className="flex flex-col w-[100%] lg:w-[90%]">
             <div className="w-[100%] my-3 sm:mt-0

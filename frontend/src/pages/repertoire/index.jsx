@@ -3,13 +3,13 @@ import { fetchPlays } from "../../store/actions/playAction"
 import { useDispatch } from "react-redux"
 import { useEffect } from "react"
 import PlayPagination from "../../components/Pagination/PlayPagination/PlayPagination"
-import { usePreloader } from "../../hooks/usePreloader"
 
 export default function RepertoirePage() {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        usePreloader(dispatch, fetchPlays())
+        //usePreloader(dispatch, fetchPlays())
+        dispatch(fetchPlays())
     }, [dispatch])
 
     return (

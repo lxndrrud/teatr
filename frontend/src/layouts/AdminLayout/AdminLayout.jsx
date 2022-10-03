@@ -2,12 +2,12 @@ import { footerStyle, layoutStyle, mainContentExpandedStyle, mainContentStyle, t
 import { useEffect } from 'react'
 import AdminNavBar from '../../components/NavBar/AdminNavBar/AdminNavBar'
 import { useDispatch, useSelector } from 'react-redux'
-import { toggleNavbar } from "../../store/actions/designAction"
+//import { toggleNavbar } from "../../store/actions/designAction"
 import Footer from '../../components/Footer/Footer'
 
 export default function AdminLayout({ children, title }) {
     const dispatch = useDispatch()
-    let isHidden = useSelector(state => state.design.navbarIsHidden)
+    let { navbarIsHidden: isHidden } = useSelector(state => state.design)
     let mainContent = isHidden 
         ? mainContentStyle
         : `${mainContentStyle} ${mainContentExpandedStyle}`

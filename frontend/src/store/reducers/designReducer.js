@@ -1,16 +1,26 @@
-import { SET_IS_LOADING, TOGGLE_NAVBAR } from "../types"
+import { createSlice } from "@reduxjs/toolkit"
+//import { SET_IS_LOADING, TOGGLE_NAVBAR } from "../types"
 
 
-const defaultState = {
+const initialState = {
     navbarIsHidden: true,
-    isLoading: false,
-    pagination: {
-        active: 1,
-        length: 0,
-        perPage: 6,
-    }
+    isLoading: false
 }
 
+export const designReducer = createSlice({
+    name: 'design',
+    initialState,
+    reducers: {
+        setIsLoading(state, action) {
+            state.isLoading = action.payload
+        },
+        toggleNavbar(state, action) {
+            state.navbarIsHidden = !state.navbarIsHidden
+        }
+    },
+})
+
+/*
 const designReducer = (state = defaultState, action) => {
     switch (action.type) {
         case TOGGLE_NAVBAR:
@@ -22,5 +32,6 @@ const designReducer = (state = defaultState, action) => {
     }
 
 }
+*/
 
-export default designReducer
+//export default designReducer.reducer

@@ -1,14 +1,73 @@
+import { createSlice } from "@reduxjs/toolkit"
+import { createPlaysCSV, fetchPlay, fetchPlays } from "../actions/playAction"
 import { CLEAR_SUCCESS_ERROR_PLAY, ERROR_PLAY, FETCH_PLAY, FETCH_PLAYS, SUCCESS_PLAY } from "../types"
 
 
-const defaultState = {
+const initialState = {
     play: {},
     plays: [],
-    loading: false,
+    isLoading: false,
     error: null,
     success: null,
 }
 
+const pending = (state) => {
+    state.isLoading = true
+}
+
+const rejected = (state, action) =>  {
+    state.isLoading = false
+    if (action) state.error = action.payload.error
+}
+
+const defaultFullfilled = (state) => {
+    rejected(state)
+}
+
+const wait = (ms) =>
+    new Promise((resolve) => {
+        setTimeout(() => resolve(), ms);
+});
+
+export const playReducer = createSlice({
+    name: 'plays',
+    initialState,
+    reducers: {
+        clearSuccess(state, action) {
+            state.success = initialState.success
+        },
+        clearError(state, action) {
+            state.error = initialState.error
+        }
+        
+    },
+    extraReducers: {
+        // Fetch play
+        [fetchPlay.fulfilled]: (state, action) => {
+            state.play = action.payload
+            defaultFullfilled(state)
+        }, 
+        [fetchPlay.pending]: pending,
+        [fetchPlay.rejected]: rejected,
+
+         // Fetch plays
+        [fetchPlays.fulfilled]: (state, action) => {
+            console.log(action)
+            state.plays = action.payload
+            defaultFullfilled(state)
+        }, 
+        [fetchPlays.pending]: pending,
+        [fetchPlays.rejected]: rejected,
+
+        // Create plays CSV
+        [createPlaysCSV.fulfilled]: defaultFullfilled,
+        [createPlaysCSV.pending]: pending,
+        [createPlaysCSV.rejected]: rejected
+    }
+
+})
+
+/*
 const playReducer = (state = defaultState, action) => {
     switch (action.type) {
         case FETCH_PLAY:
@@ -25,6 +84,6 @@ const playReducer = (state = defaultState, action) => {
             return state
     }
 
-}
+}*/
 
-export default playReducer
+//export default playReducer

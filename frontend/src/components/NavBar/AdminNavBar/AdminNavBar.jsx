@@ -4,7 +4,8 @@ import { useDispatch, useSelector, useStore } from 'react-redux'
 import { checkLogin } from "../../../middlewares/authFunctions"
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import CustomLink from '../../UI/CustomLink/CustomLink'
-import { toggleNavbar } from "../../../store/actions/designAction"
+// import { toggleNavbar } from "../../../store/actions/designAction"
+import { designReducer } from '../../../store/reducers/designReducer'
 //import Image from 'next/image'
 import styles from "../NavBar.module.css"
 import mainLogo from "../../../assets/index-logo.png"
@@ -14,10 +15,14 @@ import { useNavigate } from 'react-router-dom'
 
 
 function AdminNavBar() {
-    let isHidden = useSelector(state => state.design.navbarIsHidden)
+    let { navbarIsHidden: isHidden} = useSelector(state => state.design)
     const store = useStore()
     const navigate = useNavigate()
     const dispatch = useDispatch()
+
+    // Actions
+    const { toggleNavbar } = designReducer.actions
+
 
     let [token, setToken] = useState(useSelector(state => state.user.token))
     let [isLoggedIn, setIsLoggedIn] = useState(checkLogin(store))

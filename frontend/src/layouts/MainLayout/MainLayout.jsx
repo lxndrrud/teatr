@@ -8,8 +8,8 @@ import Header from '../../components/Header/Header'
 
 export default function MainLayout({ children, title }) {
     const dispatch = useDispatch()
-    let isHidden = useSelector(state => state.design.navbarIsHidden)
-    let mainContent = isHidden 
+    let { navbarIsHidden } = useSelector(state => state.design)
+    let mainContent = navbarIsHidden 
         ? mainContentStyle
         : `${mainContentStyle} ${mainContentExpandedStyle}`
 

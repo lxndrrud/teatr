@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import Preloader from '../../UI/Preloader/Preloader'
 
 export default function PlayList({ plays }) {
-    let isLoading = useSelector(state => state.design.isLoading)
+    let { isLoading } = useSelector(state => state.play)
     return (
         <div className="lg:ml-[5%] mx-auto sm:ml-0 w-[95%] 
                         flex flex-col flex-wrap 

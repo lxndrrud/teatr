@@ -20,7 +20,7 @@ function SessionReservationPage() {
 
     const { idSession } = useParams()
     let token = useSelector(state => state.user.token)
-    let isLoading = useSelector(state => state.design.isLoading)
+    let { isLoading } = useSelector(state => state.design)
   
   
 
