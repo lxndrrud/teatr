@@ -1,7 +1,21 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from 'axios'
-import { LOG_IN, LOG_OUT, REGISTER, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, SUCCESS_USER_SET_DEFAULT, SET_USER_SUCCESS, CREATE_USERS_CSV } from "../types";
+//import { LOG_IN, LOG_OUT, REGISTER, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, SUCCESS_USER_SET_DEFAULT, SET_USER_SUCCESS, CREATE_USERS_CSV } from "../types";
 
+export const register = createAsyncThunk<any, { email: string, password: string, firstname?: string, middlename?: string, lastname?: string }>(
+    'users/register',
+    async ({email, password, firstname, middlename, lastname }, thunkApi) => {
+        try {
+            const response = await axios.post(`/expressjs/users`, 
+                { email, password, firstname, middlename, lastname })
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+
+/*
 export const register = (email, password, 
 firstname=undefined, middlename=undefined, lastname=undefined) => async dispatch => {
     const response = await fetch(`/expressjs/users`, {
@@ -31,7 +45,20 @@ firstname=undefined, middlename=undefined, lastname=undefined) => async dispatch
             payload: json_.message
         })
 }
+*/
 
+export const logIn = createAsyncThunk<any, { email: string, password: string }>(
+    'users/login',
+    async ({ email, password }, thunkApi) => {
+        try {
+            const response = await axios.post(`/expressjs/users/login`, { email, password })
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+})
+
+/*
 export const logIn = (email, password) => async dispatch =>  {
     const response = await fetch(`/expressjs/users/login`, {
         headers: {
@@ -58,7 +85,9 @@ export const logIn = (email, password) => async dispatch =>  {
         })
 
 }
+*/
 
+/*
 export const logInAdmin = (email, password) => async dispatch =>  {
     const response = await fetch(`/expressjs/users/adminLogin`, {
         headers: {
@@ -84,6 +113,9 @@ export const logInAdmin = (email, password) => async dispatch =>  {
             payload: json_.message
         })
 }
+*/
+
+/*
 
 export const logOut = () => async dispatch => {
     dispatch({
@@ -102,7 +134,21 @@ export const successSetDefault = () => async dispatch => {
         type: SUCCESS_USER_SET_DEFAULT
     })
 }
+*/
 
+export const getPersonalArea = createAsyncThunk<any, { token: string }>(
+    'users/getPersonalArea',
+    async ({ token }, thunkApi) => {
+        try {
+            const response = await axios.get('/expressjs/users/personalArea', { headers: { 'auth-token': token } })
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+
+/*
 export const getPersonalArea = (token) => async dispatch => {
     try {
         let response = await fetch('/expressjs/users/personalArea', {
@@ -125,7 +171,26 @@ export const getPersonalArea = (token) => async dispatch => {
         })
     }
 }
+*/
 
+export const changePassword = createAsyncThunk<any, { token: string, passwordInfo: {
+    oldPassword: string,
+    newPassword: string,
+    confirmPassword: string
+  } }>(
+    'users/editPassword',
+    async ({ token, passwordInfo }, thunkApi) => {
+        try {
+            const response = await axios.post('/expressjs/users/edit/password', passwordInfo, 
+                { headers: { 'auth-token': token } })
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+
+/*
 export const changePassword = (token, passwordInfo) => async dispatch => {
     try {
         let response = await fetch('/expressjs/users/edit/password', {
@@ -155,7 +220,26 @@ export const changePassword = (token, passwordInfo) => async dispatch => {
         })
     }
 }
+*/
 
+export const changePersonalInfo = createAsyncThunk<any, { token: string, personalInfo: {
+    firstname: string;
+    middlename: string;
+    lastname: string;
+}}>(
+    'users/changePersonalInfo',
+    async({ token, personalInfo }, thunkApi) => {
+        try {
+            const response = await axios.post('/expressjs/users/edit/personal', { personalInfo },
+                { headers: { 'auth-token': token } })
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+
+/*
 export const changePersonalInfo = (token, personalInfo) => async dispatch => {
     try {  
         const response = await fetch('/expressjs/users/edit/personal', {
@@ -184,7 +268,21 @@ export const changePersonalInfo = (token, personalInfo) => async dispatch => {
         })
     }
 }
+*/
 
+export const restorePassword = createAsyncThunk<any, {email: string}>(
+    'users/restorePassword',
+    async({ email }, thunkApi) => {
+        try {
+            const response = await axios.post('/expressjs/users/restore/password', { email })
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+
+/*
 export const restorePassword = (email) => async dispatch => {
     try {
         const response = await fetch('/expressjs/users/restore/password', {
@@ -214,7 +312,24 @@ export const restorePassword = (email) => async dispatch => {
         })
     }
 }
+*/
 
+export const createUsersCSV = createAsyncThunk<any, {token: string, file: File}>(
+    'users/createUsers/csv',
+    async({ token, file }, thunkApi) => {
+        const formData = new FormData()
+        formData.append('csv', file)
+        try {
+            const response = await axios.postForm('/expressjs/users/csv/create', formData, 
+                { headers: { 'auth-token': token } })
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+
+/*
 export const createUsersCSV = (token, file) => async dispatch => {
     const formData = new FormData()
     formData.append('csv', file)
@@ -242,8 +357,10 @@ export const createUsersCSV = (token, file) => async dispatch => {
         })
     }
 }
+*/
 
-export const resendRestoreEmail = createAsyncThunk('users/restore/password/resendEmail', 
+export const resendRestoreEmail = createAsyncThunk<any, {email: string}>(
+    'users/restorePassword/resendEmail', 
     async ({ email }, thunkApi ) => {
         try {
             const response = await axios.post('/expressjs/users/restore/password/resendEmail', { email })
