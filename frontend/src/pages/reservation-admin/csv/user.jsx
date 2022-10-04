@@ -4,14 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { checkLogin } from "../../../middlewares/authFunctions";
 import AdminLayout from '../../../layouts/AdminLayout/AdminLayout'
 import FilePicker from '../../../components/UI/FilePicker/FilePicker'
-import { createUsersCSV, errorSetDefault, successSetDefault } from "../../../store/actions/userAction";
+import { createUsersCSV } from "../../../store/actions/userAction";
+import swal from 'sweetalert2'
+import { userReducer } from "../../../store/reducers/userReducer";
 
 function UserCSVUploadingPage() {
     const dispatch = useDispatch()
     const store = useStore()
     //const router = useRouter()
     const navigate = useNavigate()
-    let token = useSelector(state => state.user.token)
+    let { token } = useSelector(state => state.user)
     let [errorMessage, setErrorMessage] = useState()
     let [successMessage, setSuccessMessage] = useState()
     let [selectedFile, setSelectedFile] = useState()
@@ -28,18 +30,19 @@ function UserCSVUploadingPage() {
         setSelectedFile(file)
     }
     const onButtonClick = (e) => {
-        dispatch(createUsersCSV(token, selectedFile))
-        .then(() => {
-            const error = store.getState().user.error
-            const success = store.getState().user.success
-            if (error) {
-                setErrorMessage(error)
-            } else if (success) {
-                setSuccessMessage(success)
-            }
-            dispatch(errorSetDefault())
-            dispatch(successSetDefault())
-        })
+        dispatch(createUsersCSV({ token, selectedFile }))
+        const errorStore = store.getState().user.error
+        if (!errorStore) {
+            swal.fire({
+                title: 'Пользователи успешно сохранены!',
+                icon: 'success',
+                timer: 2000
+            })
+        } else {
+            setErrorMessage(errorStore)
+            dispatch(userReducer.actions.errorSetDefault())
+        }
+       
     }
 
 

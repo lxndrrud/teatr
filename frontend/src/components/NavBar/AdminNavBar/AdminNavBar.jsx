@@ -9,7 +9,7 @@ import { designReducer } from '../../../store/reducers/designReducer'
 //import Image from 'next/image'
 import styles from "../NavBar.module.css"
 import mainLogo from "../../../assets/index-logo.png"
-import { logOut } from "../../../store/actions/userAction"
+import { userReducer } from '../../../store/reducers/userReducer'
 import IconSVG from '../../UI/IconSVG/IconSVG'
 import { useNavigate } from 'react-router-dom'
 
@@ -29,7 +29,7 @@ function AdminNavBar() {
 
     const logOutOnClick = (e) => {
         e.preventDefault()
-        dispatch(logOut())
+        dispatch(userReducer.actions.logOut())
         .then(() => {
             setToken('')
             navigate('/login')

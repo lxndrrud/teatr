@@ -6,7 +6,7 @@ import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { playReducer } from "./reducers/playReducer";
 import sessionReducer from "./reducers/sessionReducer";
 import reservationReducer from "./reducers/reservationReducer";
-import userReducer from "./reducers/userReducer";
+import { userReducer } from "./reducers/userReducer";
 import { designReducer } from "./reducers/designReducer";
 
 /*
@@ -19,7 +19,7 @@ const rootReducer = combineReducers({
     play: playReducer.reducer,
     session: sessionReducer,
     reservation: reservationReducer,
-    user: userReducer,
+    user: userReducer.reducer,
     design: designReducer.reducer,
 })
 

@@ -5,10 +5,12 @@ import { useNavigate } from 'react-router-dom'
 import BaseForm from '../BaseForm/BaseForm'
 import CustomInput from '../../UI/CustomInput/CustomInput'
 import CustomButton from '../../UI/CustomButton/CustomButton'
-import { errorSetDefault, register } from '../../../store/actions/userAction'
+import { register } from '../../../store/actions/userAction'
+import { userReducer } from '../../../store/reducers/userReducer'
 import styles from "./RegisterForm.module.css"
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { checkLogin } from '../../../middlewares/authFunctions'
+import Preloader from '../../UI/Preloader/Preloader'
 
 function RegisterForm() {
     const dispatch = useDispatch()
@@ -22,6 +24,7 @@ function RegisterForm() {
     let [firstname, setFirstname] = useState(undefined)
     let [middlename, setMiddlename] = useState(undefined)
     let [lastname, setLastname] = useState(undefined)
+    let { isLoading } = useSelector(state => state.user.isLoading)
 
     useEffect(() => {
         if (checkLogin(store)) {
@@ -47,15 +50,15 @@ function RegisterForm() {
     const sendPostRequest = (e) => {
         e.preventDefault()
 
-        if (email && password)
+        if (email && password) {
             dispatch(register(email, password, firstname, middlename, lastname))
-            .then(() => {
-                const errorFromStore = store.getState().user.error
-                if (errorFromStore !== null) {
-                    setError(errorFromStore)
-                    dispatch(errorSetDefault())
-                }
-            })
+            const errorFromStore = store.getState().user.error
+            if (errorFromStore !== null) {
+                setError(errorFromStore)
+                dispatch(userReducer.actions.errorSetDefault())
+            }
+        }
+            
     }
     return (
         <BaseForm styleClass={styles.registerForm}>
@@ -94,7 +97,9 @@ function RegisterForm() {
                 ? <ErrorMessage text={error} />
                 : null
             }
-            <div className='mb-3'></div>
+            { 
+                isLoading && <Preloader />
+            }
             <CustomButton type="submit" value="Подтвердить" 
                 onClickHook={sendPostRequest}
                 styleClass={styles.fullWidthButton} />

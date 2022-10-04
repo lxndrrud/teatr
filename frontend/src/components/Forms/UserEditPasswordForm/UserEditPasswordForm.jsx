@@ -1,18 +1,18 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { changePassword, errorSetDefault, successSetDefault } from '../../../store/actions/userAction'
-import styles from "./UserEditPasswordForm"
+import { changePassword } from '../../../store/actions/userAction'
 import BaseForm from "../BaseForm/BaseForm"
 import CustomInput from "../../UI/CustomInput/CustomInput"
 import CustomButton from '../../UI/CustomButton/CustomButton'
-import SuccessMessage from '../../UI/SuccessMessage/SuccessMessage'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
+import swal from 'sweetalert2'
+import { userReducer } from '../../../store/reducers/userReducer'
 
 
 function UserEditPasswordForm() {
   const dispatch = useDispatch()
   const store = useStore()
-  let token = useSelector(state => state.user.token)
+  let { token } = useSelector(state => state.user)
 
   let [credentials, setCredentials] = useState({
     oldPassword: '',
@@ -47,23 +47,24 @@ function UserEditPasswordForm() {
     setError(null)
     setSuccess(null)
 
-    dispatch(changePassword(token, credentials))
-    .then(() => {
-      let successStore = store.getState().user.success,
-        errorStore = store.getState().user.error
-      if (!successStore && errorStore) setError(errorStore) 
-      else if (!errorStore && successStore) setSuccess(successStore)
-    })
-    .then(dispatch(successSetDefault()))
-    .then(dispatch(errorSetDefault()))
+    dispatch(changePassword({ token, passwordInfo: credentials }))
+    const errorStore = store.getState().user.error
+    if (!errorStore) {
+      swal.fire({
+        title: 'Пароль изменен!',
+        icon: 'success',
+        timer: 2000
+      })
+    } else {
+      setError(errorStore)
+      dispatch(userReducer.actions.errorSetDefault())
+    }
+   
   }
   return (
     <BaseForm>
       {
         error && <ErrorMessage text={error} />
-      }
-      {
-        success && <SuccessMessage text={success} />
       }
       <CustomInput 
         type="password"

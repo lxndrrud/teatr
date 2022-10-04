@@ -1,19 +1,20 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import styles from "./UserEditPersonalInfoForm.module.css"
 import BaseForm from '../BaseForm/BaseForm'
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import CustomInput from "../../UI/CustomInput/CustomInput"
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { useNavigate } from 'react-router-dom'
-import { changePersonalInfo, errorSetDefault} from '../../../store/actions/userAction'
+import { changePersonalInfo } from '../../../store/actions/userAction'
+import { userReducer } from '../../../store/reducers/userReducer'
+import swal from 'sweetalert2'
 
 
 function UserEditPersonalInfoForm() {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const store = useStore()
-    let token = useSelector(state => state.user.token)
+    let { token } = useSelector(state => state.user)
 
     let [firstname, setFirstname] = useState(useSelector(state => state.user.user.firstname))
     let [middlename, setMiddlename] = useState(useSelector(state => state.user.user.middlename))
@@ -44,15 +45,20 @@ function UserEditPersonalInfoForm() {
 
         const user = validate()
         
-        dispatch(changePersonalInfo(token, user))
-        .then(() => {
-            let errorStore = store.getState().user.error
-            if (errorStore) setError(errorStore) 
-        })
-        .then(dispatch(errorSetDefault())) 
-        .then(() => {
-            if (!error) navigate('/user/personalArea')
-        })
+        dispatch(changePersonalInfo({token, user}))
+        const errorStore = store.getState().user.error
+        if (!errorStore) {
+            swal.fire({
+                title: 'Информация успешно изменена!',
+                icon: 'success',
+                timer: 2000
+            })
+            setTimeout(() => navigate('/user/personalArea'), 2500)
+        } else {
+            setError(errorStore)
+            dispatch(userReducer.actions.errorSetDefault())
+        }
+        
     }
 
     return (

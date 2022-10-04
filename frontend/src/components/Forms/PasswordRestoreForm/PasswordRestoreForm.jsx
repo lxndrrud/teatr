@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useDispatch, useStore } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 //import { useMutation } from 'react-query'
-import { errorSetDefault, resendRestoreEmail, restorePassword } from '../../../store/actions/userAction'
+import { resendRestoreEmail, restorePassword } from '../../../store/actions/userAction'
+import { userReducer } from '../../../store/reducers/userReducer'
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import CustomInput from '../../UI/CustomInput/CustomInput'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
@@ -31,22 +32,21 @@ function PasswordRestoreForm() {
             setError('Вы не указали почту!')
         } else {
             dispatch(restorePassword(email))
-            .then(() => {
-                let errorStore = store.getState().user.error
-                if (errorStore) {
-                    setError(errorStore)
-                    dispatch(errorSetDefault()) 
-                } else {
-                    setSentEmail(true)
-                }
-            })
+            let errorStore = store.getState().user.error
+            if (errorStore) {
+                setError(errorStore)
+                dispatch(userReducer.actions.errorSetDefault()) 
+            } else {
+                setSentEmail(true)
+            }
         }
     }
-    async function resendPasswordOnEmail(e) {
+    function resendPasswordOnEmail(e) {
         e.preventDefault()
         //resendMutation.mutate(email)
-        const response = await dispatch(resendRestoreEmail({ email }))
-        if (response.error) setError(response.error.message)
+        const response = dispatch(resendRestoreEmail({ email }))
+        let errorStore = store.getState().user.error 
+        if (errorStore) setError(errorStore)
     }
     /**
      * 

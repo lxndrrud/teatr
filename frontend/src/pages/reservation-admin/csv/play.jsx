@@ -14,7 +14,7 @@ export default function PlayCSVUploadingPage() {
     const store = useStore()
     //const router = useRouter()
     const navigate = useNavigate()
-    let token = useSelector(state => state.user.token)
+    let { token } = useSelector(state => state.user)
     let [errorMessage, setErrorMessage] = useState()
     let [successMessage, setSuccessMessage] = useState()
     let [selectedFile, setSelectedFile] = useState()

@@ -9,9 +9,9 @@ import { designReducer } from '../../../store/reducers/designReducer'
 //import Image from 'next/image'
 import styles from "../NavBar.module.css"
 import mainLogo from "../../../assets/index-logo.png"
-import { logOut } from "../../../store/actions/userAction"
+import { userReducer } from '../../../store/reducers/userReducer'
 import IconSVG from '../../UI/IconSVG/IconSVG'
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 
 const NavBarController = () => {
@@ -24,27 +24,21 @@ const NavBarController = () => {
     // Actions
     const { toggleNavbar } = designReducer.actions
 
-    let [token, setToken] = useState(useSelector(state => state.user.token))
+    let token= useSelector(state => state.user.token)
     let isAdmin = useSelector(state => state.user.isAdmin)
     let [isLoggedIn, setIsLoggedIn] = useState(checkLogin(store))
 
     const logOutOnClick = (e) => {
         e.preventDefault()
-        dispatch(logOut())
-        .then(() => {
-            setToken('')
-            navigate('/')
+        dispatch(userReducer.actions.logOut())
+        setIsLoggedIn(checkLogin(store))
+        navigate('/')
             /*if (router.isReady) {
                 router.push('/')
             }*/
-        })
     }
     useEffect(() => {
-        if (checkLogin(store))
-            setIsLoggedIn(true)
-        else
-            setIsLoggedIn(false)
-        
+        setIsLoggedIn(checkLogin(store))
     }, [store, token])
     return (
         <div className={styles.fixedContainer}>

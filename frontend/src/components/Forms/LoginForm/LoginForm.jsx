@@ -6,11 +6,11 @@ import CustomLink from "../../UI/CustomLink/CustomLink"
 import { useDispatch, useStore } from 'react-redux'
 //import { useRouter } from 'next/router'
 import { useNavigate } from 'react-router-dom'
-import { errorSetDefault, logIn, logInAdmin } from "../../../store/actions/userAction"
-import styles from "./LoginForm.module.css"
+import { logIn } from "../../../store/actions/userAction"
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { checkLogin } from '../../../middlewares/authFunctions'
 import masksPicture from '../../../assets/maski.png'
+import { userReducer } from '../../../store/reducers/userReducer'
 
 function LoginForm({ isAdmin=false }) {
     const dispatch = useDispatch()
@@ -32,32 +32,17 @@ function LoginForm({ isAdmin=false }) {
 
     const sendPostRequest = (e) => {
         e.preventDefault()
-        if (!isAdmin) {
-            dispatch(logIn(email, password))
-            .then(() => {
-                const errorFromStore = store.getState().user.error 
-                if (errorFromStore !== null) {
-                    setError(errorFromStore)
-                    dispatch(errorSetDefault())
-                } else {
-                    navigate('/')
-                }
-            })
+        dispatch(logIn({ email, password }))
+        const errorStore = store.getState().user.error
+        if (!error) {
+            navigate('/')
         } else {
-            dispatch(logInAdmin(email, password))
-            .then(() => {
-                const errorFromStore = store.getState().user.error 
-                if (errorFromStore !== null) {
-                    setError(errorFromStore)
-                    dispatch(errorSetDefault())
-                } else {
-                    navigate("/reservation-admin")
-                }
-            })
+            setError(errorStore)
+            dispatch(userReducer.actions.errorSetDefault())
         }
     }
     return (
-        <BaseForm styleClass={styles.loginForm}>
+        <BaseForm>
             <div className='flex justify-center items-center'>
                 <img src={masksPicture} alt=""  className='w-[300px]'/>
             </div>
@@ -89,7 +74,7 @@ function LoginForm({ isAdmin=false }) {
 
             <CustomButton type="submit" value="Подтвердить" 
                 onClickHook={sendPostRequest}
-                styleClass={styles.fullWidthButton} />
+                styleClass="min-w-[10rem] w-full" />
         </BaseForm>
     )
 }

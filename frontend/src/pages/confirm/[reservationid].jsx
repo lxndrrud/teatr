@@ -15,7 +15,7 @@ function ConfirmationPage() {
     //const router = useRouter()
 
     const { idReservation }  = useParams()
-    let token = useSelector(state => state.user.token)
+    let { token } = useSelector(state => state.user)
 
     useEffect(() => {
         //const token = store.getState().user.token
