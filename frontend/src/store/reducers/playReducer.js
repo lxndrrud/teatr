@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit"
 import { createPlaysCSV, fetchPlay, fetchPlays } from "../actions/playAction"
-import { CLEAR_SUCCESS_ERROR_PLAY, ERROR_PLAY, FETCH_PLAY, FETCH_PLAYS, SUCCESS_PLAY } from "../types"
 
 
 const initialState = {
@@ -17,7 +16,7 @@ const pending = (state) => {
 
 const rejected = (state, action) =>  {
     state.isLoading = false
-    if (action) state.error = action.payload.error
+    if (action) state.error = action.payload.message
 }
 
 const defaultFullfilled = (state) => {
@@ -39,7 +38,6 @@ export const playReducer = createSlice({
         clearError(state, action) {
             state.error = initialState.error
         }
-        
     },
     extraReducers: {
         // Fetch play

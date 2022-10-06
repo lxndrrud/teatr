@@ -1,16 +1,8 @@
+import { createSlice } from "@reduxjs/toolkit"
 import { CLEAR_SUCCESS_ERROR_SESSION, ERROR_SESSION, FETCH_FILTERED_SESSIONS, FETCH_SESSION, FETCH_SESSIONS, FETCH_SESSIONS_BY_PLAY, FETCH_SESSION_FILTER_OPTIONS, FETCH_SLOTS,  SUCCESS_SESSION } from "../types"
 
 
 const defaultState = {
-    /*
-    {
-        id: 0,
-        play_title: 'Test',
-        timestamp: '2022-03-09T00:00:00',
-        max_slots: 0,
-        auditorium_title: ''
-    }
-    */
     session: {},
     sessions: [],
     paginatedSessions: [],
@@ -20,6 +12,7 @@ const defaultState = {
     error: null,
     success: null,
 }
+
 
 const sessionReducer = (state = defaultState, action) => {
     switch (action.type) {

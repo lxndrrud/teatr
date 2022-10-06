@@ -7,8 +7,8 @@
     flex-direction: column;
     margin: 0.1vw 0.1vw;
     text-align: center;
-    padding: 0.1vw;
-    border-radius: 10px;
+    padding: 10px;
+    border-radius: 15px;
 }
 
 .reservedContainer {
@@ -19,6 +19,7 @@
 
 .freeContainer {
     background-color: #A8DADC;
+    border: 1px solid #ae2876;
 }
 
 .freeContainer:hover {
@@ -29,4 +30,11 @@
 .clickedContainer {
     background-color: #99d98c;
 }
+/*
+@media (max-width: 640px) {
+    .slot {
+        padding: 5px;
+    }
+}
+*/
 

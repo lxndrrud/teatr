@@ -32,7 +32,7 @@ export default function PlayCSVUploadingPage() {
     }
     const onButtonClick = (e) => {
         dispatch(createPlaysCSV({ token, file: selectedFile }))
-        const { error } = useSelector(state => state.play)
+        const { error,  } = useSelector(state => state.play)
         if (!error) {
             Swal.fire({
                 title: 'Спектакли успешно загружены!',
@@ -41,21 +41,8 @@ export default function PlayCSVUploadingPage() {
             })
         } else {
             setErrorMessage(error)
+            dispatch(playReducer.actions.clearError())
         }
-        dispatch(playReducer.actions.clearError())
-        /*
-        .then(() => {
-            const error = store.getState().play.error
-            const success = store.getState().play.success
-            if (error) {
-                setErrorMessage(error)
-            }
-            else if (success) {
-                setSuccessMessage(success)
-            }
-            dispatch(clearSuccessErrorPlay())
-        })
-        */
     }
     
     return (

@@ -40,7 +40,7 @@ export const createPlaysCSV = createAsyncThunk(
             const formData = new FormData()
             formData.append('csv', file)
             const response = await axios.post(`/expressjs/plays/`, formData, { headers: {
-                'auth-token': token
+                'auth-token': token, 'Content-Type': 'multipart/form-data'
             }})
             return
         } catch(error) {

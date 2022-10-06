@@ -15,7 +15,7 @@
         {
             title: 'Восстановление пароля',
             resend_interval: 60 * 2,
-            repeat_interval: 60 * 60 * 24,
+            repeat_interval: 60 * 15,
             repeatable: true
         }
     ]);

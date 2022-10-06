@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit"
-import { changePassword, changePersonalInfo, createUsersCSV, getPersonalArea, logIn, register } from "../actions/userAction"
-import { CHANGE_PASSWORD, CHANGE_PERSONAL_INFO, CREATE_USERS_CSV, ERROR_USER, ERROR_USER_SET_DEFAULT, FETCH_PERSONAL_AREA, LOG_IN, LOG_OUT, REGISTER, SUCCESS_USER_SET_DEFAULT } from "../types"
+import { changePassword, changePersonalInfo, createUsersCSV, getPersonalArea, logIn, register, restorePassword } from "../actions/userAction"
 
 
 const initialState = {
@@ -9,7 +8,8 @@ const initialState = {
     user: null,
     error: null,
     success: null,
-    isLoading: false
+    isLoading: false,
+    errorsCSV: []
 }
 
 const pending = (state) => {
@@ -38,8 +38,10 @@ export const userReducer = createSlice({
         },
         successSetDefault(state, action) {
             state.success = initialState.success
+        },
+        errorsCSVSetDefault(state, action) {
+            state.errorsCSV = initialState.errorsCSV
         }
-        
     },
     extraReducers: {
         [logIn.fulfilled]: (state, action) => {
@@ -65,6 +67,10 @@ export const userReducer = createSlice({
         [getPersonalArea.pending]: pending,
         [getPersonalArea.rejected]: rejected,
 
+        [restorePassword.fulfilled]: defaultFullfilled,
+        [restorePassword.pending]: pending,
+        [restorePassword.rejected]: rejected,
+
         [changePassword.fulfilled]: defaultFullfilled,
         [changePassword.pending]: pending,
         [changePassword.rejected]: rejected,
@@ -73,7 +79,10 @@ export const userReducer = createSlice({
         [changePersonalInfo.pending]: pending,
         [changePersonalInfo.rejected]: rejected,
 
-        [createUsersCSV.fulfilled]: defaultFullfilled,
+        [createUsersCSV.fulfilled]: (state, action) => {
+            state.errorsCSV = action.payload.errors
+            defaultFullfilled(state)
+        },
         [createUsersCSV.pending]: pending,
         [createUsersCSV.rejected]: rejected
     }

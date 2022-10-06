@@ -13,12 +13,14 @@ import { ReservationRepo } from './repositories/Reservation.repo';
 import { RedisConnection } from './redisConnection'
 import { SessionRedisRepo} from './redisRepositories/Session.redis'
 import { SessionFilterRedisRepo } from './redisRepositories/SessionFilter.redis'
+import { PlayRedisRepo } from './redisRepositories/Play.redis';
 
 export const app = express();
 const cronProcessor = new CronProcessor(
     new SessionRepo(DatabaseConnection),
     new SessionRedisRepo(RedisConnection),
     new SessionFilterRedisRepo(RedisConnection),
+    new PlayRedisRepo(RedisConnection),
     new ReservationRepo(DatabaseConnection)
 )
 

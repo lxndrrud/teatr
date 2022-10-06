@@ -4,10 +4,21 @@ import { useState } from 'react'
 import { addSlot, deleteSlot } from '../../../store/actions/reservationAction'
 import styles from './SlotItem.module.css'
 
+function Slot({ seatNumber, rowNumber, price }) {
+    return (
+        <div className='absolute bg-[#ae2876] p-2 rounded-md'>
+            <p>Место: {seatNumber}</p>
+            <p>Ряд: {rowNumber}</p>
+            <p>{price} р.</p>
+        </div>
+    )
+}
+
 function SlotItem({ slotObject }) { 
     const dispatch = useDispatch()
 
     let [isClicked, setIsClicked] = useState(false)
+    let [isMouseWithin, setIsMouseWithin] = useState(false)
     const slotStyle = () => {
         if (slotObject.is_reserved) return `${styles.slot} ${styles.reservedContainer}`
         if (isClicked) return `${styles.slot} ${styles.clickedContainer}`
@@ -38,10 +49,15 @@ function SlotItem({ slotObject }) {
         }
     }
 
+    
+    
+
     return (
-        <div className={styleClass} onClick={slotClick}>
-            <p>#{slotObject.seat_number}</p>
-            <p>{slotObject.price} р.</p>
+        <div className={styleClass} onClick={slotClick} onMouseEnter={() => setIsMouseWithin(true)} 
+            onMouseLeave={() => setIsMouseWithin(false)}>
+            {
+                isMouseWithin && <Slot seatNumber={slotObject.seat_number} price={slotObject.price} rowNumber={slotObject.row_number}  />
+            }
         </div>
     )
 }

@@ -10,20 +10,12 @@ import CustomButton from '../../UI/CustomButton/CustomButton'
 import CustomInput from '../../UI/CustomInput/CustomInput'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import BaseForm from '../BaseForm/BaseForm'
+import swal from 'sweetalert2'
 
 function PasswordRestoreForm() {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const store = useStore()
-    /*
-    const resendMutation = useMutation(email => {
-        return axios.post('/expressjs/users/restore/password/resendEmail', { email })
-    }, {
-        onSuccess: () => alert('Сообщение отправлено!'),
-        onError: () => alert('Ошибка!')
-    })*/
-
-    let [sentEmail, setSentEmail] = useState(false)
     let [email, setEmail] = useState('')
     let [error, setError] = useState(null)
     function sendRestoreRequest(e) {
@@ -31,13 +23,19 @@ function PasswordRestoreForm() {
         if (!email) {
             setError('Вы не указали почту!')
         } else {
-            dispatch(restorePassword(email))
+            dispatch(restorePassword({ email }))
             let errorStore = store.getState().user.error
             if (errorStore) {
                 setError(errorStore)
                 dispatch(userReducer.actions.errorSetDefault()) 
             } else {
-                setSentEmail(true)
+                swal.fire({
+                    title: 'Сообщение на почту отправлено',
+                    text: 'Следующее восстановление будет доступно через 15 минут.',
+                    timer: 2000,
+                    icon: 'success'
+                })
+                setTimeout(navigate('/login'), 2100)
             }
         }
     }
@@ -65,11 +63,7 @@ function PasswordRestoreForm() {
             {
                 error && <ErrorMessage text={error} />
             }
-            <CustomButton
-                value='Отправить на почту заново'
-                onClickHook={resendPasswordOnEmail}
-                disabled={!sentEmail}
-            />
+            
             <CustomButton 
                 value="Подтвердить"
                 onClickHook={sendRestoreRequest}

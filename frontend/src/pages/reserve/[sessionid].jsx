@@ -9,7 +9,6 @@ import { useDispatch, useSelector, useStore} from 'react-redux'
 import { useEffect, useState } from 'react'
 import { clearSlots } from '../../store/actions/reservationAction';
 import { checkLogin } from '../../middlewares/authFunctions';
-import { usePreloader } from '../../hooks/usePreloader';
 import Preloader from '../../components/UI/Preloader/Preloader';
 
 function SessionReservationPage() {
@@ -44,7 +43,7 @@ function SessionReservationPage() {
 
     useEffect( () => {
         if (sessionFromStore.id_play)
-            usePreloader(dispatch, fetchPlay(sessionFromStore.id_play))
+            dispatch(fetchPlay({ idPlay: sessionFromStore.id_play }))
     }, [sessionFromStore, dispatch])
 
     const playFromStore = useSelector(state => state.play.play)

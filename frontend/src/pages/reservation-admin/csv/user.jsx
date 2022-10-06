@@ -15,7 +15,6 @@ function UserCSVUploadingPage() {
     const navigate = useNavigate()
     let { token } = useSelector(state => state.user)
     let [errorMessage, setErrorMessage] = useState()
-    let [successMessage, setSuccessMessage] = useState()
     let [selectedFile, setSelectedFile] = useState()
 
     useEffect(() => {
@@ -30,19 +29,24 @@ function UserCSVUploadingPage() {
         setSelectedFile(file)
     }
     const onButtonClick = (e) => {
-        dispatch(createUsersCSV({ token, selectedFile }))
+        dispatch(createUsersCSV({ token, file: selectedFile }))
+        const errorCSVStore = store.getState().user.errorsCSV
         const errorStore = store.getState().user.error
-        if (!errorStore) {
+        if (!errorStore && errorCSVStore.length === 0) {
             swal.fire({
                 title: 'Пользователи успешно сохранены!',
                 icon: 'success',
                 timer: 2000
             })
         } else {
-            setErrorMessage(errorStore)
-            dispatch(userReducer.actions.errorSetDefault())
+            if (errorStore) {
+                setErrorMessage(errorStore)
+                dispatch(userReducer.actions.errorSetDefault())
+            } else if (errorCSVStore.length > 0) {
+                setErrorMessage(errorCSVStore)
+                dispatch(userReducer.actions.errorsCSVSetDefault())
+            }
         }
-       
     }
 
 
@@ -52,7 +56,6 @@ function UserCSVUploadingPage() {
                 onClickHook={onButtonClick} 
                 onChangeHook={onChangeHook} 
                 error={errorMessage}
-                success={successMessage}
             />
         </AdminLayout>
     )

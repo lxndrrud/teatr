@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit"
-//import { SET_IS_LOADING, TOGGLE_NAVBAR } from "../types"
 
 
 const initialState = {

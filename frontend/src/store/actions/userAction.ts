@@ -97,8 +97,8 @@ export const createUsersCSV = createAsyncThunk<any, {token: string, file: File}>
         const formData = new FormData()
         formData.append('csv', file)
         try {
-            const response = await axios.postForm('/expressjs/users/csv/create', formData, 
-                { headers: { 'auth-token': token } })
+            const response = await axios.post('/expressjs/users/csv/create', formData, 
+                { headers: { 'auth-token': token, 'Content-Type': 'multipart/form-data' } })
             return response.data
         } catch (error) {
             throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
