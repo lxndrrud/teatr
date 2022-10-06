@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import axios from 'axios'
+import swal from 'sweetalert2'
 
 
 function ReservationPostForm() {
@@ -67,10 +68,21 @@ function ReservationPostForm() {
                 dispatch(errorSetDefault())
             } else if (needConfirmation) {
                 const idReservation = store.getState().reservation.reservation.id
-                navigate(`/confirm/${idReservation}`)
+                swal.fire({
+                    title: 'Бронь оформлена!',
+                    text: 'Необходимо подтверждение.',
+                    icon: 'success',
+                    timer: 2000
+                })
+                setTimeout(navigate(`/confirm/${idReservation}`), 2100)
             }
             else {
-                navigate('/control')
+                swal.fire({
+                    title: 'Бронь оформлена!',
+                    icon: 'success',
+                    timer: 2000
+                })
+                setTimeout(navigate('/control'), 2100)
             }
         })
     }

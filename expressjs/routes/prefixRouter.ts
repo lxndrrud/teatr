@@ -10,7 +10,7 @@ import express from 'express';
 
 export const prefixRouter = Router();
 
-prefixRouter.use('/storage', express.static(join(__dirname, '..', 'storage')))
+//prefixRouter.use('/storage', express.static(join(__dirname, '..', 'storage')))
 
 prefixRouter.use('/plays', playsRouter)
 prefixRouter.use('/sessions', sessionsRouter)

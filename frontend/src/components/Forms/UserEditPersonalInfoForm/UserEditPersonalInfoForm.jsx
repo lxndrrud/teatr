@@ -45,7 +45,7 @@ function UserEditPersonalInfoForm() {
 
         const user = validate()
         
-        dispatch(changePersonalInfo({token, user}))
+        dispatch(changePersonalInfo({token, personalInfo: user}))
         const errorStore = store.getState().user.error
         if (!errorStore) {
             swal.fire({

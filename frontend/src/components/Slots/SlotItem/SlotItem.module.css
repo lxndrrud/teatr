@@ -15,6 +15,7 @@
     background-color: #E63946; 
     /* background-color: red; */
     color: #F1FAEE;
+    border: 1px solid #E63946;
 }
 
 .freeContainer {
@@ -29,6 +30,8 @@
 
 .clickedContainer {
     background-color: #99d98c;
+    border: 1px solid #99d98c;
+    color: #F1FAEE;
 }
 /*
 @media (max-width: 640px) {

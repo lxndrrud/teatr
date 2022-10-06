@@ -7,10 +7,10 @@
     await knex('images').del();
     await knex('images').insert([
         {
-            filepath: '/expressjs/storage/photos/antrakt.jpg'
+            filepath: '/storage/photos/antrakt.jpg'
         },
         {
-            filepath: '/expressjs/storage/photos/ledi.jpg'
+            filepath: '/storage/photos/ledi.jpg'
         },
     ]);
 };

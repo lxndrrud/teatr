@@ -4,7 +4,7 @@ import styles from './Preloader.module.css'
 
 function Preloader() {
     return (
-        <div className={`w-[100%] sm:ml-[-35px] flex justify-center align-center ${styles.preloader}`}>
+        <div className={`w-[100%] md:ml-[20px] lg:ml-[-35px] flex justify-center align-center ${styles.preloader}`}>
             <IconSVG 
               width='100px'
               height='100px'
