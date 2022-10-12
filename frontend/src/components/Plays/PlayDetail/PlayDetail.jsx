@@ -5,7 +5,7 @@ import Preloader from '../../UI/Preloader/Preloader'
 
 
 
-export default function PlayDetail({ images}) {
+export default function PlayDetail({ images }) {
     const { play, isLoading } = useSelector(state => state.play)
     if (isLoading) return <Preloader />
     return (

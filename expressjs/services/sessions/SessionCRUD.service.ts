@@ -1,7 +1,7 @@
 import { ISessionPreparator } from "../../infrastructure/SessionPreparator.infra"
 import { ISlotPreparator } from "../../infrastructure/SlotPreparator.infra"
 import { InnerError } from "../../interfaces/errors"
-import { SessionBaseInterface, SessionInterface } from "../../interfaces/sessions"
+import { SessionBaseInterface, SessionFilterQueryInterface, SessionInterface } from "../../interfaces/sessions"
 import { SlotIsReservedInterface} from "../../interfaces/slots"
 import { ISessionRedisRepo } from "../../redisRepositories/Session.redis"
 import { ISessionFilterRedisRepo } from "../../redisRepositories/SessionFilter.redis"
@@ -66,7 +66,15 @@ export class SessionCRUDService implements ISessionCRUDService {
     }
 
     public async getUnlockedSessions() {
-        const sessions =  await this.sessionRepo.getUnlockedSessions()
+        const sessionCache = await this.sessionFilterRedisRepo
+            .getFilteredSessions(<SessionFilterQueryInterface> {
+                'auditorium_title': 'undefined',
+                'play_title': 'undefined',
+                'dateFrom': 'undefined',
+                'dateTo': 'undefined'
+            })
+        if (sessionCache) return sessionCache
+        const sessions = await this.sessionRepo.getUnlockedSessions()
         return sessions.map(session => this.sessionPreparator.prepareSession(session))
     }
 

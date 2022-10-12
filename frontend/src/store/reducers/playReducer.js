@@ -50,7 +50,6 @@ export const playReducer = createSlice({
 
          // Fetch plays
         [fetchPlays.fulfilled]: (state, action) => {
-            console.log(action)
             state.plays = action.payload
             defaultFullfilled(state)
         }, 

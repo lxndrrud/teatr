@@ -161,6 +161,7 @@ export class SessionController {
         }
         try {
             const result = await this.sessionCRUDService.getSlots(idSession)
+            console.log(result)
             res.status(200).send(result)
         } catch (error) {
             this.errorHandler.fetchError(res, error)

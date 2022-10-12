@@ -5,8 +5,6 @@ import { fetchSessionsByPlay } from "../../store/actions/sessionAction"
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from "react-router-dom"
 import { useEffect } from "react"
-import { usePreloader } from "../../hooks/usePreloader"
-import Preloader from "../../components/UI/Preloader/Preloader"
 
 export default function PlayPage() {
     const dispatch = useDispatch()
@@ -14,7 +12,7 @@ export default function PlayPage() {
     //let { isLoading } = useSelector(state => state.design)
     useEffect(() => {
         dispatch(fetchPlay({ idPlay }))
-        dispatch(fetchSessionsByPlay(idPlay))
+        dispatch(fetchSessionsByPlay({ idPlay }))
     }, [dispatch])
 
     const { play } = useSelector(state => state.play)

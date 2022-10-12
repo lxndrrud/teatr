@@ -4,7 +4,7 @@
 //import { createStore, applyMiddleware } from "redux";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { playReducer } from "./reducers/playReducer";
-import sessionReducer from "./reducers/sessionReducer";
+import { sessionReducer } from "./reducers/sessionReducer";
 import reservationReducer from "./reducers/reservationReducer";
 import { userReducer } from "./reducers/userReducer";
 import { designReducer } from "./reducers/designReducer";
@@ -17,7 +17,7 @@ const middleware = [thunk, apiSlice.middleware]
 
 const rootReducer = combineReducers({
     play: playReducer.reducer,
-    session: sessionReducer,
+    session: sessionReducer.reducer,
     reservation: reservationReducer,
     user: userReducer.reducer,
     design: designReducer.reducer,

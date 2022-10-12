@@ -4,61 +4,60 @@ import CustomButton from "../../UI/CustomButton/CustomButton"
 import Select from '../../UI/Select/Select'
 import { fetchFilteredSessions, fetchSessionFilterOptions } from "../../../store/actions/sessionAction"
 import InputDate from '../../UI/InputDate/InputDate'
-import { usePreloader } from '../../../hooks/usePreloader'
+import swal from 'sweetalert2'
 
 function SessionFilter() {
     const dispatch = useDispatch()
-    let [dateFrom, setDateFrom] = useState('')
-    let [dateTo, setDateTo] = useState('')
-    let [auditoriumTitle, setAuditoriumTitle] = useState('')
-    let [playTitle, setPlayTitle] = useState('')
+    let [dateFrom, setDateFrom] = useState('undefined')
+    let [dateTo, setDateTo] = useState('undefined')
+    let [auditoriumTitle, setAuditoriumTitle] = useState('undefined')
+    let [playTitle, setPlayTitle] = useState('undefined')
+    let errorSession = useSelector(state => state.session.error) 
     useEffect(() => {
         dispatch(fetchSessionFilterOptions())
+        if (errorSession) {
+            swal.fire({
+                title: 'Произошла ошибка!',
+                text: errorSession,
+                icon: 'error'
+            })
+        }
     }, [dispatch])
     const getFilteredSessions = (e) => {
         e.preventDefault()
 
-        usePreloader(dispatch, fetchFilteredSessions(dateFrom, dateTo, auditoriumTitle, playTitle))
+        dispatch(fetchFilteredSessions({ dateFrom, dateTo, auditoriumTitle, playTitle }))
+        if (errorSession) {
+            swal.fire({
+                title: 'Произошла ошибка!',
+                text: errorSession,
+                icon: 'error'
+            })
+        }
     } 
 
-    /*
-    const syncdateFrom = (e) => {
-        if (e.target.value === 'None') setDateFrom('')
-        else setDateFrom(e.target.value)
-    }
-    */
     const syncDateFrom = (e) => {
-        if (!e.target.value) setDateFrom()
+        if (!e.target.value) setDateFrom('undefined')
         else setDateFrom(e.target.value)
     }
 
     const syncDateTo = (e) => {
-        if (!e.target.value) setDateTo()
+        if (!e.target.value) setDateTo('undefined')
         else setDateTo(e.target.value)
     }
 
     const syncAuditoriumTitle = (e) => {
-        if (e.target.value === 'None') setAuditoriumTitle()
+        if (e.target.value === 'None') setAuditoriumTitle('undefined')
         else setAuditoriumTitle(e.target.value)
     }
 
     const syncPlayTitle = (e) => {
-        if (e.target.value === 'None') setPlayTitle()
+        if (e.target.value === 'None') setPlayTitle('undefined')
         else setPlayTitle(e.target.value)
     }
 
     const filterOptions = useSelector(state => state.session.filterOptions)
 
-    /*
-    <Select onChange={syncdateFrom}>
-                <option value="None">Все даты</option>
-                {filterOptions.dateFroms && filterOptions.dateFroms.map(item => (
-                  <option value={item.dateFrom}>
-                    {item.extended_dateFrom}
-                  </option>  
-                ))}
-            </Select>
-    */
     return (
         <div className="mx-auto p-2 w-[max-content] sm:w-[50%] lg:w-[900px]
             bg-[#f1e1f5] shadow-xl flex flex-col

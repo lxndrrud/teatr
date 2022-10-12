@@ -6,10 +6,11 @@ import { fetchSession } from '../../store/actions/sessionAction'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector, useStore} from 'react-redux'
 //import store from "../../store/store"
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { clearSlots } from '../../store/actions/reservationAction';
 import { checkLogin } from '../../middlewares/authFunctions';
 import Preloader from '../../components/UI/Preloader/Preloader';
+import swal from 'sweetalert2'
 
 function SessionReservationPage() {
     const navigate = useNavigate()
@@ -19,7 +20,8 @@ function SessionReservationPage() {
 
     const { idSession } = useParams()
     let token = useSelector(state => state.user.token)
-    let { isLoading } = useSelector(state => state.design)
+    let errorPlay = useSelector(state => state.play.error)
+    let errorSession = useSelector(state => state.session.error)
   
   
 
@@ -29,11 +31,18 @@ function SessionReservationPage() {
             navigate('/login')
         } else {
             //const { sessionid } = router.query
-            if (idSession)
-                dispatch(fetchSession(token, idSession))
-                .then(dispatch(clearSlots()))
-                //.catch(() => router.push('/'))
+            if (idSession) {
+                dispatch(fetchSession({ token, idSession }))
+                if (errorSession) {
+                    swal.fire({
+                        title: 'Произошла ошибка!',
+                        title: errorSession,
+                        icon: 'error'
+                    })
+                }
+                dispatch(clearSlots())
                 .catch(() => navigate('/'))
+            }
         }
         
         //}  
@@ -42,24 +51,24 @@ function SessionReservationPage() {
     const sessionFromStore = useSelector(state => state.session.session)
 
     useEffect( () => {
-        if (sessionFromStore.id_play)
+        if (sessionFromStore.id_play) {
             dispatch(fetchPlay({ idPlay: sessionFromStore.id_play }))
+            if (errorPlay) {
+                swal.fire({
+                    title: 'Произошла ошибка!',
+                    text: errorPlay,
+                    icon: 'error'
+                })
+            }
+        }
     }, [sessionFromStore, dispatch])
 
     const playFromStore = useSelector(state => state.play.play)
-
-    
     
     return (
         <>
             <MainLayout title="Оформление брони">
-                {
-                    isLoading
-                    ?
-                        <Preloader />
-                    :
-                        <ReservationForm session={ sessionFromStore } play={ playFromStore }/>
-                }
+                <ReservationForm session={ sessionFromStore } play={ playFromStore }/>
             </MainLayout>
         </>
     );

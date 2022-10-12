@@ -40,6 +40,7 @@ export class SlotsEventEmitter implements ISlotsEventEmitter {
         this.eventEmitter.once(`getSlots-${idSession}`, (idSession: number) => {
             this.sessionCRUDService.getSlots(idSession)
             .then(result => {
+                console.log("polint", result)
                 res.status(200).send(result)
             })
             .catch(error => this.errorHandler.fetchError(res, error))
