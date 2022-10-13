@@ -1,16 +1,16 @@
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { postReservation, errorSetDefault, clearSlots } from '../../../store/actions/reservationAction'
+import { createReservation } from '../../../store/actions/reservationAction'
 import { fetchSlotsBySession } from "../../../store/actions/sessionAction"
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import SlotsFieldMainAuditorium from "../../Slots/SlotsFieldMainAuditorium/SlotsFieldMainAuditorium"
 import SlotsFieldSmallScene from "../../Slots/SlotsFieldSmallScene/SlotsFieldSmallScene"
 import Preloader from '../../UI/Preloader/Preloader'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import axios from 'axios'
 import swal from 'sweetalert2'
 import { sessionReducer } from '../../../store/reducers/sessionReducer'
+import { reservationReducer } from '../../../store/reducers/reservationReducer'
 
 
 function ReservationPostForm() {
@@ -24,8 +24,7 @@ function ReservationPostForm() {
     let sessionSlots = useSelector(state => state.session.slots)
     let reservationSlots = useSelector(state => state.reservation.slots)
     let errorSession = useSelector(state => state.session.error)
-
-    let [error, setError] = useState(null)
+    let errorReservation = useSelector(state => state.reservation.error)
 
     async function subscribe() {
         try {
@@ -44,16 +43,15 @@ function ReservationPostForm() {
     }
 
     useEffect(() => {
-        dispatch(clearSlots())
+        dispatch(reservationReducer.actions.clearSlots())
         if (session.id) {
             dispatch(fetchSlotsBySession({ token, idSession: session.id }))
                 .then(async () => { await  subscribe() })
-                
             if (errorSession) {
                 swal.fire({
                     title: 'Произошла ошибка!',
                     text: errorSession,
-                    icon: 'success'
+                    icon: 'error'
                 })
                 dispatch(sessionReducer.actions.clearError())
             }
@@ -67,17 +65,20 @@ function ReservationPostForm() {
         e.preventDefault()
 
         // Отправить на backend запрос по почте
-        dispatch(postReservation({
+        dispatch(createReservation({
             token: token, 
             id_session: session.id,
             slots: reservationSlots
         }))
         .then(() => {
-            const errorFromStore = store.getState().reservation.error
             const needConfirmation = store.getState().reservation.need_confirmation
-            if (errorFromStore !== null) {
-                setError(errorFromStore)
-                dispatch(errorSetDefault())
+            if (errorReservation !== null) {
+                swal.fire({
+                    title: 'Произошла ошибка!',
+                    text: errorReservation,
+                    icon: "error"
+                })
+                dispatch(reservationReducer.actions.clearError())
             } else if (needConfirmation) {
                 const idReservation = store.getState().reservation.reservation.id
                 swal.fire({
@@ -87,8 +88,7 @@ function ReservationPostForm() {
                     timer: 2000
                 })
                 setTimeout(navigate(`/confirm/${idReservation}`), 2100)
-            }
-            else {
+            } else {
                 swal.fire({
                     title: 'Бронь оформлена!',
                     icon: 'success',
@@ -101,7 +101,6 @@ function ReservationPostForm() {
 
     return (
         <>
-        
             { 
                 isLoading
                 ?
@@ -112,9 +111,6 @@ function ReservationPostForm() {
                         : session.auditorium_title === 'Малая сцена'
                             ? <SlotsFieldSmallScene rows={sessionSlots} />
                             : null)
-            }
-            {
-                error && <ErrorMessage text={error} />
             }
             <CustomButton type="submit" value="Подтвердить" onClickHook={postEmailReservation} />
         </>

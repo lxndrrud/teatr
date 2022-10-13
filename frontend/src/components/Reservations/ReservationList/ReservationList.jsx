@@ -4,7 +4,7 @@ import Preloader from '../../UI/Preloader/Preloader'
 import ReservationItem from '../ReservationItem/ReservationItem'
 
 function ReservationList({ reservations }) {
-    let { isLoading } = useSelector(state => state.design)
+    let isLoading = useSelector(state => state.reservation.isLoading)
     return (
         <div className="mx-0 lg:ml-[5%] lg:w-[95%] 
                         flex flex-col lg:flex-row 

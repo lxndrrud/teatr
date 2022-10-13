@@ -23,11 +23,6 @@ const defaultFullfilled = (state) => {
     rejected(state)
 }
 
-const wait = (ms) =>
-    new Promise((resolve) => {
-        setTimeout(() => resolve(), ms);
-});
-
 export const playReducer = createSlice({
     name: 'plays',
     initialState,

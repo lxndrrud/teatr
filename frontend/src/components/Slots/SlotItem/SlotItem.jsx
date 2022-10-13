@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useState } from 'react'
-import { addSlot, deleteSlot } from '../../../store/actions/reservationAction'
 import styles from './SlotItem.module.css'
+import { reservationReducer } from '../../../store/reducers/reservationReducer'
 
 function Slot({ seatNumber, rowNumber, price }) {
     return (
@@ -33,13 +33,13 @@ function SlotItem({ slotObject }) {
 
     const slotClick = () => { 
         if (!slotObject.is_reserved) {
-            if (isClicked) dispatch(deleteSlot({
+            if (isClicked) dispatch(reservationReducer.actions.deleteSlot({
                 id: slotObject.id,
                 seat_number: slotObject.seat_number,
                 row_number: slotObject.row_number,
                 price: slotObject.price
             }))
-            else dispatch(addSlot({
+            else dispatch(reservationReducer.actions.addSlot({
                 id: slotObject.id,
                 seat_number: slotObject.seat_number,
                 row_number: slotObject.row_number,

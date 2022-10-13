@@ -1,20 +1,7 @@
-import { 
-    ERROR_RESERVATION,
-    ERROR_CONFIRMATION,
-    POST_RESERVATION,
-    SET_RESERVATION, 
-    ADD_SLOT,
-    DELETE_SLOT,
-    ERROR_RESERVATION_SET_DEFAULT,
-    FETCH_RESERVATIONS,
-    DELETE_RESERVATION,
-    PAYMENT_RESERVATION,
-    FETCH_RESERVATION,
-    CLEAR_SLOTS,
-    FETCH_FILTERED_RESERVATIONS,
-    FETCH_RESERVATION_FILTER_OPTIONS
-} from "../types"
+import { createAsyncThunk } from "@reduxjs/toolkit"
+import axios from "axios"
 
+/*
 export const postReservation = ({ token, id_session, slots }) => async dispatch => {
     let body = {
         id_session, slots
@@ -45,7 +32,42 @@ export const postReservation = ({ token, id_session, slots }) => async dispatch 
         })
 
 }
+*/
 
+export const createReservation = createAsyncThunk(
+    'reservations/createReservation',
+    async ({ token, idSession, slots }, thunkApi) => {
+        try {
+            const body = {
+                id_session: idSession,
+                slots
+            }
+            const response = await axios.post('/expressjs/reservations', body, { headers: { 'auth-token': token } })
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+
+export const confirmReservation = createAsyncThunk(
+    'reservations/confirmReservation',
+    async ({ token, id_reservation, id_session, confirmation_code }, thunkApi) => {
+        try {
+            const body = {
+                confirmation_code: confirmation_code,
+                id_session: id_session
+            }
+            const response = await axios.put( `/expressjs/reservations/${id_reservation.toString()}/confirm/`, body, {
+                headers: { 'auth-token': token }
+            })
+            return
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+/*
 export const confirmReservation = ({ 
     token, 
     id_reservation, 
@@ -76,19 +98,24 @@ export const confirmReservation = ({
         })
     }
 }
+*/
 
 
-export const setReservation = (payload) => async dispatch => {
-    dispatch({
-        type: SET_RESERVATION,
-        payload: {
-            id: payload.id,
-            confirmation_code: payload.confirmation_code,
-            id_session: payload.id_session
+export const fetchReservation = createAsyncThunk(
+    'reservations/fetchReservation',
+    async ({ token, idReservation }, thunkApi) => {
+        try {
+            const response = await axios.get(`/expressjs/reservations/${idReservation}`, {
+                headers: { 'auth-token': token }
+            })
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
         }
-    })
-}
+    }
+)
 
+/*
 export const fetchReservation = ({
     token,
     id_reservation
@@ -118,38 +145,21 @@ export const fetchReservation = ({
         })
     }
 }
+*/
 
-export const addSlot = (payload) => async dispatch => {
-    dispatch({
-        type: ADD_SLOT,
-        payload: {
-            seat_number: payload.seat_number,
-            row_number: payload.row_number,
-            price: payload.price,
-            id: payload.id
+export const fetchReservations = createAsyncThunk(
+    'reservations/fetchReservations',
+    async () => {
+        try {
+            const response = await axios.get('/expressjs/reservations/', { headers: { 'auth-token': token } })
+            console.log(response.status, response.data)
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
         }
-    })
-}
-
-
-export const deleteSlot = (payload) => async dispatch => {
-    dispatch({
-        type: DELETE_SLOT,
-        payload: {
-            seat_number: payload.seat_number,
-            row_number: payload.row_number,
-            price: payload.price,
-            id: payload.id
-        }
-    })
-}
-
-export const errorSetDefault = () => async dispatch => {
-    dispatch({
-        type: ERROR_RESERVATION_SET_DEFAULT
-    })
-}
-
+    }
+)
+/*
 export const fetchReservations = (token) => async dispatch => {
     const resp = await fetch('/expressjs/reservations/', {
         headers: {
@@ -162,7 +172,22 @@ export const fetchReservations = (token) => async dispatch => {
         payload: body
     })
 }
+*/
 
+export const changePaymentStatus = createAsyncThunk(
+    'reservations/changePaymentStatus',
+    async ({ token, idReservation }, thunkApi) => {
+        try {
+            const response = await axios.put(`/expressjs/reservations/${idReservation}/payment`, {
+                headers: { 'auth-token': token }
+            })
+            return
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+/*
 export const paymentStatusReservation = ({
     token, 
     id_reservation
@@ -190,7 +215,23 @@ export const paymentStatusReservation = ({
     }
        
 }
+*/
 
+export const deleteReservation = createAsyncThunk(
+    'reservations/deleteReservation',
+    async ({ token , idReservation }, thunkApi) => {
+        try {
+            const response = await axios.delete(`/expressjs/reservations/${idReservation}`, {
+                headers: { 'auth-token': token }
+            })
+            return
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+
+/*
 export const deleteReservation = ({
     token, 
     id_reservation
@@ -219,13 +260,10 @@ export const deleteReservation = ({
     }
        
 }
+*/
 
-export const clearSlots = () => async dispatch => {
-    dispatch({
-        type: CLEAR_SLOTS,
-    })
-}
 
+/*
 export const fetchReservationFilterOptions = (token) => async dispatch => {
     const response = await fetch('/expressjs/reservations/filter/setup', {
         headers: {
@@ -244,7 +282,48 @@ export const fetchReservationFilterOptions = (token) => async dispatch => {
         })
     }
 }
+*/
 
+export const fetchReservationFilterOptions = createAsyncThunk(
+    'reservations/fetchReservationFilterOptions',
+    async ({ token }, thunkApi) => {
+        try {
+            const response = await axios.get('/expressjs/reservations/filter/setup', {
+                headers: { 'auth-token': token }
+            })
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+
+export const fetchFilteredReservations = createAsyncThunk(
+    'reservations/fetchFilteredReservations',
+    async ({ token, dateFrom, dateTo, auditoriumTitle, playTitle, isLocked, idReservation }, thunkApi) => {
+        try {
+            const response = await axios.get('/expressjs/reservations/filter', {
+                params: {
+                    'dateFrom': dateFrom,
+                    'dateTo': dateTo,
+                    'auditorium_title': auditoriumTitle,
+                    'play_title': playTitle,
+                    'is_locked': isLocked,
+                    'id_reservation': idReservation
+                },
+                headers: {
+                    'auth-token': token
+                }
+            })
+            console.log(response.status, response.data)
+            return response.data
+        } catch (error) {
+            throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
+        }
+    }
+)
+
+/*
 export const fetchFilteredReservations = (token, dateFrom, dateTo, auditoriumTitle, playTitle, isLocked, idReservation) => async dispatch => {
     const response = await fetch('/expressjs/reservations/filter?' + new URLSearchParams({
         'dateFrom': dateFrom,
@@ -281,3 +360,4 @@ export const fetchFilteredReservations = (token, dateFrom, dateTo, auditoriumTit
         })
     }
 }
+*/

@@ -6,7 +6,6 @@ import { fetchReservation } from '../../store/actions/reservationAction'
 import { checkLogin } from '../../middlewares/authFunctions'
 import { useNavigate, useParams } from 'react-router-dom'
 import Preloader from '../../components/UI/Preloader/Preloader'
-import { usePreloader } from '../../hooks/usePreloader'
 
 
 function ReservationDetailPage() {
@@ -16,7 +15,7 @@ function ReservationDetailPage() {
 
     const { idReservation } = useParams()
     let token = useSelector(state => state.user.token)
-    let { isLoading } = useSelector(state => state.design)
+    let isLoading = useSelector(state => state.reservation.isLoading)
 
     useEffect(() => {
         if (!checkLogin(store)) {
@@ -24,10 +23,7 @@ function ReservationDetailPage() {
             return
         }
         if (idReservation) {
-            usePreloader(dispatch, fetchReservation({ 
-                token: token,
-                id_reservation: idReservation
-            }))
+            dispatch(fetchReservation(token, idReservation))
         }
     }, [navigate, store, dispatch, token])
 

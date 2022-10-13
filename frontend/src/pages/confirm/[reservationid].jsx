@@ -25,7 +25,7 @@ function ConfirmationPage() {
                 return
             }
             // Задиспатчить получение брони 
-            dispatch(fetchReservation({ token, id_reservation: idReservation }))
+            dispatch(fetchReservation({ token, idReservation }))
         //}
     }, [token, store])
 

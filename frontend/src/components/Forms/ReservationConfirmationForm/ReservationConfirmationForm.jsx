@@ -1,12 +1,12 @@
 import React from 'react'
-//import { useRouter } from "next/router"
 import CustomInput from '../../UI/CustomInput/CustomInput'
 import CustomButton from '../../UI/CustomButton/CustomButton'
-import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
-import { confirmReservation, errorSetDefault } from "../../../store/actions/reservationAction"
+import { confirmReservation } from "../../../store/actions/reservationAction"
 import { useDispatch, useSelector, useStore } from 'react-redux'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import swal from 'sweetalert2'
+import { reservationReducer } from '../../../store/reducers/reservationReducer'
 
 function ReservationConfirmationForm() {
     const navigate = useNavigate()
@@ -15,7 +15,6 @@ function ReservationConfirmationForm() {
     let token = useSelector(state => state.user.token)
 
     let [confirmationCode, setConfirmationCode] = useState('')
-    let [confirmationErrorMessage, setConfirmationErrorMessage] = useState('')
 
     let reservation = useSelector(state => state.reservation.reservation)
 
@@ -35,12 +34,21 @@ function ReservationConfirmationForm() {
         .then(() => {
             const errorFromStore = store.getState().reservation.error
             if (errorFromStore !== null) {
-                setConfirmationErrorMessage(errorFromStore)
+                swal.fire({
+                    title: 'Произошла ошибка!',
+                    text: errorFromStore,
+                    icon: 'error'
+                })
                 setConfirmationCode('')
-                dispatch(errorSetDefault())
+                dispatch(reservationReducer.actions.clearError())
             } 
             else {
-                navigate('/control')
+                swal.fire({
+                    title: 'Бронь подтверждена!',
+                    icon: 'success',
+                    timer: 2000
+                })
+                setTimeout(navigate('/control'), 2100)
             }
         })
     }
@@ -50,12 +58,7 @@ function ReservationConfirmationForm() {
                 placeholder="Код подтверждения"
                 onChange={syncConfirmationCode} 
                 description="Введите код подтверждения, который вы получили по почте" 
-                errorMessage={confirmationErrorMessage} />
-            {
-                confirmationErrorMessage !== ''
-                ? <ErrorMessage text={confirmationErrorMessage} />
-                : null
-            }
+            />
             <CustomButton type="submit" value="Подтвердить" onClickHook={postConfirmation} />
         </> 
     )   

@@ -1,3 +1,5 @@
+import { createSlice } from "@reduxjs/toolkit"
+import { changePaymentStatus, createReservation, deleteReservation, fetchFilteredReservations, fetchReservation, fetchReservationFilterOptions, fetchReservations } from "../actions/reservationAction"
 import { 
     SET_RESERVATION, 
     FETCH_RESERVATION ,
@@ -16,23 +18,106 @@ import {
 } from "../types"
 
 
-const defaultState = {
-    /*
-    {
-        id: 0,
-        confirmation_code: '',
-        id_session: 0
-    }
-    */
+const initialState = {
     reservation: {},
     reservations: [],
     need_confirmation: true,
     slots: [],
-    loading: false,
+    isLoading: false,
     filterOptions: {},
     error: null,
 }
 
+const pending = (state) => {
+    state.isLoading = true
+}
+
+const rejected = (state, action) =>  {
+    state.isLoading = false
+    if (action) state.error = action.payload.message
+}
+
+const defaultFullfilled = (state) => {
+    rejected(state)
+}
+
+
+export const reservationReducer = createSlice({
+    name: "reservations",
+    initialState,
+    reducers: {
+        addSlot(state, action) {
+            state.slots = state.slots.push({
+                seat_number: action.payload.seat_number,
+                row_number: action.payload.row_number,
+                price: action.payload.price,
+                id: action.payload.id
+            })
+        },
+        deleteSlot(state, action) {
+            state.slots = state.slots.filter(slot => slot.id != action.payload.id)
+        },
+        clearSlots(state, action) {
+            state.slots = initialState.slots
+        },
+        clearError(state, action) {
+            state.error = initialState.error
+        }
+    },
+    extraReducers: {
+        [fetchReservation.fulfilled]: (state, action) => {
+            state.reservation = action.payload
+            defaultFullfilled(state)
+        },
+        [fetchReservation.pending]: pending,
+        [fetchReservation.rejected]: rejected,
+
+        [fetchReservations.fulfilled]: (state, action) => {
+            state.reservations = action.payload
+            defaultFullfilled(state)
+        },
+        [fetchReservations.pending]: pending,
+        [fetchReservations.rejected]: rejected,
+
+        [createReservation.fulfilled]: (state, action) => {
+            state.reservation = {
+                id: action.payload.id,
+                id_session: action.payload.id_session
+            }
+            state.slots = initialState.slots
+            state.need_confirmation = action.payload.need_confirmation
+            defaultFullfilled(state)
+        },
+        [createReservation.pending]: pending,
+        [createReservation.rejected]: rejected,
+
+        [deleteReservation.fulfilled]: defaultFullfilled,
+        [deleteReservation.pending]: pending,
+        [deleteReservation.rejected]: rejected,
+
+        [changePaymentStatus.fulfilled]: defaultFullfilled,
+        [changePaymentStatus.pending]: pending,
+        [changePaymentStatus.rejected]: rejected,
+
+        [fetchReservationFilterOptions.fulfilled]: (state, action) => {
+            state.filterOptions = action.payload
+            defaultFullfilled(state)
+        },
+        [fetchReservationFilterOptions.pending]: pending,
+        [fetchReservationFilterOptions.rejected]: rejected,
+
+        [fetchFilteredReservations.fulfilled]: (state, action) => {
+            state.reservations = action.payload
+            defaultFullfilled(state)
+        },
+        [fetchFilteredReservations.pending]: pending,
+        [fetchFilteredReservations.rejected]: rejected,
+
+
+    }
+})
+
+/*
 const reservationReducer = (state = defaultState, action) => {
     switch (action.type) {
         case FETCH_RESERVATIONS:
@@ -80,3 +165,4 @@ const reservationReducer = (state = defaultState, action) => {
 }
 
 export default reservationReducer
+*/

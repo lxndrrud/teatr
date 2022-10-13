@@ -6,12 +6,13 @@ import { useDispatch, useSelector} from 'react-redux'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { fetchFilteredReservations, fetchReservationFilterOptions } from '../../../store/actions/reservationAction'
 import InputDate from '../../UI/InputDate/InputDate'
-import { setIsLoading } from '../../../store/actions/designAction'
-import { usePreloader } from '../../../hooks/usePreloader'
+import { reservationReducer } from '../../../store/reducers/reservationReducer'
+
 
 function ReservationFilter() {
     const dispatch = useDispatch()
     const token = useSelector(state => state.user.token)
+    let errorReservation = useSelector(state => state.reservation.error)
 
     // Состояния фильтра
     let [dateFrom, setDateFrom] = useState()
@@ -23,7 +24,7 @@ function ReservationFilter() {
     let [error, setError] = useState(null)
 
     useEffect(() => {
-        dispatch(fetchReservationFilterOptions(token))
+        dispatch(fetchReservationFilterOptions({ token }))
     }, [dispatch, token])
 
     // Функции для синронизации состояния с input`ами
@@ -90,8 +91,12 @@ function ReservationFilter() {
     const getFilteredReservations = (e) => {
         e.preventDefault()
 
-        usePreloader(dispatch, fetchFilteredReservations(token, dateFrom, dateTo, auditoriumTitle, playTitle, 
-            showLocked, reservationNumber))
+        dispatch(fetchFilteredReservations({ token, dateFrom, dateTo, auditoriumTitle, playTitle, 
+            isLocked: showLocked, idReservation: reservationNumber }))
+        if (errorReservation) {
+            setError(errorReservation)
+            dispatch(reservationReducer.actions.clearError())
+        }
     }
 
     /*
@@ -146,15 +151,10 @@ function ReservationFilter() {
                     <option value="true">Закрытые</option>
                     <option value="false">Открытые</option>
                 </Select>
-            
-
                 
                 {
-                    error !== null
-                    ? <ErrorMessage text={error} />
-                    : null
+                    error !== null && <ErrorMessage text={error} />
                 }
-                
 
             </div>
             <div className='lg:ml-[90px] mt-2 w-[200px]'>

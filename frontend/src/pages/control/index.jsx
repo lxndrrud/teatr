@@ -6,7 +6,6 @@ import { fetchReservations } from "../../store/actions/reservationAction"
 import { useEffect } from "react"
 import { checkLogin } from "../../middlewares/authFunctions"
 import { useNavigate } from "react-router-dom"
-import { usePreloader } from "../../hooks/usePreloader"
 
 export default function ControlIndexPage() {
     const dispatch = useDispatch()
@@ -20,7 +19,7 @@ export default function ControlIndexPage() {
             navigate('/login')
             return
         }
-        usePreloader(dispatch, fetchReservations(token))
+        dispatch(fetchReservations({ token }))
     }, [dispatch, navigate, token, store])
 
     return (

@@ -7,10 +7,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector, useStore} from 'react-redux'
 //import store from "../../store/store"
 import { useEffect } from 'react'
-import { clearSlots } from '../../store/actions/reservationAction';
 import { checkLogin } from '../../middlewares/authFunctions';
-import Preloader from '../../components/UI/Preloader/Preloader';
 import swal from 'sweetalert2'
+import { reservationReducer } from '../../store/reducers/reservationReducer';
 
 function SessionReservationPage() {
     const navigate = useNavigate()
@@ -40,7 +39,7 @@ function SessionReservationPage() {
                         icon: 'error'
                     })
                 }
-                dispatch(clearSlots())
+                dispatch(reservationReducer.actions.clearSlots())
                 .catch(() => navigate('/'))
             }
         }
