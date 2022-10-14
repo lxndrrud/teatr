@@ -30,27 +30,27 @@ function ReservationConfirmationForm() {
             confirmation_code: confirmationCode
         }
 
-        dispatch(confirmReservation(body))
-        .then(() => {
-            const errorFromStore = store.getState().reservation.error
-            if (errorFromStore !== null) {
-                swal.fire({
-                    title: 'Произошла ошибка!',
-                    text: errorFromStore,
-                    icon: 'error'
-                })
-                setConfirmationCode('')
-                dispatch(reservationReducer.actions.clearError())
-            } 
-            else {
-                swal.fire({
-                    title: 'Бронь подтверждена!',
-                    icon: 'success',
-                    timer: 2000
-                })
-                setTimeout(navigate('/control'), 2100)
-            }
-        })
+        await dispatch(confirmReservation(body))
+       
+        const errorFromStore = store.getState().reservation.error
+        console.log(errorFromStore)
+        if (errorFromStore) {
+            swal.fire({
+                title: 'Произошла ошибка!',
+                text: errorFromStore,
+                icon: 'error'
+            })
+            setConfirmationCode('')
+            await dispatch(reservationReducer.actions.clearError())
+        } 
+        else {
+            swal.fire({
+                title: 'Бронь подтверждена!',
+                icon: 'success',
+                timer: 2000
+            })
+            setTimeout(navigate('/control'), 2100)
+        }
     }
     return (
         <>

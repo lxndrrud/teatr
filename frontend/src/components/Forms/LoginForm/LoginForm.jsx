@@ -26,20 +26,21 @@ function LoginForm({ isAdmin=false }) {
             if (!isAdmin)
                 navigate("/")
             else 
-               navigate("/reservation-admin")
+                navigate("/reservation-admin")
         }
     }, [navigate, store])
 
-    const sendPostRequest = (e) => {
+    const sendPostRequest = async (e) => {
         e.preventDefault()
-        dispatch(logIn({ email, password }))
+        await dispatch(logIn({ email, password }))
         const errorStore = store.getState().user.error
-        if (!error) {
+        if (!errorStore) {
             navigate('/')
         } else {
             setError(errorStore)
-            dispatch(userReducer.actions.errorSetDefault())
+            await dispatch(userReducer.actions.errorSetDefault())
         }
+       
     }
     return (
         <BaseForm>

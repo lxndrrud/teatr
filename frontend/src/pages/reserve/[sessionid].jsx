@@ -21,6 +21,7 @@ function SessionReservationPage() {
     let token = useSelector(state => state.user.token)
     let errorPlay = useSelector(state => state.play.error)
     let errorSession = useSelector(state => state.session.error)
+    let errorReservation = useSelector(state => state.reservation.error)
   
   
 
@@ -40,7 +41,13 @@ function SessionReservationPage() {
                     })
                 }
                 dispatch(reservationReducer.actions.clearSlots())
-                .catch(() => navigate('/'))
+                if (errorReservation) {
+                    swal.fire({
+                        title: 'Произошла ошибка',
+                        text: errorReservation,
+                        icon: 'error'
+                    })
+                }
             }
         }
         

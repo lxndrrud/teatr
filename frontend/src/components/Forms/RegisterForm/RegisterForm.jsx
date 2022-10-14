@@ -11,6 +11,7 @@ import styles from "./RegisterForm.module.css"
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { checkLogin } from '../../../middlewares/authFunctions'
 import Preloader from '../../UI/Preloader/Preloader'
+import swal from 'sweetalert2'
 
 function RegisterForm() {
     const dispatch = useDispatch()
@@ -47,18 +48,19 @@ function RegisterForm() {
     const syncLastname = (e) => {
         setLastname(e.target.value)
     }
-    const sendPostRequest = (e) => {
+    const sendPostRequest = async (e) => {
         e.preventDefault()
 
         if (email && password) {
-            dispatch(register(email, password, firstname, middlename, lastname))
+            await dispatch(register({ email, password, firstname, middlename, lastname }))
             const errorFromStore = store.getState().user.error
-            if (errorFromStore !== null) {
+            if (errorFromStore) {
                 setError(errorFromStore)
-                dispatch(userReducer.actions.errorSetDefault())
+                await dispatch(userReducer.actions.errorSetDefault())
+                return
             }
+            navigate('/')
         }
-            
     }
     return (
         <BaseForm styleClass={styles.registerForm}>

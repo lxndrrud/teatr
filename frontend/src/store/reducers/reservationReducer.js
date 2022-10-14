@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit"
-import { changePaymentStatus, createReservation, deleteReservation, fetchFilteredReservations, fetchReservation, fetchReservationFilterOptions, fetchReservations } from "../actions/reservationAction"
+import { changePaymentStatus, confirmReservation, createReservation, deleteReservation, fetchFilteredReservations, fetchReservation, fetchReservationFilterOptions, fetchReservations } from "../actions/reservationAction"
 import { 
     SET_RESERVATION, 
     FETCH_RESERVATION ,
@@ -34,7 +34,7 @@ const pending = (state) => {
 
 const rejected = (state, action) =>  {
     state.isLoading = false
-    if (action) state.error = action.payload.message
+    if (action) state.error = action.error.message
 }
 
 const defaultFullfilled = (state) => {
@@ -47,7 +47,7 @@ export const reservationReducer = createSlice({
     initialState,
     reducers: {
         addSlot(state, action) {
-            state.slots = state.slots.push({
+            state.slots.push({
                 seat_number: action.payload.seat_number,
                 row_number: action.payload.row_number,
                 price: action.payload.price,
@@ -94,6 +94,10 @@ export const reservationReducer = createSlice({
         [deleteReservation.fulfilled]: defaultFullfilled,
         [deleteReservation.pending]: pending,
         [deleteReservation.rejected]: rejected,
+
+        [confirmReservation.fulfilled]: defaultFullfilled,
+        [confirmReservation.pending]: pending,
+        [confirmReservation.rejected]: rejected,
 
         [changePaymentStatus.fulfilled]: defaultFullfilled,
         [changePaymentStatus.pending]: pending,

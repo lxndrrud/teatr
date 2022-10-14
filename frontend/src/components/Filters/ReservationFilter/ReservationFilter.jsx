@@ -15,12 +15,12 @@ function ReservationFilter() {
     let errorReservation = useSelector(state => state.reservation.error)
 
     // Состояния фильтра
-    let [dateFrom, setDateFrom] = useState()
-    let [dateTo, setDateTo] = useState()
-    let [auditoriumTitle, setAuditoriumTitle] = useState()
-    let [playTitle, setPlayTitle] = useState()
-    let [reservationNumber, setReservationNumber] = useState()
-    let [showLocked, setShowLocked] = useState()
+    let [dateFrom, setDateFrom] = useState('undefined')
+    let [dateTo, setDateTo] = useState('undefined')
+    let [auditoriumTitle, setAuditoriumTitle] = useState('undefined')
+    let [playTitle, setPlayTitle] = useState('undefined')
+    let [reservationNumber, setReservationNumber] = useState('undefined')
+    let [showLocked, setShowLocked] = useState('undefined')
     let [error, setError] = useState(null)
 
     useEffect(() => {
@@ -36,20 +36,20 @@ function ReservationFilter() {
     */
 
     const syncDateFrom = (e) => {
-        if (!e.target.value) setDateFrom()
+        if (!e.target.value) setDateFrom('undefined')
         else setDateFrom(e.target.value)
     }
     const syncDateTo = (e) => {
-        if (!e.target.value) setDateTo()
+        if (!e.target.value) setDateTo('undefined')
         else setDateTo(e.target.value)
     }
     const syncAuditoriumTitle = (e) => {
-        if (e.target.value === 'None') setAuditoriumTitle()
+        if (e.target.value === 'None') setAuditoriumTitle('undefined')
         else setAuditoriumTitle(e.target.value)
     }
 
     const syncPlayTitle = (e) => {
-        if (e.target.value === 'None') setPlayTitle()
+        if (e.target.value === 'None') setPlayTitle('undefined')
         else setPlayTitle(e.target.value)
     }
     const syncShowLocked = (e) => {
@@ -64,7 +64,7 @@ function ReservationFilter() {
 
             if (e.target.value === '') {
                 setError(null)
-                setReservationNumber()
+                setReservationNumber('undefined')
                 return
             }
 

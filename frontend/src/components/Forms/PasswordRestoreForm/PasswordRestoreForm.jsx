@@ -18,31 +18,31 @@ function PasswordRestoreForm() {
     const store = useStore()
     let [email, setEmail] = useState('')
     let [error, setError] = useState(null)
-    function sendRestoreRequest(e) {
+    async function sendRestoreRequest(e) {
         e.preventDefault()
         if (!email) {
             setError('Вы не указали почту!')
         } else {
-            dispatch(restorePassword({ email }))
+            await dispatch(restorePassword({ email }))
             let errorStore = store.getState().user.error
             if (errorStore) {
                 setError(errorStore)
-                dispatch(userReducer.actions.errorSetDefault()) 
+                await dispatch(userReducer.actions.errorSetDefault()) 
             } else {
+                navigate('/login')
                 swal.fire({
                     title: 'Сообщение на почту отправлено',
                     text: 'Следующее восстановление будет доступно через 15 минут.',
-                    timer: 2000,
-                    icon: 'success'
+                    icon: 'success',
+                    timer: 5000
                 })
-                setTimeout(navigate('/login'), 2100)
             }
         }
     }
-    function resendPasswordOnEmail(e) {
+    async function resendPasswordOnEmail(e) {
         e.preventDefault()
         //resendMutation.mutate(email)
-        const response = dispatch(resendRestoreEmail({ email }))
+        const response = await dispatch(resendRestoreEmail({ email }))
         let errorStore = store.getState().user.error 
         if (errorStore) setError(errorStore)
     }

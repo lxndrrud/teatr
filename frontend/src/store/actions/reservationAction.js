@@ -105,11 +105,13 @@ export const fetchReservation = createAsyncThunk(
     'reservations/fetchReservation',
     async ({ token, idReservation }, thunkApi) => {
         try {
+            console.log(token, idReservation)
             const response = await axios.get(`/expressjs/reservations/${idReservation}`, {
                 headers: { 'auth-token': token }
             })
             return response.data
         } catch (error) {
+            console.log(error)
             throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
         }
     }
@@ -149,10 +151,9 @@ export const fetchReservation = ({
 
 export const fetchReservations = createAsyncThunk(
     'reservations/fetchReservations',
-    async () => {
+    async ({ token }) => {
         try {
             const response = await axios.get('/expressjs/reservations/', { headers: { 'auth-token': token } })
-            console.log(response.status, response.data)
             return response.data
         } catch (error) {
             throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
@@ -178,7 +179,7 @@ export const changePaymentStatus = createAsyncThunk(
     'reservations/changePaymentStatus',
     async ({ token, idReservation }, thunkApi) => {
         try {
-            const response = await axios.put(`/expressjs/reservations/${idReservation}/payment`, {
+            const response = await axios.put(`/expressjs/reservations/${idReservation}/payment`, null, {
                 headers: { 'auth-token': token }
             })
             return
@@ -221,11 +222,13 @@ export const deleteReservation = createAsyncThunk(
     'reservations/deleteReservation',
     async ({ token , idReservation }, thunkApi) => {
         try {
+            console.log(token, idReservation)
             const response = await axios.delete(`/expressjs/reservations/${idReservation}`, {
                 headers: { 'auth-token': token }
             })
             return
         } catch (error) {
+            console.log(error)
             throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')
         }
     }
@@ -312,10 +315,11 @@ export const fetchFilteredReservations = createAsyncThunk(
                     'id_reservation': idReservation
                 },
                 headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                     'auth-token': token
                 }
             })
-            console.log(response.status, response.data)
             return response.data
         } catch (error) {
             throw new Error(error?.response?.data.message || 'Произошла непредвиденная ошибка')

@@ -24,7 +24,6 @@ function ReservationPostForm() {
     let sessionSlots = useSelector(state => state.session.slots)
     let reservationSlots = useSelector(state => state.reservation.slots)
     let errorSession = useSelector(state => state.session.error)
-    let errorReservation = useSelector(state => state.reservation.error)
 
     async function subscribe() {
         try {
@@ -67,18 +66,19 @@ function ReservationPostForm() {
         // Отправить на backend запрос по почте
         dispatch(createReservation({
             token: token, 
-            id_session: session.id,
+            idSession: session.id,
             slots: reservationSlots
         }))
-        .then(() => {
+        .then(async () => {
+            const errorReservation = store.getState().reservation.error
             const needConfirmation = store.getState().reservation.need_confirmation
-            if (errorReservation !== null) {
+            if (errorReservation) {
                 swal.fire({
                     title: 'Произошла ошибка!',
                     text: errorReservation,
                     icon: "error"
                 })
-                dispatch(reservationReducer.actions.clearError())
+                await dispatch(reservationReducer.actions.clearError())
             } else if (needConfirmation) {
                 const idReservation = store.getState().reservation.reservation.id
                 swal.fire({
@@ -97,6 +97,7 @@ function ReservationPostForm() {
                 setTimeout(navigate('/control'), 2100)
             }
         })
+        
     }
 
     return (

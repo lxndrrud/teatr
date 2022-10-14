@@ -6,6 +6,8 @@ import { fetchReservation } from '../../store/actions/reservationAction'
 import { checkLogin } from '../../middlewares/authFunctions'
 import { useNavigate, useParams } from 'react-router-dom'
 import Preloader from '../../components/UI/Preloader/Preloader'
+import { reservationReducer } from '../../store/reducers/reservationReducer'
+import swal from 'sweetalert2'
 
 
 function ReservationDetailPage() {
@@ -16,6 +18,7 @@ function ReservationDetailPage() {
     const { idReservation } = useParams()
     let token = useSelector(state => state.user.token)
     let isLoading = useSelector(state => state.reservation.isLoading)
+    let errorReservation = useSelector(state => state.reservation.error)
 
     useEffect(() => {
         if (!checkLogin(store)) {
@@ -23,7 +26,17 @@ function ReservationDetailPage() {
             return
         }
         if (idReservation) {
-            dispatch(fetchReservation(token, idReservation))
+            dispatch(fetchReservation({token, idReservation}))
+                .then(() => {
+                    if (errorReservation) {
+                        swal.fire({
+                            title: 'Произошла ошибка!',
+                            text: errorReservation,
+                            icon: 'error'
+                        })
+                        dispatch(reservationReducer.actions.clearError())
+                    }
+                })
         }
     }, [navigate, store, dispatch, token])
 

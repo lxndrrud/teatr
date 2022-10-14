@@ -11,7 +11,7 @@ function DialogForm({ text, onClickHook, buttonType, error }) {
         <div className={styles.dialogForm}>
              <span className={styles.text}>{text}</span>
             {
-                error !== null 
+                error
                 ? <ErrorMessage text={error} />
                 : null
             }

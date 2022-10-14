@@ -17,8 +17,9 @@ const pending = (state) => {
 }
 
 const rejected = (state, action) =>  {
+    console.log(action)
     state.isLoading = false
-    if (action) state.error = action.payload.error
+    if (action) state.error = action.error.message
 }
 
 const defaultFullfilled = (state) => {

@@ -6,6 +6,7 @@ import { useDispatch,  useStore } from "react-redux"
 import { checkLogin } from '../../../middlewares/authFunctions'
 import { useNavigate, useParams } from 'react-router-dom'
 import { reservationReducer } from '../../../store/reducers/reservationReducer'
+import swal from 'sweetalert2'
 
 
 function DeleteReservationPage() {
