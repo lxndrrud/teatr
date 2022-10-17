@@ -4,20 +4,18 @@ import CustomInput from "../../UI/CustomInput/CustomInput"
 import CustomButton from "../../UI/CustomButton/CustomButton"
 import CustomLink from "../../UI/CustomLink/CustomLink"
 import { useDispatch, useStore } from 'react-redux'
-//import { useRouter } from 'next/router'
 import { useNavigate } from 'react-router-dom'
 import { logIn } from "../../../store/actions/userAction"
-import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { checkLogin } from '../../../middlewares/authFunctions'
 import masksPicture from '../../../assets/maski.png'
 import { userReducer } from '../../../store/reducers/userReducer'
+import Swal from 'sweetalert2'
 
 function LoginForm({ isAdmin=false }) {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const store = useStore()
 
-    let [error, setError] = useState('')
     let [email, setEmail] = useState('')
     let [password, setPassword] = useState('')
 
@@ -32,15 +30,21 @@ function LoginForm({ isAdmin=false }) {
 
     const sendPostRequest = async (e) => {
         e.preventDefault()
-        await dispatch(logIn({ email, password }))
-        const errorStore = store.getState().user.error
-        if (!errorStore) {
+        dispatch(logIn({ email, password }))
+        .then(() => {
+            const errorUser = store.getState().user.error
+            if (errorUser) {
+                Swal.fire({
+                    title: 'Произошла ошибка!',
+                    text: errorUser,
+                    icon: "error"
+                })
+                dispatch(userReducer.actions.errorSetDefault())
+                return
+            }
             navigate('/')
-        } else {
-            setError(errorStore)
-            await dispatch(userReducer.actions.errorSetDefault())
-        }
-       
+        })
+        
     }
     return (
         <BaseForm>
@@ -63,11 +67,6 @@ function LoginForm({ isAdmin=false }) {
 
             
 
-            {
-                error !== ''
-                ? <ErrorMessage text={error} />
-                : null
-            }
             <CustomLink
                 destination="/user/restore/password"
                 text="Восстановить пароль"

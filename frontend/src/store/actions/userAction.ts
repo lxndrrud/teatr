@@ -52,7 +52,7 @@ export const changePassword = createAsyncThunk<any, { token: string, passwordInf
     'users/editPassword',
     async ({ token, passwordInfo }, thunkApi) => {
         try {
-            const response = await axios.post('/expressjs/users/edit/password', passwordInfo, 
+            const response = await axios.put('/expressjs/users/edit/password', passwordInfo, 
                 { headers: { 'auth-token': token } })
             return response.data
         } catch (error) {
@@ -70,7 +70,7 @@ export const changePersonalInfo = createAsyncThunk<any, { token: string, persona
     'users/changePersonalInfo',
     async({ token, personalInfo }, thunkApi) => {
         try {
-            const response = await axios.post('/expressjs/users/edit/personal', { personalInfo },
+            const response = await axios.put('/expressjs/users/edit/personal', personalInfo,
                 { headers: { 'auth-token': token } })
             return response.data
         } catch (error) {

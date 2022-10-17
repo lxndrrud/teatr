@@ -2,56 +2,42 @@ import MainLayout from '../../layouts/MainLayout/MainLayout'
 import ReservationForm from '../../components/Forms/ReservationForm/ReservationForm';
 import { fetchPlay } from "../../store/actions/playAction"
 import { fetchSession } from '../../store/actions/sessionAction'
-//import { useRouter } from 'next/router';
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector, useStore} from 'react-redux'
-//import store from "../../store/store"
 import { useEffect } from 'react'
 import { checkLogin } from '../../middlewares/authFunctions';
 import swal from 'sweetalert2'
 import { reservationReducer } from '../../store/reducers/reservationReducer';
+import { playReducer } from '../../store/reducers/playReducer';
+import { sessionReducer } from '../../store/reducers/sessionReducer';
 
 function SessionReservationPage() {
     const navigate = useNavigate()
-    //const router = useRouter()
     const dispatch = useDispatch()
     const store = useStore()
 
     const { idSession } = useParams()
     let token = useSelector(state => state.user.token)
-    let errorPlay = useSelector(state => state.play.error)
-    let errorSession = useSelector(state => state.session.error)
-    let errorReservation = useSelector(state => state.reservation.error)
-  
-  
 
     useEffect(() => {
-        //if(router.isReady) {
         if (!checkLogin(store)) {
             navigate('/login')
-        } else {
-            //const { sessionid } = router.query
-            if (idSession) {
-                dispatch(fetchSession({ token, idSession }))
-                if (errorSession) {
-                    swal.fire({
-                        title: 'Произошла ошибка!',
-                        title: errorSession,
-                        icon: 'error'
-                    })
-                }
-                dispatch(reservationReducer.actions.clearSlots())
-                if (errorReservation) {
-                    swal.fire({
-                        title: 'Произошла ошибка',
-                        text: errorReservation,
-                        icon: 'error'
-                    })
-                }
-            }
+            return
         }
-        
-        //}  
+        if (idSession) {
+            dispatch(fetchSession({ token, idSession }))
+            const errorSession = store.getState().session.error
+            if (errorSession) {
+                swal.fire({
+                    title: 'Произошла ошибка!',
+                    title: errorSession,
+                    icon: 'error'
+                })
+                dispatch(sessionReducer.actions.clearError())
+                return
+            }
+            dispatch(reservationReducer.actions.clearSlots())
+        }
     }, [navigate, dispatch, store, token])
 
     const sessionFromStore = useSelector(state => state.session.session)
@@ -59,13 +45,19 @@ function SessionReservationPage() {
     useEffect( () => {
         if (sessionFromStore.id_play) {
             dispatch(fetchPlay({ idPlay: sessionFromStore.id_play }))
-            if (errorPlay) {
-                swal.fire({
-                    title: 'Произошла ошибка!',
-                    text: errorPlay,
-                    icon: 'error'
-                })
-            }
+            .then(() => {
+                const errorPlay = store.getState().play.error
+                if (errorPlay) {
+                    swal.fire({
+                        title: 'Произошла ошибка!',
+                        text: errorPlay,
+                        icon: 'error'
+                    })
+                    dispatch(playReducer.actions.clearError())
+                    return
+                }
+            })
+            
         }
     }, [sessionFromStore, dispatch])
 

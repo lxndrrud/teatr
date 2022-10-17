@@ -1,16 +1,14 @@
 import React from 'react'
-//import axios from 'axios'
 import { useState } from 'react'
 import { useDispatch, useStore } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-//import { useMutation } from 'react-query'
 import { resendRestoreEmail, restorePassword } from '../../../store/actions/userAction'
 import { userReducer } from '../../../store/reducers/userReducer'
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import CustomInput from '../../UI/CustomInput/CustomInput'
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import BaseForm from '../BaseForm/BaseForm'
-import swal from 'sweetalert2'
+import Swal from 'sweetalert2'
 
 function PasswordRestoreForm() {
     const dispatch = useDispatch()
@@ -22,29 +20,41 @@ function PasswordRestoreForm() {
         e.preventDefault()
         if (!email) {
             setError('Вы не указали почту!')
-        } else {
-            await dispatch(restorePassword({ email }))
-            let errorStore = store.getState().user.error
-            if (errorStore) {
-                setError(errorStore)
-                await dispatch(userReducer.actions.errorSetDefault()) 
-            } else {
-                navigate('/login')
-                swal.fire({
-                    title: 'Сообщение на почту отправлено',
-                    text: 'Следующее восстановление будет доступно через 15 минут.',
-                    icon: 'success',
-                    timer: 5000
-                })
-            }
+            return
         }
+        
+        dispatch(restorePassword({ email }))
+        .then(() => {
+            let errorUser = store.getState().user.error
+            if (errorUser) {
+                Swal.fire({
+                    title: 'Произошла ошибка!',
+                    text: errorUser,
+                    icon: "error"
+                })
+                setError(errorUser)
+                dispatch(userReducer.actions.errorSetDefault())
+                return 
+            }
+            navigate('/login')
+            Swal.fire({
+                title: 'Сообщение на почту отправлено',
+                text: 'Следующее восстановление будет доступно через 15 минут.',
+                icon: 'success',
+                timer: 5000
+            })
+        })
+        
     }
     async function resendPasswordOnEmail(e) {
         e.preventDefault()
         //resendMutation.mutate(email)
-        const response = await dispatch(resendRestoreEmail({ email }))
-        let errorStore = store.getState().user.error 
-        if (errorStore) setError(errorStore)
+        dispatch(resendRestoreEmail({ email }))
+        .then(() => {   
+            let errorStore = store.getState().user.error 
+            if (errorStore) setError(errorStore)
+        })
+        
     }
     /**
      * 

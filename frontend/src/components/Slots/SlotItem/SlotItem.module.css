@@ -33,6 +33,13 @@
     border: 1px solid #99d98c;
     color: #F1FAEE;
 }
+
+@media(max-width: 640px) {
+    .slot {
+        padding: 5px;
+    }
+}
+
 /*
 @media (max-width: 640px) {
     .slot {

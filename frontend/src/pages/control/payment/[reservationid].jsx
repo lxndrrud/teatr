@@ -31,23 +31,22 @@ function PaymentReservationPage() {
             idReservation
         }))
         .then(() => {
-            const errorFromStore = store.getState().reservation.error
-            if (errorFromStore !== null) {
+            const errorReservation = store.getState().reservation.error
+            if (errorReservation) {
                 swal.fire({
                     title: 'Произошла ошибка!',
                     text: errorFromStore,
                     icon: "error"
                 })
                 dispatch(reservationReducer.actions.clearError())
+                return
             }
-            else {
-                swal.fire({
-                    title: 'Бронь оплачена!',
-                    icon: "success",
-                    timer: 2000
-                })
-                setTimeout(navigate('/control'), 2100) 
-            }
+            swal.fire({
+                title: 'Бронь оплачена!',
+                icon: "success",
+                timer: 3000
+            })
+            setTimeout(navigate('/control'), 3100) 
         })
     }
     return (

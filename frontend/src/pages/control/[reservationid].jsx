@@ -18,7 +18,6 @@ function ReservationDetailPage() {
     const { idReservation } = useParams()
     let token = useSelector(state => state.user.token)
     let isLoading = useSelector(state => state.reservation.isLoading)
-    let errorReservation = useSelector(state => state.reservation.error)
 
     useEffect(() => {
         if (!checkLogin(store)) {
@@ -27,16 +26,18 @@ function ReservationDetailPage() {
         }
         if (idReservation) {
             dispatch(fetchReservation({token, idReservation}))
-                .then(() => {
-                    if (errorReservation) {
-                        swal.fire({
-                            title: 'Произошла ошибка!',
-                            text: errorReservation,
-                            icon: 'error'
-                        })
-                        dispatch(reservationReducer.actions.clearError())
-                    }
-                })
+            .then(() => {
+                const errorReservation = store.getState().reservation.error
+                if (errorReservation) {
+                    swal.fire({
+                        title: 'Произошла ошибка!',
+                        text: errorReservation,
+                        icon: 'error'
+                    })
+                    dispatch(reservationReducer.actions.clearError())
+                    return
+                }
+            })
         }
     }, [navigate, store, dispatch, token])
 

@@ -4,14 +4,15 @@ import { changePassword } from '../../../store/actions/userAction'
 import BaseForm from "../BaseForm/BaseForm"
 import CustomInput from "../../UI/CustomInput/CustomInput"
 import CustomButton from '../../UI/CustomButton/CustomButton'
-import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
-import swal from 'sweetalert2'
 import { userReducer } from '../../../store/reducers/userReducer'
+import Swal from 'sweetalert2'
+import { useNavigate } from 'react-router-dom'
 
 
 function UserEditPasswordForm() {
   const dispatch = useDispatch()
   const store = useStore()
+  const navigate = useNavigate()
   let { token } = useSelector(state => state.user)
 
   let [credentials, setCredentials] = useState({
@@ -20,52 +21,62 @@ function UserEditPasswordForm() {
     confirmPassword: ''
   })
 
-  let [success, setSuccess] = useState(null)
-  let [error, setError] = useState(null)
-
   function validate() {
     if (!credentials.oldPassword) {
-      setError('Введите старый пароль')
+      Swal.fire({
+          title: 'Ошибка!',
+          text: 'Введите старый пароль',
+          icon: "warning"
+      })
       return false
     }
     else if (!credentials.newPassword) {
-      setError('Введите новый пароль')
+      Swal.fire({
+        title: 'Ошибка!',
+        text: 'Введите новый пароль',
+        icon: "warning"
+      })
       return false
     }
     else if (!credentials.confirmPassword) {
-      setError("Введите подтверждение нового пароля")
+      Swal.fire({
+        title: 'Ошибка!',
+        text: "Введите подтверждение нового пароля",
+        icon: "warning"
+      })
       return false
     }
     return true
   }
 
-  function sendChangePasswordRequest(e) {
-    e.preventDefault()
+  async function sendChangePasswordRequest(e) {
+      e.preventDefault()
 
-    if (!validate()) return
+      if (!validate()) return
 
-    setError(null)
-    setSuccess(null)
-
-    dispatch(changePassword({ token, passwordInfo: credentials }))
-    const errorStore = store.getState().user.error
-    if (!errorStore) {
-      swal.fire({
-        title: 'Пароль изменен!',
-        icon: 'success',
-        timer: 2000
+      dispatch(changePassword({ token, passwordInfo: credentials }))
+      .then(() => {
+          const errorUser = store.getState().user.error
+          if (errorUser) {
+              Swal.fire({
+                  title: "Произошла ошибка!",
+                  text: errorUser,
+                  icon: 'error'
+              })
+              dispatch(userReducer.actions.errorSetDefault())
+              return
+          }
+          Swal.fire({
+            title: 'Пароль изменен!',
+            icon: 'success',
+            timer: 3000
+          })
+          setTimeout(navigate('/user/personalArea'), 3500)
       })
-    } else {
-      setError(errorStore)
-      dispatch(userReducer.actions.errorSetDefault())
-    }
-   
+      
   }
   return (
     <BaseForm>
-      {
-        error && <ErrorMessage text={error} />
-      }
       <CustomInput 
         type="password"
         description="Старый пароль" 

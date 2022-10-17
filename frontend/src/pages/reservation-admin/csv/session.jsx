@@ -5,7 +5,8 @@ import FilePicker from "../../../components/UI/FilePicker/FilePicker";
 import AdminLayout from "../../../layouts/AdminLayout/AdminLayout";
 import { checkLogin } from "../../../middlewares/authFunctions";
 import { createSessionsCSV } from "../../../store/actions/sessionAction"
-import swal from 'sweetalert2'
+import Swal from 'sweetalert2'
+import { sessionReducer } from "../../../store/reducers/sessionReducer";
 
 export default function SessionCSVUploadingPage() {
     const dispatch = useDispatch()
@@ -26,24 +27,26 @@ export default function SessionCSVUploadingPage() {
         setSelectedFile(file)
     }
     const onButtonClick = (e) => {
-        dispatch(createSessionsCSV({ token, file: selectedFile }))
+        e.preventDefault()
 
-        const error = store.getState().session.error
-        if (!error) {
-            swal.fire({
+        dispatch(createSessionsCSV({ token, file: selectedFile }))
+        .then(() => {
+            const errorSession = store.getState().session.error
+            if (errorSession) {
+                Swal.fire({
+                    title: 'Произошла ошибка!',
+                    text: errorSession,
+                    icon: 'error'
+                })
+                dispatch(sessionReducer.actions.clearError())
+                return
+            }
+            Swal.fire({
                 title: 'Сеансы успешно загружены!',
                 icon: 'success',
                 timer: 2500
             })
-        } else {
-            //setErrorMessage(error)
-            swal.fire({
-                title: 'Произошла ошибка!',
-                text: error,
-                icon: 'error'
-            })
-            dispatch(clearSuccessErrorSession())
-        }
+        })
     }
     return (
         <AdminLayout title="Импорт сеансов">

@@ -3,30 +3,38 @@ import ReservationConfirmationForm
     from "../../components/Forms/ReservationConfirmationForm/ReservationConfirmationForm";
 import { useEffect } from "react";
 import { useSelector, useStore, useDispatch } from "react-redux";
-//import { useRouter } from "next/router";
 import { fetchReservation } from "../../store/actions/reservationAction";
 import { checkLogin } from "../../middlewares/authFunctions";
 import { useNavigate, useParams } from "react-router-dom";
+import swal from 'sweetalert2'
 
 function ConfirmationPage() {
     const store = useStore()
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    //const router = useRouter()
 
     const { idReservation }  = useParams()
     let { token } = useSelector(state => state.user)
 
     useEffect(() => {
-        //const token = store.getState().user.token
-        //if (router.isReady) {
-            if (!checkLogin(store)) {
-                navigate('/login')
+        if (!checkLogin(store)) {
+            navigate('/login')
+            return
+        }
+        // Задиспатчить получение брони 
+        dispatch(fetchReservation({ token, idReservation }))
+        .then(() => {
+            const errorReservation = store.getState().reservation.error
+            if (errorReservation) {
+                swal.fire({
+                    title: 'Произошла ошибка!',
+                    text: errorReservation,
+                    icon: "error"
+                })
                 return
             }
-            // Задиспатчить получение брони 
-            dispatch(fetchReservation({ token, idReservation }))
-        //}
+        })
+        
     }, [token, store])
 
     return (

@@ -6,6 +6,8 @@ import { fetchReservations } from "../../store/actions/reservationAction"
 import { useEffect } from "react"
 import { checkLogin } from "../../middlewares/authFunctions"
 import { useNavigate } from "react-router-dom"
+import { reservationReducer } from "../../store/reducers/reservationReducer"
+import Swal from 'sweetalert2'
 
 export default function ControlIndexPage() {
     const dispatch = useDispatch()
@@ -20,6 +22,16 @@ export default function ControlIndexPage() {
             return
         }
         dispatch(fetchReservations({ token }))
+        const errorReservation = store.getState().reservation.error
+        if (errorReservation) {
+            Swal.fire({
+                title: 'Произошла ошибка!',
+                text: errorReservation,
+                icon: 'error'
+            })
+            dispatch(reservationReducer.actions.clearError())
+            return
+        }
     }, [dispatch, navigate, token, store])
 
     return (

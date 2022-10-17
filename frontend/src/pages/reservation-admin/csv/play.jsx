@@ -1,4 +1,3 @@
-//import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -12,37 +11,39 @@ import { playReducer } from "../../../store/reducers/playReducer";
 export default function PlayCSVUploadingPage() {
     const dispatch = useDispatch()
     const store = useStore()
-    //const router = useRouter()
     const navigate = useNavigate()
+
     let { token } = useSelector(state => state.user)
-    let [errorMessage, setErrorMessage] = useState()
-    let [successMessage, setSuccessMessage] = useState()
     let [selectedFile, setSelectedFile] = useState()
 
     useEffect(() => {
-        //if (router.isReady) {
         if (!checkLogin(store)) {
             navigate('/reservation-admin/login')
             return
         }
-        //}
     }, [navigate, store])
     const onChangeHook = (file) => {
         setSelectedFile(file)
     }
     const onButtonClick = (e) => {
         dispatch(createPlaysCSV({ token, file: selectedFile }))
-        const { error,  } = useSelector(state => state.play)
-        if (!error) {
+        .then(() => {
+            const errorPlay = store.getState().play.error
+            if (errorPlay) {
+                Swal.fire({
+                    title: 'Произошла ошибка!',
+                    text: errorPlay,
+                    icon: "error"
+                })
+                dispatch(playReducer.actions.clearError())
+                return
+            }
             Swal.fire({
                 title: 'Спектакли успешно загружены!',
                 icon: 'success',
-                timer: 2000
+                timer: 5000
             })
-        } else {
-            setErrorMessage(error)
-            dispatch(playReducer.actions.clearError())
-        }
+        })
     }
     
     return (
@@ -50,8 +51,6 @@ export default function PlayCSVUploadingPage() {
             <FilePicker 
                 onClickHook={onButtonClick} 
                 onChangeHook={onChangeHook} 
-                error={errorMessage}
-                success={successMessage}
             />
         </AdminLayout>
     )

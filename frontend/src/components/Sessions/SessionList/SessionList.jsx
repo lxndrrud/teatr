@@ -5,14 +5,16 @@ import SessionItem from '../SessionItem/SessionItem.jsx'
 export default function SessionList({ sessions }) {
     let isLoading = useSelector(state => state.session.isLoading)
     return (
-        <div className="[@media(min-width:1600px)]:ml-[5%] mx-auto sm:mx-0 w-[95%] 
+        <div className="[@media(min-width:1600px)]:ml-[1%] mx-auto sm:mx-0 w-[95%] sm:w-[99%]
                         flex flex-col [@media(min-width:1600px)]:flex-row flex-wrap 
                         justify-center [@media(min-width:1600px)]:justify-start
                         items-center">
             {
                 isLoading
                 ?
-                    <Preloader />
+                    <div className='flex w-full lg:ml-[55px]'>
+                        <Preloader />
+                    </div>
                 :
                     (sessions && sessions.length > 0 
                         ? 

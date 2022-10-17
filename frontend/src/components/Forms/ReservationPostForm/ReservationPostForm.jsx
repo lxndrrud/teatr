@@ -33,7 +33,7 @@ function ReservationPostForm() {
                 }
             }) 
             dispatch(sessionReducer.actions.fetchSlots(response.data))
-            await subscribe()
+            .then(async () => { await subscribe() })
         } catch (e) {
             setTimeout(() => {
                 subscribe()

@@ -23,7 +23,7 @@ function DeleteReservationPage() {
         }
     }, [store, navigate])
 
-    const deleteHook = (e) => {
+    const deleteHook = async (e) => {
         e.preventDefault()
         
         const token = store.getState().user.token
@@ -32,23 +32,22 @@ function DeleteReservationPage() {
             idReservation
         }))
         .then(() => {
-            const errorFromStore = store.getState().reservation.error
-            if (errorFromStore !== null) {
+            const errorReservation = store.getState().reservation.error
+            if (errorReservation) {
                 swal.fire({
                     title: 'Произошла ошибка!',
-                    text: errorFromStore,
+                    text: errorReservation,
                     icon: "error"
                 })
                 dispatch(reservationReducer.actions.clearError())
+                return
             }
-            else {
-                swal.fire({
-                    title: 'Бронь удалена!',
-                    icon: "success",
-                    timer: 2000
-                })
-                setTimeout(navigate('/control'), 2100)
-            }
+            swal.fire({
+                title: 'Бронь удалена!',
+                icon: "success",
+                timer: 2000
+            })
+            setTimeout(navigate('/control'), 2100)
         })
     }
 

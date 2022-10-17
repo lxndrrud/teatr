@@ -11,7 +11,6 @@ import styles from "./RegisterForm.module.css"
 import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { checkLogin } from '../../../middlewares/authFunctions'
 import Preloader from '../../UI/Preloader/Preloader'
-import swal from 'sweetalert2'
 
 function RegisterForm() {
     const dispatch = useDispatch()
@@ -52,14 +51,16 @@ function RegisterForm() {
         e.preventDefault()
 
         if (email && password) {
-            await dispatch(register({ email, password, firstname, middlename, lastname }))
-            const errorFromStore = store.getState().user.error
-            if (errorFromStore) {
-                setError(errorFromStore)
-                await dispatch(userReducer.actions.errorSetDefault())
-                return
-            }
-            navigate('/')
+            dispatch(register({ email, password, firstname, middlename, lastname }))
+            .then(() => {
+                const errorFromStore = store.getState().user.error
+                if (errorFromStore) {
+                    setError(errorFromStore)
+                    dispatch(userReducer.actions.errorSetDefault())
+                    return
+                }
+                navigate('/')
+            })
         }
     }
     return (

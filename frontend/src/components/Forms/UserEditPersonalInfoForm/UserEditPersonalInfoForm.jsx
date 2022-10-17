@@ -3,11 +3,10 @@ import { useDispatch, useSelector, useStore } from 'react-redux'
 import BaseForm from '../BaseForm/BaseForm'
 import CustomButton from '../../UI/CustomButton/CustomButton'
 import CustomInput from "../../UI/CustomInput/CustomInput"
-import ErrorMessage from '../../UI/ErrorMessage/ErrorMessage'
 import { useNavigate } from 'react-router-dom'
 import { changePersonalInfo } from '../../../store/actions/userAction'
 import { userReducer } from '../../../store/reducers/userReducer'
-import swal from 'sweetalert2'
+import Swal from 'sweetalert2'
 
 
 function UserEditPersonalInfoForm() {
@@ -19,8 +18,6 @@ function UserEditPersonalInfoForm() {
     let [firstname, setFirstname] = useState(useSelector(state => state.user.user.firstname))
     let [middlename, setMiddlename] = useState(useSelector(state => state.user.user.middlename))
     let [lastname, setLastname] = useState(useSelector(state => state.user.user.lastname))
-
-    let [error, setError] = useState(null)
 
     function validate() {
         let user = {
@@ -38,34 +35,34 @@ function UserEditPersonalInfoForm() {
         return user
     }
 
-    function sendChangePersonalRequest(e) {
+    async function sendChangePersonalRequest(e) {
         e.preventDefault()
-
-        setError(null)
 
         const user = validate()
         
-        dispatch(changePersonalInfo({token, personalInfo: user}))
-        const errorStore = store.getState().user.error
-        if (!errorStore) {
-            swal.fire({
+        dispatch(changePersonalInfo({ token, personalInfo: user }))
+        .then(() => {
+            const errorUser = store.getState().user.error
+            if (errorUser) {
+                Swal.fire({
+                    title: 'Произошла ошибка!',
+                    text: errorUser,
+                    icon: 'error'
+                })
+                dispatch(userReducer.actions.errorSetDefault())
+                return
+            }
+            Swal.fire({
                 title: 'Информация успешно изменена!',
                 icon: 'success',
-                timer: 2000
+                timer: 3000
             })
-            setTimeout(() => navigate('/user/personalArea'), 2500)
-        } else {
-            setError(errorStore)
-            dispatch(userReducer.actions.errorSetDefault())
-        }
-        
+            setTimeout(navigate('/user/personalArea'), 3500)
+        })
     }
 
     return (
         <BaseForm>
-            {
-                error && <ErrorMessage text={error} />
-            }
             <CustomInput
                 description={'Фамилия'} 
                 value={lastname} 
