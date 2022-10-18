@@ -1,12 +1,26 @@
+import { useState } from 'react'
 import SessionPagination from '../../Pagination/SessionPagination/SessionPagination'
 import { useSelector } from "react-redux"
 import DetailImage from "../../UI/Images/DetailImage/DetailImage"
 import Preloader from '../../UI/Preloader/Preloader'
+import CustomButton from '../../UI/CustomButton/CustomButton'
 
 
+function ShowDescriptionButton({ showDescription, setShowDescription }) {
+    return (
+        <div className='mt-3 w-full flex justify-center align-center'>
+            <div className='lg:ml-[150px] w-[max-content]'>
+                <CustomButton 
+                    onClickHook={() => setShowDescription(!showDescription)} 
+                    value={ showDescription ? "Скрыть описание": "Показать описание" }
+                />
+            </div>
+        </div>)
+}
 
 export default function PlayDetail({ images }) {
     const { play, isLoading } = useSelector(state => state.play)
+    let [showDescription, setShowDescription] = useState(false)
     if (isLoading) return <Preloader />
     return (
         <div className="flex flex-col w-[100%] lg:w-[90%]">
@@ -29,13 +43,27 @@ export default function PlayDetail({ images }) {
                    
                 </table>
             </div>
-            <div className="w-[90%] sm:w-[100%] mx-auto mt-3 sm:mx-0">
-                {
-                    play.description && play.description.map(paragraph => (
-                        <h2 className="mt-2 text-justify">{paragraph}</h2>
-                    ))
-                }
-            </div>
+            <ShowDescriptionButton  
+                showDescription={showDescription} 
+                setShowDescription={setShowDescription} 
+            />
+            {
+                showDescription 
+                && 
+                <div>
+                    <div className="w-[90%] sm:w-[100%] mx-auto mt-3 sm:mx-0">
+                        {
+                            play.description && play.description.map(paragraph => (
+                                <h2 className="mt-3 text-justify">{paragraph}</h2>
+                            ))
+                        }
+                    </div>
+                    <ShowDescriptionButton  
+                        showDescription={showDescription} 
+                        setShowDescription={setShowDescription} 
+                    />
+                </div>
+            }
             <div className="w-[100%] mt-3 lg:ml-[75px]">
                 <SessionPagination itemsPerPage={3} />
             </div>

@@ -6,7 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useDispatch, useSelector, useStore} from 'react-redux'
 import { useEffect } from 'react'
 import { checkLogin } from '../../middlewares/authFunctions';
-import swal from 'sweetalert2'
+import Swal from 'sweetalert2'
 import { reservationReducer } from '../../store/reducers/reservationReducer';
 import { playReducer } from '../../store/reducers/playReducer';
 import { sessionReducer } from '../../store/reducers/sessionReducer';
@@ -28,9 +28,9 @@ function SessionReservationPage() {
             dispatch(fetchSession({ token, idSession }))
             const errorSession = store.getState().session.error
             if (errorSession) {
-                swal.fire({
+                Swal.fire({
                     title: 'Произошла ошибка!',
-                    title: errorSession,
+                    text: errorSession,
                     icon: 'error'
                 })
                 dispatch(sessionReducer.actions.clearError())
@@ -48,7 +48,7 @@ function SessionReservationPage() {
             .then(() => {
                 const errorPlay = store.getState().play.error
                 if (errorPlay) {
-                    swal.fire({
+                    Swal.fire({
                         title: 'Произошла ошибка!',
                         text: errorPlay,
                         icon: 'error'

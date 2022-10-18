@@ -1,4 +1,4 @@
-export const layoutStyle = `relative flex flex-row justify-start`
+export const layoutStyle = `relative flex flex-row justify-start z-0`
 
 export const titleStyle = `m-0 sm:my-[1rem] w-[100%] text-[28px] font-bold 
 flex flex-row justify-center sm:justify-start items-center sm:items-start text-center`
