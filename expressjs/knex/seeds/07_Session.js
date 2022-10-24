@@ -9,25 +9,25 @@ exports.seed = async function(knex) {
     {
       id_play: 1,
       is_locked: false,
-      timestamp: '2022-10-15T23:00+0300',
+      timestamp: '2022-10-15T15:00+0300',
       id_price_policy: 1
     },
     {
       id_play: 1,
       is_locked: false,
-      timestamp: '2022-10-20T08:30+0300',
+      timestamp: '2022-10-20T15:30+0300',
       id_price_policy: 1
     },
     {
       id_play: 2,
       is_locked: false,
-      timestamp: '2022-10-21T07:30+0300',
+      timestamp: '2022-11-21T15:30+0300',
       id_price_policy: 2
     },
     {
       id_play: 2,
       is_locked: false,
-      timestamp: '2022-10-22T08:30+0300',
+      timestamp: '2022-12-22T15:30+0300',
       id_price_policy: 1
     }
   ]);

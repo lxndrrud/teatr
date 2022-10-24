@@ -26,17 +26,19 @@ function SessionReservationPage() {
         }
         if (idSession) {
             dispatch(fetchSession({ token, idSession }))
-            const errorSession = store.getState().session.error
-            if (errorSession) {
-                Swal.fire({
-                    title: 'Произошла ошибка!',
-                    text: errorSession,
-                    icon: 'error'
-                })
-                dispatch(sessionReducer.actions.clearError())
-                return
-            }
-            dispatch(reservationReducer.actions.clearSlots())
+            .then(() => {
+                const errorSession = store.getState().session.error
+                if (errorSession) {
+                    Swal.fire({
+                        title: 'Произошла ошибка!',
+                        text: errorSession,
+                        icon: 'error'
+                    })
+                    dispatch(sessionReducer.actions.clearError())
+                    navigate('/schedule')
+                }
+                dispatch(reservationReducer.actions.clearSlots())
+            })
         }
     }, [navigate, dispatch, store, token])
 
@@ -54,7 +56,7 @@ function SessionReservationPage() {
                         icon: 'error'
                     })
                     dispatch(playReducer.actions.clearError())
-                    return
+                    navigate('/schedule')
                 }
             })
             

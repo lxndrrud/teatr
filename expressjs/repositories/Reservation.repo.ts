@@ -232,7 +232,7 @@ export class ReservationRepo implements IReservationRepo {
         const reservations = await this.connection.createQueryBuilder(Reservation, 'r')
             .innerJoinAndSelect('r.session', 's')
             .where(new Brackets(builder => {
-                builder.where('r.createdAt >= :resDelTimestamp', { resDelTimestamp: reservationDeleteTimestamp })
+                builder.where('r.createdAt <= :resDelTimestamp', { resDelTimestamp: reservationDeleteTimestamp })
                 builder.andWhere('r.isConfirmed = :isConfirmedFalse', { isConfirmedFalse: false })
             }))
             .orWhere(new Brackets(builder => {

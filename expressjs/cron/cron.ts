@@ -30,22 +30,23 @@ export class CronProcessor implements ICronProcessor {
         this.reservationsRepo = reservationRepoInstance
     }
 
-    public eveyMinuteTask() {
+    public async eveyMinuteTask() {
         console.log('1m cron task')
-        this.processSessions()
-        this.processReservations()
+        await Promise.all([
+            this.processSessions(),
+            this.processReservations()
+        ])
     }
 
     private async processSessions() {
         try {
-            const sessionIDs = await this.sessionRepo.lockSessions(moment().subtract(15, 'minutes')
+            const sessionIDs = await this.sessionRepo.lockSessions(moment().add(15, 'minutes')
                 .format('YYYY-MM-DDThh:mm:ss').toString())
-            console.log('sess', sessionIDs.length)
             for (const idSession of sessionIDs) {
                 await this.sessionRedisRepo.clearSession(idSession)
-                await this.playRedisRepo.clearUnlockedPlays()
-                await this.sessionFilterRedisRepo.clearFilteredSession(idSession)
             }
+            await this.sessionFilterRedisRepo.clearFilteredSessions()
+            await this.playRedisRepo.clearUnlockedPlays()
         } catch (error) {
             console.log(error)
         }

@@ -4,13 +4,12 @@ import { SessionFilterQueryInterface, SessionInterface } from "../interfaces/ses
 export interface ISessionFilterRedisRepo {
     setFilteredSessions(sessionQuery: SessionFilterQueryInterface, sessions: SessionInterface[]): Promise<void>
     getFilteredSessions(sessionQuery: SessionFilterQueryInterface): Promise<SessionInterface[] | null>
-    clearFilteredSession(idSession: number): Promise<void>
+    clearFilteredSessions(): Promise<void>
 }
 
 export class SessionFilterRedisRepo implements ISessionFilterRedisRepo {
     private connection
     private sessionFilterString = 'sessionFilter'
-    private sessionFilterReverseString = 'sessionFilterReverse'
     
     constructor(
         redisConnection: Redis
@@ -26,9 +25,6 @@ export class SessionFilterRedisRepo implements ISessionFilterRedisRepo {
         const preparedQuery = this.parseSessionQueryInterface(sessionQuery)
         await this.connection.hset(this.sessionFilterString, 
             preparedQuery, JSON.stringify(sessions))
-        for (const session of sessions) {
-            await this.connection.hset(this.sessionFilterReverseString, `session-${session.id}`, preparedQuery)
-        }
     }
 
     public async getFilteredSessions(sessionQuery: SessionFilterQueryInterface) {
@@ -37,10 +33,7 @@ export class SessionFilterRedisRepo implements ISessionFilterRedisRepo {
         return <SessionInterface[]> JSON.parse(sessionsString)
     }
 
-    public async clearFilteredSession(idSession: number) {
-        const queryPayloads = await this.connection.hmget(this.sessionFilterReverseString, `session-${idSession}`)
-        for (const payload of queryPayloads) {
-            if (payload) await this.connection.hdel(this.sessionFilterString, payload)
-        }
+    public async clearFilteredSessions() {
+        await this.connection.del(this.sessionFilterString)
     }
 }

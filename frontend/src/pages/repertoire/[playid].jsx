@@ -3,7 +3,7 @@ import PlayDetail from "../../components/Plays/PlayDetail/PlayDetail"
 import { fetchPlay } from "../../store/actions/playAction"
 import { fetchSessionsByPlay } from "../../store/actions/sessionAction"
 import { useDispatch, useSelector, useStore } from 'react-redux'
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useEffect } from "react"
 import { playReducer } from '../../store/reducers/playReducer'
 import { sessionReducer } from '../../store/reducers/sessionReducer'
@@ -12,6 +12,7 @@ import Swal from "sweetalert2"
 export default function PlayPage() {
     const dispatch = useDispatch()
     const store = useStore()
+    const navigate = useNavigate()
     const { idPlay } = useParams()
     useEffect(() => {
         dispatch(fetchPlay({ idPlay }))
@@ -24,7 +25,7 @@ export default function PlayPage() {
                     icon: 'error'
                 })
                 dispatch(playReducer.actions.clearError())
-                return
+                navigate("/repertoire")
             }   
         })
         dispatch(fetchSessionsByPlay({ idPlay }))
@@ -37,6 +38,7 @@ export default function PlayPage() {
                     icon: 'error'
                 })
                 dispatch(sessionReducer.actions.clearError())
+                navigate("/repertoire")
             }
         })
     }, [dispatch])

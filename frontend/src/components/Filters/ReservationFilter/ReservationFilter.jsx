@@ -28,13 +28,6 @@ function ReservationFilter() {
     }, [dispatch, token])
 
     // Функции для синронизации состояния с input`ами
-    /*
-    const syncDate = (e) => {
-        if (e.target.value === 'None') setDate()
-        else setDate(e.target.value)
-    }
-    */
-
     const syncDateFrom = (e) => {
         if (!e.target.value) setDateFrom('undefined')
         else setDateFrom(e.target.value)
@@ -53,7 +46,7 @@ function ReservationFilter() {
         else setPlayTitle(e.target.value)
     }
     const syncShowLocked = (e) => {
-        if (e.target.value === 'None')  setShowLocked()
+        if (e.target.value === 'None')  setShowLocked('undefined')
         else if (e.target.value === 'true') setShowLocked(true)
         else if (e.target.value === 'false') setShowLocked(false)
     }
@@ -69,11 +62,11 @@ function ReservationFilter() {
             }
 
             if (parsedInt <= 0 ) {
-                setReservationNumber(undefined)
+                setReservationNumber('undefined')
                 setError("Значение должно быть больше нуля")
             }
             else if (isNaN(parsedInt)) {
-                setReservationNumber(undefined)
+                setReservationNumber('undefined')
                 setError('Неверный номер брони')
             }
             else if (parsedInt) {

@@ -54,15 +54,19 @@ export class SessionCRUDService implements ISessionCRUDService {
     }
     
     public async updateSession(idSession: number, payload: SessionBaseInterface) {
-        await this.sessionRedisRepo.clearSession(idSession)
-        await this.sessionFilterRedisRepo.clearFilteredSession(idSession)
-        await this.sessionRepo.updateSession(idSession, payload)
+        await Promise.all([
+            this.sessionRedisRepo.clearSession(idSession),
+            this.sessionFilterRedisRepo.clearFilteredSessions(),
+            this.sessionRepo.updateSession(idSession, payload)
+        ])
     }
 
     public async deleteSession(idSession: number) {
-        await this.sessionRedisRepo.clearSession(idSession)
-        await this.sessionFilterRedisRepo.clearFilteredSession(idSession)
-        await this.sessionRepo.deleteSession(idSession)
+        await Promise.all([
+            this.sessionRedisRepo.clearSession(idSession),
+            this.sessionFilterRedisRepo.clearFilteredSessions(),
+            this.sessionRepo.deleteSession(idSession)
+        ])
     }
 
     public async getUnlockedSessions() {
