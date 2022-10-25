@@ -1,0 +1,12 @@
+.layout_left { grid-area: left; }
+.layout_main { grid-area: center; }
+.layout_right { grid-area: right; }
+.layout_footer { grid-area: bottom; }
+
+.layout_grid-container {
+    display: grid;
+    gap: 0px;
+    grid-template-areas:
+        'left center right'
+        'bottom bottom bottom';
+}

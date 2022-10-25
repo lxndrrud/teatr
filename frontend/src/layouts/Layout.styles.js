@@ -1,14 +1,17 @@
-export const layoutStyle = `relative flex flex-row justify-start z-0`
+export const layoutStyle = `layout_grid-container flex flex-col justify-center 
+    align-center mx-auto absolute w-full z-0 mt-[50px]`
 
-export const titleStyle = `m-0 sm:my-[1rem] w-[100%] text-[28px] font-bold 
+export const titleStyle = `m-0 sm:my-[1rem] text-[28px] font-bold 
 flex flex-row justify-center sm:justify-start items-center sm:items-start text-center`
 
-export const mainContentStyle = `w-[100%] min-w-[200px] min-h-[100vh] 
-mt-[70px] sm:mt-0 ml-0 sm:ml-[100px] 
+export const mainContentStyle = `layout_main lg:w-[85%] lg:mx-auto min-w-[200px]
+mt-[70px] sm:mt-0 ml-0 px-2
 flex flex-col`
 
 export const mainContentExpandedStyle = `ml-0 sm:ml-[300px]`
 
-export const contentStyle = `flex flex-col min-h-[75vh]`
+export const contentStyle = `min-h-[70vh]`
 
-export const footerStyle = `sm:h-[14vh] mt-3 w-[99%]`
+export const footerStyle = `layout_footer sm:h-[14vh] mt-3`
+
+export const footerExpandedStyle = `ml-0 sm:ml-[300px]`

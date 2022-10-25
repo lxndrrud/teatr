@@ -31,8 +31,10 @@ export default function SchedulePage() {
     return (
         <div>
             <MainLayout title="Афиша">
-                <SessionFilter />
-                <SessionPagination />
+                <div className="w-full">
+                    <SessionFilter />
+                    <SessionPagination />
+                </div>
             </MainLayout>
         </div>
     )

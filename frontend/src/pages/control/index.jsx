@@ -37,8 +37,10 @@ export default function ControlIndexPage() {
     return (
         <div>
             <MainLayout title="Управление бронями">
-                <ReservationFilter />
-                <ReservationPagination />
+                <div className="w-full">
+                    <ReservationFilter />
+                    <ReservationPagination />
+                </div>
             </MainLayout>
         </div>
     )

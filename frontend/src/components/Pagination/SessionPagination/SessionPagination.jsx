@@ -36,7 +36,7 @@ function SessionPagination({ itemsPerPage=6 }) {
         }
     }, [sessions, activePage])
     return (
-        <div className='w-[100%]'>
+        <div>
             <PaginationButtons 
                 activePage={activePage} 
                 setActivePage={setActivePage} 

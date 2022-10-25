@@ -5,13 +5,16 @@ import { toggleNavbar } from "../../store/actions/designAction"
 import { footerStyle, layoutStyle, mainContentExpandedStyle, mainContentStyle, titleStyle, contentStyle } from '../Layout.styles'
 import Footer from '../../components/Footer/Footer'
 import Header from '../../components/Header/Header'
+import curtain from  '../../assets/curtain.png'
+//import '../Layout.css'
 
 export default function MainLayout({ children, title }) {
     const dispatch = useDispatch()
     let { navbarIsHidden } = useSelector(state => state.design)
     let mainContent = navbarIsHidden 
         ? mainContentStyle
-        : `${mainContentStyle} ${mainContentExpandedStyle}`
+        : mainContentStyle
+        //: `${mainContentStyle} ${mainContentExpandedStyle}`
 
     useEffect(() => {
         document.title = "Брони на Оборонной"
@@ -19,9 +22,11 @@ export default function MainLayout({ children, title }) {
 
     return (
         <div>
-            {/*<Header title={title} />*/}
+            <Header />
             <div className={layoutStyle}>
-                <NavBarController />
+                {/* <NavBarController /> */}
+                <div className='layout_left lg:w-[200px] bg-[blue]' >
+                </div>
                 <main className={mainContent} 
                     /*onClick={() => {
                         if (!isHidden) {
@@ -35,11 +40,12 @@ export default function MainLayout({ children, title }) {
                     <div className={contentStyle}>
                         { children }
                     </div>
-                    
-                    <footer className={footerStyle}>
-                        <Footer />
-                    </footer>
                 </main>
+                <div className='layout_right lg:w-[200px] bg-[blue]' >
+                </div>
+                <footer className={footerStyle}>
+                    <Footer />
+                </footer>
             </div>
             
         </div>
