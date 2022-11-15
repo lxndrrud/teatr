@@ -84,12 +84,12 @@ function Header() {
                         <CustomLink destination="/login" text="Войти"  />
                     </div>
                     : 
-                    <div className='ml-3'>
+                    <span className='ml-3 p-2'>
                         <CustomButton 
                             value={'Выйти'}
                             onClickHook={logOutOnClick}
                         />
-                    </div>
+                    </span>
                     
                 }
             </nav>  

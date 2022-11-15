@@ -4,7 +4,7 @@ export const layoutStyle = `layout_grid-container flex flex-col justify-center
 export const titleStyle = `m-0 sm:my-[1rem] text-[28px] font-bold 
 flex flex-row justify-center sm:justify-start items-center sm:items-start text-center`
 
-export const mainContentStyle = `layout_main lg:w-[85%] lg:mx-auto min-w-[200px]
+export const mainContentStyle = `layout_main lg:w-[75%] lg:mx-auto min-w-[200px]
 mt-[70px] sm:mt-0 ml-0 px-2
 flex flex-col`
 
