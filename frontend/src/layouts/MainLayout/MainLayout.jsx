@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { toggleNavbar } from "../../store/actions/designAction"
 import { footerStyle, layoutStyle, mainContentExpandedStyle, mainContentStyle, titleStyle, contentStyle } from '../Layout.styles'
 import Footer from '../../components/Footer/Footer'
-import Header from '../../components/Header/Header'
+import Header, { HeaderController } from '../../components/Header/Header'
 import curtain from  '../../assets/curtain.png'
 //import '../Layout.css'
 
@@ -22,7 +22,8 @@ export default function MainLayout({ children, title }) {
 
     return (
         <div>
-            <Header />
+            { /*<Header /> */}
+            <HeaderController />
             <div className={layoutStyle}>
                 {/* <NavBarController /> */}
                 <div className='layout_left lg:w-[200px] bg-[blue]' >

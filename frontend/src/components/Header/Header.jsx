@@ -1,11 +1,32 @@
 import React, { useState } from 'react'
+import { useEffect } from 'react'
 import { useDispatch, useStore } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { checkLogin } from '../../middlewares/authFunctions'
 import { userReducer } from '../../store/reducers/userReducer'
+import NavBarController from '../NavBar/NavBarController/NavBarController'
 import CustomButton from '../UI/CustomButton/CustomButton'
 import CustomLink from '../UI/CustomLink/CustomLink'
 import IconSVG from '../UI/IconSVG/IconSVG'
+
+export function HeaderController() {
+    let [mobileFlag, setMobileFlag] = useState(false)
+    useEffect(() => {
+        console.log('kek')
+        const calculcatedWidth = (window.innerWidth > 0) ? window.innerWidth : screen.width
+        if (calculcatedWidth <= 640) setMobileFlag(true)
+        else setMobileFlag(false) 
+    }, [window.innerWidth, screen.width])
+
+    switch (mobileFlag) {
+        case true:
+            return <NavBarController />
+        case false: 
+            return <Header />
+        default:
+            return <Header />
+    } 
+} 
 
 function Header() {
     const dispatch = useDispatch()
