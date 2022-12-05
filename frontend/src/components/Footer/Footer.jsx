@@ -11,7 +11,7 @@ function Footer() {
                             flex flex-col sm:flex-row 
                             justiy-center items-center sm:justify-between'>
                 <CustomExternalLink destination={"http://teatrnaoboronny.ru"} text={'Главный сайт'} />
-                <CustomExternalLink destination={"https://vk.com/teatr_ua"} text={'Группа ВК'} />
+                <CustomExternalLink destination={"https://vk.com/teatr_ru"} text={'Группа ВК'} />
             </div>
             <div className='mt-2 flex flex-col sm:flex-row justify-center items-center'>
                 <div className='relative border border-solid  rounded-full'>
