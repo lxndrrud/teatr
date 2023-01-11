@@ -49,7 +49,7 @@ export class PlayService implements IPlayService {
     }
 
     public async getSinglePlay(idPlay: number) {
-        // Проверка хэша
+        // Проверка кэша
         const playCache = await this.playRedisRepo.getUnlockedPlay(idPlay)
         if (playCache) return playCache
         // Получение с базы данных
@@ -63,7 +63,7 @@ export class PlayService implements IPlayService {
 
     public async createPlay(payload: PlayBaseInterface) {
         await Promise.all([
-            // Очистка хэша
+            // Очистка кэша
             this.playRedisRepo.clearUnlockedPlays(),
             this.playRepo.createPlay(payload)
         ])

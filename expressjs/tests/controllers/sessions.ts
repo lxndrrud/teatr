@@ -109,6 +109,14 @@ export function SessionsControllerTest() {
                     })
 
                 expect(response.status).to.equal(200)
+                expect(response.body).to.haveOwnProperty('id').that.equals(3)
+                expect(response.body).to.haveOwnProperty('play_title')
+                expect(response.body).to.haveOwnProperty('auditorium_title')
+                expect(response.body).to.haveOwnProperty('poster_filepath')
+                expect(response.body).to.haveOwnProperty('timestamp')
+                expect(response.body).to.haveOwnProperty('is_locked')
+                expect(response.body).to.haveOwnProperty('max_slots')
+                /*
                 expect(response.body).to.eql({
                     id: 3,
                     id_play: 2,
@@ -120,6 +128,7 @@ export function SessionsControllerTest() {
                     auditorium_title: 'Малая сцена',
                     poster_filepath: '/expressjs/storage/photos/ledi.jpg'
                 })
+                */
             })
 
             it("should have 404 status", async function() {

@@ -45,8 +45,11 @@ export class CronProcessor implements ICronProcessor {
             for (const idSession of sessionIDs) {
                 await this.sessionRedisRepo.clearSession(idSession)
             }
-            await this.sessionFilterRedisRepo.clearFilteredSessions()
-            await this.playRedisRepo.clearUnlockedPlays()
+            await Promise.all([
+                this.sessionFilterRedisRepo.clearFilteredSessions(),
+                this.playRedisRepo.clearUnlockedPlays()
+            ])
+           
         } catch (error) {
             console.log(error)
         }
