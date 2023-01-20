@@ -36,7 +36,7 @@ export class PlayService implements IPlayService {
     }
 
     public async getAll() {
-        // Проверка хэша
+        // Проверка кэша
         const playsCache = await this.playRedisRepo.getUnlockedPlays()
         if (playsCache) return playsCache
         // Получение с базы данных

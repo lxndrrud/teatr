@@ -5,7 +5,6 @@ import { SessionBaseInterface, SessionDatabaseInterface, SessionFilterQueryInter
 import { KnexConnection } from "../../knex/connections";
 import { TimestampHelper } from "../../utils/timestamp";
 import fs from "fs"
-import path from "path";
 
 
 export function SessionsControllerTest() {
@@ -58,13 +57,13 @@ export function SessionsControllerTest() {
                 id_play: 2,
                 id_price_policy: 2,
                 is_locked: false,
-                timestamp: timestampHelper.timestampFromMoment(moment()),
+                timestamp: "2023-10-21T10:00:00+0300",
                 max_slots: 10
             }
             const failPostPayload = {
                 id_price_policy: 2,
                 is_locked: false,
-                timestamp: timestampHelper.timestampFromMoment(moment())
+                timestamp: "2023-10-21T12:00:00+0300"
             }
 
             it("should be 201 CREATED", async function () {
