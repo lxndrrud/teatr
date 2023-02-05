@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface ISessionService {
     List<Session> getAll();
+    List<Session> getUnlocked();
+    List<Session> getUnlockedByPlay(Long idPlay);
 }

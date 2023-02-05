@@ -14,7 +14,6 @@ public class Session {
     private Long id;
     @Column
     private Date timestamp;
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_play", nullable = false)
     private Play play;
@@ -25,6 +24,7 @@ public class Session {
     @Column(name = "is_locked")
     private boolean isLocked;
 
+    @JsonIgnore
     public boolean isReservationAvailable() {
         return isLocked && timestamp.before(new Date());
     }

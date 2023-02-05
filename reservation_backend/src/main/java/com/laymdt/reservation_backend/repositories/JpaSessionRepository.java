@@ -27,4 +27,29 @@ public class JpaSessionRepository implements ISessionRepository {
         );
         return query.getResultList();
     }
+
+    @Override
+    public List<Session> getUnlocked() {
+        TypedQuery<Session> query = this.entityManagerFactory.createEntityManager().createQuery(
+                "SELECT s FROM sessions s " +
+                        "INNER JOIN s.play AS p " +
+                        "INNER JOIN s.pricePolicy AS pp " +
+                        "WHERE s.isLocked = FALSE ",
+                Session.class
+        );
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Session> getUnlockedByPlay(Long idPlay) {
+        TypedQuery<Session> query = this.entityManagerFactory.createEntityManager().createQuery(
+                "SELECT s FROM sessions s " +
+                        "INNER JOIN s.play AS p " +
+                        "INNER JOIN s.pricePolicy AS pp " +
+                        "WHERE s.isLocked = FALSE AND p.id = :idPlay ",
+                Session.class
+        );
+        query.setParameter("idPlay", idPlay);
+        return query.getResultList();
+    }
 }

@@ -5,4 +5,6 @@ spring:
     url: "jdbc:postgresql://localhost:5432/teatr"
     username: "user"
     password: "password"
-    ddl-auto: "none"
+  jpa:
+    hibernate:
+      ddl-auto: "none"

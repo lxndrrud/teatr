@@ -8,7 +8,7 @@ import java.util.List;
 
 @Service
 public class SessionService implements ISessionService {
-    private ISessionRepository sessionRepository;
+    private final ISessionRepository sessionRepository;
 
     public SessionService(
         ISessionRepository sessionRepository
@@ -19,5 +19,15 @@ public class SessionService implements ISessionService {
     @Override
     public List<Session> getAll() {
         return this.sessionRepository.getAll();
+    }
+
+    @Override
+    public List<Session> getUnlocked() {
+        return this.sessionRepository.getUnlocked();
+    }
+
+    @Override
+    public List<Session> getUnlockedByPlay(Long idPlay) {
+        return this.sessionRepository.getUnlockedByPlay(idPlay);
     }
 }
