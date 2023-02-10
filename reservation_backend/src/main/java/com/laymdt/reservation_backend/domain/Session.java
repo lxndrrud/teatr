@@ -17,15 +17,14 @@ public class Session {
     @ManyToOne
     @JoinColumn(name = "id_play", nullable = false)
     private Play play;
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_price_policy", nullable = false)
     private PricePolicy pricePolicy;
     @Column(name = "is_locked")
-    private boolean isLocked;
+    private Boolean isLocked;
 
     @JsonIgnore
-    public boolean isReservationAvailable() {
-        return isLocked && timestamp.before(new Date());
+    public Boolean isReservationAvailable() {
+        return !isLocked && timestamp.after(new Date());
     }
 }

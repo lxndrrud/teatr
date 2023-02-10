@@ -1,5 +1,6 @@
 package com.laymdt.reservation_backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -14,9 +15,10 @@ public class PlayImage {
     @OneToOne
     @JoinColumn(name = "id_image")
     private Image image;
-    @JsonIgnore
+
     @ManyToOne
     @JoinColumn(name = "id_play", nullable = false)
+    @JsonBackReference
     private Play play;
     @Column
     private boolean isPoster;

@@ -1,5 +1,6 @@
 package com.laymdt.reservation_backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -18,5 +19,6 @@ public class Play {
     @Column
     private String crew;
     @OneToMany(mappedBy = "play")
+    @JsonManagedReference
     private List<PlayImage> playImages;
 }

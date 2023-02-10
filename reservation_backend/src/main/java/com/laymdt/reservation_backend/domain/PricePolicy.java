@@ -1,6 +1,7 @@
 package com.laymdt.reservation_backend.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -14,12 +15,7 @@ public class PricePolicy {
     private Long id;
     @Column
     private String title;
-    /*
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "id_auditorium", nullable = false)
-    private Auditorium auditorium;
-     */
-
-    // private List<SeatPrice> seatPrices;
+    @OneToMany(mappedBy = "pricePolicy")
+    @JsonManagedReference
+    private List<SeatPrice> seatPrices;
 }

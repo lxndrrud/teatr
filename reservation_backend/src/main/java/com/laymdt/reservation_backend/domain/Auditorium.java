@@ -1,5 +1,8 @@
 package com.laymdt.reservation_backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -13,11 +16,7 @@ public class Auditorium {
     private Long id;
     @Column
     private String title;
-
-    // private List<AuditoriumRow> auditoriumRows = null;
-
-    /*
     @OneToMany(mappedBy = "auditorium")
-    private List<PricePolicy> pricePolicies;
-     */
+    @JsonBackReference
+    private List<AuditoriumRow> auditoriumRows;
 }

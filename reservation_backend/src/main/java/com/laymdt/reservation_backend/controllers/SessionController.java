@@ -1,11 +1,9 @@
 package com.laymdt.reservation_backend.controllers;
 
 import com.laymdt.reservation_backend.domain.Session;
+import com.laymdt.reservation_backend.dto.SessionFilterOptions;
 import com.laymdt.reservation_backend.services.ISessionService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,9 +34,13 @@ public class SessionController {
 
     @GetMapping("/unlocked/play/{playId}")
     public List<Session> getUnlockedByPlay(@PathVariable(name = "playId") long id) {
-        return this.sessionService.getUnlockedByPlay(id)
-                .stream()
-                .filter(Session::isReservationAvailable)
-                .collect(Collectors.toList());
+        return this.sessionService.getUnlockedByPlay(id);
+    }
+
+    @GetMapping("/unlocked/filter/")
+    public List<Session> getFilteredUnlockedSessions(
+        @RequestBody() SessionFilterOptions filterOptions
+    ) {
+        return this.sessionService.getFilteredUnlockedSessions(filterOptions);
     }
 }
